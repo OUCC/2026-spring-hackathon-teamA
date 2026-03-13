@@ -8,7 +8,7 @@ public class Player : MonoBehaviour
 	public static Player Instance;
 
 	[Header("ステータス")]
-	public int maxHp = 100;
+	public int maxHp = 10;
 	public TextMeshProUGUI hpText; // HP表示用のテキスト（インスペクターでセット）
 	public int currentHp;
 	public Slider hpSlider; // UnityエディタからSliderをドラッグ&ドロップ
@@ -17,17 +17,17 @@ public class Player : MonoBehaviour
 	public float moveSpeed = 5f;
 	public Tilemap groundTilemap;
 	public Tilemap obstacleTilemap;
-	public Color actedColor = new Color(0.3f, 0.3f, 0.3f);
 
 	[Header("特殊能力：タイル変更")]
 	public TileBase fireTile;
+
+	[Header("攻撃設定")]
+	public int attackDamage = 25;
 
 	[Header("状態管理")]
 	public bool hasActed = false;
 	private Vector3 targetPosition;
 	private bool isMoving = false;
-	private Color originalColor;
-	private SpriteRenderer sr;
 
 	void Awake()
 	{
@@ -38,9 +38,6 @@ public class Player : MonoBehaviour
 
 	void Start()
 	{
-		sr = GetComponent<SpriteRenderer>();
-		originalColor = sr.color;
-
 		// UIの初期設定
 		UpdateHPUI();
 
@@ -115,6 +112,36 @@ public class Player : MonoBehaviour
 				FinishAction();
 			}
 		}
+
+		if (Input.GetMouseButtonDown(0))
+		{
+			TryAttackByClick();
+		}
+	}
+
+	private void TryAttackByClick()
+	{
+		if (Camera.main == null) return;
+
+		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		mousePos.z = 0;
+		Vector2Int clickedPos = new Vector2Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y));
+		Vector2Int playerPos = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
+
+		// 上下左右1マスのみ（マンハッタン距離=1）
+		int manhattan = Mathf.Abs(clickedPos.x - playerPos.x) + Mathf.Abs(clickedPos.y - playerPos.y);
+		if (manhattan != 1) return;
+
+		if (GridEntityManager.Instance == null) return;
+
+		EntityData target = GridEntityManager.Instance.GetEntityAt(clickedPos);
+		if (target == null || target.type != "Enemy" || target.obj == null) return;
+
+		Enemy enemy = target.obj.GetComponent<Enemy>();
+		if (enemy == null) return;
+
+		enemy.TakeDamage(attackDamage);
+		FinishAction();
 	}
 
 	private void TrySetTarget(Vector3 direction)
@@ -147,13 +174,11 @@ public class Player : MonoBehaviour
 	public void FinishAction()
 	{
 		hasActed = true;
-		sr.color = actedColor;
 		GameManager.Instance.NextTurn();
 	}
 
 	public void ResetTurn()
 	{
 		hasActed = false;
-		if (sr != null) sr.color = originalColor;
 	}
 }

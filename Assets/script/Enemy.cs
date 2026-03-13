@@ -8,10 +8,15 @@ public class Enemy : MonoBehaviour
 	private Vector3 targetPosition;
 	private bool isMoving = false;
 	public bool hasActed = false;
+
+	public int maxHp = 2;
+	public int currentHp;
+	private bool isDead = false;
 	GameObject player;
 
 	void Start()
 	{
+		currentHp = maxHp;
 		// 座標をグリッドに合わせる
 		targetPosition = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), 0);
 		transform.position = targetPosition;
@@ -72,6 +77,35 @@ public class Enemy : MonoBehaviour
 				FinishAction();
 			}
 		}
+
+		if (currentHp <= 0)
+		{
+			Die();
+		}
+	}
+
+	public void TakeDamage(int damage)
+	{
+		if (isDead) return;
+
+		currentHp -= damage;
+		if (currentHp <= 0)
+		{
+			Die();
+		}
+	}
+
+	private void Die()
+	{
+		if (isDead) return;
+		isDead = true;
+
+		if (GridEntityManager.Instance != null)
+		{
+			GridEntityManager.Instance.RemoveEntity(gameObject);
+		}
+
+		Destroy(gameObject);
 	}
 
 	Vector3 CalculateBestMove(Vector3 playerPos)
