@@ -74,6 +74,19 @@ public class GridEntityManager : MonoBehaviour
 		return entityMap.ContainsKey(pos) ? entityMap[pos] : null;
 	}
 
+	public void RemoveEntity(GameObject obj)
+	{
+		var keyToRemove = entityMap
+			.Where(kvp => kvp.Value.obj == obj)
+			.Select(kvp => kvp.Key)
+			.FirstOrDefault();
+
+		if (entityMap.ContainsKey(keyToRemove) && entityMap[keyToRemove].obj == obj)
+		{
+			entityMap.Remove(keyToRemove);
+		}
+	}
+
 	// 4. プレイヤーの座標をすべて返す（複数いる可能性を考慮）
 	public List<Vector2Int> GetPlayerPositions()
 	{

@@ -9,8 +9,9 @@ public class Enemy : MonoBehaviour
 	private bool isMoving = false;
 	public bool hasActed = false;
 
-	public int maxHp = 50;
+	public int maxHp = 2;
 	public int currentHp;
+	private bool isDead = false;
 	GameObject player;
 
 	void Start()
@@ -79,8 +80,32 @@ public class Enemy : MonoBehaviour
 
 		if (currentHp <= 0)
 		{
-			Destroy(gameObject);
+			Die();
 		}
+	}
+
+	public void TakeDamage(int damage)
+	{
+		if (isDead) return;
+
+		currentHp -= damage;
+		if (currentHp <= 0)
+		{
+			Die();
+		}
+	}
+
+	private void Die()
+	{
+		if (isDead) return;
+		isDead = true;
+
+		if (GridEntityManager.Instance != null)
+		{
+			GridEntityManager.Instance.RemoveEntity(gameObject);
+		}
+
+		Destroy(gameObject);
 	}
 
 	Vector3 CalculateBestMove(Vector3 playerPos)
