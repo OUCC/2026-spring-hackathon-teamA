@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -52,11 +53,23 @@ public class GridData
 
             data.Tiles.Add(row);
         }
+        data.printData();
 
         return data;
     }
 
-    
+    public void printData()
+    {
+        foreach (var row in Enumerable.Reverse(Tiles))
+        {
+            string rowStr = "";
+            foreach (var tile in row)
+            {
+                rowStr += tile.type == TileType.Normal ? "N" : "E";
+            }
+            Debug.Log(rowStr);
+        }
+    }
 
     public void ChangeTileType(int x, int y, TileType newType)
     {

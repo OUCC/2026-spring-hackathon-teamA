@@ -100,3 +100,5 @@ InitTestScene*.unity*
 .vscode/
 *.sln
 *.slnx
+*.code-workspace
+*.csproj

@@ -4,7 +4,6 @@ public enum TileType
 {
     Empty,
     Normal,
-    Wall,
 }
 
 public class TileData
