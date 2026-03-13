@@ -8,10 +8,14 @@ public class Enemy : MonoBehaviour
 	private Vector3 targetPosition;
 	private bool isMoving = false;
 	public bool hasActed = false;
+
+	public int maxHp = 50;
+	public int currentHp;
 	GameObject player;
 
 	void Start()
 	{
+		currentHp = maxHp;
 		// 座標をグリッドに合わせる
 		targetPosition = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), 0);
 		transform.position = targetPosition;
@@ -71,6 +75,11 @@ public class Enemy : MonoBehaviour
 				isMoving = false;
 				FinishAction();
 			}
+		}
+
+		if (currentHp <= 0)
+		{
+			Destroy(gameObject);
 		}
 	}
 
