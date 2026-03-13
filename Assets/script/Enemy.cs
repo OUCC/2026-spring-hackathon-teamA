@@ -8,12 +8,14 @@ public class Enemy : MonoBehaviour
 	private Vector3 targetPosition;
 	private bool isMoving = false;
 	public bool hasActed = false;
+	GameObject player;
 
 	void Start()
 	{
 		// 座標をグリッドに合わせる
 		targetPosition = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), 0);
 		transform.position = targetPosition;
+		player = GameObject.FindGameObjectWithTag("Player");
 	}
 
 	// 敵のターンになったらBattleManagerから呼ばれる関数
@@ -31,7 +33,6 @@ public class Enemy : MonoBehaviour
 		}
 
 		// 1. プレイヤー（ターゲット）を探す
-		GameObject player = GameObject.FindGameObjectWithTag("Player");
 		if (player == null)
 		{
 			FinishAction();
@@ -45,6 +46,11 @@ public class Enemy : MonoBehaviour
 		if (direction != Vector3.zero)
 		{
 			targetPosition = transform.position + direction;
+			GridEntityManager.Instance.UpdateEntityPosition(
+				gameObject,
+				new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y)),
+				new Vector2Int(Mathf.RoundToInt(targetPosition.x), Mathf.RoundToInt(targetPosition.y))
+			);
 			isMoving = true;
 		}
 		else
