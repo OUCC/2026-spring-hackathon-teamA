@@ -4,6 +4,7 @@ public enum TileType
 {
     Empty,
     Normal,
+    Fire
 }
 
 public class TileData

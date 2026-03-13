@@ -13,23 +13,25 @@ public class GridData
     [SerializeField]
     private Tilemap Tilemap;
 
+    private TileMapanager tileMapManager;
+
     // [row(y)][col(x)] の2次元リスト
     public List<List<TileData>> Tiles { get; private set; }
 
     /// <summary>
     /// Tilemap からタイルリストを生成する
     /// </summary>
-    public static GridData GenerateFromTilemap(Tilemap tilemap)
+    public GridData(Tilemap tilemap)
     {
+        tileMapManager = tilemap.GetComponent<TileMapanager>();
+
         tilemap.CompressBounds();
         BoundsInt bounds = tilemap.cellBounds;
 
-        var data = new GridData
-        {
-            Width = bounds.size.x,
-            Height = bounds.size.y,
-            Tiles = new List<List<TileData>>()
-        };
+    
+        Width = bounds.size.x;
+        Height = bounds.size.y;
+        Tiles = new List<List<TileData>>();
 
         // y 行ごとにリストを作成
         for (int y = 0; y < bounds.size.y; y++)
@@ -51,11 +53,9 @@ public class GridData
                 row.Add(new TileData(x, y, type));
             }
 
-            data.Tiles.Add(row);
+            Tiles.Add(row);
         }
-        data.printData();
-
-        return data;
+        printData();
     }
 
     public void printData()
@@ -71,16 +71,16 @@ public class GridData
         }
     }
 
-    public void ChangeTileType(int x, int y, TileType newType)
+    public void ChangeTile(int x, int y, TileType newType)
     {
         if (x < 0 || x >= Width || y < 0 || y >= Height)
         {
-            Debug.LogError($"ChangeTileType: 座標 ({x}, {y}) はグリッドの範囲外です。");
+            Debug.LogError($"ChangeTile: 座標 ({x}, {y}) はグリッドの範囲外です。");
             return;
         }
 
         Tiles[y][x].type = newType;
-        Tilemap.SetTile(toGridPosition(x, y), newType == TileType.Normal ? Tilemap.GetTile(toGridPosition(x, y)) : null);
+        tileMapManager.ChangeTile(x, y, newType);
     }
     
     public TileData GetTileData(int x, int y)
