@@ -12,6 +12,7 @@ public class Enemy : MonoBehaviour
 	public int maxHp = 2;
 	public int currentHp;
 	private bool isDead = false;
+	public bool IsDead => isDead || currentHp <= 0;
 	GameObject player;
 
 	void Start()

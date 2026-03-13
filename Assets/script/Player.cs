@@ -128,9 +128,9 @@ public class Player : MonoBehaviour
 		Vector2Int clickedPos = new Vector2Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y));
 		Vector2Int playerPos = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
 
-		// 上下左右1マスのみ（マンハッタン距離=1）
+		// 上下左右1マス以内のみ（マンハッタン距離）
 		int manhattan = Mathf.Abs(clickedPos.x - playerPos.x) + Mathf.Abs(clickedPos.y - playerPos.y);
-		if (manhattan != 1) return;
+		if (manhattan > 1) return;
 
 		if (GridEntityManager.Instance == null) return;
 
