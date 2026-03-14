@@ -50,6 +50,14 @@ public class GridEntityManager : MonoBehaviour
 		entityMap[pos] = new EntityData(obj, pos, type);
 	}
 
+	public void AddOrUpdateEntity(GameObject obj, string type)
+	{
+		if (obj == null) return;
+
+		Vector2Int pos = WorldToGrid2D(obj.transform.position);
+		entityMap[pos] = new EntityData(obj, pos, type);
+	}
+
 	private Vector2Int WorldToGrid2D(Vector3 worldPos)
 	{
 		return new Vector2Int(Mathf.RoundToInt(worldPos.x), Mathf.RoundToInt(worldPos.y));
