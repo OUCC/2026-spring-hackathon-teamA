@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8836390863512580614}
   - component: {fileID: 5934876517340891192}
-  - component: {fileID: 8858272480492770874}
+  - component: {fileID: 2831291342831491943}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Enemy
@@ -92,7 +92,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &8858272480492770874
+--- !u!114 &2831291342831491943
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -101,11 +101,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1572429826316994202}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f6f89beed22b47f780cfe3a92e3e3d6, type: 3}
+  m_Script: {fileID: 11500000, guid: 62f0c7ea9235d486b8e555ee420f1124, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  m_EditorClassIdentifier: Assembly-CSharp::Slime
   moveSpeed: 5
   groundTilemap: {fileID: 0}
   hasActed: 0
-  maxHp: 1
-  currentHp: 1
+  maxHp: 2
+  currentHp: 0
+  attackDamage: 1

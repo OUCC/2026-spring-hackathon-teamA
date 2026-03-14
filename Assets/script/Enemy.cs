@@ -5,17 +5,17 @@ public class Enemy : MonoBehaviour
 {
 	public float moveSpeed = 5f;
 	public Tilemap groundTilemap;
-	private Vector3 targetPosition;
-	private bool isMoving = false;
+	protected Vector3 targetPosition;
+	protected bool isMoving = false;
 	public bool hasActed = false;
 
 	public int maxHp = 2;
 	public int currentHp;
-	private bool isDead = false;
+	protected bool isDead = false;
 	public bool IsDead => isDead || currentHp <= 0;
-	GameObject player;
+	protected GameObject player;
 
-	void Start()
+	protected virtual void Start()
 	{
 		currentHp = maxHp;
 		// 座標をグリッドに合わせる
@@ -25,7 +25,7 @@ public class Enemy : MonoBehaviour
 	}
 
 	// 敵のターンになったらBattleManagerから呼ばれる関数
-	public void StartEnemyTurn()
+	public virtual void StartEnemyTurn()
 	{
 		if (hasActed)
 		{
@@ -66,7 +66,7 @@ public class Enemy : MonoBehaviour
 		}
 	}
 
-	void Update()
+	protected virtual void Update()
 	{
 		if (isMoving)
 		{
@@ -85,7 +85,7 @@ public class Enemy : MonoBehaviour
 		}
 	}
 
-	public void TakeDamage(int damage)
+	public virtual void TakeDamage(int damage)
 	{
 		if (isDead) return;
 
@@ -96,7 +96,7 @@ public class Enemy : MonoBehaviour
 		}
 	}
 
-	private void Die()
+	protected virtual void Die()
 	{
 		if (isDead) return;
 		isDead = true;
@@ -109,7 +109,7 @@ public class Enemy : MonoBehaviour
 		Destroy(gameObject);
 	}
 
-	Vector3 CalculateBestMove(Vector3 playerPos)
+	protected virtual Vector3 CalculateBestMove(Vector3 playerPos)
 	{
 		Vector3 diff = playerPos - transform.position;
 		Vector3 dir = Vector3.zero;
@@ -130,12 +130,12 @@ public class Enemy : MonoBehaviour
 		return Vector3.zero; // 移動不可なら動かない
 	}
 
-	void FinishAction()
+	protected virtual void FinishAction()
 	{
 		hasActed = true;
 	}
 
-	public void ResetTurn()
+	public virtual void ResetTurn()
 	{
 		hasActed = false;
 	}

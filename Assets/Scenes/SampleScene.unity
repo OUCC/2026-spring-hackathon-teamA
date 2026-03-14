@@ -1762,14 +1762,14 @@ MonoBehaviour:
   waveText: {fileID: 947824212}
   waves:
   - enemies:
-    - enemyPrefab: {fileID: 8858272480492770874, guid: 9b196abb1d5ce4350b86d40083a19373, type: 3}
+    - enemyPrefab: {fileID: 2831291342831491943, guid: 9b196abb1d5ce4350b86d40083a19373, type: 3}
       spawnGridPos: {x: 0, y: 0}
       overrideMaxHp: 1
   - enemies:
-    - enemyPrefab: {fileID: 8858272480492770874, guid: 9b196abb1d5ce4350b86d40083a19373, type: 3}
+    - enemyPrefab: {fileID: 2831291342831491943, guid: 9b196abb1d5ce4350b86d40083a19373, type: 3}
       spawnGridPos: {x: 0, y: 0}
       overrideMaxHp: 1
-    - enemyPrefab: {fileID: 8858272480492770874, guid: 9b196abb1d5ce4350b86d40083a19373, type: 3}
+    - enemyPrefab: {fileID: 2831291342831491943, guid: 9b196abb1d5ce4350b86d40083a19373, type: 3}
       spawnGridPos: {x: 3, y: 0}
       overrideMaxHp: 1
   enemyGroundTilemap: {fileID: 224710906}
@@ -2722,7 +2722,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 636eec7e241224c818cf6385e40dc380, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  maxHp: 100
+  maxHp: 10
   hpText: {fileID: 280133371}
   currentHp: 100
   hpSlider: {fileID: 432964198}

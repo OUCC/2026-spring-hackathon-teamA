@@ -102,20 +102,22 @@ public class Player : MonoBehaviour
 
 		if (Input.GetMouseButtonDown(1))
 		{
-			Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-			mousePos.z = 0;
-			Vector3Int cellPos = groundTilemap.WorldToCell(mousePos);
-
-			if (groundTilemap.HasTile(cellPos))
-			{
-				groundTilemap.SetTile(cellPos, fireTile);
-				FinishAction();
-			}
+			SetTile();
 		}
 
 		if (Input.GetMouseButtonDown(0))
 		{
 			TryAttackByClick();
+		}
+	}
+
+	public void SetTile()
+	{
+		Vector3Int cellPos = groundTilemap.WorldToCell(transform.position);
+		if (groundTilemap.HasTile(cellPos))
+		{
+			groundTilemap.SetTile(cellPos, fireTile);
+			FinishAction();
 		}
 	}
 
