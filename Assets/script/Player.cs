@@ -1,99 +1,155 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI; // UI操作に必要
 
 public class Player : MonoBehaviour
 {
 	public static Player Instance;
 
+	[Header("ステータス")]
+	public int maxHp = 10;
+	public TextMeshProUGUI hpText; // HP表示用のテキスト（インスペクターでセット）
+	public int currentHp;
+	public Slider hpSlider; // UnityエディタからSliderをドラッグ&ドロップ
+
 	[Header("移動設定")]
 	public float moveSpeed = 5f;
-	public Tilemap groundTilemap;    // 床（移動可能範囲）
-	public Tilemap obstacleTilemap;  // 障害物（壁など）
-	public Color actedColor = new Color(0.3f, 0.3f, 0.3f);
+	public Tilemap groundTilemap;
+	public Tilemap obstacleTilemap;
 
 	[Header("特殊能力：タイル変更")]
-	public TileBase fireTile;        // 変化後の炎タイル
+	public TileBase fireTile;
+
+	[Header("攻撃設定")]
+	public int attackDamage = 25;
 
 	[Header("状態管理")]
 	public bool hasActed = false;
 	private Vector3 targetPosition;
 	private bool isMoving = false;
-	private Color originalColor;
-	private SpriteRenderer sr;
 
 	void Awake()
 	{
 		Instance = this;
+		// ゲーム開始時に満タンにする
+		currentHp = maxHp;
 	}
 
 	void Start()
 	{
-		sr = GetComponent<SpriteRenderer>();
-		originalColor = sr.color;
+		// UIの初期設定
+		UpdateHPUI();
 
-		// 座標をグリッドの整数値にスナップさせる
 		targetPosition = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), 0);
 		transform.position = targetPosition;
 	}
 
+	// --- HP関連のメソッド ---
+
+	/// <summary>
+	/// ダメージを受ける処理。外部（敵など）から呼ばれる想定
+	/// </summary>
+	public void TakeDamage(int damage)
+	{
+		currentHp -= damage;
+		currentHp = Mathf.Clamp(currentHp, 0, maxHp); // 0以下、最大値以上にならないよう制限
+
+		UpdateHPUI();
+
+		if (currentHp <= 0)
+		{
+			Die();
+		}
+	}
+
+	/// <summary>
+	/// UIスライダーの値を更新
+	/// </summary>
+	private void UpdateHPUI()
+	{
+		if (hpSlider != null)
+		{
+			hpSlider.maxValue = maxHp;
+			hpSlider.value = currentHp;
+			hpText.text = $"HP: {currentHp}/{maxHp}";
+		}
+	}
+
+	private void Die()
+	{
+		Debug.Log("Player has died.");
+		// ここに死亡演出やリロード処理などを記述
+	}
+
+	// --- 以下、既存のUpdate / HandleInput / Move 処理 ---
+	// (変更がないため、以前のコードをそのまま維持してください)
+
 	void Update()
 	{
-		// 1. 自分のターンでない、または行動済みなら何もしない
 		if (GameManager.Instance == null || GameManager.Instance.currentPhase != TurnPhase.Player || hasActed) return;
-
-		// 2. 移動中なら移動処理のみ
-		if (isMoving)
-		{
-			MoveTowardsTarget();
-			return;
-		}
-
-		// 3. 入力処理
+		if (isMoving) { MoveTowardsTarget(); return; }
 		HandleInput();
 	}
 
 	private void HandleInput()
 	{
-		// --- WASD移動 ---
 		float h = Input.GetAxisRaw("Horizontal");
 		float v = Input.GetAxisRaw("Vertical");
 
-		if (h != 0)
-		{
-			TrySetTarget(new Vector3(Mathf.Sign(h), 0, 0));
-		}
-		else if (v != 0)
-		{
-			TrySetTarget(new Vector3(0, Mathf.Sign(v), 0));
-		}
+		if (h != 0) TrySetTarget(new Vector3(Mathf.Sign(h), 0, 0));
+		else if (v != 0) TrySetTarget(new Vector3(0, Mathf.Sign(v), 0));
 
-		// --- 右クリックでタイルを炎に変える（1ターン消費） ---
 		if (Input.GetMouseButtonDown(1))
 		{
-			// マウス位置をワールド座標に変換
-			Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-			mousePos.z = 0;
+			SetTile();
+		}
 
-			// セル座標に変換
-			Vector3Int cellPos = groundTilemap.WorldToCell(mousePos);
-
-			// 床がある場所ならタイルを張り替える
-			if (groundTilemap.HasTile(cellPos))
-			{
-				groundTilemap.SetTile(cellPos, fireTile);
-				Debug.Log($"タイルを炎に変更: {cellPos}");
-				FinishAction();
-			}
+		if (Input.GetMouseButtonDown(0))
+		{
+			TryAttackByClick();
 		}
 	}
 
-	// 移動可能かチェックしてターゲットをセット
+	public void SetTile()
+	{
+		Vector3Int cellPos = groundTilemap.WorldToCell(transform.position);
+		if (groundTilemap.HasTile(cellPos))
+		{
+			groundTilemap.SetTile(cellPos, fireTile);
+			FinishAction();
+		}
+	}
+
+	private void TryAttackByClick()
+	{
+		if (Camera.main == null) return;
+
+		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		mousePos.z = 0;
+		Vector2Int clickedPos = new Vector2Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y));
+		Vector2Int playerPos = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
+
+		// 上下左右1マス以内のみ（マンハッタン距離）
+		int manhattan = Mathf.Abs(clickedPos.x - playerPos.x) + Mathf.Abs(clickedPos.y - playerPos.y);
+		if (manhattan > 1) return;
+
+		if (GridEntityManager.Instance == null) return;
+
+		EntityData target = GridEntityManager.Instance.GetEntityAt(clickedPos);
+		if (target == null || target.type != "Enemy" || target.obj == null) return;
+
+		Enemy enemy = target.obj.GetComponent<Enemy>();
+		if (enemy == null) return;
+
+		enemy.TakeDamage(attackDamage);
+		FinishAction();
+	}
+
 	private void TrySetTarget(Vector3 direction)
 	{
 		Vector3 nextPos = transform.position + direction;
 		Vector3Int cellPos = groundTilemap.WorldToCell(nextPos);
-
-		// 床がない、または障害物がある場合は移動不可
 		if (!groundTilemap.HasTile(cellPos)) return;
 		if (obstacleTilemap != null && obstacleTilemap.HasTile(cellPos)) return;
 
@@ -104,13 +160,15 @@ public class Player : MonoBehaviour
 	private void MoveTowardsTarget()
 	{
 		transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
-
+		GridEntityManager.Instance.UpdateEntityPosition(
+			gameObject,
+			new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y)),
+			new Vector2Int(Mathf.RoundToInt(targetPosition.x), Mathf.RoundToInt(targetPosition.y))
+		);
 		if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
 		{
 			transform.position = targetPosition;
 			isMoving = false;
-
-			// 移動完了で行動終了（FE風：1回移動したら終わり）
 			FinishAction();
 		}
 	}
@@ -118,15 +176,11 @@ public class Player : MonoBehaviour
 	public void FinishAction()
 	{
 		hasActed = true;
-		sr.color = actedColor;
-
-		// ターン終了をマネージャーに通知
 		GameManager.Instance.NextTurn();
 	}
 
 	public void ResetTurn()
 	{
 		hasActed = false;
-		if (sr != null) sr.color = originalColor;
 	}
 }

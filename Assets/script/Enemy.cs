@@ -5,19 +5,27 @@ public class Enemy : MonoBehaviour
 {
 	public float moveSpeed = 5f;
 	public Tilemap groundTilemap;
-	private Vector3 targetPosition;
-	private bool isMoving = false;
+	protected Vector3 targetPosition;
+	protected bool isMoving = false;
 	public bool hasActed = false;
 
-	void Start()
+	public int maxHp = 2;
+	public int currentHp;
+	protected bool isDead = false;
+	public bool IsDead => isDead || currentHp <= 0;
+	protected GameObject player;
+
+	protected virtual void Start()
 	{
+		currentHp = maxHp;
 		// 座標をグリッドに合わせる
 		targetPosition = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), 0);
 		transform.position = targetPosition;
+		player = GameObject.FindGameObjectWithTag("Player");
 	}
 
 	// 敵のターンになったらBattleManagerから呼ばれる関数
-	public void StartEnemyTurn()
+	public virtual void StartEnemyTurn()
 	{
 		if (hasActed)
 		{
@@ -31,7 +39,6 @@ public class Enemy : MonoBehaviour
 		}
 
 		// 1. プレイヤー（ターゲット）を探す
-		GameObject player = GameObject.FindGameObjectWithTag("Player");
 		if (player == null)
 		{
 			FinishAction();
@@ -45,6 +52,11 @@ public class Enemy : MonoBehaviour
 		if (direction != Vector3.zero)
 		{
 			targetPosition = transform.position + direction;
+			GridEntityManager.Instance.UpdateEntityPosition(
+				gameObject,
+				new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y)),
+				new Vector2Int(Mathf.RoundToInt(targetPosition.x), Mathf.RoundToInt(targetPosition.y))
+			);
 			isMoving = true;
 		}
 		else
@@ -54,7 +66,7 @@ public class Enemy : MonoBehaviour
 		}
 	}
 
-	void Update()
+	protected virtual void Update()
 	{
 		if (isMoving)
 		{
@@ -66,9 +78,38 @@ public class Enemy : MonoBehaviour
 				FinishAction();
 			}
 		}
+
+		if (currentHp <= 0)
+		{
+			Die();
+		}
 	}
 
-	Vector3 CalculateBestMove(Vector3 playerPos)
+	public virtual void TakeDamage(int damage)
+	{
+		if (isDead) return;
+
+		currentHp -= damage;
+		if (currentHp <= 0)
+		{
+			Die();
+		}
+	}
+
+	protected virtual void Die()
+	{
+		if (isDead) return;
+		isDead = true;
+
+		if (GridEntityManager.Instance != null)
+		{
+			GridEntityManager.Instance.RemoveEntity(gameObject);
+		}
+
+		Destroy(gameObject);
+	}
+
+	protected virtual Vector3 CalculateBestMove(Vector3 playerPos)
 	{
 		Vector3 diff = playerPos - transform.position;
 		Vector3 dir = Vector3.zero;
@@ -89,12 +130,12 @@ public class Enemy : MonoBehaviour
 		return Vector3.zero; // 移動不可なら動かない
 	}
 
-	void FinishAction()
+	protected virtual void FinishAction()
 	{
 		hasActed = true;
 	}
 
-	public void ResetTurn()
+	public virtual void ResetTurn()
 	{
 		hasActed = false;
 	}

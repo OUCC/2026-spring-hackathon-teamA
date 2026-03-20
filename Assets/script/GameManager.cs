@@ -1,8 +1,24 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.Tilemaps;
 
 public enum TurnPhase { Player, Enemy }
+
+[System.Serializable]
+public class EnemySpawnData
+{
+	public Enemy enemyPrefab;
+	public Vector2Int spawnGridPos;
+	public int overrideMaxHp = -1;
+}
+
+[System.Serializable]
+public class WaveData
+{
+	public List<EnemySpawnData> enemies = new List<EnemySpawnData>();
+}
 
 public class GameManager : MonoBehaviour
 {
@@ -10,9 +26,16 @@ public class GameManager : MonoBehaviour
 
 	[Header("UI設定")]
 	public TextMeshProUGUI turnText; // インスペクターでTMPをセット
+	public TextMeshProUGUI waveText;
+
+	[Header("Wave設定")]
+	public List<WaveData> waves = new List<WaveData>();
+	public Tilemap enemyGroundTilemap;
 
 	[Header("状態管理")]
 	public TurnPhase currentPhase = TurnPhase.Player;
+	private int currentWaveIndex = -1;
+	private bool isGameFinished = false;
 
 	void Awake()
 	{
@@ -22,6 +45,12 @@ public class GameManager : MonoBehaviour
 
 	void Start()
 	{
+		if (!SpawnNextWave())
+		{
+			HandleVictory();
+			return;
+		}
+
 		// 最初のターン開始
 		SetPlayerTurn();
 	}
@@ -29,6 +58,8 @@ public class GameManager : MonoBehaviour
 	// ターン切り替えのメインロジック
 	public void NextTurn()
 	{
+		if (isGameFinished) return;
+
 		if (currentPhase == TurnPhase.Player)
 		{
 			StartCoroutine(EnemyTurnRoutine());
@@ -43,6 +74,8 @@ public class GameManager : MonoBehaviour
 
 	void SetPlayerTurn()
 	{
+		if (isGameFinished) return;
+
 		currentPhase = TurnPhase.Player;
 		UpdateTurnUI("Player Turn", Color.blue);
 
@@ -65,19 +98,36 @@ public class GameManager : MonoBehaviour
 	// 敵のターン処理
 	IEnumerator EnemyTurnRoutine()
 	{
+		if (isGameFinished) yield break;
+
 		currentPhase = TurnPhase.Enemy;
 		UpdateTurnUI("Enemy Turn", Color.red);
+		yield return null;
 
-		// 敵全員を未行動に戻す
-		Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+		// 生存中の敵のみ取得
+		List<Enemy> enemies = GetAliveEnemies();
+		if (enemies.Count == 0)
+		{
+			if (!SpawnNextWave())
+			{
+				HandleVictory();
+				yield break;
+			}
+
+			SetPlayerTurn();
+			yield break;
+		}
+
 		foreach (var e in enemies) e.ResetTurn();
 
 		// 敵を1体ずつ動かす
 		foreach (Enemy enemy in enemies)
 		{
+			if (enemy == null || enemy.IsDead) continue;
+
 			enemy.StartEnemyTurn();
 
-			while (!enemy.hasActed)
+			while (enemy != null && !enemy.hasActed)
 			{
 				yield return null;
 			}
@@ -85,8 +135,96 @@ public class GameManager : MonoBehaviour
 			yield return new WaitForSeconds(0.1f);
 		}
 
-		// 全員の行動が終わったらプレイヤーへ
-		NextTurn();
+		// 行動後に敵が全滅していたら次Wave、なければプレイヤーへ
+		enemies = GetAliveEnemies();
+		if (enemies.Count == 0)
+		{
+			if (!SpawnNextWave())
+			{
+				HandleVictory();
+				yield break;
+			}
+		}
+
+		SetPlayerTurn();
+	}
+
+	private List<Enemy> GetAliveEnemies()
+	{
+		Enemy[] allEnemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+		List<Enemy> aliveEnemies = new List<Enemy>();
+
+		foreach (Enemy enemy in allEnemies)
+		{
+			if (enemy == null) continue;
+			if (enemy.IsDead) continue;
+			if (!enemy.gameObject.activeInHierarchy) continue;
+
+			aliveEnemies.Add(enemy);
+		}
+
+		return aliveEnemies;
+	}
+
+	private bool SpawnNextWave()
+	{
+		currentWaveIndex++;
+
+		if (currentWaveIndex >= waves.Count)
+		{
+			return false;
+		}
+
+		WaveData wave = waves[currentWaveIndex];
+		if (wave == null || wave.enemies == null) return true;
+
+		foreach (EnemySpawnData spawnData in wave.enemies)
+		{
+			if (spawnData == null || spawnData.enemyPrefab == null) continue;
+
+			Vector3 spawnPos = new Vector3(spawnData.spawnGridPos.x, spawnData.spawnGridPos.y, 0f);
+			Enemy spawnedEnemy = Instantiate(spawnData.enemyPrefab, spawnPos, Quaternion.identity);
+
+			if (spawnedEnemy != null)
+			{
+				if (spawnedEnemy.groundTilemap == null && enemyGroundTilemap != null)
+				{
+					spawnedEnemy.groundTilemap = enemyGroundTilemap;
+				}
+
+				if (spawnData.overrideMaxHp > 0)
+				{
+					spawnedEnemy.maxHp = spawnData.overrideMaxHp;
+					spawnedEnemy.currentHp = spawnData.overrideMaxHp;
+				}
+
+				if (GridEntityManager.Instance != null)
+				{
+					GridEntityManager.Instance.AddOrUpdateEntity(spawnedEnemy.gameObject, "Enemy");
+				}
+			}
+		}
+
+		UpdateWaveUI();
+		return true;
+	}
+
+	private void HandleVictory()
+	{
+		isGameFinished = true;
+		UpdateTurnUI("Victory!", Color.green);
+		if (waveText != null)
+		{
+			waveText.text = "All Waves Cleared";
+		}
+	}
+
+	private void UpdateWaveUI()
+	{
+		if (waveText != null)
+		{
+			waveText.text = $"Wave {currentWaveIndex + 1}/{waves.Count}";
+		}
 	}
 
 	void UpdateTurnUI(string message, Color color)
