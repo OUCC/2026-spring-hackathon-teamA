@@ -13,7 +13,7 @@ public class GridData
     [SerializeField]
     private Tilemap Tilemap;
 
-    private TileMapanager tileMapManager;
+    private TileMapManager tileMapManager;
 
     // [row(y)][col(x)] の2次元リスト
     public List<List<TileData>> Tiles { get; private set; }
@@ -23,7 +23,7 @@ public class GridData
     /// </summary>
     public GridData(Tilemap tilemap)
     {
-        tileMapManager = tilemap.GetComponent<TileMapanager>();
+        tileMapManager = tilemap.GetComponent<TileMapManager>();
 
         tilemap.CompressBounds();
         BoundsInt bounds = tilemap.cellBounds;

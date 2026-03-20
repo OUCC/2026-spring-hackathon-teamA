@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-public class TileMapanager : MonoBehaviour
+public class TileMapManager : MonoBehaviour
 {
     [SerializeField]
     private TileBase normaltile;
