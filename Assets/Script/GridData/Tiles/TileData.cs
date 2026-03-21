@@ -1,7 +1,10 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace Tiles {
+namespace CustomTiles {
+    /*
+    新しいタイルを追加するには、このTileDataを継承したクラスを作成し、必要なロジックを実装してください。そして、UnityエディタでScriptableObjectとして保存することでタイルを作れます。
+    */
     public abstract class TileData : ScriptableObject
     {   
         [SerializeField]
@@ -11,16 +14,19 @@ namespace Tiles {
 
         public string TileName;
 
-        public virtual void OnTurn(Vector3Int position)
+        //Znjectを使ってGridDataを注入する？とりあえず普通にDIで渡す形にする
+        public GridData GridData;
+
+        public virtual void OnNextTurn(Vector2Int position)
         {
             
         }
-        public virtual void OnSet(Vector3Int position, Player player)
+        public virtual void OnSet(Vector2Int position)
         {
             
         }
 
-        public virtual void OnPlayerSteppedOnTile(Vector3Int position, Player player)
+        public virtual void OnPlayerSteppedOnTile(Vector2Int position, Player player)
         {
             
         }

@@ -7,7 +7,7 @@ public class GridEntityManager : MonoBehaviour
 	public static GridEntityManager Instance;
 
     [SerializeField]
-    private TileMapManager tileMapManager; // インスペクターでセット
+    private TileMapUI tileMapManager; // インスペクターでセット
 
 	// 座標(Vector2Int)をキーにしてデータを高速検索できるようにする
 	private Dictionary<Vector2Int, EntityData> entityMap = new Dictionary<Vector2Int, EntityData>();

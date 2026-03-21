@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI; // UI操作に必要
-using Tiles;
+using CustomTiles;
 
 public class Player : MonoBehaviour
 {
@@ -20,7 +20,7 @@ public class Player : MonoBehaviour
 	public Tilemap obstacleTilemap;
 
 	[Header("特殊能力：タイル変更")]
-	public Tiles.TileData fireTile;
+	public CustomTiles.TileData fireTile;
 
 	[Header("攻撃設定")]
 	public int attackDamage = 25;
@@ -32,7 +32,7 @@ public class Player : MonoBehaviour
 
     [Header("タイル")]
     [SerializeField]
-    private TileMapManager tileMapManager;
+    private TileMapUI tileMapManager;
     [SerializeField]
     private GridData gridData;
 
@@ -167,11 +167,9 @@ public class Player : MonoBehaviour
         // int manhattan = Mathf.Abs(clickedPos.x - playerPos.x) + Mathf.Abs(clickedPos.y - playerPos.y);
         // if (manhattan > 1) return;
 
-        Vector3Int clickedGridPos = groundTilemap.WorldToCell(mousePos);
-
+        Vector2Int clickedGridPos = ConvertVector.ToVector2Int(groundTilemap.WorldToCell(mousePos));
+        gridData.ChangeTile(clickedGridPos, fireTile);
         Debug.Log($"Clicked grid position: {clickedGridPos}");
-
-        tileMapManager.ChangeTile(clickedGridPos, fireTile);
         FinishAction();
     }
 
@@ -200,7 +198,7 @@ public class Player : MonoBehaviour
 			isMoving = false;
 
             //炎のマスに入ったときにダメージ（簡易版)
-            Vector3Int targetPositionGrid = groundTilemap.WorldToCell(targetPosition);
+            Vector2Int targetPositionGrid = ConvertVector.ToVector2Int(groundTilemap.WorldToCell(targetPosition));
             gridData.GetTileData(targetPositionGrid).OnPlayerSteppedOnTile(targetPositionGrid, this);
             Debug.Log($"Player stepped on tile at {targetPositionGrid}");
 

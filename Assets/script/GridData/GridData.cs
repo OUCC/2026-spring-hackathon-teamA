@@ -1,55 +1,55 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using Tiles;
+using CustomTiles;
 
 public class GridData: MonoBehaviour
 {
     [SerializeField]
     private Tilemap tileMap;
 
-    private TileMapManager tileMapManager;
+    private TileMapUI tileMapUI;
     // [row(y)][col(x)] の2次元リスト
 
     [SerializeField]
     private List<TileTypeMap> tileTypeMapping;
-    private Dictionary<Vector2Int, Tiles.TileData> gridData;
-    
+    private Dictionary<Vector2Int, CustomTiles.TileData> gridData;
+    public Dictionary<Vector2Int, CustomTiles.TileData> TilesChangeOnNextTurn { get; private set; } = new Dictionary<Vector2Int, CustomTiles.TileData>();
 
     void Start()
     {
         gridData = GenerateGridData();
         printData();
-        tileMapManager = tileMap.GetComponent<TileMapManager>();
+        tileMapUI = tileMap.GetComponent<TileMapUI>();
     }
 
     /// <summary>
     /// Tilemap からタイルリストを生成する
     /// </summary>
-    public Dictionary<Vector2Int, Tiles.TileData> GenerateGridData()
+    public Dictionary<Vector2Int, CustomTiles.TileData> GenerateGridData()
     {
         this.tileMap.CompressBounds();
         BoundsInt bounds = this.tileMap.cellBounds;
 
-        gridData = new Dictionary<Vector2Int, Tiles.TileData>();
+        gridData = new Dictionary<Vector2Int, CustomTiles.TileData>();
 
         // y 行ごとにリストを作成
         for (int y = bounds.yMin; y < bounds.yMax; y++)
         {
             for (int x = bounds.xMin; x < bounds.xMax; x++)
             {
-                var cellPos2D = new Vector2Int(x, y);
-                TileBase tile = tileMap.GetTile(toVector3Int(cellPos2D));
+                Vector2Int cellPos = new Vector2Int(x, y);
+                TileBase tile = tileMap.GetTile(ConvertVector.ToVector3Int(cellPos));
+                CustomTiles.TileData newTileData = findTileDataByTileBase(tile, tileTypeMapping);
                 //対応するタイルのデータオブジェクトが見つからなかった場合スキップ
-                if (tile == null)
+                if (newTileData == null)
                 {
                     continue;
                 }
-                gridData.Add(cellPos2D, findTileDataByTileBase(tile, tileTypeMapping));
+                newTileData.GridData = this; // タイルデータにGridDataの参照を渡す
+                gridData[cellPos] = newTileData;
             }
         }
         return gridData;
@@ -66,7 +66,7 @@ public class GridData: MonoBehaviour
             for(int x = bounds.xMin; x < bounds.xMax; x++)
             {
                 var cellPos2D = new Vector2Int(x, y);
-                if (gridData.TryGetValue(cellPos2D, out Tiles.TileData tileData))
+                if (gridData.TryGetValue(cellPos2D, out CustomTiles.TileData tileData))
                 {
                     rowStr += tileData.TileName + " ";
                 }
@@ -79,36 +79,64 @@ public class GridData: MonoBehaviour
         }
     }
 
-    public void ChangeTile(Vector3Int position, Tiles.TileData newTile)
+    public void ChangeTile(Vector2Int position, CustomTiles.TileData newTile)
     {
-        Vector2Int cellPos = toVector2Int(position);
-        if (gridData.ContainsKey(cellPos))
+        if (gridData.ContainsKey(position))
         {
-            gridData[cellPos] = newTile;
-            tileMapManager.ChangeTileUI(position);
+            gridData[position] = newTile;
+            newTile.OnSet(position);
+            tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position));
         }
         else
         {
-            Debug.LogError($"ChangeTile: 座標 ({cellPos.x}, {cellPos.y}) にタイルデータが見つかりません。");
+            Debug.LogError($"ChangeTile: 座標 ({position.x}, {position.y}) にタイルデータが見つかりません。");
+        }
+    }
+
+    public void ChangeTiles(Dictionary<Vector2Int, CustomTiles.TileData> tilesToChange)
+    {
+        foreach (var kvp in tilesToChange)
+        {
+            Vector2Int position = kvp.Key;
+            CustomTiles.TileData newTile = kvp.Value;
+            if (gridData.ContainsKey(position))
+            {
+                gridData[position] = newTile;
+                newTile.OnSet(position);
+                tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position));
+            }
+            else
+            {
+                Debug.LogError($"ChangeTiles: 座標 ({position.x}, {position.y}) にタイルデータが見つかりません。");
+            }
         }
     }
     
-    public Tiles.TileData GetTileData(Vector3Int position)
+    public CustomTiles.TileData GetTileData(Vector2Int position)
     {
-        Vector2Int cellPos = toVector2Int(position);
-        if (gridData.TryGetValue(cellPos, out Tiles.TileData tileData))
+        if (gridData.TryGetValue(position, out CustomTiles.TileData tileData))
         {
             return tileData;
         }
         else
         {
-            Debug.LogError($"GetTileData: 座標 ({cellPos.x}, {cellPos.y}) にタイルデータが見つかりません。");
+            Debug.LogError($"GetTileData: 座標 ({position.x}, {position.y}) にタイルデータが見つかりません。");
             return null;
         }
     }
-    
+
+    public void ChangeTilesOnNextTurn()
+    {
+        ChangeTiles(TilesChangeOnNextTurn);
+    }
+
+    // public void AddTileChangeOnNextTurn(Vector2Int position, CustomTiles.TileData tileData)
+    // {
+    //     TilesChangeOnNextTurn[position] = tileData;
+    // }
+
     //タイルとタイルデータのスクリプタブルオブジェクトの対応の最善策が分からないので以下は応急処置用
-    private Tiles.TileData findTileDataByTileBase(TileBase tileBase, List<TileTypeMap> tileTypeMapping)
+    private CustomTiles.TileData findTileDataByTileBase(TileBase tileBase, List<TileTypeMap> tileTypeMapping)
     {
         foreach (var mapping in tileTypeMapping)
         {
@@ -120,21 +148,11 @@ public class GridData: MonoBehaviour
         Debug.LogError($"TileMapManager: タイル {tileBase} に対応する TileDataBase が見つかりません。");
         return null;
     }
-
-    private Vector2Int toVector2Int(Vector3Int vec3)
-    {
-        return new Vector2Int(vec3.x, vec3.y);
-    }
-
-    private Vector3Int toVector3Int(Vector2Int vec2)
-    {
-        return new Vector3Int(vec2.x, vec2.y, 0);
-    }
 }
 
 [System.Serializable]
 public struct TileTypeMap
 {
     public TileBase tileBase;
-    public Tiles.TileData tileData;
+    public CustomTiles.TileData tileData;
 }

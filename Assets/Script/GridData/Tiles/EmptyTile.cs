@@ -1,5 +1,5 @@
 using UnityEngine;
-using Tiles;
+using CustomTiles;
 
 [CreateAssetMenu(fileName = "EmptyTile", menuName = "Tiles/EmptyTile")]
 public class EmptyTile : TileData
