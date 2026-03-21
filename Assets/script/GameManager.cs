@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour
 
 		if (currentPhase == TurnPhase.Player)
 		{
-            gridData.ChangeTilesOnNextTurn(); // ターン開始時にタイルの変化を処理
+            gridData.OnNextTurn(); // ターン開始時にタイルの変化を処理
 			StartCoroutine(EnemyTurnRoutine());
             //ターン終了
 		}

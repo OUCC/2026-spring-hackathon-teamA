@@ -125,9 +125,22 @@ public class GridData: MonoBehaviour
         }
     }
 
-    public void ChangeTilesOnNextTurn()
+    public void OnNextTurn()
+    {
+        // ターン開始時にタイルの変化を処理
+        ChangeTilesOnNextTurn();
+        foreach (var kvp in gridData)
+        {
+            Vector2Int position = kvp.Key;
+            CustomTiles.TileData tileData = kvp.Value;
+            tileData.OnNextTurn(position);
+        }
+    }
+
+    private void ChangeTilesOnNextTurn()
     {
         ChangeTiles(TilesChangeOnNextTurn);
+        TilesChangeOnNextTurn.Clear(); // ターン開始時に辞書をクリアして次のターンに備える
     }
 
     // public void AddTileChangeOnNextTurn(Vector2Int position, CustomTiles.TileData tileData)
