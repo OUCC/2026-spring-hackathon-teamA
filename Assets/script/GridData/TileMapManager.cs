@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Tiles;
+
 public class TileMapManager : MonoBehaviour
 {
     [SerializeField]
@@ -11,29 +14,46 @@ public class TileMapManager : MonoBehaviour
     [SerializeField]
     private TileBase firetile;
 
-    private GridData GridData;
-    private Tilemap tilemap;
+    [SerializeField]
+    private List<TileTypeMap> tileTypeMapping;
+
+    [SerializeField]
+    private GridData gridData;
+    private Tilemap tileMap;
 
     void Start()
     {
-        tilemap = GetComponent<Tilemap>();
-        GridData = new GridData(tilemap);
+        tileMap = GetComponent<Tilemap>();
     }
 
-    public void ChangeTile(int x, int y, TileType type)
+    public void ChangeTile(Vector3Int position, Tiles.TileData newTile)
     {
-        switch (type)
-        {
-            case TileType.Empty:
-                tilemap.SetTile(new Vector3Int(x, y, 0), null);
-                break;
-            case TileType.Normal:
-                tilemap.SetTile(new Vector3Int(x, y, 0), normaltile);
-                break;
-            case TileType.Fire:
-                tilemap.SetTile(new Vector3Int(x, y, 0), firetile); 
-                break;
-        }
+        gridData.ChangeTile(position, newTile);
     }
 
+    public void NewTurn()
+    {
+        
+    }
+
+    public void OnEntityMoved(Vector3Int position)
+    {
+        
+    }
+
+    public void OnPlayerSteppedOnTile(Vector3Int position, Player player)
+    {
+        var tileData = gridData.GetTileData(position);
+        tileData.OnPlayerSteppedOnTile(position, player);
+    }
+
+    public void ChangeTileUI(Vector3Int position)
+    {
+        tileMap.SetTile(position, gridData.GetTileData(position).TileBase);
+    }
+
+    void OnDestroy()
+    {
+        
+    }   
 }

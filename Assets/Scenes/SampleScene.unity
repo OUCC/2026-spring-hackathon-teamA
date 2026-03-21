@@ -1436,6 +1436,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8a1c3826dd61d24e8f63ebd42d4b3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileMapanager
+  normaltile: {fileID: 11400000, guid: de37066ce26bd458e91976ba7f35aafb, type: 2}
+  firetile: {fileID: 11400000, guid: 3e4c9b32959484248a1e7940eb109007, type: 2}
+  tileTypeMapping:
+  - tileBase: {fileID: 11400000, guid: de37066ce26bd458e91976ba7f35aafb, type: 2}
+    tileData: {fileID: 11400000, guid: 10c67ae468dce634c85c7998c5b04bcd, type: 2}
+  - tileBase: {fileID: 11400000, guid: 3e4c9b32959484248a1e7940eb109007, type: 2}
+    tileData: {fileID: 11400000, guid: 8ee731be4f220eb48a0afc76908e5077, type: 2}
 --- !u!1 &279010517
 GameObject:
   m_ObjectHideFlags: 0
@@ -2377,6 +2384,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00d243e52fb4a478e81b7ceb9c915dfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridEntityManager
+  tileMapManager: {fileID: 224710907}
 --- !u!4 &1444907742
 Transform:
   m_ObjectHideFlags: 0
@@ -2745,9 +2753,10 @@ MonoBehaviour:
   moveSpeed: 5
   groundTilemap: {fileID: 224710906}
   obstacleTilemap: {fileID: 0}
-  fireTile: {fileID: 11400000, guid: 3e4c9b32959484248a1e7940eb109007, type: 2}
+  fireTile: {fileID: 11400000, guid: 8ee731be4f220eb48a0afc76908e5077, type: 2}
   attackDamage: 1
   hasActed: 0
+  tileMapManager: {fileID: 224710907}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

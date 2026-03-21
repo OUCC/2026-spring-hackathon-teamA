@@ -1,113 +1,140 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Tiles;
 
-public class GridData
+public class GridData: MonoBehaviour
 {
-    public int Width { get; private set; }
-    public int Height { get; private set; }
-
     [SerializeField]
-    private Tilemap Tilemap;
+    private Tilemap tileMap;
 
     private TileMapManager tileMapManager;
-
     // [row(y)][col(x)] の2次元リスト
-    public List<List<TileData>> Tiles { get; private set; }
+
+    [SerializeField]
+    private List<TileTypeMap> tileTypeMapping;
+    private Dictionary<Vector2Int, Tiles.TileData> gridData;
+    
+
+    void Start()
+    {
+        gridData = GenerateGridData();
+        printData();
+        tileMapManager = tileMap.GetComponent<TileMapManager>();
+    }
 
     /// <summary>
     /// Tilemap からタイルリストを生成する
     /// </summary>
-    public GridData(Tilemap tilemap)
+    public Dictionary<Vector2Int, Tiles.TileData> GenerateGridData()
     {
-        tileMapManager = tilemap.GetComponent<TileMapManager>();
+        this.tileMap.CompressBounds();
+        BoundsInt bounds = this.tileMap.cellBounds;
 
-        tilemap.CompressBounds();
-        BoundsInt bounds = tilemap.cellBounds;
-
-    
-        Width = bounds.size.x;
-        Height = bounds.size.y;
-        Tiles = new List<List<TileData>>();
+        gridData = new Dictionary<Vector2Int, Tiles.TileData>();
 
         // y 行ごとにリストを作成
-        for (int y = 0; y < bounds.size.y; y++)
+        for (int y = bounds.yMin; y < bounds.yMax; y++)
         {
-            var row = new List<TileData>();
-
-            for (int x = 0; x < bounds.size.x; x++)
+            for (int x = bounds.xMin; x < bounds.xMax; x++)
             {
-                // Tilemap 上の実座標
-                var cellPos = new Vector3Int(
-                    bounds.xMin + x,
-                    bounds.yMin + y,
-                    0
-                );
-
-                TileBase tile = tilemap.GetTile(cellPos);
-                TileType type = (tile != null) ? TileType.Normal : TileType.Empty;
-
-                row.Add(new TileData(x, y, type));
+                var cellPos2D = new Vector2Int(x, y);
+                TileBase tile = tileMap.GetTile(toVector3Int(cellPos2D));
+                //対応するタイルのデータオブジェクトが見つからなかった場合スキップ
+                if (tile == null)
+                {
+                    continue;
+                }
+                gridData.Add(cellPos2D, findTileDataByTileBase(tile, tileTypeMapping));
             }
-
-            Tiles.Add(row);
         }
-        printData();
+        return gridData;
     }
 
+    // デバッグ用：タイルの種類をコンソールに出力
     public void printData()
     {
-        foreach (var row in Enumerable.Reverse(Tiles))
+        BoundsInt bounds = this.tileMap.cellBounds;
+        for(int y = bounds.yMin; y < bounds.yMax; y++)
         {
+
             string rowStr = "";
-            foreach (var tile in row)
+            for(int x = bounds.xMin; x < bounds.xMax; x++)
             {
-                rowStr += tile.type == TileType.Normal ? "N" : "E";
+                var cellPos2D = new Vector2Int(x, y);
+                if (gridData.TryGetValue(cellPos2D, out Tiles.TileData tileData))
+                {
+                    rowStr += tileData.TileName + " ";
+                }
+                else
+                {
+                    rowStr += "* ";
+                }
             }
             Debug.Log(rowStr);
         }
     }
 
-    public void ChangeTile(int x, int y, TileType newType)
+    public void ChangeTile(Vector3Int position, Tiles.TileData newTile)
     {
-        if (x < 0 || x >= Width || y < 0 || y >= Height)
+        Vector2Int cellPos = toVector2Int(position);
+        if (gridData.ContainsKey(cellPos))
         {
-            Debug.LogError($"ChangeTile: 座標 ({x}, {y}) はグリッドの範囲外です。");
-            return;
+            gridData[cellPos] = newTile;
+            tileMapManager.ChangeTileUI(position);
         }
-
-        Tiles[y][x].type = newType;
-        tileMapManager.ChangeTile(x, y, newType);
+        else
+        {
+            Debug.LogError($"ChangeTile: 座標 ({cellPos.x}, {cellPos.y}) にタイルデータが見つかりません。");
+        }
     }
     
-    public TileData GetTileData(int x, int y)
+    public Tiles.TileData GetTileData(Vector3Int position)
     {
-        var ListPos = toListPosition(x, y);
-        (int listX, int listY) = (ListPos.x, ListPos.y);
-
-        if (listX < 0 || listX >= Width || listY < 0 || listY >= Height)
+        Vector2Int cellPos = toVector2Int(position);
+        if (gridData.TryGetValue(cellPos, out Tiles.TileData tileData))
         {
-            Debug.LogError($"GetTileData: 座標 ({x}, {y}) はグリッドの範囲外です。");
+            return tileData;
+        }
+        else
+        {
+            Debug.LogError($"GetTileData: 座標 ({cellPos.x}, {cellPos.y}) にタイルデータが見つかりません。");
             return null;
         }
-
-        return Tiles[listY][listX];
-    }
-
-    public Vector3Int toListPosition(int Gridx, int Gridy)
-    {
-        BoundsInt bounds = this.Tilemap.cellBounds;
-        return new Vector3Int(Gridx - bounds.xMin, Gridy - bounds.yMin, 0);
-    }
-
-    public Vector3Int toGridPosition(int listX, int listY)
-    {
-        BoundsInt bounds = this.Tilemap.cellBounds;
-        return new Vector3Int(listX + bounds.xMin, listY + bounds.yMin, 0);
     }
     
+    //タイルとタイルデータのスクリプタブルオブジェクトの対応の最善策が分からないので以下は応急処置用
+    private Tiles.TileData findTileDataByTileBase(TileBase tileBase, List<TileTypeMap> tileTypeMapping)
+    {
+        foreach (var mapping in tileTypeMapping)
+        {
+            if (mapping.tileBase == tileBase)
+            {
+                return mapping.tileData;
+            }
+        }
+        Debug.LogError($"TileMapManager: タイル {tileBase} に対応する TileDataBase が見つかりません。");
+        return null;
+    }
 
+    private Vector2Int toVector2Int(Vector3Int vec3)
+    {
+        return new Vector2Int(vec3.x, vec3.y);
+    }
+
+    private Vector3Int toVector3Int(Vector2Int vec2)
+    {
+        return new Vector3Int(vec2.x, vec2.y, 0);
+    }
+}
+
+[System.Serializable]
+public struct TileTypeMap
+{
+    public TileBase tileBase;
+    public Tiles.TileData tileData;
 }

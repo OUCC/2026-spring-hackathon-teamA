@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI; // UI操作に必要
+using Tiles;
 
 public class Player : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public class Player : MonoBehaviour
 	public Tilemap obstacleTilemap;
 
 	[Header("特殊能力：タイル変更")]
-	public TileBase fireTile;
+	public Tiles.TileData fireTile;
 
 	[Header("攻撃設定")]
 	public int attackDamage = 25;
@@ -28,6 +29,12 @@ public class Player : MonoBehaviour
 	public bool hasActed = false;
 	private Vector3 targetPosition;
 	private bool isMoving = false;
+
+    [Header("タイル")]
+    [SerializeField]
+    private TileMapManager tileMapManager;
+    [SerializeField]
+    private GridData gridData;
 
 	void Awake()
 	{
@@ -102,7 +109,7 @@ public class Player : MonoBehaviour
 
 		if (Input.GetMouseButtonDown(1))
 		{
-			SetTile();
+			ChangeTileByClick();
 		}
 
 		if (Input.GetMouseButtonDown(0))
@@ -116,7 +123,7 @@ public class Player : MonoBehaviour
 		Vector3Int cellPos = groundTilemap.WorldToCell(transform.position);
 		if (groundTilemap.HasTile(cellPos))
 		{
-			groundTilemap.SetTile(cellPos, fireTile);
+			groundTilemap.SetTile(cellPos, fireTile.TileBase);
 			FinishAction();
 		}
 	}
@@ -146,6 +153,28 @@ public class Player : MonoBehaviour
 		FinishAction();
 	}
 
+    //右クリックでタイルを変更する処理
+    private void ChangeTileByClick()
+    {
+        if (Camera.main == null) return;
+
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0;
+        Vector3Int clickedPos = new Vector3Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y), 0);
+        Vector3Int playerPos = new Vector3Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y), 0);
+
+        // // 上下左右1マス以内のみ（マンハッタン距離）
+        // int manhattan = Mathf.Abs(clickedPos.x - playerPos.x) + Mathf.Abs(clickedPos.y - playerPos.y);
+        // if (manhattan > 1) return;
+
+        Vector3Int clickedGridPos = groundTilemap.WorldToCell(mousePos);
+
+        Debug.Log($"Clicked grid position: {clickedGridPos}");
+
+        tileMapManager.ChangeTile(clickedGridPos, fireTile);
+        FinishAction();
+    }
+
 	private void TrySetTarget(Vector3 direction)
 	{
 		Vector3 nextPos = transform.position + direction;
@@ -169,6 +198,12 @@ public class Player : MonoBehaviour
 		{
 			transform.position = targetPosition;
 			isMoving = false;
+
+            //炎のマスに入ったときにダメージ（簡易版)
+            Vector3Int targetPositionGrid = groundTilemap.WorldToCell(targetPosition);
+            gridData.GetTileData(targetPositionGrid).OnPlayerSteppedOnTile(targetPositionGrid, this);
+            Debug.Log($"Player stepped on tile at {targetPositionGrid}");
+
 			FinishAction();
 		}
 	}
