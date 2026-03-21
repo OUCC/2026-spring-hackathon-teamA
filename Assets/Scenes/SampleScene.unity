@@ -592,8 +592,8 @@ Tilemap:
   - first: {x: -2, y: -2, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 0
-      m_TileSpriteIndex: 1
+      m_TileIndex: 2
+      m_TileSpriteIndex: 2
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -1371,15 +1371,19 @@ Tilemap:
       m_AllTileFlags: 1073741825
   m_AnimatedTiles: {}
   m_TileAssetArray:
-  - m_RefCount: 106
+  - m_RefCount: 105
     m_Data: {fileID: 11400000, guid: de37066ce26bd458e91976ba7f35aafb, type: 2}
   - m_RefCount: 1
     m_Data: {fileID: 11400000, guid: 3e4c9b32959484248a1e7940eb109007, type: 2}
+  - m_RefCount: 1
+    m_Data: {fileID: 11400000, guid: 45ece8e9a53c70c4f8cf071591f74fc8, type: 2}
   m_TileSpriteArray:
   - m_RefCount: 1
     m_Data: {fileID: 21300000, guid: 0ada72c9ee80c4e8c947de467099ed7d, type: 3}
-  - m_RefCount: 106
+  - m_RefCount: 105
     m_Data: {fileID: 21300000, guid: 9db9af93eeaac4a46a31e4d112fd8e70, type: 3}
+  - m_RefCount: 1
+    m_Data: {fileID: 8509550459451208454, guid: d97257e67bf2def488fff34fdb35cccf, type: 3}
   m_TileMatrixArray:
   - m_RefCount: 107
     m_Data:
@@ -1445,7 +1449,9 @@ MonoBehaviour:
     tileData: {fileID: 11400000, guid: 10c67ae468dce634c85c7998c5b04bcd, type: 2}
   - tileBase: {fileID: 11400000, guid: 3e4c9b32959484248a1e7940eb109007, type: 2}
     tileData: {fileID: 11400000, guid: 8ee731be4f220eb48a0afc76908e5077, type: 2}
-  gridData: {fileID: 924137964}
+  - tileBase: {fileID: 11400000, guid: 45ece8e9a53c70c4f8cf071591f74fc8, type: 2}
+    tileData: {fileID: 11400000, guid: 60f1d90383abb764099b13dbcce1e3f8, type: 2}
+  tileMap: {fileID: 0}
 --- !u!1 &279010517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1740,7 +1746,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 782563887}
   m_HandleRect: {fileID: 0}
@@ -2860,6 +2866,7 @@ MonoBehaviour:
   groundTilemap: {fileID: 224710906}
   obstacleTilemap: {fileID: 0}
   fireTile: {fileID: 11400000, guid: 8ee731be4f220eb48a0afc76908e5077, type: 2}
+  waterTile: {fileID: 11400000, guid: 60f1d90383abb764099b13dbcce1e3f8, type: 2}
   attackDamage: 1
   hasActed: 0
   tileMapManager: {fileID: 224710907}

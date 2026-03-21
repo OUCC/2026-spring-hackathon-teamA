@@ -15,18 +15,18 @@ namespace CustomTiles {
         public string TileName;
 
         //Znjectを使ってGridDataを注入する？とりあえず普通にDIで渡す形にする
-        public GridData GridData;
+        // public GridData GridData;
 
-        public virtual void OnNextTurn(Vector2Int position)
+        public virtual void OnNextTurn(Vector2Int position, GridData gridData)
         {
             
         }
-        public virtual void OnSet(Vector2Int position)
+        public virtual void OnSet(Vector2Int position, GridData gridData)
         {
             
         }
 
-        public virtual void OnPlayerSteppedOnTile(Vector2Int position, Player player)
+        public virtual void OnPlayerSteppedOnTile(Vector2Int position, GridData gridData, Player player)
         {
             
         }

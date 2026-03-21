@@ -15,12 +15,12 @@ public class GridData: MonoBehaviour
 
     [SerializeField]
     private List<TileTypeMap> tileTypeMapping;
-    private Dictionary<Vector2Int, CustomTiles.TileData> gridData;
+    private Dictionary<Vector2Int, CustomTiles.TileData> gridDataDict;
     public Dictionary<Vector2Int, CustomTiles.TileData> TilesChangeOnNextTurn { get; private set; } = new Dictionary<Vector2Int, CustomTiles.TileData>();
 
     void Start()
     {
-        gridData = GenerateGridData();
+        gridDataDict = GenerateGridData();
         printData();
         tileMapUI = tileMap.GetComponent<TileMapUI>();
     }
@@ -33,7 +33,7 @@ public class GridData: MonoBehaviour
         this.tileMap.CompressBounds();
         BoundsInt bounds = this.tileMap.cellBounds;
 
-        gridData = new Dictionary<Vector2Int, CustomTiles.TileData>();
+        gridDataDict = new Dictionary<Vector2Int, CustomTiles.TileData>();
 
         // y 行ごとにリストを作成
         for (int y = bounds.yMin; y < bounds.yMax; y++)
@@ -48,11 +48,10 @@ public class GridData: MonoBehaviour
                 {
                     continue;
                 }
-                newTileData.GridData = this; // タイルデータにGridDataの参照を渡す
-                gridData[cellPos] = newTileData;
+                gridDataDict[cellPos] = newTileData;
             }
         }
-        return gridData;
+        return gridDataDict;
     }
 
     // デバッグ用：タイルの種類をコンソールに出力
@@ -66,7 +65,7 @@ public class GridData: MonoBehaviour
             for(int x = bounds.xMin; x < bounds.xMax; x++)
             {
                 var cellPos2D = new Vector2Int(x, y);
-                if (gridData.TryGetValue(cellPos2D, out CustomTiles.TileData tileData))
+                if (gridDataDict.TryGetValue(cellPos2D, out CustomTiles.TileData tileData))
                 {
                     rowStr += tileData.TileName + " ";
                 }
@@ -81,11 +80,17 @@ public class GridData: MonoBehaviour
 
     public void ChangeTile(Vector2Int position, CustomTiles.TileData newTile)
     {
-        if (gridData.ContainsKey(position))
+        if (newTile == null)
         {
-            gridData[position] = newTile;
-            newTile.OnSet(position);
-            tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position));
+            Debug.LogError("ChangeTile: newTile が null です。Inspector で TileData を設定してください。");
+            return;
+        }
+        
+        if (gridDataDict.ContainsKey(position))
+        {
+            gridDataDict[position] = newTile;
+            newTile.OnSet(position, this);
+            tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position), newTile.TileBase);
         }
         else
         {
@@ -99,11 +104,11 @@ public class GridData: MonoBehaviour
         {
             Vector2Int position = kvp.Key;
             CustomTiles.TileData newTile = kvp.Value;
-            if (gridData.ContainsKey(position))
+            if (gridDataDict.ContainsKey(position))
             {
-                gridData[position] = newTile;
-                newTile.OnSet(position);
-                tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position));
+                gridDataDict[position] = newTile;
+                tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position), newTile.TileBase);
+                newTile.OnSet(position, this);
             }
             else
             {
@@ -114,27 +119,39 @@ public class GridData: MonoBehaviour
     
     public CustomTiles.TileData GetTileData(Vector2Int position)
     {
-        if (gridData.TryGetValue(position, out CustomTiles.TileData tileData))
+        if (gridDataDict.TryGetValue(position, out CustomTiles.TileData tileData))
         {
             return tileData;
         }
         else
         {
-            Debug.LogError($"GetTileData: 座標 ({position.x}, {position.y}) にタイルデータが見つかりません。");
+            Debug.LogError($"GetTileData: tile not found at ({position.x}, {position.y})");
             return null;
         }
+    }
+
+    public CustomTiles.TileData TryGetTileData(Vector2Int position)
+    {
+        gridDataDict.TryGetValue(position, out CustomTiles.TileData tileData);
+        return tileData;
     }
 
     public void OnNextTurn()
     {
         // ターン開始時にタイルの変化を処理
         ChangeTilesOnNextTurn();
-        foreach (var kvp in gridData)
+        foreach (var kvp in gridDataDict)
         {
             Vector2Int position = kvp.Key;
             CustomTiles.TileData tileData = kvp.Value;
-            tileData.OnNextTurn(position);
+            tileData.OnNextTurn(position, this);
         }
+    }
+
+    public void OnPlayerSteppedOnTile(Vector2Int position, Player player)
+    {
+        var tileData = GetTileData(position);
+        tileData.OnPlayerSteppedOnTile(position, this, player);
     }
 
     private void ChangeTilesOnNextTurn()

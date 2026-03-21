@@ -20,7 +20,10 @@ public class Player : MonoBehaviour
 	public Tilemap obstacleTilemap;
 
 	[Header("特殊能力：タイル変更")]
-	public CustomTiles.TileData fireTile;
+    [SerializeField]
+	private CustomTiles.TileData fireTile;
+    [SerializeField]
+    private CustomTiles.TileData waterTile;
 
 	[Header("攻撃設定")]
 	public int attackDamage = 25;
@@ -109,23 +112,18 @@ public class Player : MonoBehaviour
 
 		if (Input.GetMouseButtonDown(1))
 		{
-			ChangeTileByClick();
+			ChangeTileByClick(fireTile);
 		}
 
 		if (Input.GetMouseButtonDown(0))
 		{
 			TryAttackByClick();
 		}
-	}
 
-	public void SetTile()
-	{
-		Vector3Int cellPos = groundTilemap.WorldToCell(transform.position);
-		if (groundTilemap.HasTile(cellPos))
-		{
-			groundTilemap.SetTile(cellPos, fireTile.TileBase);
-			FinishAction();
-		}
+        if (Input.GetMouseButtonDown(2))
+        {
+            ChangeTileByClick(waterTile);
+        }
 	}
 
 	private void TryAttackByClick()
@@ -154,7 +152,7 @@ public class Player : MonoBehaviour
 	}
 
     //右クリックでタイルを変更する処理
-    private void ChangeTileByClick()
+    private void ChangeTileByClick(CustomTiles.TileData tileData)
     {
         if (Camera.main == null) return;
 
@@ -163,12 +161,12 @@ public class Player : MonoBehaviour
         Vector3Int clickedPos = new Vector3Int(Mathf.RoundToInt(mousePos.x), Mathf.RoundToInt(mousePos.y), 0);
         Vector3Int playerPos = new Vector3Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y), 0);
 
-        // // 上下左右1マス以内のみ（マンハッタン距離）
-        // int manhattan = Mathf.Abs(clickedPos.x - playerPos.x) + Mathf.Abs(clickedPos.y - playerPos.y);
-        // if (manhattan > 1) return;
+        // 上下左右1マス以内のみ（マンハッタン距離）
+        int manhattan = Mathf.Abs(clickedPos.x - playerPos.x) + Mathf.Abs(clickedPos.y - playerPos.y);
+        if (manhattan > 1) return;
 
         Vector2Int clickedGridPos = ConvertVector.ToVector2Int(groundTilemap.WorldToCell(mousePos));
-        gridData.ChangeTile(clickedGridPos, fireTile);
+        gridData.ChangeTile(clickedGridPos, tileData);
         Debug.Log($"Clicked grid position: {clickedGridPos}");
         FinishAction();
     }
@@ -199,7 +197,7 @@ public class Player : MonoBehaviour
 
             //炎のマスに入ったときにダメージ（簡易版)
             Vector2Int targetPositionGrid = ConvertVector.ToVector2Int(groundTilemap.WorldToCell(targetPosition));
-            gridData.GetTileData(targetPositionGrid).OnPlayerSteppedOnTile(targetPositionGrid, this);
+            gridData.OnPlayerSteppedOnTile(targetPositionGrid, this);
             Debug.Log($"Player stepped on tile at {targetPositionGrid}");
 
 			FinishAction();

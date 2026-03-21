@@ -7,12 +7,12 @@ namespace CustomTiles {
         [SerializeField]
         private int damage = 1;
 
-        public override void OnPlayerSteppedOnTile(Vector2Int position, Player player)
+        public override void OnPlayerSteppedOnTile(Vector2Int position, GridData gridData, Player player)
         {
             player.TakeDamage(damage);
         }
 
-        public override void OnNextTurn(Vector2Int position)
+        public override void OnNextTurn(Vector2Int position, GridData gridData)
         {
 
             // タイルがセットされたときのロジックをここに実装
@@ -26,20 +26,20 @@ namespace CustomTiles {
                     } 
 
                     Vector2Int adjacentPos = new Vector2Int(position.x + x, position.y + y);
-                    TileData currentTileData = GridData.GetTileData(adjacentPos);
+                    TileData currentTileData = gridData.TryGetTileData(adjacentPos);
                     if (currentTileData != null)
                     {
-                        if (GridData.TilesChangeOnNextTurn.TryGetValue(adjacentPos, out TileData newTileData))
+                        if (gridData.TilesChangeOnNextTurn.TryGetValue(adjacentPos, out TileData newTileData))
                         {
                             if(newTileData is WaterTile)
                             {
                                 // 隣接するタイルが水の場合は炎を消す
-                                GridData.TilesChangeOnNextTurn[adjacentPos] = this; // nullをセットしてタイルを消す
+                                gridData.TilesChangeOnNextTurn[adjacentPos] = this; // nullをセットしてタイルを消す
                             }
                         }
                         else if (!(currentTileData is WaterTile || currentTileData is FireTile))
                         {
-                            GridData.TilesChangeOnNextTurn[adjacentPos] = this; // 隣接するタイルの位置とデータを辞書に追加
+                            gridData.TilesChangeOnNextTurn[adjacentPos] = this; // 隣接するタイルの位置とデータを辞書に追加
                         }
                     }
                 }

@@ -19,7 +19,6 @@ public class TileMapUI : MonoBehaviour
     private List<TileTypeMap> tileTypeMapping;
 
     [SerializeField]
-    private GridData gridData;
     private Tilemap tileMap;
 
     void Start()
@@ -27,9 +26,9 @@ public class TileMapUI : MonoBehaviour
         tileMap = GetComponent<Tilemap>();
     }
 
-    public void ChangeTileUI(Vector3Int position, CustomTiles.TileData newTile)
+    public void ChangeTileUI(Vector3Int position, TileBase newTile)
     {
-        tileMap.SetTile(position, newTile.TileBase);
+        tileMap.SetTile(position, newTile);
     }
 
     public void ChangeTilesUI(Dictionary<Vector2Int, TileBase> tilePositionPairs)
@@ -48,17 +47,6 @@ public class TileMapUI : MonoBehaviour
     public void OnEntityMoved(Vector2Int position)
     {
         
-    }
-
-    public void OnPlayerSteppedOnTile(Vector2Int position, Player player)
-    {
-        var tileData = gridData.GetTileData(position);
-        tileData.OnPlayerSteppedOnTile(position, player);
-    }
-
-    public void ChangeTileUI(Vector3Int position)
-    {
-        tileMap.SetTile(position, gridData.GetTileData(ConvertVector.ToVector2Int(position)).TileBase);
     }
 
     void OnDestroy()
