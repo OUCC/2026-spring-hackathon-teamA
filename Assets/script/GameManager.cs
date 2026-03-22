@@ -37,6 +37,10 @@ public class GameManager : MonoBehaviour
 	private int currentWaveIndex = -1;
 	private bool isGameFinished = false;
 
+    [Header("グリッドのデータ")]
+    [SerializeField]
+    private GridData gridData;
+
 	void Awake()
 	{
 		if (Instance == null) Instance = this;
@@ -62,7 +66,9 @@ public class GameManager : MonoBehaviour
 
 		if (currentPhase == TurnPhase.Player)
 		{
+            gridData.OnNextTurn(); // ターン開始時にタイルの変化を処理
 			StartCoroutine(EnemyTurnRoutine());
+            //ターン終了
 		}
 		else
 		{
