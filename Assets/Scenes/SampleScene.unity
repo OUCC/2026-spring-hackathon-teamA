@@ -1444,8 +1444,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8a1c3826dd61d24e8f63ebd42d4b3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileMapanager
-  tileBaseMapping: {fileID: 0}
-  tileMap: {fileID: 0}
+  tileBaseMapping: {fileID: 11400000, guid: d96f68aa79f620f4faf75e38ac320d83, type: 2}
 --- !u!1 &279010517
 GameObject:
   m_ObjectHideFlags: 0
@@ -2586,50 +2585,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1539815423}
   m_CullTransparentMesh: 1
---- !u!1 &1683072409
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1683072411}
-  - component: {fileID: 1683072410}
-  m_Layer: 0
-  m_Name: GameObjectContext
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1683072410
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1683072409}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08eca9f7688a0a24685b89133b020c8e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Zenject::Zenject.GameObjectContext
---- !u!4 &1683072411
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1683072409}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2041587796
 GameObject:
   m_ObjectHideFlags: 0
@@ -2863,4 +2818,3 @@ SceneRoots:
   - {fileID: 279010520}
   - {fileID: 1444907742}
   - {fileID: 924137965}
-  - {fileID: 1683072411}

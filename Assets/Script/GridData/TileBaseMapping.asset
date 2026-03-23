@@ -12,4 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4156b2301685ae41991fb31ce5be462, type: 3}
   m_Name: TileBaseMapping
   m_EditorClassIdentifier: Assembly-CSharp::TileBaseMapping
-  mappingList: []
+  mappingList:
+  - tileType: 1
+    tileBase: {fileID: 11400000, guid: 3e4c9b32959484248a1e7940eb109007, type: 2}
+  - tileType: 0
+    tileBase: {fileID: 11400000, guid: de37066ce26bd458e91976ba7f35aafb, type: 2}
+  - tileType: 2
+    tileBase: {fileID: 11400000, guid: 45ece8e9a53c70c4f8cf071591f74fc8, type: 2}
