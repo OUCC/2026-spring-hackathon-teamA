@@ -198,6 +198,15 @@ public class GameManager : MonoBehaviour
 					spawnedEnemy.groundTilemap = enemyGroundTilemap;
 				}
 
+                if (gridData != null)
+                {
+                    spawnedEnemy.gridData = gridData;
+                } 
+                else
+                {
+                    Debug.LogError("GridData reference is missing in GameManager. Enemy won't be able to interact with tiles.");
+                }
+
 				if (spawnData.overrideMaxHp > 0)
 				{
 					spawnedEnemy.maxHp = spawnData.overrideMaxHp;

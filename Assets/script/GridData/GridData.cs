@@ -162,6 +162,7 @@ public class GridData: MonoBehaviour
         return gridDataDict.TryGetValue(position, out tileData);
     }
 
+    //ここから下のやつをイベントハンドラーで呼び出すように変更したい
     public void OnNextTurn()
     {
         // ターン開始時にタイルの変化を処理
@@ -178,6 +179,12 @@ public class GridData: MonoBehaviour
     {
         var tileData = GetTileData(position);
         tileData.OnPlayerSteppedOnTile(position, this, player);
+    }
+
+    public void OnEnemySteppedOnTile(Vector2Int position, Enemy enemy)
+    {
+        var tileData = GetTileData(position);
+        tileData.OnEnemySteppedOnTile(position, this, enemy);
     }
 
     private void ChangeTilesOnNextTurn()
