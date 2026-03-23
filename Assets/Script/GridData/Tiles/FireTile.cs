@@ -1,46 +1,67 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
+using CustomTiles;
+using Unity.VisualScripting;
 
 namespace CustomTiles {
     [CreateAssetMenu(fileName = "FireTile", menuName = "Tiles/FireTile")]
-    public class FireTile: TileData
+
+    [System.Serializable]
+    public class FireTile : CustomTileData
     {
-        [SerializeField]
-        private int damage = 1;
+        private int _damage = 1;
+
+        private int _spreadDepth = 0;
+        public FireTile(TileBaseType tileType = TileBaseType.Fire, string tileName = "FireTile", int damage = 1, int spreadDepth = 0): base(tileType, tileName)
+        {
+            _damage = damage;
+            _spreadDepth = spreadDepth;
+        }
 
         public override void OnPlayerSteppedOnTile(Vector2Int position, GridData gridData, Player player)
         {
-            player.TakeDamage(damage);
+            player.TakeDamage(_damage);
+        }
+
+        public override void OnEnemySteppedOnTile(Vector2Int position, GridData gridData, Enemy enemy)
+        {
+            enemy.TakeDamage(_damage);
         }
 
         public override void OnNextTurn(Vector2Int position, GridData gridData)
         {
-
-            // タイルがセットされたときのロジックをここに実装
-            for (int x = -1; x <= 1; x++)
+            if(_spreadDepth < 1) // _spreadDepthが1未満の場合にのみ拡散する
             {
-                for (int y = -1; y <= 1; y++)
-                {
-                    if (Mathf.Abs(x) == Mathf.Abs(y))
-                    {
-                        continue; // 斜めはスキップ
-                    } 
+                SpreadFire(position, gridData);
+            }
+        }
 
-                    Vector2Int adjacentPos = new Vector2Int(position.x + x, position.y + y);
-                    TileData currentTileData = gridData.TryGetTileData(adjacentPos);
-                    if (currentTileData != null)
+        private void SpreadFire(Vector2Int position, GridData gridData)
+        {
+            if (_spreadDepth >= 1) return; // 拡散深度が1以上の場合は拡散しない
+
+            Vector2Int[] directions = new Vector2Int[]
+            {
+                new Vector2Int(1, 0),   // 右
+                new Vector2Int(-1, 0),  // 左
+                new Vector2Int(0, 1),   // 上
+                new Vector2Int(0, -1)   // 下
+            };
+
+            foreach (Vector2Int dir in directions)
+            {
+                if (gridData.TilesChangeOnNextTurn.TryGetValue(position + dir, out CustomTileData newTileData))
+                {
+                    if (newTileData.TileType == TileBaseType.Normal)
                     {
-                        if (gridData.TilesChangeOnNextTurn.TryGetValue(adjacentPos, out TileData newTileData))
-                        {
-                            if(newTileData is WaterTile)
-                            {
-                                // 隣接するタイルが水の場合は炎を消す
-                                gridData.TilesChangeOnNextTurn[adjacentPos] = this; // nullをセットしてタイルを消す
-                            }
-                        }
-                        else if (!(currentTileData is WaterTile || currentTileData is FireTile))
-                        {
-                            gridData.TilesChangeOnNextTurn[adjacentPos] = this; // 隣接するタイルの位置とデータを辞書に追加
-                        }
+                        gridData.TilesChangeOnNextTurn[position + dir] = new FireTile(TileBaseType.Fire, "FireTile", _damage, _spreadDepth + 1);
+                    }
+                } 
+                else 
+                {
+                    if (gridData.TryGetTileData(position + dir, out CustomTileData existingTileData) && existingTileData.TileType == TileBaseType.Normal)
+                    {
+                        gridData.TilesChangeOnNextTurn[position + dir] = new FireTile(TileBaseType.Fire, "FireTile", _damage, _spreadDepth + 1);
                     }
                 }
             }

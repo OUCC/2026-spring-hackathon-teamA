@@ -9,16 +9,10 @@ using CustomTiles;
 
 public class TileMapUI : MonoBehaviour
 {
-    [SerializeField]
-    private TileBase normaltile;
 
     [SerializeField]
-    private TileBase firetile;
+    private TileBaseMapping tileBaseMapping;
 
-    [SerializeField]
-    private List<TileTypeMap> tileTypeMapping;
-
-    [SerializeField]
     private Tilemap tileMap;
 
     void Start()
@@ -26,19 +20,19 @@ public class TileMapUI : MonoBehaviour
         tileMap = GetComponent<Tilemap>();
     }
 
-    public void ChangeTileUI(Vector3Int position, TileBase newTile)
+    public void ChangeTileUI(Vector3Int position, CustomTileData newTile)
     {
-        tileMap.SetTile(position, newTile);
+        tileMap.SetTile(position, tileBaseMapping.GetTileBase(newTile.TileType));
     }
 
-    public void ChangeTilesUI(Dictionary<Vector2Int, TileBase> tilePositionPairs)
+    public void ChangeTilesUI(Dictionary<Vector2Int, CustomTileData> tileDataDict)
     {
-        Vector3Int[] positions = tilePositionPairs.Keys.Select(ConvertVector.ToVector3Int).ToArray();
-        TileBase[] tileBases = tilePositionPairs.Values.ToArray();
+        Vector3Int[] positions = tileDataDict.Keys.Select(ConvertVector.ToVector3Int).ToArray();
+        TileBase[] tileBases = tileDataDict.Values.Select(tileData => tileBaseMapping.GetTileBase(tileData.TileType)).ToArray();
 
         tileMap.SetTiles(positions, tileBases);
     }
-
+   
     public void NewTurn()
     {
         

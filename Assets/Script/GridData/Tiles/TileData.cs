@@ -2,25 +2,27 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace CustomTiles {
-    /*
-    新しいタイルを追加するには、このTileDataを継承したクラスを作成し、必要なロジックを実装してください。そして、UnityエディタでScriptableObjectとして保存することでタイルを作れます。
-    */
-    public abstract class TileData : ScriptableObject
+    [System.Serializable]
+    public abstract class CustomTileData
     {   
-        [SerializeField]
-        private TileBase _tileBase;
-        
-        public TileBase TileBase => _tileBase;
+        public readonly TileBaseType TileType;
 
-        public string TileName;
+        public readonly string TileName;
 
-        //Znjectを使ってGridDataを注入する？とりあえず普通にDIで渡す形にする
+        //DIでGridDataを渡す?
         // public GridData GridData;
+
+        public CustomTileData(TileBaseType tileType, string tileName)
+        {
+            TileType = tileType;
+            TileName = tileName;
+        }
 
         public virtual void OnNextTurn(Vector2Int position, GridData gridData)
         {
             
         }
+        
         public virtual void OnSet(Vector2Int position, GridData gridData)
         {
             
@@ -30,5 +32,16 @@ namespace CustomTiles {
         {
             
         }
+
+        public virtual void OnEnemySteppedOnTile(Vector2Int position, GridData gridData, Enemy enemy)
+        {
+            
+        }
+
+        //プレイヤーとエネミーintefaceで統一してほしい
+        // public virtual void OnEntitySteppedOnTile(Vector2Int position, GridData gridData, Entity entity)
+        // {
+            
+        // }
     }
 }
