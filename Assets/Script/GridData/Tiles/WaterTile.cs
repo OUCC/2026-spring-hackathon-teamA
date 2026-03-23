@@ -3,7 +3,6 @@ using CustomTiles;
 using UnityEngine.Tilemaps;
 
 namespace CustomTiles {
-    [CreateAssetMenu(fileName = "WaterTile", menuName = "Tiles/WaterTile")]
     public class WaterTile : CustomTileData
     {
         public WaterTile(TileBaseType tileType = TileBaseType.Water, string tileName = "WaterTile") : base(tileType, tileName)

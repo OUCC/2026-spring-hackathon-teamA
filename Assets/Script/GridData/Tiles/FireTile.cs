@@ -4,9 +4,6 @@ using CustomTiles;
 using Unity.VisualScripting;
 
 namespace CustomTiles {
-    [CreateAssetMenu(fileName = "FireTile", menuName = "Tiles/FireTile")]
-
-    [System.Serializable]
     public class FireTile : CustomTileData
     {
         private int _damage = 1;
