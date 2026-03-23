@@ -2,7 +2,9 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class Enemy : MonoBehaviour
-{
+{   
+    public GridData gridData;
+
 	public float moveSpeed = 5f;
 	public Tilemap groundTilemap;
 	protected Vector3 targetPosition;
@@ -76,6 +78,11 @@ public class Enemy : MonoBehaviour
 				transform.position = targetPosition;
 				isMoving = false;
 				FinishAction();
+
+                //炎のマスに入ったときにダメージ（簡易版)
+                Vector2Int targetPositionGrid = ConvertVector.ToVector2Int(groundTilemap.WorldToCell(targetPosition));
+                gridData.OnEnemySteppedOnTile(targetPositionGrid, this);
+                Debug.Log($"Enemy stepped on tile at {targetPositionGrid}");
 			}
 		}
 

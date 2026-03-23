@@ -19,12 +19,6 @@ public class Player : MonoBehaviour
 	public Tilemap groundTilemap;
 	public Tilemap obstacleTilemap;
 
-	[Header("特殊能力：タイル変更")]
-    [SerializeField]
-	private CustomTiles.TileData fireTile;
-    [SerializeField]
-    private CustomTiles.TileData waterTile;
-
 	[Header("攻撃設定")]
 	public int attackDamage = 25;
 
@@ -112,7 +106,7 @@ public class Player : MonoBehaviour
 
 		if (Input.GetMouseButtonDown(1))
 		{
-			ChangeTileByClick(fireTile);
+			ChangeTileByClick(new FireTile());
 		}
 
 		if (Input.GetMouseButtonDown(0))
@@ -122,7 +116,7 @@ public class Player : MonoBehaviour
 
         if (Input.GetMouseButtonDown(2))
         {
-            ChangeTileByClick(waterTile);
+            ChangeTileByClick(new WaterTile());
         }
 	}
 
@@ -152,7 +146,7 @@ public class Player : MonoBehaviour
 	}
 
     //右クリックでタイルを変更する処理
-    private void ChangeTileByClick(CustomTiles.TileData tileData)
+    private void ChangeTileByClick(CustomTileData tileData)
     {
         if (Camera.main == null) return;
 
