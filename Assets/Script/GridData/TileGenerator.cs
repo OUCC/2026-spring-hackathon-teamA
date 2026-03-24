@@ -14,12 +14,12 @@ namespace CustomTiles {
 
         public CustomTileData FireTile(int damage = 1, int spreadDepth = 0)
         {
-            return new FireTile(fireTileBase, "FireTile", damage, spreadDepth, _gridData, this);
+            return new FireTile(gridData: _gridData, tileBase: fireTileBase, tileName: "FireTile", damage: damage, spreadDepth: spreadDepth, tileGenerator: this);
         }
 
         public CustomTileData WaterTile()
         {
-            return new WaterTile(waterTileBase, "WaterTile");
+            return new WaterTile(tileBase: waterTileBase, tileName: "WaterTile");
         }
     }
 }

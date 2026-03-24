@@ -33,7 +33,11 @@ public class GridData: MonoBehaviour
     void Start()
     {
         _gameManager.OnNextTurn
-            .Subscribe(_ => ChangeTilesOnNextTurn())
+            .Subscribe(_ => 
+                {
+                    ChangeTilesOnNextTurn();
+                }
+            )
             .AddTo(this);
         GenerateGridData();
         printData();
@@ -122,8 +126,8 @@ public class GridData: MonoBehaviour
         if (_existingCells.Contains(position))
         {
             _gridDataDict[position] = newTile;
-            newTile.OnSet(position);
             _tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position), newTile);
+            newTile.OnSet(position);
         }
         else
         {
@@ -204,5 +208,9 @@ public class GridData: MonoBehaviour
     {
         ChangeTiles(TilesChangeOnNextTurn);
         TilesChangeOnNextTurn.Clear(); // ターン開始時に辞書をクリアして次のターンに備える
+        foreach (var tiles in _gridDataDict.Values)
+        {
+            tiles.OnNextTurn();
+        }
     }
 }

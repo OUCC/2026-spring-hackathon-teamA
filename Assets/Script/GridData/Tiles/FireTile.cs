@@ -9,25 +9,29 @@ namespace CustomTiles {
         private readonly GridData _gridData;
         private readonly TileGenerator _tileGenerator;
 
+        private Vector2Int _position; // タイルの位置
+
         private int _spreadDepth = 0;
+        private int _maxSpreadDepth = 1;
+        private int _spreadExtentionTurns = 0; // 火が広がる猶予ターン数
         public FireTile(
             TileBase tileBase,
-            string tileName = "FireTile",
+            GridData gridData,
+            TileGenerator tileGenerator,
+            string tileName = "FireTile",  
             int damage = 1,
-            int spreadDepth = 0,
-            GridData gridData = null,
-            TileGenerator tileGenerator = null
+            int spreadDepth = 0
         ) : base(tileName, tileBase)
         {
             _damage = damage;
             _spreadDepth = spreadDepth;
-                _gridData = gridData;
+            _gridData = gridData;
             _tileGenerator = tileGenerator;
         }
 
         public override void OnSet(Vector2Int position)
-        {
-            SpreadFire(position); // タイルが設置されたときに火を拡散
+        {            
+            _position = position; // タイルの位置を保存
         }
 
         public override void OnPlayerStepped(Vector2Int position, Player player)
@@ -40,14 +44,21 @@ namespace CustomTiles {
             enemy.TakeDamage(_damage);
         }
 
+        public override void OnNextTurn()
+        {
+            SpreadFire(_position);
+        }
+
         private void SpreadFire(Vector2Int position)
         {
-            if (_spreadDepth >= 1) return; // 拡散深度が1以上の場合は拡散しない
-
-            if (_gridData == null || _tileGenerator == null)
+            if (_spreadDepth >= _maxSpreadDepth)  
             {
-                Debug.LogWarning("FireTile.SpreadFire: GridData または TileGenerator が未設定のため拡散をスキップします。");
                 return;
+            }  
+            else if (_spreadExtentionTurns > 0)
+            {
+                _spreadExtentionTurns--;
+                return; // 拡散深度が最大値以上の場合は拡散しない
             }
 
             Vector2Int[] directions = new Vector2Int[]
@@ -69,7 +80,7 @@ namespace CustomTiles {
                 } 
                 else 
                 {
-                    if (_gridData.TryGetTileData(position + dir, out CustomTileData existingTileData) && existingTileData is not FireTile && existingTileData is not WaterTile)
+                    if (!_gridData.TryGetTileData(position + dir, out CustomTileData existingTileData) || (existingTileData is not FireTile && existingTileData is not WaterTile))
                     {
                         _gridData.TilesChangeOnNextTurn[position + dir] = _tileGenerator.FireTile(_damage, _spreadDepth + 1);
                     }
