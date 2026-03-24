@@ -20,15 +20,15 @@ public class TileMapUI : MonoBehaviour
         tileMap = GetComponent<Tilemap>();
     }
 
-    public void ChangeTileUI(Vector3Int position, CustomTileData newTile)
-    {
-        tileMap.SetTile(position, tileBaseMapping.GetTileBase(newTile.TileType));
+        public void ChangeTileUI(Vector3Int position, CustomTileData newTileData)
+        {
+        tileMap.SetTile(position, newTileData.TileBase);
     }
 
     public void ChangeTilesUI(Dictionary<Vector2Int, CustomTileData> tileDataDict)
     {
         Vector3Int[] positions = tileDataDict.Keys.Select(ConvertVector.ToVector3Int).ToArray();
-        TileBase[] tileBases = tileDataDict.Values.Select(tileData => tileBaseMapping.GetTileBase(tileData.TileType)).ToArray();
+        TileBase[] tileBases = tileDataDict.Values.Select(newTileData => newTileData.TileBase).ToArray();
 
         tileMap.SetTiles(positions, tileBases);
     }

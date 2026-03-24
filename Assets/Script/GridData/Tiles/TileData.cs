@@ -5,30 +5,30 @@ namespace CustomTiles {
     [System.Serializable]
     public abstract class CustomTileData
     {   
-        public readonly TileBaseType TileType;
+        public readonly TileBase TileBase;
 
         public readonly string TileName;
 
         //DIでGridDataを渡す?
         // public GridData GridData;
 
-        public CustomTileData(TileBaseType tileType, string tileName)
+        public CustomTileData(string tileName, TileBase tileBase)
         {
-            TileType = tileType;
+            TileBase = tileBase;
             TileName = tileName;
         }
-
-        public virtual void OnNextTurn(Vector2Int position, GridData gridData)
-        {
-            
-        }
         
-        public virtual void OnSet(Vector2Int position, GridData gridData)
+        public virtual void OnSet(Vector2Int position)
         {
             
         }
 
-        public virtual void OnPlayerSteppedOnTile(Vector2Int position, GridData gridData, Player player)
+        public virtual void OnPlayerSteppedOnTile(Vector2Int position, Player player)
+        {
+            
+        }
+
+        public virtual void OnNextTurn()
         {
             
         }

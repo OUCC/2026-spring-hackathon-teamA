@@ -1799,7 +1799,6 @@ MonoBehaviour:
       overrideMaxHp: 1
   enemyGroundTilemap: {fileID: 224710906}
   currentPhase: 0
-  gridData: {fileID: 924137964}
 --- !u!4 &498906210
 Transform:
   m_ObjectHideFlags: 0
@@ -2250,7 +2249,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ee07facd52846542a9c44bcf29ca257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridData
-  tileMap: {fileID: 224710906}
+  _tileMapGround: {fileID: 0}
+  _tileMapCustomTiles: {fileID: 0}
+  _tileMapUI: {fileID: 0}
 --- !u!4 &924137965
 Transform:
   m_ObjectHideFlags: 0
@@ -2805,6 +2806,56 @@ MonoBehaviour:
   hasActed: 0
   tileMapManager: {fileID: 224710907}
   gridData: {fileID: 924137964}
+--- !u!1 &2055249658
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2055249660}
+  - component: {fileID: 2055249659}
+  m_Layer: 0
+  m_Name: GameEventSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2055249659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2055249658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f84743239902e3418004bd6693f25e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameEventSource
+  parentReference:
+    TypeName: 
+  autoRun: 1
+  autoInjectGameObjects: []
+  gameManager: {fileID: 498906209}
+  gridData: {fileID: 0}
+--- !u!4 &2055249660
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2055249658}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.44117, y: -1.82747, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2818,3 +2869,4 @@ SceneRoots:
   - {fileID: 279010520}
   - {fileID: 1444907742}
   - {fileID: 924137965}
+  - {fileID: 2055249660}

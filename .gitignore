@@ -102,3 +102,6 @@ InitTestScene*.unity*
 *.slnx
 *.code-workspace
 *.csproj
+
+# NuGet packages
+/Packages/nuget-packages/InstalledPackages*

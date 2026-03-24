@@ -3,6 +3,8 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Tilemaps;
+using R3;
+using System;
 
 public enum TurnPhase { Player, Enemy }
 
@@ -37,9 +39,8 @@ public class GameManager : MonoBehaviour
 	private int currentWaveIndex = -1;
 	private bool isGameFinished = false;
 
-    [Header("グリッドのデータ")]
-    [SerializeField]
-    private GridData gridData;
+    Subject<Unit> onNextTurn = new Subject<Unit>();
+    public Observable<Unit> OnNextTurn => onNextTurn;
 
 	void Awake()
 	{
@@ -66,7 +67,7 @@ public class GameManager : MonoBehaviour
 
 		if (currentPhase == TurnPhase.Player)
 		{
-            gridData.OnNextTurn(); // ターン開始時にタイルの変化を処理
+            onNextTurn.OnNext(Unit.Default); // ターン開始時にタイルの変化を処理
 			StartCoroutine(EnemyTurnRoutine());
             //ターン終了
 		}
@@ -197,15 +198,6 @@ public class GameManager : MonoBehaviour
 				{
 					spawnedEnemy.groundTilemap = enemyGroundTilemap;
 				}
-
-                if (gridData != null)
-                {
-                    spawnedEnemy.gridData = gridData;
-                } 
-                else
-                {
-                    Debug.LogError("GridData reference is missing in GameManager. Enemy won't be able to interact with tiles.");
-                }
 
 				if (spawnData.overrideMaxHp > 0)
 				{

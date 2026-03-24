@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI; // UI操作に必要
 using CustomTiles;
+using VContainer;
+using VContainer.Unity;
 
 public class Player : MonoBehaviour
 {
@@ -32,6 +34,9 @@ public class Player : MonoBehaviour
     private TileMapUI tileMapManager;
     [SerializeField]
     private GridData gridData;
+
+    [Inject]
+    private TileGenerator tileGenerator;
 
 	void Awake()
 	{
@@ -106,7 +111,7 @@ public class Player : MonoBehaviour
 
 		if (Input.GetMouseButtonDown(1))
 		{
-			ChangeTileByClick(new FireTile());
+			ChangeTileByClick(tileGenerator.FireTile());
 		}
 
 		if (Input.GetMouseButtonDown(0))
@@ -116,7 +121,7 @@ public class Player : MonoBehaviour
 
         if (Input.GetMouseButtonDown(2))
         {
-            ChangeTileByClick(new WaterTile());
+            ChangeTileByClick(tileGenerator.WaterTile());
         }
 	}
 
