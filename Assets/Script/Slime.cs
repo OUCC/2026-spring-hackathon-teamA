@@ -1,12 +1,19 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
+using System.Collections;
 
 public class Slime : Enemy
 {
 	[Header("Slime Settings")]
 	public int attackDamage = 1;
 
-	// EnemyのStartを継承
-	protected override void Start()
+    [Header("Visual Effects")]
+    public Color highlightColor = new Color(1f, 0.4f, 0.4f, 1f); // 攻撃時のタイルの色
+    public float flashDuration = 0.3f; // 光っている時間
+
+    // EnemyのStartを継承
+    protected override void Start()
 	{
 		base.Start();
 	}
@@ -51,7 +58,9 @@ public class Slime : Enemy
 			playerScript.TakeDamage(attackDamage);
 		}
 
-		FinishAction();
+        StartCoroutine(FlashAttackRangeRoutine());
+
+        FinishAction();
 	}
 
 	// 移動処理
@@ -90,4 +99,48 @@ public class Slime : Enemy
 			FinishAction();
 		}
 	}
+    IEnumerator FlashAttackRangeRoutine()
+    {
+        // 攻撃範囲となるタイルの座標リストを作成
+        List<Vector3Int> cellsToHighlight = GetAttackRangeCells();
+
+        // 範囲内のタイルをすべて光らせる
+        foreach (Vector3Int cell in cellsToHighlight)
+        {
+            if (groundTilemap.HasTile(cell))
+            {
+                // タイルの色ロックを解除
+                groundTilemap.SetTileFlags(cell, TileFlags.None);
+                // 色を変更
+                groundTilemap.SetColor(cell, highlightColor);
+            }
+        }
+
+        // 指定時間待機
+        yield return new WaitForSeconds(flashDuration);
+
+        // タイルの色を元（白）に戻す
+        foreach (Vector3Int cell in cellsToHighlight)
+        {
+            if (groundTilemap.HasTile(cell))
+            {
+                groundTilemap.SetColor(cell, Color.white);
+            }
+        }
+    }
+    private List<Vector3Int> GetAttackRangeCells()
+    {
+        List<Vector3Int> cells = new List<Vector3Int>();
+        Vector3Int myPos = groundTilemap.WorldToCell(transform.position);
+
+        // ニマス十字の座標を追加（上・下・左・右）
+        cells.Add(myPos + Vector3Int.up);
+        cells.Add(myPos + Vector3Int.down);
+        cells.Add(myPos + Vector3Int.left);
+        cells.Add(myPos + Vector3Int.right);
+
+
+
+        return cells;
+    }
 }

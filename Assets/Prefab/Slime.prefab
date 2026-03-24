@@ -104,9 +104,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62f0c7ea9235d486b8e555ee420f1124, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Slime
+  gridData: {fileID: 0}
   moveSpeed: 5
   groundTilemap: {fileID: 0}
   hasActed: 0
   maxHp: 2
   currentHp: 0
   attackDamage: 1
+  highlightColor: {r: 0.52517694, g: 0.8930817, b: 0.8043247, a: 1}
+  flashDuration: 0.3
