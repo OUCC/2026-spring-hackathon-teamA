@@ -23,7 +23,7 @@ namespace CustomTiles {
             
         }
 
-        public virtual void OnPlayerSteppedOnTile(Vector2Int position, Player player)
+        public virtual void OnPlayerStepped(Vector2Int position, Player player)
         {
             
         }
@@ -33,7 +33,7 @@ namespace CustomTiles {
             
         }
 
-        public virtual void OnEnemySteppedOnTile(Vector2Int position, GridData gridData, Enemy enemy)
+        public virtual void OnEnemyStepped(Vector2Int position, Enemy enemy)
         {
             
         }

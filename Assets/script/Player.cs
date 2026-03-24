@@ -5,7 +5,13 @@ using UnityEngine.UI; // UI操作に必要
 using CustomTiles;
 using VContainer;
 using VContainer.Unity;
+using R3;
 
+public struct PlayerSteppedOnTileInfo
+{
+    public Vector2Int position;
+    public Player player;
+}
 public class Player : MonoBehaviour
 {
 	public static Player Instance;
@@ -32,11 +38,16 @@ public class Player : MonoBehaviour
     [Header("タイル")]
     [SerializeField]
     private TileMapUI tileMapManager;
-    [SerializeField]
-    private GridData gridData;
 
-    [Inject]
+    [SerializeField]
     private TileGenerator tileGenerator;
+
+    [SerializeField]
+    private GridData _gridData;
+
+    Subject<PlayerSteppedOnTileInfo> _onPlayerSteppedOnTile = new Subject<PlayerSteppedOnTileInfo>();
+    public Observable<PlayerSteppedOnTileInfo> OnPlayerSteppedOnTile => _onPlayerSteppedOnTile;
+
 
 	void Awake()
 	{
@@ -165,7 +176,7 @@ public class Player : MonoBehaviour
         if (manhattan > 1) return;
 
         Vector2Int clickedGridPos = ConvertVector.ToVector2Int(groundTilemap.WorldToCell(mousePos));
-        gridData.ChangeTile(clickedGridPos, tileData);
+        _gridData.ChangeTile(clickedGridPos, tileData);
         Debug.Log($"Clicked grid position: {clickedGridPos}");
         FinishAction();
     }
@@ -196,7 +207,7 @@ public class Player : MonoBehaviour
 
             //炎のマスに入ったときにダメージ（簡易版)
             Vector2Int targetPositionGrid = ConvertVector.ToVector2Int(groundTilemap.WorldToCell(targetPosition));
-            gridData.OnPlayerSteppedOnTile(targetPositionGrid, this);
+            _gridData.OnPlayerSteppedOnTile(targetPositionGrid, this);
             Debug.Log($"Player stepped on tile at {targetPositionGrid}");
 
 			FinishAction();

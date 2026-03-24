@@ -1,21 +1,25 @@
 using UnityEngine;
 using CustomTiles;
 using UnityEngine.Tilemaps;
+using VContainer;
 
 namespace CustomTiles {
-    public class TileGenerator : ScriptableObject
+    public class TileGenerator : MonoBehaviour
     {
-        public TileDataDefault FireTileDefault;
-        public TileDataDefault WaterTileDefault;
+        [SerializeField]
+        private GridData _gridData;
+
+        public TileBase fireTileBase;
+        public TileBase waterTileBase;
 
         public CustomTileData FireTile(int damage = 1, int spreadDepth = 0)
         {
-            return new FireTile(FireTileDefault.tileBase, FireTileDefault.tileName, damage, spreadDepth);
+            return new FireTile(fireTileBase, "FireTile", damage, spreadDepth, _gridData, this);
         }
 
         public CustomTileData WaterTile()
         {
-            return new WaterTile(WaterTileDefault.tileBase, WaterTileDefault.tileName);
+            return new WaterTile(waterTileBase, "WaterTile");
         }
     }
 }
