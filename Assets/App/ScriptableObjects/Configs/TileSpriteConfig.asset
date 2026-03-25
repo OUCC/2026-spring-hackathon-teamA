@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce1b7a2a96b63114b96f609f8973ce0d, type: 3}
+  m_Name: TileSpriteConfig
+  m_EditorClassIdentifier: App.Stage.Presentation::FloorBreaker.Stage.Presentation.TileSpriteConfig
+  _normalSprite: {fileID: -3162297989292788097, guid: 7b74a1f717ba3ae46994371949db0552, type: 3}
+  _wallSprite: {fileID: 7490741384817036163, guid: 53c8091117304bb46b17c665b1e7ad3d, type: 3}
+  _burningSprite: {fileID: 1236508845325073191, guid: 84be1220d972b274c93a4aa206e50019, type: 3}
+  _collapsingSprite: {fileID: 8784432506071648853, guid: 69677eced846d734886890c2fd55fa65, type: 3}
+  _collapsedSprite: {fileID: 6392453971589360466, guid: 5c6f47dc9e427fd43b542d6cf5c67b79, type: 3}
+  _destroyedSprite: {fileID: 8290474533591977239, guid: ba83213a3fb7d9943930f47164bb3e02, type: 3}
+  _normalColor: {r: 0.83, g: 0.77, b: 0.66, a: 1}
+  _wallColor: {r: 0.42, g: 0.36, b: 0.29, a: 1}
+  _burningTint: {r: 1, g: 0.53, b: 0.27, a: 1}
+  _burningPulseBright: {r: 1, g: 0.75, b: 0.3, a: 1}
+  _collapsingTint: {r: 0.67, g: 0.6, b: 0.47, a: 1}
+  _collapsedColor: {r: 0.1, g: 0.08, b: 0.13, a: 1}
+  _destroyedColor: {r: 0, g: 0, b: 0, a: 0}
+  _fireVfxPrefab: {fileID: 1724243991040466, guid: f3377962368b1df43ae045f46ddaf9cd, type: 3}
+  _collapseDebrisPrefab: {fileID: 0}
+  _collapseAnimDuration: 0.45
+  _recoveryAnimDuration: 0.35
+  _firePulseSpeed: 2
+  _shrinkWaveStagger: 0.7
