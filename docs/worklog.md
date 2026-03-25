@@ -1,5 +1,29 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 10 — ステージ Presentation
+
+### 完了タスク
+- **T-10.0** App.Stage.Presentation.asmdef 新設 (noEngineReferences: false, 参照: App.Stage + App.Shared.* + R3 + DOTween)
+- **T-10.1** TileSpriteConfig ScriptableObject (全6状態のスプライト・色・VFXプレハブ・アニメーションパラメータ一元管理)
+- **T-10.2** TileView MonoBehaviour (薄い View、ApplyState で即座にスプライト/色切替、自身では R3 購読しない)
+- **T-10.3** StageViewFactory (30x30 = 900 個の TileView 生成、Dictionary<GridPos, TileView> 返却)
+- **T-10.4** TileAnimationService (DOTween: 崩落 Ease.InBack / 復帰 Ease.OutBack / 炎パルス Yoyo / 永久消滅)
+- **T-10.5** TileFireVfxPool (Epic Toon FX 炎パーティクル用オブジェクトプール、初期20個)
+- **T-10.6** StagePresenter (単一 R3 購読 → Dictionary ディスパッチ、全6状態遷移ハンドリング)
+- **T-10.7** StageShrinkAnimator (バッチ検出 + 時計回りソート + stagger delay ウェーブ崩落演出)
+- **T-10.8** StagePreviewController + Debug シーン (キー操作で全タイル状態・縮小・炎・崩落を目視確認)
+- コンパイルエラー 0 件、EditMode テスト 223 件全件グリーン
+
+### 設計判断
+- **asmdef 分割**: 既存 `App.Stage.asmdef` (noEngineReferences: true) を維持し、Presentation 用に `App.Stage.Presentation.asmdef` を新設。Domain の純粋性を保護
+- **900 個の個別購読を回避**: StagePresenter が StageModel.TileChanged を 1 回だけ購読し、Dictionary<GridPos, TileView> でディスパッチ。パフォーマンス重視
+- **StageShrinkAnimator のバッチ検出**: 同一フレームで 8 タイル以上の PermanentlyDestroyed をウェーブと判定。StagePresenter は IsShrinkAnimating フラグで即時処理をスキップ
+- **MatchPhaseScheduler 変更不要**: ドメインが即座に状態変更 → Presentation が TileChanged 購読でアニメーション。sync timer (1.0s) の範囲内で演出完了
+- **TileView は購読しない**: MonoBehaviour は薄く保ち、StagePresenter / TileAnimationService が状態遷移と演出を統括
+- **スプライト6種**: 既存の Tile_Floor_Normal/Wall/Burning/Collapsing/Collapsed/Destroyed.png を TileSpriteConfig SO で参照
+
+---
+
 ## 2026-03-26: Phase 9 — UI Toolkit HUD / オーバーレイ
 
 ### 完了タスク
