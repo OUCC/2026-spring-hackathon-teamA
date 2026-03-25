@@ -1,13 +1,10 @@
 {
-    "name": "App.Bombs",
-    "rootNamespace": "FloorBreaker.Bombs.Domain",
+    "name": "App.Upgrades",
+    "rootNamespace": "FloorBreaker.Upgrades.Domain",
     "references": [
         "App.Shared.Domain",
         "App.Shared.Application",
-        "App.Stage",
-        "App.Player",
-        "App.Slimes",
-        "App.Upgrades"
+        "App.Player"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
