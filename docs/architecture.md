@@ -3,41 +3,39 @@
 ## 全体構造
 
 ```mermaid
-graph TB
-    subgraph Bootstrap
+flowchart TB
+    subgraph BS["Bootstrap / VContainer"]
         PLS[ProjectLifetimeScope]
         MLS[MatchLifetimeScope]
     end
 
-    subgraph Shared
-        SD[Domain]
-        SA[Application]
-        SI[Infrastructure]
-        SP[Presentation]
+    subgraph SH["Shared"]
+        SH_D[Domain]
+        SH_A[Application]
+        SH_I[Infrastructure]
+        SH_P[Presentation]
     end
 
-    subgraph Features
-        Stage
-        Player
-        Bombs
-        Slimes
-        Upgrades
-        MatchFlow
-        Input
-        UI
-        Cameras
+    subgraph FT["Features"]
+        FT_ST[Stage]
+        FT_PL[Player]
+        FT_BM[Bombs]
+        FT_SL[Slimes]
+        FT_UP[Upgrades]
+        FT_MF[MatchFlow]
+        FT_IN["Input System"]
+        FT_UI["UI Toolkit"]
+        FT_CM[Cameras]
     end
 
-    subgraph ScriptableObjects
-        SO[BalanceConfig]
-    end
+    SOB["BalanceConfig / ScriptableObject"]
 
-    Bootstrap --> Features
-    Bootstrap --> Shared
-    Bootstrap --> ScriptableObjects
-    Features --> Shared
-    ScriptableObjects --> SA
-    ScriptableObjects --> SD
+    BS --> FT
+    BS --> SH
+    BS --> SOB
+    FT --> SH
+    SOB --> SH_A
+    SOB --> SH_D
 ```
 
 ### Shared 内容
@@ -53,18 +51,18 @@ graph TB
 
 ```mermaid
 graph LR
-    SD["App.Shared.Domain ✓"]
-    SA["App.Shared.Application ✓"]
+    SD["App.Shared.Domain<br/>noEngine ✓"]
+    SA["App.Shared.Application<br/>noEngine ✓"]
     SI[App.Shared.Infrastructure]
     SP[App.Shared.Presentation]
-    AST["App.Stage ✓"]
-    APL["App.Player ✓"]
-    ABM["App.Bombs ✓ 予定"]
-    ASL["App.Slimes 予定"]
-    AUP["App.Upgrades 予定"]
-    AMF["App.MatchFlow 予定"]
-    AIN["App.Input 予定"]
-    AUI["App.UI 予定"]
+    AST["App.Stage<br/>noEngine ✓"]
+    APL["App.Player<br/>noEngine ✓"]
+    ABM["App.Bombs<br/>noEngine ✓ 予定"]
+    ASL["App.Slimes<br/>予定"]
+    AUP["App.Upgrades<br/>予定"]
+    AMF["App.MatchFlow<br/>予定"]
+    AIN["App.Input<br/>予定"]
+    AUI["App.UI<br/>予定"]
     ASO[App.ScriptableObjects]
     ABT[App.Bootstrap]
 
@@ -111,10 +109,10 @@ graph LR
 ```mermaid
 graph TB
     subgraph layers["依存方向 (上→下のみ)"]
-        Pres[Presentation]
-        Infra[Infrastructure]
-        App[Application]
-        Dom[Domain]
+        Pres["Presentation<br/>MonoBehaviour, UIDocument<br/>SpriteRenderer, VFX, DOTween"]
+        Infra["Infrastructure<br/>Unity API, Input System<br/>AudioService, 保存"]
+        App["Application<br/>UseCase, Orchestrator<br/>Presenter Bridge"]
+        Dom["Domain<br/>Model, Service, Resolver<br/>pure C#, R3 ReactiveProperty"]
     end
 
     Pres --> App
@@ -384,13 +382,13 @@ flowchart LR
     end
 
     subgraph Presentation
-        TV[TileView]
+        TV["TileView<br/>スプライト切替"]
         HUD_T[HUD Timer]
         HUD_HP[HUD HP Bar]
         HUD_C[HUD Coins]
-        PV[PlayerView]
-        TVFX[Tile VFX]
-        OV[Overlay UI]
+        PV["PlayerView<br/>移動アニメ"]
+        TVFX["Tile VFX<br/>崩落/炎エフェクト"]
+        OV["Overlay<br/>強化UI/リザルト"]
     end
 
     SM_TC --> TV
