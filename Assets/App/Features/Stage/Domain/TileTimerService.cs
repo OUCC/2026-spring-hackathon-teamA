@@ -73,19 +73,20 @@ namespace FloorBreaker.Stage.Domain
 
         public void Tick(float deltaTime)
         {
-            // 完了タイマーを収集 (iteration 中に辞書を変更しない)
+            // Pass 1: 残り時間を減算し、完了分を収集 (辞書を変更しない)
             List<(GridPos pos, TileTimerEntry entry)> completed = null;
+            var keys = new List<GridPos>(_activeTimers.Keys);
 
-            foreach (var kvp in _activeTimers)
+            foreach (var key in keys)
             {
-                var entry = kvp.Value;
+                var entry = _activeTimers[key];
                 entry.Remaining -= deltaTime;
-                _activeTimers[kvp.Key] = entry;
+                _activeTimers[key] = entry;
 
                 if (entry.Remaining <= 0f)
                 {
                     completed ??= new List<(GridPos, TileTimerEntry)>();
-                    completed.Add((kvp.Key, entry));
+                    completed.Add((key, entry));
                 }
             }
 
