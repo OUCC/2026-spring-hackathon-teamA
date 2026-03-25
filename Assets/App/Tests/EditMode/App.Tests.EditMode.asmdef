@@ -6,6 +6,7 @@
         "App.Shared.Application",
         "App.Shared.Infrastructure",
         "App.Stage",
+        "App.Player",
         "R3.Unity"
     ],
     "includePlatforms": [

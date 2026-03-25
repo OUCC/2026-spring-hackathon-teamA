@@ -1,6 +1,26 @@
 # FLOOR BREAKER — 作業ログ
 
-## 2026-03-26: Phase 2 — ステージ Domain (PR #TBD)
+## 2026-03-26: Phase 3 — プレイヤー Domain (PR #TBD)
+
+### 完了タスク
+- **T-3.1** PlayerStats — ReactiveProperty HP/Coins、TakeDamage/Heal/AddCoins/SpendCoins
+- **T-3.2** PlayerBuild — 全 15 強化の追跡、ApplyUpgrade、CD 下限対応
+- **T-3.3** PlayerModel — PlayerId/Stats/Build/Position/FacingDirection を集約
+- **T-3.4** InvulnerabilityState — Activate/Tick で時限無敵
+- **T-3.5** ForcedMoveState — Start/Tick/Complete で強制移動管理
+- **T-3.6** PlayerMoveService — 8 方向移動、通行可能チェック、強制移動中ブロック
+- **T-3.7** PlayerDamageService — 無敵チェック、ダメージ適用、崩落時の強制移動
+- **T-3.8** EditMode テスト 6 ファイル
+- UpgradeId enum を Shared/Domain/Primitives に追加
+
+### 設計判断
+- PlayerBuild は BombSpec に依存しない — 生の強化値のみ保持、BombSpec 組み立ては Phase 4
+- App.Player asmdef は Feature ルートに配置 (Domain + Application をカバー)
+- UpgradeId enum を Shared に配置し Phase 6 の UpgradeDefinition と共有
+
+---
+
+## 2026-03-26: Phase 2 — ステージ Domain (PR #22)
 
 ### 完了タスク
 - **T-2.1** TileState 列挙型 (Normal/OnFire/Collapsing/Collapsed/PermanentlyDestroyed/Wall)
