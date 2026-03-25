@@ -136,6 +136,72 @@ graph TB
 | Infrastructure | Unity API ラッパー、外部実装 | UnityTimeProvider, InputAdapter, AudioService |
 | Presentation | MonoBehaviour, UI, VFX, アニメーション | TileView, PlayerView, HUD Presenter |
 
+## アーキテクチャ原則
+
+### 時間管理の単一化
+
+全ての時間進行は **MatchPhaseScheduler (Phase 7)** が唯一のドライバーとなる。
+
+```mermaid
+flowchart TD
+    MPS[MatchPhaseScheduler] -->|Tick dt| MC[MatchClock]
+    MPS -->|Tick dt| TTS[TileTimerService]
+    MPS -->|Tick dt| BCS[BombCooldownState]
+    MPS -->|Tick dt| INV[InvulnerabilityState x2]
+    MPS -->|Tick dt| FM[ForcedMoveState x2]
+    MPS -->|Tick dt| STS[SlimeTickService]
+```
+
+- 各サービスは自分でタイマーを持たず、外部から `Tick(float dt)` を受ける
+- `MatchPhaseScheduler` が一時停止すると全ての Tick が止まる
+- 独自の `Update()` や `InvokeRepeating` でタイマーを回すことを禁止
+
+### Domain の公開面は read-only
+
+Domain の `ReactiveProperty<T>` は private に閉じ、外部には `ReadOnlyReactiveProperty<T>` を公開する。
+
+```
+// 内部
+private readonly ReactiveProperty<int> _currentHp;
+
+// 公開
+public ReadOnlyReactiveProperty<int> CurrentHp => _currentHp;
+```
+
+**適用済みの箇所**: StageModel.TileChanged, MatchClock.Remaining/CurrentPhase/IsPaused, PlayerStats.CurrentHp/Coins, PlayerModel.Position/FacingDirection, TileTimerService.TimerCompleted
+
+**原則**: 状態を変更できるのは所有者のメソッドのみ。外部は購読だけ行う。
+
+### UI Toolkit ルート戦略
+
+Match 画面では **1 枚のフルスクリーン UIDocument** を使い、内部を領域分割する。
+
+```mermaid
+flowchart TB
+    subgraph UIDocument
+        subgraph TopLayer
+            Announce[SharedAnnouncements]
+        end
+        subgraph MatchLayer
+            LeftHUD[LeftHudRoot]
+            Timer[CenterPhaseTimer]
+            RightHUD[RightHudRoot]
+        end
+        subgraph OverlayLayer
+            UpgradeOV[UpgradeOverlayRoot]
+            PauseOV[PauseRoot]
+            ResultOV[ResultRoot]
+        end
+    end
+```
+
+- パネルを増やさない（focus/navigation/sort order の複雑化回避）
+- 左右 HUD は同一テンプレートを使う（P1/P2 で別実装にしない）
+- オーバーレイの開閉は `display` / USS class 切り替えで制御
+- 強化フェーズ中は gameplay input を凍結し、UI input のみ許可
+
+---
+
 ## Feature 別クラス構成
 
 ### Stage
