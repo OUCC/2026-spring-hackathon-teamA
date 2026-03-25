@@ -58,10 +58,10 @@ graph LR
     AST["App.Stage<br/>noEngine ✓"]
     APL["App.Player<br/>noEngine ✓"]
     ABM["App.Bombs<br/>noEngine ✓"]
-    ASL["App.Slimes<br/>予定"]
-    AUP["App.Upgrades<br/>予定"]
-    AMF["App.MatchFlow<br/>予定"]
-    AIN["App.Input<br/>予定"]
+    ASL["App.Slimes<br/>noEngine ✓"]
+    AUP["App.Upgrades<br/>noEngine ✓"]
+    AMF["App.MatchFlow<br/>noEngine ✓"]
+    AIN["App.Input"]
     AUI["App.UI<br/>予定"]
     ASO[App.ScriptableObjects]
     ABT[App.Bootstrap]
@@ -100,6 +100,9 @@ graph LR
     style AST fill:#e8f5e9
     style APL fill:#e8f5e9
     style ABM fill:#e8f5e9
+    style ASL fill:#e8f5e9
+    style AUP fill:#e8f5e9
+    style AMF fill:#e8f5e9
 ```
 
 > 緑 = `noEngineReferences: true` (pure C# Domain)
@@ -421,7 +424,7 @@ flowchart LR
 | 5 | スライム | SlimeModel 等 7 クラス | SlimeTickService | — | **完了** |
 | 6 | 強化 | UpgradeDef 等 7 クラス | UpgradeApplyService | — | **完了** |
 | 7 | マッチフロー | — | Scheduler, FireDmg 等 6 クラス | — | **完了** |
-| 8 | 入力 | BombHoldCommand, BombFlightTracker | InputBridge | InputAdapter | **進行中** |
+| 8 | 入力 | BombHoldCommand, BombFlightTracker | InputBridge | InputAdapter | **完了** |
 | 9 | UI | — | — | UXML/USS/Presenter | 未着手 |
 | 10-14 | Presentation | — | — | View, VFX, Camera | 未着手 |
 | 15 | Bootstrap | — | — | LifetimeScope | 未着手 |
