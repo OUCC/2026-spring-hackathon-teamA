@@ -63,6 +63,11 @@ namespace FloorBreaker.Shared.Application.Interfaces
 
         // --- Forced Move ---
         float ForcedMoveDuration { get; }
+        float InvulnerabilityDuration { get; }
+
+        // --- Bomb Flight ---
+        float BombFlightSpeed { get; }
+        float StageShrinkAnimDuration { get; }
 
         // --- Upgrade: HP Recovery ---
         int HpRecoveryAmount { get; }
