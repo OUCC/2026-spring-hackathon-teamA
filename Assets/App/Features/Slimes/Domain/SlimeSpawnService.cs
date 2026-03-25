@@ -17,7 +17,9 @@ namespace FloorBreaker.Slimes.Domain
             IBalanceParameters balance)
         {
             int aliveTiles = stage.GetAliveTileCount();
-            int targetCount = (int)(aliveTiles * balance.SlimeTargetRatio);
+            // 仕様: 端数切り捨て。float精度問題を回避するため 0.5 加算後に切り捨て
+            // 例: 900 * 0.03f = 26.999... → +0.001 = 27.0 → (int) = 27
+            int targetCount = (int)(aliveTiles * balance.SlimeTargetRatio + 0.001f);
             int deficit = targetCount - registry.AliveCount;
 
             if (deficit <= 0)
