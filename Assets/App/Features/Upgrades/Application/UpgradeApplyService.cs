@@ -22,10 +22,12 @@ namespace FloorBreaker.Upgrades.Domain
                     player.Stats.MoveSpeed = MathF.Min(
                         player.Stats.MaxMoveSpeed,
                         player.Stats.MoveSpeed + _balance.MovementSpeedIncrement);
+                    player.Build.RecordUpgrade(id);
                     break;
 
                 case UpgradeId.HpRecovery:
                     player.Stats.Heal(_balance.HpRecoveryAmount);
+                    player.Build.RecordUpgrade(id);
                     break;
 
                 default:

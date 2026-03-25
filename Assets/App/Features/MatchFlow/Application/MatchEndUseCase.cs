@@ -1,11 +1,17 @@
+using System;
 using System.Collections.Generic;
+using R3;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Player.Domain;
 
 namespace FloorBreaker.MatchFlow.Application
 {
-    public sealed class MatchEndUseCase
+    public sealed class MatchEndUseCase : IDisposable
     {
+        private readonly ReactiveProperty<PlayerId?> _winner = new(null);
+
+        public ReadOnlyReactiveProperty<PlayerId?> Winner => _winner;
+
         /// <summary>
         /// いずれかのプレイヤーが死亡していれば勝者を返す。
         /// 両方死亡の場合は Player2 勝利（簡易実装）。
@@ -23,6 +29,16 @@ namespace FloorBreaker.MatchFlow.Application
                 return PlayerId.Player1;
 
             return null;
+        }
+
+        public void SetWinner(PlayerId winner)
+        {
+            _winner.Value = winner;
+        }
+
+        public void Dispose()
+        {
+            _winner.Dispose();
         }
     }
 }

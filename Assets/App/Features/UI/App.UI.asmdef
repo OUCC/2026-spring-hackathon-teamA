@@ -1,0 +1,23 @@
+{
+    "name": "App.UI",
+    "rootNamespace": "FloorBreaker.UI",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Player",
+        "App.Bombs",
+        "App.Upgrades",
+        "App.MatchFlow"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

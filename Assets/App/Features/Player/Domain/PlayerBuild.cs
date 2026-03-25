@@ -1,10 +1,18 @@
 using System;
+using System.Collections.Generic;
+using R3;
 using FloorBreaker.Shared.Domain.Primitives;
 
 namespace FloorBreaker.Player.Domain
 {
-    public sealed class PlayerBuild
+    public sealed class PlayerBuild : IDisposable
     {
+        // --- 取得済み強化 ---
+        private readonly List<UpgradeId> _acquiredList = new();
+        private readonly ReactiveProperty<IReadOnlyList<UpgradeId>> _acquiredUpgrades
+            = new(Array.Empty<UpgradeId>());
+
+        public ReadOnlyReactiveProperty<IReadOnlyList<UpgradeId>> AcquiredUpgrades => _acquiredUpgrades;
         // --- 炎ボム ---
         public int FireFlightRange { get; private set; }
         public int FireEffectRange { get; private set; }
@@ -96,6 +104,23 @@ namespace FloorBreaker.Player.Domain
                     break;
                 // MoveSpeed と HpRecovery は PlayerStats 側で適用
             }
+
+            RecordUpgrade(id);
+        }
+
+        /// <summary>
+        /// 強化取得を履歴に記録する。ボム強化は ApplyUpgrade 内で自動呼び出し。
+        /// MoveSpeed / HpRecovery は UpgradeApplyService から明示的に呼ぶ。
+        /// </summary>
+        public void RecordUpgrade(UpgradeId id)
+        {
+            _acquiredList.Add(id);
+            _acquiredUpgrades.Value = _acquiredList.ToArray();
+        }
+
+        public void Dispose()
+        {
+            _acquiredUpgrades.Dispose();
         }
     }
 }

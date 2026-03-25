@@ -1,5 +1,25 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 8.5 — Phase 9 前提修正
+
+### 完了タスク
+- **T-8.5.1** PlayerBuild に AcquiredUpgrades 追跡を追加 (IDisposable + ReactiveProperty + RecordUpgrade)
+- **T-8.5.2** UpgradeApplyService に MoveSpeed/HpRecovery の RecordUpgrade 呼び出しを追加
+- **T-8.5.3** PlayerModel.Dispose に Build.Dispose() を追加
+- **T-8.5.4** MatchEndUseCase に Winner Observable を追加 (IDisposable + ReactiveProperty<PlayerId?>)
+- **T-8.5.5** MatchPhaseScheduler.TransitionToResult に PlayerId パラメータ追加 + SetWinner 接続
+- **T-8.5.6** UpgradePhaseUseCase.RemainingTime を ReadOnlyReactiveProperty<float> に Observable 化
+- **T-8.5.7** App.UI.asmdef を新規作成 (App.Bombs 含む参照リスト)
+- **T-8.5.8** EditMode テスト 12 件追加 (PlayerBuild 4件, MatchEndUseCase 2件, UpgradePhaseUseCase 4件, UpgradeApplyService 2件)
+
+### 設計判断
+- 取得済み強化の追跡は PlayerBuild に配置 (PlayerModel ではなく)。MoveSpeed/HpRecovery は UpgradeApplyService から RecordUpgrade を明示呼び出し
+- MatchEndUseCase.Winner は ReactiveProperty で公開。Scheduler が TransitionToResult 時に SetWinner を呼ぶ
+- UpgradePhaseUseCase.RemainingTime は MatchClock 流用ではなく専用 ReactiveProperty。理由: 強化フェーズ中は MatchClock が Pause 状態のため
+- App.UI.asmdef に App.Bombs を含める (HUD の BombCooldownState 購読に必要)
+
+---
+
 ## 2026-03-26: Phase 7+8 — MatchFlow + BombFlightTracker (PR #28)
 
 ### 完了タスク

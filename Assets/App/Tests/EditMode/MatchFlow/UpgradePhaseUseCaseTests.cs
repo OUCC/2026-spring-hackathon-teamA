@@ -49,6 +49,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         [TearDown]
         public void TearDown()
         {
+            _useCase.Dispose();
             _draftP1.Dispose();
             _draftP2.Dispose();
             _player1.Dispose();
@@ -118,6 +119,38 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             // Tick to process completion
             _useCase.Tick(0.1f);
             Assert.IsFalse(_useCase.IsActive);
+        }
+
+        // --- RemainingTime Observable テスト ---
+
+        [Test]
+        public void RemainingTime_InitiallyZero()
+        {
+            Assert.AreEqual(0f, _useCase.RemainingTime.CurrentValue, 0.001f);
+        }
+
+        [Test]
+        public void RemainingTime_AfterStart_EqualsTimeout()
+        {
+            _useCase.Start(_players, _random);
+            Assert.AreEqual(10f, _useCase.RemainingTime.CurrentValue, 0.001f);
+        }
+
+        [Test]
+        public void RemainingTime_AfterTick_Decreases()
+        {
+            _useCase.Start(_players, _random);
+            _useCase.Tick(3f);
+            Assert.AreEqual(7f, _useCase.RemainingTime.CurrentValue, 0.01f);
+        }
+
+        [Test]
+        public void RemainingTime_AfterReset_Zero()
+        {
+            _useCase.Start(_players, _random);
+            _useCase.Tick(3f);
+            _useCase.Reset();
+            Assert.AreEqual(0f, _useCase.RemainingTime.CurrentValue, 0.001f);
         }
 
         private sealed class TestBalanceParameters : IBalanceParameters

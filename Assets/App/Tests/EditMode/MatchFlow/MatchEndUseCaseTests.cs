@@ -34,6 +34,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         [TearDown]
         public void TearDown()
         {
+            _useCase.Dispose();
             _player1.Dispose();
             _player2.Dispose();
         }
@@ -61,6 +62,19 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
 
             var result = _useCase.CheckEnd(_players);
             Assert.AreEqual(PlayerId.Player1, result);
+        }
+
+        [Test]
+        public void Winner_InitiallyNull()
+        {
+            Assert.IsNull(_useCase.Winner.CurrentValue);
+        }
+
+        [Test]
+        public void SetWinner_UpdatesWinnerProperty()
+        {
+            _useCase.SetWinner(PlayerId.Player1);
+            Assert.AreEqual(PlayerId.Player1, _useCase.Winner.CurrentValue);
         }
     }
 }

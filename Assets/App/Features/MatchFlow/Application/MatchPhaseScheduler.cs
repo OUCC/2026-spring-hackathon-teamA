@@ -130,7 +130,7 @@ namespace FloorBreaker.MatchFlow.Application
             var winner = _matchEndUseCase.CheckEnd(_players);
             if (winner.HasValue)
             {
-                TransitionToResult();
+                TransitionToResult(winner.Value);
                 return;
             }
 
@@ -209,11 +209,12 @@ namespace FloorBreaker.MatchFlow.Application
             _clock.Resume();
         }
 
-        private void TransitionToResult()
+        private void TransitionToResult(PlayerId winner)
         {
             State = SchedulerState.Result;
             _clock.SetPhase(GamePhase.Result);
             _clock.Pause();
+            _matchEndUseCase.SetWinner(winner);
         }
     }
 }

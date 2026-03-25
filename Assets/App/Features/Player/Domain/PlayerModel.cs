@@ -47,6 +47,7 @@ namespace FloorBreaker.Player.Domain
             _position.Dispose();
             _facingDirection.Dispose();
             Stats.Dispose();
+            Build.Dispose();
         }
     }
 }

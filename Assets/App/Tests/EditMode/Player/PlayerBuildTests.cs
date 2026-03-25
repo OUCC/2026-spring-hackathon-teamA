@@ -1,3 +1,4 @@
+using System.Linq;
 using NUnit.Framework;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Shared.Domain.Primitives;
@@ -7,6 +8,8 @@ namespace FloorBreaker.Tests.EditMode.Player
     [TestFixture]
     public class PlayerBuildTests
     {
+        private PlayerBuild _build;
+
         private PlayerBuild CreateDefault() => new PlayerBuild(
             fireFlightRange: 3, fireEffectRange: 1, fireDamage: 1, fireCooldown: 2f,
             fireDuration: 3.5f, fireWallPenetration: false, fireCooldownMin: 0.5f,
@@ -57,6 +60,57 @@ namespace FloorBreaker.Tests.EditMode.Player
             var build = CreateDefault();
             build.ApplyUpgrade(UpgradeId.FallCollapseTime);
             Assert.AreEqual(5f, build.FallCollapseTime, 0.01f);
+            build.Dispose();
+        }
+
+        // --- AcquiredUpgrades 追跡テスト ---
+
+        [Test]
+        public void RecordUpgrade_TracksInAcquiredList()
+        {
+            _build = CreateDefault();
+            _build.RecordUpgrade(UpgradeId.MoveSpeed);
+
+            var acquired = _build.AcquiredUpgrades.CurrentValue;
+            Assert.AreEqual(1, acquired.Count);
+            Assert.AreEqual(UpgradeId.MoveSpeed, acquired[0]);
+            _build.Dispose();
+        }
+
+        [Test]
+        public void ApplyUpgrade_BombUpgrade_AlsoRecordsInAcquiredList()
+        {
+            _build = CreateDefault();
+            _build.ApplyUpgrade(UpgradeId.FireFlightRange);
+
+            var acquired = _build.AcquiredUpgrades.CurrentValue;
+            Assert.AreEqual(1, acquired.Count);
+            Assert.AreEqual(UpgradeId.FireFlightRange, acquired[0]);
+            _build.Dispose();
+        }
+
+        [Test]
+        public void AcquiredUpgrades_MultipleUpgrades_TracksAllInOrder()
+        {
+            _build = CreateDefault();
+            _build.ApplyUpgrade(UpgradeId.FireDamage);
+            _build.ApplyUpgrade(UpgradeId.FallEffectRange);
+            _build.RecordUpgrade(UpgradeId.HpRecovery);
+
+            var acquired = _build.AcquiredUpgrades.CurrentValue;
+            Assert.AreEqual(3, acquired.Count);
+            Assert.AreEqual(UpgradeId.FireDamage, acquired[0]);
+            Assert.AreEqual(UpgradeId.FallEffectRange, acquired[1]);
+            Assert.AreEqual(UpgradeId.HpRecovery, acquired[2]);
+            _build.Dispose();
+        }
+
+        [Test]
+        public void AcquiredUpgrades_InitiallyEmpty()
+        {
+            _build = CreateDefault();
+            Assert.AreEqual(0, _build.AcquiredUpgrades.CurrentValue.Count);
+            _build.Dispose();
         }
     }
 }

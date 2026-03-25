@@ -425,6 +425,7 @@ flowchart LR
 | 6 | 強化 | UpgradeDef 等 7 クラス | UpgradeApplyService | — | **完了** |
 | 7 | マッチフロー | — | Scheduler, FireDmg 等 6 クラス | — | **完了** |
 | 8 | 入力 | BombHoldCommand, BombFlightTracker | InputBridge | InputAdapter | **完了** |
+| 8.5 | Phase 9 前提修正 | AcquiredUpgrades, Winner Observable | RemainingTime Observable | App.UI.asmdef | **完了** |
 | 9 | UI | — | — | UXML/USS/Presenter | 未着手 |
 | 10-14 | Presentation | — | — | View, VFX, Camera | 未着手 |
 | 15 | Bootstrap | — | — | LifetimeScope | 未着手 |
