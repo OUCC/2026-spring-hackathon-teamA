@@ -44,7 +44,7 @@
                         <Label name="LeftStatus" class="upgrade-pane__status" />
                     </VisualElement>
 
-                    <VisualElement class="upgrade-divider" />
+                    <VisualElement class="match-divider" />
 
                     <VisualElement name="RightUpgradePane" class="upgrade-pane upgrade-pane--p2">
                         <Label class="upgrade-pane__title" text="強化フェーズ" />
@@ -70,10 +70,14 @@
                         </VisualElement>
                     </VisualElement>
 
-                    <VisualElement class="result-divider" />
+                    <VisualElement class="match-divider" />
 
                     <VisualElement name="RightResultPane" class="result-pane result-pane--p2">
                         <Label name="RightResultLabel" class="result-pane__result" text="" />
+                        <VisualElement class="result-pane__buttons">
+                            <Button name="RematchButton2" class="result-btn" text="リマッチ" />
+                            <Button name="TitleButton2" class="result-btn result-btn--secondary" text="タイトルへ" />
+                        </VisualElement>
                     </VisualElement>
                 </VisualElement>
             </VisualElement>

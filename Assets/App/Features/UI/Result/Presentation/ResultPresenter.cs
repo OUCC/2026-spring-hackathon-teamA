@@ -36,6 +36,8 @@ namespace FloorBreaker.UI.Result.Presentation
 
             view.RematchButton.clicked += () => SceneManager.LoadScene("Match");
             view.TitleButton.clicked += () => SceneManager.LoadScene("Title");
+            view.RematchButton2.clicked += () => SceneManager.LoadScene("Match");
+            view.TitleButton2.clicked += () => SceneManager.LoadScene("Title");
         }
 
         public void Dispose()

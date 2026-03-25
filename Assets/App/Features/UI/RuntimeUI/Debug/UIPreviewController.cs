@@ -116,6 +116,19 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
                 Debug.Log("[UIPreview] タイトルへ戻る");
             });
 
+            // P2 側ボタン（同じ動作）
+            _root.Q<Button>("RematchButton2")?.RegisterCallback<ClickEvent>(_ =>
+            {
+                _currentPhase = "match";
+                _p1Hp = 10; _p2Hp = 10; _p1Coins = 0; _p2Coins = 0;
+                _timer = 20f; _upgradeCount = 0;
+                _p1AcquiredRow.Clear(); _p2AcquiredRow.Clear();
+            });
+            _root.Q<Button>("TitleButton2")?.RegisterCallback<ClickEvent>(_ =>
+            {
+                Debug.Log("[UIPreview] タイトルへ戻る");
+            });
+
             UpdateHud();
             ShowMatchPhase();
 

@@ -39,11 +39,6 @@
     padding: var(--spacing-lg);
 }
 
-.result-divider {
-    width: 2px;
-    background-color: rgba(240, 232, 216, 0.2);
-}
-
 /* --- 勝敗表示 --- */
 .result-pane__result {
     font-size: 56px;

@@ -39,11 +39,6 @@
     padding: var(--spacing-md);
 }
 
-.upgrade-divider {
-    width: 2px;
-    background-color: rgba(240, 232, 216, 0.2);
-}
-
 /* --- ペイン内要素 --- */
 .upgrade-pane__title {
     font-size: var(--font-size-lg);
