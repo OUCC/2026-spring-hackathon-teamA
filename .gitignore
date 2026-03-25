@@ -3,6 +3,12 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
+
+# Claude Code
+.claude/
+
+# Node.js
+node_modules/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
