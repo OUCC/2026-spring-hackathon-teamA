@@ -6,8 +6,6 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Bombs.Domain;
-using FloorBreaker.Slimes.Domain;
-using FloorBreaker.Upgrades.Domain;
 
 namespace FloorBreaker.Bombs.Application
 {
@@ -17,38 +15,27 @@ namespace FloorBreaker.Bombs.Application
         private readonly FallBombResolver _fallResolver;
         private readonly FireBombResolver _fireResolver;
         private readonly StageModel _stage;
-        private readonly TileTimerService _tileTimerService;
-        private readonly PlayerDamageService _damageService;
-        private readonly SafeTileSearchService _safeTileSearch;
-        private readonly SlimeRegistry _slimeRegistry;
-        private readonly SlimeDropResolver _slimeDropResolver;
-        private readonly IRandomProvider _random;
         private readonly float _fallBombRecoveryDuration;
+        private readonly BombEffectSpreadService _spreadService;
+        private readonly float _fireSpreadInterval;
+        private readonly float _fallSpreadInterval;
 
         public BombLaunchUseCase(
             BombLandingResolver landingResolver,
             FallBombResolver fallResolver,
             FireBombResolver fireResolver,
             StageModel stage,
-            TileTimerService tileTimerService,
-            PlayerDamageService damageService,
-            SafeTileSearchService safeTileSearch,
             IBalanceParameters balance,
-            SlimeRegistry slimeRegistry = null,
-            SlimeDropResolver slimeDropResolver = null,
-            IRandomProvider random = null)
+            BombEffectSpreadService spreadService)
         {
             _landingResolver = landingResolver;
             _fallResolver = fallResolver;
             _fireResolver = fireResolver;
             _stage = stage;
-            _tileTimerService = tileTimerService;
-            _damageService = damageService;
-            _safeTileSearch = safeTileSearch;
             _fallBombRecoveryDuration = balance.FallBombRecoveryDuration;
-            _slimeRegistry = slimeRegistry;
-            _slimeDropResolver = slimeDropResolver;
-            _random = random;
+            _spreadService = spreadService;
+            _fireSpreadInterval = balance.FireBombSpreadInterval;
+            _fallSpreadInterval = balance.FallBombSpreadInterval;
         }
 
         public BombSpec CreateFallBombSpec(PlayerBuild build)
@@ -119,86 +106,13 @@ namespace FloorBreaker.Bombs.Application
         private void ExecuteFallBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players, PlayerModel owner)
         {
             var result = _fallResolver.Resolve(landingPos, spec, _stage);
-            var affectedSet = new HashSet<GridPos>(result.AffectedTiles);
-
-            // 1. 壁破壊
-            foreach (var wall in result.WallsDestroyed)
-                _stage.SetTileState(wall, TileState.Normal);
-
-            // 2. タイルを Collapsing に設定 + タイマー開始
-            foreach (var tile in result.AffectedTiles)
-            {
-                _stage.SetTileState(tile, TileState.Collapsing);
-                _tileTimerService.StartCollapseTimer(tile, result.CollapseTime, result.RecoveryTime);
-            }
-
-            // 3. 影響範囲内のプレイヤーにダメージ（強制移動あり）
-            var occupied = BuildOccupiedSet(players);
-            foreach (var player in players)
-            {
-                if (affectedSet.Contains(player.CurrentPosition))
-                {
-                    _damageService.ApplyDamage(
-                        player, result.Damage, true,
-                        _stage, _safeTileSearch, occupied);
-                }
-            }
-
-            // 4. 影響範囲内のスライム死亡 + ドロップ
-            KillSlimesInArea(result.AffectedTiles, owner);
+            _spreadService.EnqueueFallBomb(result, landingPos, players, owner, _fallSpreadInterval);
         }
 
         private void ExecuteFireBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players, PlayerModel owner)
         {
             var result = _fireResolver.Resolve(landingPos, spec, _stage);
-            var affectedSet = new HashSet<GridPos>(result.AffectedTiles);
-
-            // 1. 壁破壊
-            foreach (var wall in result.WallsDestroyed)
-                _stage.SetTileState(wall, TileState.Normal);
-
-            // 2. タイルを OnFire に設定 + 炎タイマー開始
-            foreach (var tile in result.AffectedTiles)
-            {
-                _stage.SetTileState(tile, TileState.OnFire);
-                _tileTimerService.StartFireTimer(tile, result.FireDuration);
-            }
-
-            // 3. 影響範囲内のプレイヤーに接触ダメージ（強制移動なし）
-            var occupied = BuildOccupiedSet(players);
-            foreach (var player in players)
-            {
-                if (affectedSet.Contains(player.CurrentPosition))
-                {
-                    _damageService.ApplyDamage(
-                        player, result.ContactDamage, false,
-                        _stage, _safeTileSearch, occupied);
-                }
-            }
-
-            // 4. 影響範囲内のスライム死亡 + ドロップ
-            KillSlimesInArea(result.AffectedTiles, owner);
-        }
-
-        private void KillSlimesInArea(IReadOnlyList<GridPos> affectedTiles, PlayerModel killer)
-        {
-            if (_slimeRegistry == null || _slimeDropResolver == null) return;
-
-            var slimes = _slimeRegistry.GetSlimesAt(affectedTiles);
-            foreach (var slime in slimes)
-            {
-                slime.Kill();
-                _slimeDropResolver.Resolve(slime, killer, _random);
-                _slimeRegistry.Remove(slime.Id);
-            }
-        }
-
-        private static HashSet<GridPos> BuildOccupiedSet(IReadOnlyList<PlayerModel> players)
-        {
-            var set = new HashSet<GridPos>();
-            foreach (var p in players)
-                set.Add(p.CurrentPosition);
-            return set;
+            _spreadService.EnqueueFireBomb(result, landingPos, players, owner, _fireSpreadInterval);
         }
     }
 }

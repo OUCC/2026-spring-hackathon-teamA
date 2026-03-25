@@ -29,6 +29,7 @@ namespace FloorBreaker.MatchFlow.Application
         private readonly SlimeTickService _slimeTickService;
         private readonly FireDamageTickService _fireDamageTickService;
         private readonly BombFlightTracker _bombFlightTracker;
+        private readonly BombEffectSpreadService _bombEffectSpreadService;
         private readonly StageShrinkService _stageShrinkService;
         private readonly UpgradePhaseUseCase _upgradePhaseUseCase;
         private readonly MatchEndUseCase _matchEndUseCase;
@@ -54,6 +55,7 @@ namespace FloorBreaker.MatchFlow.Application
             SlimeTickService slimeTickService,
             FireDamageTickService fireDamageTickService,
             BombFlightTracker bombFlightTracker,
+            BombEffectSpreadService bombEffectSpreadService,
             StageShrinkService stageShrinkService,
             UpgradePhaseUseCase upgradePhaseUseCase,
             MatchEndUseCase matchEndUseCase,
@@ -72,6 +74,7 @@ namespace FloorBreaker.MatchFlow.Application
             _slimeTickService = slimeTickService;
             _fireDamageTickService = fireDamageTickService;
             _bombFlightTracker = bombFlightTracker;
+            _bombEffectSpreadService = bombEffectSpreadService;
             _stageShrinkService = stageShrinkService;
             _upgradePhaseUseCase = upgradePhaseUseCase;
             _matchEndUseCase = matchEndUseCase;
@@ -125,6 +128,7 @@ namespace FloorBreaker.MatchFlow.Application
             _slimeTickService.Tick(deltaTime, _players, _stage, _random, _balance);
             _fireDamageTickService.Tick(deltaTime, _players, _stage);
             _bombFlightTracker?.Tick(deltaTime, _players);
+            _bombEffectSpreadService?.Tick(deltaTime);
 
             // HP 0 チェック
             var winner = _matchEndUseCase.CheckEnd(_players);

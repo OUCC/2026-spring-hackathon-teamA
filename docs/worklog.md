@@ -1,5 +1,30 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 10 追補 — ボム効果の段階的十字広がり
+
+### 完了タスク
+- **BombEffectSpreadService** 新規作成 (Bombs/Application) — 距離ごとにキューイングし Tick(dt) で段階的に SetTileState
+- **BombLaunchUseCase** リファクタ — ExecuteFall/FireBomb を SpreadService に委譲、不要フィールド削除でスリム化
+- **IBalanceParameters** + **BalanceConfig** — FireBombSpreadInterval (0.15s) / FallBombSpreadInterval (0.3s) 追加
+- **MatchPhaseScheduler** — Tick 配布先に BombEffectSpreadService 追加
+- **MatchFlowOrchestrator** — SpreadService の生成・注入
+- **StagePreviewController** — BombEffectSpreadService 経由のボムシミュレーションに変更
+- **BombEffectSpreadServiceTests** 新規 7 件 — 距離0即時、距離1/2遅延、速度差テスト
+- **BombLaunchUseCaseTests** 修正 — SpreadService の Tick を挟んだアサートに更新
+- 全テストファイル (12件) の TestBalanceParameters に新プロパティ追加
+- **docs/implementation.md** — ボム共通仕様に段階的広がり記述追加
+- コンパイルエラー 0 件、EditMode テスト 232 件全件グリーン
+
+### 設計判断
+- **Domain/Application 層で段階的適用**: 演出ではなくゲームルール。BombEffectSpreadService が Tick で距離ごとに状態変更
+- **ボム種別ごとの速度**: 炎ボム 0.15s/マス (素早い延焼)、滑落ボム 0.3s/マス (重い崩落)
+- **距離 0 は即座に適用**: 着弾地点は Enqueue 時点で即適用
+- **PendingTiles で退避先を保護**: SpreadService が未適用タイルを HashSet で公開。ダメージ時の退避先探索 (SafeTileSearchService) に occupied として渡し、「広がる予定のタイル」へのリスポーンを防止
+- **SpreadEntry を immutable readonly struct に**: WithApplied() パターンで安全に更新。壁判定は HashSet で O(1)
+- **BombLaunchUseCase のスリム化**: ダメージ・タイマー・スライム処理を SpreadService に移譲。UseCase は Resolver → SpreadService への橋渡しのみ
+
+---
+
 ## 2026-03-26: Phase 10 — ステージ Presentation
 
 ### 完了タスク

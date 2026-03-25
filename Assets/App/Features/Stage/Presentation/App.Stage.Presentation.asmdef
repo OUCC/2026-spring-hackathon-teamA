@@ -6,7 +6,10 @@
         "App.Shared.Application",
         "App.Shared.Presentation",
         "App.Shared.Infrastructure",
-        "App.Stage"
+        "App.Stage",
+        "App.Bombs",
+        "App.Player",
+        "App.Slimes"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

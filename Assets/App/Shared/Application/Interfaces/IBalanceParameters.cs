@@ -69,6 +69,10 @@ namespace FloorBreaker.Shared.Application.Interfaces
         float BombFlightSpeed { get; }
         float StageShrinkAnimDuration { get; }
 
+        // --- Bomb Effect Spread ---
+        float FireBombSpreadInterval { get; }
+        float FallBombSpreadInterval { get; }
+
         // --- Upgrade: HP Recovery ---
         int HpRecoveryAmount { get; }
         int HpRecoveryThreshold { get; }

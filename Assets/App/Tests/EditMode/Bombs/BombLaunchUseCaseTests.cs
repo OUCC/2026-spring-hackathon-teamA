@@ -17,6 +17,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         private TileTimerService _timerService;
         private PlayerDamageService _damageService;
         private SafeTileSearchService _safeTileSearch;
+        private BombEffectSpreadService _spreadService;
         private BombLaunchUseCase _useCase;
         private PlayerModel _player1;
         private PlayerModel _player2;
@@ -36,10 +37,12 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var fallResolver = new FallBombResolver(areaResolver);
             var fireResolver = new FireBombResolver(areaResolver);
 
+            _spreadService = new BombEffectSpreadService(
+                _stage, _timerService, _damageService, _safeTileSearch);
+
             _useCase = new BombLaunchUseCase(
                 landingResolver, fallResolver, fireResolver,
-                _stage, _timerService, _damageService, _safeTileSearch,
-                new TestBalanceParameters());
+                _stage, new TestBalanceParameters(), _spreadService);
 
             var stats1 = new PlayerStats(10, 1f, 2f);
             var build1 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
@@ -80,7 +83,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void ExecuteLanding_FallBomb_SetsTilesCollapsing()
+        public void ExecuteLanding_FallBomb_CenterTileCollapsingImmediately()
         {
             var spec = _useCase.CreateFallBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
@@ -88,7 +91,25 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             _useCase.ExecuteLanding(cmd, landingPos, _players, null);
 
+            // 距離0 (中央) は即座に適用
             Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(5, 5)));
+        }
+
+        [Test]
+        public void ExecuteLanding_FallBomb_AdjacentTilesCollapsingAfterSpread()
+        {
+            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
+            var landingPos = new GridPos(5, 5);
+
+            _useCase.ExecuteLanding(cmd, landingPos, _players, null);
+
+            // 距離1 はまだ適用されていない
+            Assert.AreEqual(TileState.Normal, _stage.GetTileState(new GridPos(5, 6)));
+
+            // Tick で広がり
+            _spreadService.Tick(0.3f);
+
             Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(5, 6)));
             Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(6, 5)));
             Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(5, 4)));
@@ -102,13 +123,14 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
+            _spreadService.Tick(0.3f);
 
             Assert.IsTrue(_timerService.HasActiveTimer(new GridPos(5, 5)));
             Assert.IsTrue(_timerService.HasActiveTimer(new GridPos(5, 6)));
         }
 
         [Test]
-        public void ExecuteLanding_FallBomb_DamagesPlayerOnTile()
+        public void ExecuteLanding_FallBomb_DamagesPlayerOnCenterTile()
         {
             _player1.CurrentPosition = new GridPos(5, 5);
             var spec = _useCase.CreateFallBombSpec(_player1.Build);
@@ -116,6 +138,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
 
+            // 中央タイルは即座にダメージ
             Assert.AreEqual(8, _player1.Stats.CurrentHp.CurrentValue); // 10 - 2
         }
 
@@ -139,13 +162,14 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
+            _spreadService.Tick(0.3f);
 
             // 壁は破壊された後 Collapsing に変わる
             Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(6, 5)));
         }
 
         [Test]
-        public void ExecuteLanding_FireBomb_SetsTilesOnFire()
+        public void ExecuteLanding_FireBomb_CenterTileOnFireImmediately()
         {
             var spec = _useCase.CreateFireBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
@@ -153,6 +177,21 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
 
             Assert.AreEqual(TileState.OnFire, _stage.GetTileState(new GridPos(5, 5)));
+        }
+
+        [Test]
+        public void ExecuteLanding_FireBomb_AdjacentTilesOnFireAfterSpread()
+        {
+            var spec = _useCase.CreateFireBombSpec(_player1.Build);
+            var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
+
+            _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
+
+            // 距離1 はまだ
+            Assert.AreEqual(TileState.Normal, _stage.GetTileState(new GridPos(5, 6)));
+
+            _spreadService.Tick(0.15f);
+
             Assert.AreEqual(TileState.OnFire, _stage.GetTileState(new GridPos(5, 6)));
         }
 
@@ -163,6 +202,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
+            _spreadService.Tick(0.15f);
 
             Assert.IsTrue(_timerService.HasActiveTimer(new GridPos(5, 5)));
         }
@@ -188,6 +228,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
+            _spreadService.Tick(0.15f);
 
             // 壁は破壊された後 OnFire に変わる
             Assert.AreEqual(TileState.OnFire, _stage.GetTileState(new GridPos(6, 5)));
@@ -201,14 +242,11 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player2);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
+            _spreadService.Tick(0.3f);
 
             Assert.AreEqual(10, _player1.Stats.CurrentHp.CurrentValue);
         }
 
-        /// <summary>
-        /// テスト用 IBalanceParameters の最小実装。
-        /// BombLaunchUseCase は FallBombRecoveryDuration のみ使用する。
-        /// </summary>
         private sealed class TestBalanceParameters : IBalanceParameters
         {
             public int InitialHp => 10;
@@ -260,6 +298,8 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             public float InvulnerabilityDuration => 1.5f;
             public float BombFlightSpeed => 12f;
             public float StageShrinkAnimDuration => 1f;
+            public float FireBombSpreadInterval => 0.15f;
+            public float FallBombSpreadInterval => 0.3f;
         }
     }
 }

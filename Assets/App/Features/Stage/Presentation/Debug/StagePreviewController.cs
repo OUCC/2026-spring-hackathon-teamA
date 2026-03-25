@@ -4,7 +4,11 @@ using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Shared.Infrastructure.Random;
 using FloorBreaker.Shared.Presentation.Common;
+using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Stage.Domain;
+using FloorBreaker.Player.Domain;
+using FloorBreaker.Bombs.Domain;
+using FloorBreaker.Bombs.Application;
 
 namespace FloorBreaker.Stage.Presentation.Debug
 {
@@ -33,6 +37,11 @@ namespace FloorBreaker.Stage.Presentation.Debug
         private StageShrinkService _shrinkService;
         private WallGenerationService _wallGenService;
         private StageQueryService _queryService;
+
+        // Bomb simulation (Application 層と同じロジック)
+        private BombEffectSpreadService _spreadService;
+        private FallBombResolver _fallResolver;
+        private FireBombResolver _fireResolver;
 
         // Presentation
         private Dictionary<GridPos, TileView> _views;
@@ -74,6 +83,15 @@ namespace FloorBreaker.Stage.Presentation.Debug
             {
                 _model.SetTileState(pos, TileState.Wall);
             }
+
+            // Bomb simulation セットアップ
+            var safeTileSearch = new SafeTileSearchService();
+            var damageService = new PlayerDamageService(1.5f, 1f);
+            var areaResolver = new BombAreaResolver(_queryService);
+            _fallResolver = new FallBombResolver(areaResolver);
+            _fireResolver = new FireBombResolver(areaResolver);
+            _spreadService = new BombEffectSpreadService(
+                _model, _tileTimerService, damageService, safeTileSearch);
 
             // Presentation セットアップ
             var config = _factory.Config;
@@ -117,6 +135,9 @@ namespace FloorBreaker.Stage.Presentation.Debug
         {
             // TileTimerService の Tick (崩落→復帰の自動遷移)
             _tileTimerService.Tick(Time.deltaTime);
+
+            // BombEffectSpreadService の Tick (段階的十字広がり)
+            _spreadService.Tick(Time.deltaTime);
 
             // StageShrinkAnimator のバッチフラッシュ
             _shrinkAnimator.FlushPendingWave();
@@ -186,65 +207,29 @@ namespace FloorBreaker.Stage.Presentation.Debug
             _tileTimerService.StartCollapseTimer(_cursorPos, CollapseDuration, RecoveryDuration);
         }
 
-        private const float SpreadDelay = 0.3f; // 1マスあたりの広がり時間
+        private const float FireSpreadInterval = 0.15f;
+        private const float FallSpreadInterval = 0.3f;
 
         /// <summary>
-        /// 炎ボムシミュレーション: 十字パターン、壁貫通なし。
-        /// 中央から徐々に広がる (0.3秒/マス)。
+        /// 炎ボムシミュレーション: BombEffectSpreadService 経由の段階的十字広がり。
         /// </summary>
         private void FireBombCross()
         {
-            var affected = _queryService.GetTilesInCross(_cursorPos, _effectRange, penetrateWalls: false);
-            var center = _cursorPos;
-
-            foreach (var pos in affected)
-            {
-                int dist = center.ChebyshevDistance(pos);
-                float delay = dist * SpreadDelay;
-
-                // ローカル変数にキャプチャ
-                var capturedPos = pos;
-                DG.Tweening.DOVirtual.DelayedCall(delay, () =>
-                {
-                    var current = _model.GetTileState(capturedPos);
-                    if (current == TileState.Wall)
-                    {
-                        _model.SetTileState(capturedPos, TileState.Normal);
-                    }
-                    _model.SetTileState(capturedPos, TileState.OnFire);
-                    _tileTimerService.StartFireTimer(capturedPos, FireDuration);
-                });
-            }
-            UnityEngine.Debug.Log("[StagePreview] 炎ボム十字 (壁貫通なし): " + affected.Count + " タイル, 範囲=" + _effectRange);
+            var spec = new BombSpec(BombType.Fire, 3, _effectRange, 1, 2f, false, false, FireDuration, 0f, 0f);
+            var result = _fireResolver.Resolve(_cursorPos, spec, _model);
+            _spreadService.EnqueueFireBomb(result, _cursorPos, new List<PlayerModel>(), null, FireSpreadInterval);
+            UnityEngine.Debug.Log("[StagePreview] 炎ボム十字 (壁貫通なし, 0.15s/マス): " + result.AffectedTiles.Count + " タイル, 範囲=" + _effectRange);
         }
 
         /// <summary>
-        /// 滑落ボムシミュレーション: 十字パターン、壁貫通あり。
-        /// 中央から徐々に広がる (0.3秒/マス)。
+        /// 滑落ボムシミュレーション: BombEffectSpreadService 経由の段階的十字広がり。
         /// </summary>
         private void FallBombCross()
         {
-            var affected = _queryService.GetTilesInCross(_cursorPos, _effectRange, penetrateWalls: true);
-            var center = _cursorPos;
-
-            foreach (var pos in affected)
-            {
-                int dist = center.ChebyshevDistance(pos);
-                float delay = dist * SpreadDelay;
-
-                var capturedPos = pos;
-                DG.Tweening.DOVirtual.DelayedCall(delay, () =>
-                {
-                    var current = _model.GetTileState(capturedPos);
-                    if (current == TileState.Wall)
-                    {
-                        _model.SetTileState(capturedPos, TileState.Normal);
-                    }
-                    _model.SetTileState(capturedPos, TileState.Collapsing);
-                    _tileTimerService.StartCollapseTimer(capturedPos, CollapseDuration, RecoveryDuration);
-                });
-            }
-            UnityEngine.Debug.Log("[StagePreview] 滑落ボム十字 (壁貫通): " + affected.Count + " タイル, 範囲=" + _effectRange);
+            var spec = new BombSpec(BombType.Fall, 3, _effectRange, 2, 4f, false, true, 0f, CollapseDuration, RecoveryDuration);
+            var result = _fallResolver.Resolve(_cursorPos, spec, _model);
+            _spreadService.EnqueueFallBomb(result, _cursorPos, new List<PlayerModel>(), null, FallSpreadInterval);
+            UnityEngine.Debug.Log("[StagePreview] 滑落ボム十字 (壁貫通, 0.3s/マス): " + result.AffectedTiles.Count + " タイル, 範囲=" + _effectRange);
         }
 
         private void ShrinkStage()
