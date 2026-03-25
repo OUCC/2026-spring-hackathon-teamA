@@ -1833,6 +1833,16 @@ MonoBehaviour:
     - enemyPrefab: {fileID: 1300070554809178781, guid: 24e457fc66192ff478e679fd653526c3, type: 3}
       spawnGridPos: {x: -2, y: 3}
       overrideMaxHp: 1
+  - enemies:
+    - enemyPrefab: {fileID: 2831291342831491943, guid: 9b196abb1d5ce4350b86d40083a19373, type: 3}
+      spawnGridPos: {x: 2, y: 4}
+      overrideMaxHp: 1
+    - enemyPrefab: {fileID: 1300070554809178781, guid: 24e457fc66192ff478e679fd653526c3, type: 3}
+      spawnGridPos: {x: 4, y: -2}
+      overrideMaxHp: 1
+    - enemyPrefab: {fileID: 4798223459009502082, guid: 1eab2b14fa4cda741a4f7f4b77a0da49, type: 3}
+      spawnGridPos: {x: -2, y: -3}
+      overrideMaxHp: 1
   enemyGroundTilemap: {fileID: 224710906}
   currentPhase: 0
   _gridData: {fileID: 924137964}

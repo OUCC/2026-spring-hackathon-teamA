@@ -104,9 +104,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787503034b2865b4cb7e8f523164360e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mage
+  gridData: {fileID: 0}
   moveSpeed: 5
   groundTilemap: {fileID: 0}
   hasActed: 0
   maxHp: 2
   currentHp: 0
   attackDamage: 1
+  highlightColor: {r: 1, g: 0.4, b: 0.4, a: 1}
+  flashDuration: 0.15

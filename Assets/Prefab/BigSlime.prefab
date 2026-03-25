@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8836390863512580614}
   - component: {fileID: 5934876517340891192}
-  - component: {fileID: 2831291342831491943}
+  - component: {fileID: 4798223459009502082}
   m_Layer: 0
-  m_Name: Slime
+  m_Name: BigSlime
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5, y: 2, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -4280474151325575655, guid: 3cfa02850b4f241b29c8b2fff377e226, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.70440245, g: 0.6756061, b: 0.6756061, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -92,7 +92,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &2831291342831491943
+--- !u!114 &4798223459009502082
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -101,15 +101,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1572429826316994202}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62f0c7ea9235d486b8e555ee420f1124, type: 3}
+  m_Script: {fileID: 11500000, guid: 500189adeeeff5e499d54756dc07f6da, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Slime
+  m_EditorClassIdentifier: Assembly-CSharp::BigSlime
   gridData: {fileID: 0}
   moveSpeed: 5
   groundTilemap: {fileID: 0}
   hasActed: 0
-  maxHp: 2
+  maxHp: 4
   currentHp: 0
   attackDamage: 1
-  highlightColor: {r: 0.52517694, g: 0.8930817, b: 0.8043247, a: 1}
-  flashDuration: 0.15
+  highlightColor: {r: 0.39999998, g: 0.56163836, b: 1, a: 1}
+  flashDuration: 0.3
