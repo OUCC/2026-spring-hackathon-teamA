@@ -295,7 +295,99 @@ PlayerSettings:
   AndroidReportGooglePlayAppDependencies: 1
   androidSymbolsSizeThreshold: 800
   m_BuildTargetIcons: []
-  m_BuildTargetPlatformIcons: []
+  m_BuildTargetPlatformIcons:
+  - m_BuildTarget: Android
+    m_Icons:
+    - m_Textures: []
+      m_Width: 432
+      m_Height: 432
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 324
+      m_Height: 324
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 216
+      m_Height: 216
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 162
+      m_Height: 162
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 108
+      m_Height: 108
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 81
+      m_Height: 81
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 192
+      m_Height: 192
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 144
+      m_Height: 144
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 96
+      m_Height: 96
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 72
+      m_Height: 72
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 48
+      m_Height: 48
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 36
+      m_Height: 36
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 192
+      m_Height: 192
+      m_Kind: 0
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 144
+      m_Height: 144
+      m_Kind: 0
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 96
+      m_Height: 96
+      m_Kind: 0
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 72
+      m_Height: 72
+      m_Kind: 0
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 48
+      m_Height: 48
+      m_Kind: 0
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 36
+      m_Height: 36
+      m_Kind: 0
+      m_SubKind: 
   m_BuildTargetBatching: []
   m_BuildTargetShaderSettings: []
   m_BuildTargetGraphicsJobs: []
@@ -583,7 +675,25 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    EmbeddedLinux: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    GameCoreScarlett: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    GameCoreXboxOne: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    Kepler: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    LinuxHeadlessSimulation: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    Nintendo Switch: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    Nintendo Switch 2: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    PS4: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    PS5: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    QNX: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    Standalone: DOTWEEN;MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    VisionOS: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    WebGL: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    Windows Store Apps: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    XboxOne: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    iPhone: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
+    tvOS: DOTWEEN;DOTWEEN_UITOOLKIT;DOTWEEN_TEXTMESHPRO
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
