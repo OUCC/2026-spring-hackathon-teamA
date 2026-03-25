@@ -418,10 +418,10 @@ flowchart LR
 | 2 | ステージ | StageModel 等 7 クラス | — | — | **完了** |
 | 3 | プレイヤー | PlayerModel 等 5 クラス | MoveService, DamageService | — | **完了** |
 | 4 | ボム | BombSpec 等 8 クラス | BombLaunchUseCase | — | **完了** |
-| 5 | スライム | SlimeModel 等 4 クラス | SlimeTickService | — | **次** |
-| 6 | 強化 | UpgradeDef 等 6 クラス | UpgradeApplyService | — | 未着手 |
-| 7 | マッチフロー | — | Orchestrator, Scheduler | — | 未着手 |
-| 8 | 入力 | — | InputBridge | InputAdapter | 未着手 |
+| 5 | スライム | SlimeModel 等 7 クラス | SlimeTickService | — | **完了** |
+| 6 | 強化 | UpgradeDef 等 7 クラス | UpgradeApplyService | — | **完了** |
+| 7 | マッチフロー | — | Scheduler, FireDmg 等 6 クラス | — | **完了** |
+| 8 | 入力 | BombHoldCommand, BombFlightTracker | InputBridge | InputAdapter | **進行中** |
 | 9 | UI | — | — | UXML/USS/Presenter | 未着手 |
 | 10-14 | Presentation | — | — | View, VFX, Camera | 未着手 |
 | 15 | Bootstrap | — | — | LifetimeScope | 未着手 |

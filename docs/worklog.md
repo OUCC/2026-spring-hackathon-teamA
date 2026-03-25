@@ -1,5 +1,38 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 7+8 — MatchFlow + BombFlightTracker (PR #28)
+
+### 完了タスク
+- **T-7.1** MatchPhaseScheduler — 状態マシン (Running/StageShrink/UpgradePhase/Result)、全 Tick 配布
+- **T-7.2** UpgradePhaseUseCase — P1/P2 DraftService、10秒タイムアウト、自動スキップ
+- **T-7.3** MatchEndUseCase — HP0 検出→勝者判定
+- **T-7.4** MatchFlowOrchestrator — 壁生成→プレイヤー→初期スライム→スケジューラ起動
+- **T-7.5** SlimeTickService — AI Tick + 5秒スポーン + 崩落スライム自動死亡 (TimerCompleted購読)
+- **T-7.6** FireDamageTickService — OnFire 滞在1秒ごと1ダメージ
+- **T-8.1** BombFlightTracker — リアルタイム飛行追跡、壁/エンティティ/最大距離で自動着弾
+- **T-8.2** BombHoldCommand — 入力コマンド値型
+- IBalanceParameters に BombFlightSpeed/StageShrinkAnimDuration/InvulnerabilityDuration 追加
+- EditMode テスト 24 件追加 (累計 211 件全件グリーン)
+
+### 設計判断
+- MatchPhaseScheduler は UniTask async ループではなく同期状態マシン + Tick 方式を採用（EditMode テスト容易性）
+- BombFlightTracker は Bombs/Application に配置（ボムの動作はボム feature の責務）
+- 炎 DoT のスライム撃破者は追跡困難→ドロップなし
+- PlayerId に公開コンストラクタがないため、BombFlightTracker は P1/P2 フィールド分離で対応
+- Input Infrastructure (MonoBehaviour) は Unity API 依存のため別 PR に分離
+
+---
+
+## 2026-03-26: Phase 5+6 — スライム + 強化 (PR #27)
+
+### 完了タスク
+- Upgrades: UpgradeDefinition, UpgradeCatalog (15強化), AvailabilityRule, RollRule, DraftService, ApplyService
+- Slimes: SlimeType/Id/Model, SlimeRegistry, SpawnService, AiService, DropResolver
+- BombLaunchUseCase にスライム死亡+ドロップ統合
+- EditMode テスト 8 ファイル追加
+
+---
+
 ## 2026-03-26: Phase 4 — ボムリゾルバ (PR #26)
 
 ### 完了タスク
