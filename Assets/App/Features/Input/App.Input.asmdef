@@ -1,0 +1,25 @@
+{
+    "name": "App.Input",
+    "rootNamespace": "FloorBreaker.Input",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Player",
+        "App.Bombs",
+        "App.Upgrades",
+        "App.Stage",
+        "App.MatchFlow",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
