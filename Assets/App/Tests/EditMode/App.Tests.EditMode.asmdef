@@ -4,7 +4,9 @@
     "references": [
         "App.Shared.Domain",
         "App.Shared.Application",
-        "App.Shared.Infrastructure"
+        "App.Shared.Infrastructure",
+        "App.Stage",
+        "R3.Unity"
     ],
     "includePlatforms": [
         "Editor"
