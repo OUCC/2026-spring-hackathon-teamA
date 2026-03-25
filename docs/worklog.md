@@ -1,5 +1,30 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 4 — ボムリゾルバ (PR #26)
+
+### 完了タスク
+- **T-4.0** BombType enum を Shared/Domain/Primitives に追加
+- **T-4.1** BombSpec — readonly struct、全ボムパラメータを保持
+- **T-4.2** BombFlightCommand — 発射コマンド値型 (Origin, Direction, Spec, Owner)
+- **T-4.3** BombCooldownState — R3 ReactiveProperty で FallRemaining/FireRemaining を read-only 公開
+- **T-4.4** BombAreaResolver — StageQueryService.GetTilesInCross に委譲する薄いラッパー
+- **T-4.5** BombLandingResolver — 壁・エンティティ・Collapsed/PermanentlyDestroyed の衝突解決
+- **T-4.6** FallBombResolver — FallBombResult 構造体を返す副作用なしリゾルバ
+- **T-4.7** FireBombResolver — FireBombResult 構造体を返す副作用なしリゾルバ
+- **T-4.8** BombLaunchUseCase — BombSpec 組み立て + 壁破壊→タイル変更→タイマー→ダメージ適用
+- **T-4.9** EditMode テスト 6 ファイル (BombCooldownState, BombAreaResolver, BombLandingResolver, FallBombResolver, FireBombResolver, BombLaunchUseCase)
+- App.Bombs.asmdef (noEngineReferences: true)、App.Tests.EditMode.asmdef に参照追加
+
+### 設計判断
+- Resolver は結果構造体を返し副作用なし。Application 層 (BombLaunchUseCase) が状態変更を統括
+- BombSpec は純粋な値型 (PlayerBuild 非依存)。PlayerBuild → BombSpec の組み立ては BombLaunchUseCase に配置
+- RecoveryTime は IBalanceParameters.FallBombRecoveryDuration から取得 (PlayerBuild にはない固定値)
+- エンティティ衝突は `Func<GridPos, bool> isEntityAt` で注入。Phase 5 で SlimeRegistry を追加可能
+- 壁衝突時はボムが壁の位置で着弾 (壁タイルが効果範囲の中心になり破壊される)
+- 炎 DoT / 飛行時ダメージ / 飛行状態追跡は後続 Phase に委ねる
+
+---
+
 ## 2026-03-26: ドキュメント整備
 
 - docs/architecture.md を作成 (mermaid 図付き: 依存グラフ、レイヤー構造、クラス図、マッチフロー、R3 データフロー)

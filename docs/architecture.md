@@ -57,7 +57,7 @@ graph LR
     SP[App.Shared.Presentation]
     AST["App.Stage<br/>noEngine ✓"]
     APL["App.Player<br/>noEngine ✓"]
-    ABM["App.Bombs<br/>noEngine ✓ 予定"]
+    ABM["App.Bombs<br/>noEngine ✓"]
     ASL["App.Slimes<br/>予定"]
     AUP["App.Upgrades<br/>予定"]
     AMF["App.MatchFlow<br/>予定"]
@@ -291,12 +291,13 @@ classDiagram
     PlayerDamageService --> SafeTileSearchService
 ```
 
-### Bombs (Phase 4 予定)
+### Bombs
 
 ```mermaid
 classDiagram
     class BombSpec {
         <<readonly struct>>
+        +BombType Type
         +int MaxFlightDistance
         +int EffectRange
         +int Damage
@@ -307,21 +308,28 @@ classDiagram
         +float CollapseTime
         +float RecoveryTime
     }
+    class BombFlightCommand {
+        <<readonly struct>>
+        +GridPos Origin
+        +Direction8 Direction
+        +BombSpec Spec
+        +PlayerId Owner
+    }
     class BombLandingResolver {
-        +Resolve(cmd, stage, entityQuery) GridPos
+        +Resolve(cmd, actualDist, isEntityAt) GridPos
     }
     class BombAreaResolver {
-        +Resolve(center, range, penetrate, stage) IReadOnlyList~GridPos~
+        +Resolve(center, range, penetrateWalls) IReadOnlyList~GridPos~
     }
     class FallBombResolver {
-        +Execute(landingPos, spec, stage, timerService)
+        +Resolve(landingPos, spec, stage) FallBombResult
     }
     class FireBombResolver {
-        +Execute(landingPos, spec, stage, timerService)
+        +Resolve(landingPos, spec, stage) FireBombResult
     }
     class BombCooldownState {
-        +ReactiveProperty~float~ FallRemaining
-        +ReactiveProperty~float~ FireRemaining
+        +ReadOnlyReactiveProperty~float~ FallBombRemaining
+        +ReadOnlyReactiveProperty~float~ FireBombRemaining
         +StartCooldown(type, duration)
         +CanFire(type) bool
     }
@@ -409,8 +417,8 @@ flowchart LR
 | 1 | 共通プリミティブ | GridPos 等 | Interfaces | TimeProvider 等 | **完了** |
 | 2 | ステージ | StageModel 等 7 クラス | — | — | **完了** |
 | 3 | プレイヤー | PlayerModel 等 5 クラス | MoveService, DamageService | — | **完了** |
-| 4 | ボム | BombSpec 等 6 クラス | BombLaunchUseCase | — | **次** |
-| 5 | スライム | SlimeModel 等 4 クラス | SlimeTickService | — | 未着手 |
+| 4 | ボム | BombSpec 等 8 クラス | BombLaunchUseCase | — | **完了** |
+| 5 | スライム | SlimeModel 等 4 クラス | SlimeTickService | — | **次** |
 | 6 | 強化 | UpgradeDef 等 6 クラス | UpgradeApplyService | — | 未着手 |
 | 7 | マッチフロー | — | Orchestrator, Scheduler | — | 未着手 |
 | 8 | 入力 | — | InputBridge | InputAdapter | 未着手 |
