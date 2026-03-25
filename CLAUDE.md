@@ -1007,19 +1007,25 @@ App.Tests.PlayMode
 
 ## 22. コマンド
 
-このセクションはプロジェクト固有コマンドに置き換えること。
-存在するスクリプト / Makefile / CI を最優先で参照すること。
+### テスト実行
 
-例:
+Unity MCP 経由で EditMode テストを実行する。結果はファイル出力またはコンソールログで確認する。
 
-- EditMode tests
-  - `TODO: replace with actual command`
-- PlayMode tests
-  - `TODO: replace with actual command`
-- Lint / format
-  - `TODO: replace with actual command`
-- Build
-  - `TODO: replace with actual command`
+```
+// Unity MCP RunCommand でテスト実行
+TestRunnerApi.Execute(new ExecutionSettings(new Filter {
+    testMode = TestMode.EditMode,
+    assemblyNames = new[] { "App.Tests.EditMode" }
+}));
+```
+
+- EditMode テスト対象アセンブリ: `App.Tests.EditMode`
+- テスト結果は `Temp/test_results.txt` に書き出すか、`Debug.Log` で `[TEST DONE]` プレフィックス付きで出力
+- PR 作成前に全テスト通過を確認すること (§23 参照)
+
+### ビルド
+
+- CI 未設定。ローカルビルドは Unity Editor の `File > Build Settings` から実行。
 
 ---
 

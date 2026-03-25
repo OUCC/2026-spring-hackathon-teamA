@@ -1,6 +1,14 @@
 # FLOOR BREAKER — 作業ログ
 
-## 2026-03-26: Phase 3 — プレイヤー Domain (PR #TBD)
+## 2026-03-26: ドキュメント整備
+
+- docs/architecture.md を作成 (mermaid 図付き: 依存グラフ、レイヤー構造、クラス図、マッチフロー、R3 データフロー)
+- アーキテクチャ原則を明文化: 時間管理の単一化、Domain read-only 公開、UI Toolkit ルート戦略
+- Phase 4 タスクレビューを実施し tasks.md に反映 (BombType 追加、BombSpec 組み立て方針、スライム衝突の注入パターン等)
+
+---
+
+## 2026-03-26: Phase 3 — プレイヤー Domain (PR #24)
 
 ### 完了タスク
 - **T-3.1** PlayerStats — ReactiveProperty HP/Coins、TakeDamage/Heal/AddCoins/SpendCoins
