@@ -1005,23 +1005,58 @@ App.Tests.PlayMode
 
 ---
 
-## 22. コマンド
+## 22. コンパイル・テスト・結果確認フロー
 
-### テスト実行
+コード変更後は、**必ず以下のフローを順に実行**し、全件グリーンを確認してから commit / push / PR 作成に進むこと。
 
-Unity MCP 経由で EditMode テストを実行する。結果はファイル出力またはコンソールログで確認する。
+### Step 1: コンパイル確認
 
+Unity MCP 経由で `AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate)` を実行し、コンパイルエラーがないことを確認する。
+
+```csharp
+// Unity MCP RunCommand
+AssetDatabase.ImportAsset("Assets/App/...", ImportAssetOptions.ForceUpdate);
+AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
 ```
-// Unity MCP RunCommand でテスト実行
-TestRunnerApi.Execute(new ExecutionSettings(new Filter {
+
+- `GetConsoleLogs(logTypes: "error")` でコンパイルエラーが 0 件であることを確認する。
+- **注意**: 単に `AssetDatabase.Refresh()` だけでは再コンパイルがトリガーされない場合がある。変更ファイルに対して `ImportAsset(..., ForceUpdate)` を明示的に呼ぶこと。
+
+### Step 2: テスト実行
+
+```csharp
+// Unity MCP RunCommand
+var api = ScriptableObject.CreateInstance<TestRunnerApi>();
+var filter = new Filter {
     testMode = TestMode.EditMode,
     assemblyNames = new[] { "App.Tests.EditMode" }
-}));
+};
+api.Execute(new ExecutionSettings(filter));
 ```
 
-- EditMode テスト対象アセンブリ: `App.Tests.EditMode`
-- テスト結果は `Temp/test_results.txt` に書き出すか、`Debug.Log` で `[TEST DONE]` プレフィックス付きで出力
-- PR 作成前に全テスト通過を確認すること (§23 参照)
+### Step 3: テスト結果の確認
+
+テスト結果は以下のファイルに XML 形式で出力される:
+
+```
+C:/Users/herring/AppData/LocalLow/DefaultCompany/SpringGame_teamA/TestResults.xml
+```
+
+このファイルを読み取り、`result="Failed"` を検索して失敗テストがないことを確認する。
+
+```
+// 確認コマンド例（Grep ツール）
+pattern: test-run.*result=
+→ result="Passed" total="N" passed="N" failed="0" であること
+```
+
+- `failed="0"` であれば全件グリーン。
+- `failed` が 1 以上の場合、`result="Failed"` の `test-case` 要素を特定し、`<message>` と `<stack-trace>` からエラー内容を読み取って修正する。
+- **テスト実行は非同期**なので、実行開始後 5〜10 秒待ってから結果ファイルを確認すること。`start-time` のタイムスタンプが更新されていることで新しい結果であることを検証する。
+
+### Step 4: commit / push / PR
+
+上記 Step 1〜3 で全件グリーンを確認した後にのみ、commit → push → PR 作成に進む。
 
 ### ビルド
 
@@ -1031,11 +1066,11 @@ TestRunnerApi.Execute(new ExecutionSettings(new Filter {
 
 ## 23. テスト完了の必須確認
 
-PR を作成する前に、**必ず全ての EditMode テストが通ることを確認**すること。
+PR を作成する前に、**必ず §22 のフローで全ての EditMode テストが通ることを確認**すること。
 
-- Unity MCP 経由でテストを実行し、結果（passed / failed / skipped）をログで確認する。
 - 1 件でも失敗がある場合は、修正してから再実行し、全件グリーンを確認するまで PR を作成しない。
-- テスト結果が非同期で取得できない場合は、コンソールログのエラー有無で代替確認する。
+- **TestResults.xml を実際に読み取って `failed="0"` を目視確認**すること。MCP の RunCommand 手動テストだけでは NUnit テストの合否を代替できない。
+- テスト結果ファイルの `start-time` が最新の実行であることを必ず検証する（古い結果を読んでいないか確認）。
 
 ---
 
