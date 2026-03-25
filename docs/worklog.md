@@ -1,5 +1,28 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 9 — UI Toolkit HUD / オーバーレイ
+
+### 完了タスク
+- **T-9.1** USS 変数 + ルート UXML/USS (Variables.uss, MatchRoot.uxml/uss)
+- **T-9.2** HUD: PlayerHud.uxml/uss, PlayerHudView.cs, PlayerHudPresenter.cs (タイマー統合)
+- **T-9.3** 強化オーバーレイ: UpgradeCard.uxml/uss, UpgradeOverlay.uss, UpgradeCardElement.cs, UpgradeIdDisplayHelper.cs, UpgradeOverlayView.cs, UpgradeOverlayPresenter.cs
+- **T-9.3** UpgradeSelectionState.cs (Upgrades/Domain), UpgradeUIInputBridge.cs 修正 (X軸ナビ + SelectionState)
+- **T-9.4** リザルト: Result.uss, ResultView.cs, ResultPresenter.cs (左右独立ペイン)
+- **T-9.5** MatchUIDocument.cs, MatchPanelSettings.asset
+- **T-9.6** UIPreview シーン + UIPreviewController.cs (Scenes/Debug/, RuntimeUI/Debug/)
+- コンパイルエラー 0 件、EditMode テスト 223 件全件グリーン
+
+### 設計判断
+- **プレイヤー独立原則**: 全フェーズ (HUD/強化/リザルト) で各プレイヤーが自己完結した UI ペインを持つ。共有の中央タイマーやグローバルカウントダウンは廃止
+- **スケーラブル設計**: PlayerHud テンプレートを繰り返すだけで 1〜N 人に対応可能
+- **USS 変数定義**: `:root` ではなく `.match-root` に定義（UXML テンプレートインスタンスへの変数継承問題を回避）
+- **PhaseTimerPresenter 廃止**: タイマーは PlayerHudPresenter に統合（各プレイヤー HUD 内に表示）
+- **リロール**: Label ではなく Button に変更
+- **開発用ファイル分離**: UIPreviewController → RuntimeUI/Debug/, UIPreview.unity → Scenes/Debug/
+- CLAUDE.md §11.2 をプレイヤー独立構造に更新、§11.4 にデザイン方針を追加
+
+---
+
 ## 2026-03-26: Phase 8.5 — Phase 9 前提修正
 
 ### 完了タスク

@@ -1,0 +1,92 @@
+/* ==============================================
+   FLOOR BREAKER — Result スタイル
+   左右プレイヤー独立ペイン
+   ============================================== */
+
+.result-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    picking-mode: position;
+}
+
+.result-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-backdrop);
+}
+
+/* --- 左右ペイン配置 --- */
+.result-panes {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: row;
+}
+
+.result-pane {
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+}
+
+.result-divider {
+    width: 2px;
+    background-color: rgba(240, 232, 216, 0.2);
+}
+
+/* --- 勝敗表示 --- */
+.result-pane__result {
+    font-size: 56px;
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-xl);
+}
+
+.result-pane--p1 > .result-pane__result {
+    color: var(--color-p1);
+}
+
+.result-pane--p2 > .result-pane__result {
+    color: var(--color-p2);
+}
+
+/* --- ボタン --- */
+.result-pane__buttons {
+    flex-direction: column;
+    align-items: center;
+}
+
+.result-btn {
+    font-size: var(--font-size-lg);
+    color: var(--color-text);
+    background-color: var(--color-bg-panel);
+    border-width: 2px;
+    border-color: var(--color-text-dim);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-xl);
+    margin-bottom: var(--spacing-sm);
+    min-width: 200px;
+    -unity-text-align: middle-center;
+}
+
+.result-btn:hover {
+    background-color: rgba(240, 232, 216, 0.1);
+    border-color: var(--color-text);
+}
+
+.result-btn--secondary {
+    border-color: var(--color-disabled);
+}
+
+.result-btn--secondary:hover {
+    border-color: var(--color-text-dim);
+}

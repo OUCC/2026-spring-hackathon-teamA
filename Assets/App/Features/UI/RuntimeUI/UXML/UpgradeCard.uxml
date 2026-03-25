@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="UnityEngine.UIElements"
+      xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
+
+    <VisualElement class="card">
+        <VisualElement name="CategoryBand" class="card__band" />
+        <VisualElement class="card__body">
+            <Label name="CardName" class="card__name" text="強化名" />
+            <Label name="CardDesc" class="card__desc" text="効果説明" />
+        </VisualElement>
+        <VisualElement class="card__footer">
+            <Label class="card__cost-icon" text="&#x25C9;" />
+            <Label name="CardCost" class="card__cost" text="0" />
+        </VisualElement>
+    </VisualElement>
+
+</UXML>

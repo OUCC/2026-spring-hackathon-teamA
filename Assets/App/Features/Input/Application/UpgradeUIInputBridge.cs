@@ -20,9 +20,7 @@ namespace FloorBreaker.Input.Application
         private readonly PlayerModel _player2;
         private readonly MatchClock _clock;
         private readonly IRandomProvider _random;
-
-        private int _p1SelectIndex;
-        private int _p2SelectIndex;
+        private readonly UpgradeSelectionState _selectionState;
 
         public UpgradeUIInputBridge(
             UpgradeDraftService draftP1,
@@ -30,7 +28,8 @@ namespace FloorBreaker.Input.Application
             PlayerModel player1,
             PlayerModel player2,
             MatchClock clock,
-            IRandomProvider random)
+            IRandomProvider random,
+            UpgradeSelectionState selectionState)
         {
             _draftP1 = draftP1;
             _draftP2 = draftP2;
@@ -38,20 +37,22 @@ namespace FloorBreaker.Input.Application
             _player2 = player2;
             _clock = clock;
             _random = random;
+            _selectionState = selectionState;
         }
 
         public void OnNavigateP1(InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase()) return;
             var v = ctx.ReadValue<UnityEngine.Vector2>();
-            if (v.y > 0.5f) _p1SelectIndex = Math.Max(0, _p1SelectIndex - 1);
-            else if (v.y < -0.5f) _p1SelectIndex = Math.Min(2, _p1SelectIndex + 1);
+            int current = _selectionState.GetIndex(PlayerId.Player1);
+            if (v.x > 0.5f) _selectionState.SetIndex(PlayerId.Player1, Math.Min(2, current + 1));
+            else if (v.x < -0.5f) _selectionState.SetIndex(PlayerId.Player1, Math.Max(0, current - 1));
         }
 
         public void OnSubmitP1(InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
-            _draftP1.SelectChoice(_p1SelectIndex, _player1);
+            _draftP1.SelectChoice(_selectionState.GetIndex(PlayerId.Player1), _player1);
         }
 
         public void OnSkipP1(InputAction.CallbackContext ctx)
@@ -70,14 +71,15 @@ namespace FloorBreaker.Input.Application
         {
             if (!IsUpgradePhase()) return;
             var v = ctx.ReadValue<UnityEngine.Vector2>();
-            if (v.y > 0.5f) _p2SelectIndex = Math.Max(0, _p2SelectIndex - 1);
-            else if (v.y < -0.5f) _p2SelectIndex = Math.Min(2, _p2SelectIndex + 1);
+            int current = _selectionState.GetIndex(PlayerId.Player2);
+            if (v.x > 0.5f) _selectionState.SetIndex(PlayerId.Player2, Math.Min(2, current + 1));
+            else if (v.x < -0.5f) _selectionState.SetIndex(PlayerId.Player2, Math.Max(0, current - 1));
         }
 
         public void OnSubmitP2(InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
-            _draftP2.SelectChoice(_p2SelectIndex, _player2);
+            _draftP2.SelectChoice(_selectionState.GetIndex(PlayerId.Player2), _player2);
         }
 
         public void OnSkipP2(InputAction.CallbackContext ctx)
@@ -99,8 +101,7 @@ namespace FloorBreaker.Input.Application
 
         public void ResetSelection()
         {
-            _p1SelectIndex = 0;
-            _p2SelectIndex = 0;
+            _selectionState.Reset();
         }
     }
 }

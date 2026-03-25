@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="UnityEngine.UIElements"
+      xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
+
+    <VisualElement class="hud">
+        <!-- 上辺バー: タイマー + HP + コイン -->
+        <VisualElement class="hud__top-bar">
+            <!-- タイマーバッジ -->
+            <VisualElement class="hud__timer-badge">
+                <Label name="TimerLabel" class="hud__timer-value" text="20" />
+                <Label class="hud__timer-unit" text="秒" />
+            </VisualElement>
+
+            <!-- HP -->
+            <VisualElement class="hud__hp-container">
+                <VisualElement class="hud__hp-icon-wrap">
+                    <Label class="hud__hp-icon" text="&#x2665;" />
+                </VisualElement>
+                <VisualElement class="hud__hp-bar">
+                    <VisualElement name="HpFill" class="hud__hp-fill" />
+                </VisualElement>
+                <Label name="HpLabel" class="hud__hp-value" text="10" />
+            </VisualElement>
+
+            <!-- コインバッジ -->
+            <VisualElement class="hud__coin-badge">
+                <Label class="hud__coin-icon" text="&#x25C9;" />
+                <Label name="CoinLabel" class="hud__coin-value" text="0" />
+            </VisualElement>
+        </VisualElement>
+
+        <!-- 下辺バー: ボムCD + 取得済み強化 -->
+        <VisualElement class="hud__bottom-bar">
+            <VisualElement class="hud__cd-container">
+                <VisualElement class="hud__cd-slot">
+                    <VisualElement class="hud__cd-icon-wrap hud__cd-icon-wrap--fire">
+                        <Label class="hud__cd-icon" text="炎" />
+                    </VisualElement>
+                    <VisualElement class="hud__cd-bar">
+                        <VisualElement name="FireCdFill" class="hud__cd-fill hud__cd-fill--fire" />
+                    </VisualElement>
+                </VisualElement>
+                <VisualElement class="hud__cd-slot">
+                    <VisualElement class="hud__cd-icon-wrap hud__cd-icon-wrap--fall">
+                        <Label class="hud__cd-icon" text="滑" />
+                    </VisualElement>
+                    <VisualElement class="hud__cd-bar">
+                        <VisualElement name="FallCdFill" class="hud__cd-fill hud__cd-fill--fall" />
+                    </VisualElement>
+                </VisualElement>
+            </VisualElement>
+            <VisualElement name="AcquiredUpgrades" class="hud__upgrades-row" />
+        </VisualElement>
+    </VisualElement>
+
+</UXML>

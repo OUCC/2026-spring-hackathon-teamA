@@ -1,0 +1,46 @@
+/* ==============================================
+   FLOOR BREAKER — MatchRoot レイアウト
+   ============================================== */
+
+.match-root {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+}
+
+/* --- レイヤー共通 --- */
+.match-layer,
+.overlay-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    picking-mode: ignore;
+}
+
+/* --- MatchLayer: プレイヤー HUD を横に並べる --- */
+.match-layer {
+    flex-direction: row;
+}
+
+.hud-root {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* --- 中央仕切り線 --- */
+.match-divider {
+    width: 2px;
+    background-color: rgba(240, 232, 216, 0.2);
+}
+
+/* 非表示状態 */
+.upgrade-overlay--hidden {
+    display: none;
+}
+
+.result-root--hidden {
+    display: none;
+}
