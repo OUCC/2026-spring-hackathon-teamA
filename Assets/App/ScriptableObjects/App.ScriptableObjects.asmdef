@@ -1,0 +1,17 @@
+{
+    "name": "App.ScriptableObjects",
+    "rootNamespace": "FloorBreaker.ScriptableObjects",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

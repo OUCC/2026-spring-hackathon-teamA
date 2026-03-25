@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 381125c8f551d8f41b8a3e5d55cfb10e, type: 3}
+  m_Name: DefaultBalance
+  m_EditorClassIdentifier: App.ScriptableObjects::FloorBreaker.ScriptableObjects.Balance.BalanceConfig
+  initialHp: 10
+  baseMovementSpeed: 1
+  maxMovementSpeed: 2
+  movementSpeedIncrement: 0.2
+  fallBombMaxFlightDistance: 3
+  fallBombEffectRange: 1
+  fallBombDamage: 2
+  fallBombCollapseDuration: 3
+  fallBombRecoveryDuration: 5
+  fallBombCooldown: 4
+  fallBombCooldownMin: 1
+  fallBombCooldownReduction: 0.5
+  fallBombDefaultWallPenetration: 1
+  fireBombMaxFlightDistance: 3
+  fireBombEffectRange: 1
+  fireBombContactDamage: 1
+  fireBombDotDamage: 1
+  fireBombDotInterval: 1
+  fireBombDuration: 3.5
+  fireBombCooldown: 2
+  fireBombCooldownMin: 0.5
+  fireBombCooldownReduction: 0.3
+  fireBombDefaultWallPenetration: 0
+  stageSize: 30
+  wallSeedPercent: 0.08
+  wallGrowthChance: 0.4
+  wallTargetPercent: 0.2
+  spawnProtectionRadius: 2
+  slimeSpawnCheckInterval: 5
+  slimeTargetRatio: 0.03
+  slimeMinDistanceFromPlayer: 5
+  slimeHp: 1
+  slimeSpeedMultiplier: 0.5
+  slimeDetectionRange: 5
+  slimeAttackDamage: 1
+  slimeAttackCooldown: 1
+  slimeSpawnRatioNormal: 10
+  slimeSpawnRatioGold: 1
+  slimeSpawnRatioRed: 1
+  phaseDuration: 20
+  upgradeSelectionTimeout: 10
+  upgradeChoiceCount: 3
+  rerollCost: 1
+  forcedMoveDuration: 1
+  hpRecoveryAmount: 3
+  hpRecoveryThreshold: 5
