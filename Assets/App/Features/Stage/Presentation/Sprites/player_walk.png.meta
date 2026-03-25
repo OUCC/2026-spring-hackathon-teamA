@@ -140,7 +140,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: player_walk_0
+      name: player_walk_up_left
       rect:
         serializedVersion: 2
         x: 2
@@ -162,7 +162,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_walk_1
+      name: player_walk_up
       rect:
         serializedVersion: 2
         x: 346
@@ -184,7 +184,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_walk_3
+      name: player_walk_up_right
       rect:
         serializedVersion: 2
         x: 742
@@ -206,7 +206,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_walk_4
+      name: player_walk_left
       rect:
         serializedVersion: 2
         x: 20
@@ -228,29 +228,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_walk_5
-      rect:
-        serializedVersion: 2
-        x: 354
-        y: 540
-        width: 319
-        height: 450
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b6f24819050ba65b0800000000000000
-      internalID: -5374289345228034197
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: player_walk_6
+      name: player_walk_right
       rect:
         serializedVersion: 2
         x: 733
@@ -272,7 +250,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_walk_7
+      name: player_walk_down_left
       rect:
         serializedVersion: 2
         x: 0
@@ -294,7 +272,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_walk_8
+      name: player_walk_down
       rect:
         serializedVersion: 2
         x: 344
@@ -316,7 +294,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_walk_9
+      name: player_walk_down_right
       rect:
         serializedVersion: 2
         x: 725
@@ -351,16 +329,16 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      player_walk_0: 2215745761463138581
-      player_walk_1: 1700766857389022521
       player_walk_2: 2457880308640484884
-      player_walk_3: -1273090703572220712
-      player_walk_4: 7775377318884447243
       player_walk_5: -5374289345228034197
-      player_walk_6: 765823781208195064
-      player_walk_7: 535955826551466408
-      player_walk_8: -754307324568069651
-      player_walk_9: 3513833701161860113
+      player_walk_down: -754307324568069651
+      player_walk_down_left: 535955826551466408
+      player_walk_down_right: 3513833701161860113
+      player_walk_left: 7775377318884447243
+      player_walk_right: 765823781208195064
+      player_walk_up: 1700766857389022521
+      player_walk_up_left: 2215745761463138581
+      player_walk_up_right: -1273090703572220712
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
