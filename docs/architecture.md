@@ -4,60 +4,69 @@
 
 ```mermaid
 graph TB
-    subgraph Bootstrap["Bootstrap (VContainer)"]
+    subgraph Bootstrap
         PLS[ProjectLifetimeScope]
         MLS[MatchLifetimeScope]
     end
 
-    subgraph Shared["Shared"]
-        SD[Domain<br/>GridPos, Direction8, PlayerId<br/>GamePhase, MatchClock<br/>Float2, TileCoordRange<br/>UpgradeId]
-        SA[Application<br/>IBalanceParameters<br/>ITimeProvider<br/>IRandomProvider<br/>IAudioService]
-        SI[Infrastructure<br/>UnityTimeProvider<br/>SeededRandomProvider]
-        SP[Presentation<br/>Float2Extensions]
+    subgraph Shared
+        SD[Domain]
+        SA[Application]
+        SI[Infrastructure]
+        SP[Presentation]
     end
 
-    subgraph Features["Features"]
-        Stage[Stage]
-        Player[Player]
-        Bombs[Bombs]
-        Slimes[Slimes]
-        Upgrades[Upgrades]
-        MatchFlow[MatchFlow]
-        Input[Input]
-        UI[UI]
-        Cameras[Cameras]
+    subgraph Features
+        Stage
+        Player
+        Bombs
+        Slimes
+        Upgrades
+        MatchFlow
+        Input
+        UI
+        Cameras
     end
 
-    subgraph External["ScriptableObjects"]
+    subgraph ScriptableObjects
         SO[BalanceConfig]
     end
 
     Bootstrap --> Features
     Bootstrap --> Shared
-    Bootstrap --> External
+    Bootstrap --> ScriptableObjects
     Features --> Shared
-    External --> SA
-    External --> SD
+    ScriptableObjects --> SA
+    ScriptableObjects --> SD
 ```
+
+### Shared 内容
+
+| レイヤー | クラス |
+|---|---|
+| Domain | GridPos, Direction8, CardinalDirection4, TileCoordRange, PlayerId, Float2, UpgradeId, GamePhase, MatchClock |
+| Application | IBalanceParameters, ITimeProvider, IRandomProvider, IAudioService |
+| Infrastructure | UnityTimeProvider, SeededRandomProvider |
+| Presentation | Float2Extensions |
 
 ## アセンブリ依存グラフ
 
 ```mermaid
 graph LR
-    SD["App.Shared.Domain<br/><i>noEngine ✓</i>"]
-    SA["App.Shared.Application<br/><i>noEngine ✓</i>"]
-    SI["App.Shared.Infrastructure"]
-    SP["App.Shared.Presentation"]
-    AST["App.Stage<br/><i>noEngine ✓</i>"]
-    APL["App.Player<br/><i>noEngine ✓</i>"]
-    ABM["App.Bombs<br/><i>noEngine ✓</i><br/>(予定)"]
-    ASL["App.Slimes<br/>(予定)"]
-    AUP["App.Upgrades<br/>(予定)"]
-    AMF["App.MatchFlow<br/>(予定)"]
-    AIN["App.Input<br/>(予定)"]
-    AUI["App.UI<br/>(予定)"]
-    ASO["App.ScriptableObjects"]
-    ABT["App.Bootstrap"]
+    SD["App.Shared.Domain ✓"]
+    SA["App.Shared.Application ✓"]
+    SI[App.Shared.Infrastructure]
+    SP[App.Shared.Presentation]
+    AST["App.Stage ✓"]
+    APL["App.Player ✓"]
+    ABM["App.Bombs ✓ 予定"]
+    ASL["App.Slimes 予定"]
+    AUP["App.Upgrades 予定"]
+    AMF["App.MatchFlow 予定"]
+    AIN["App.Input 予定"]
+    AUI["App.UI 予定"]
+    ASO[App.ScriptableObjects]
+    ABT[App.Bootstrap]
 
     SA --> SD
     SI --> SD
@@ -102,10 +111,10 @@ graph LR
 ```mermaid
 graph TB
     subgraph layers["依存方向 (上→下のみ)"]
-        Pres["Presentation<br/>MonoBehaviour, UIDocument<br/>SpriteRenderer, VFX, DOTween"]
-        Infra["Infrastructure<br/>Unity API ラッパー, Input System<br/>AudioService, 保存"]
-        App["Application<br/>UseCase, Orchestrator<br/>Presenter Bridge"]
-        Dom["Domain<br/>Model, Service, Resolver<br/>pure C#, R3 ReactiveProperty"]
+        Pres[Presentation]
+        Infra[Infrastructure]
+        App[Application]
+        Dom[Domain]
     end
 
     Pres --> App
@@ -119,6 +128,13 @@ graph TB
     style Infra fill:#e3f2fd
     style Pres fill:#fce4ec
 ```
+
+| レイヤー | 責務 | 例 |
+|---|---|---|
+| Domain | ゲームルール、モデル、サービス (pure C#, R3) | StageModel, PlayerBuild, BombSpec |
+| Application | ユースケース、オーケストレーション | BombLaunchUseCase, PlayerMoveService |
+| Infrastructure | Unity API ラッパー、外部実装 | UnityTimeProvider, InputAdapter, AudioService |
+| Presentation | MonoBehaviour, UI, VFX, アニメーション | TileView, PlayerView, HUD Presenter |
 
 ## Feature 別クラス構成
 
@@ -292,23 +308,23 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     subgraph Domain
-        SM_TC["StageModel<br/>.TileChanged"]
-        MC_R["MatchClock<br/>.Remaining"]
-        MC_P["MatchClock<br/>.CurrentPhase"]
-        PS_HP["PlayerStats<br/>.CurrentHp"]
-        PS_C["PlayerStats<br/>.Coins"]
-        PM_Pos["PlayerModel<br/>.Position"]
-        TTS["TileTimerService<br/>.TimerCompleted"]
+        SM_TC[StageModel.TileChanged]
+        MC_R[MatchClock.Remaining]
+        MC_P[MatchClock.CurrentPhase]
+        PS_HP[PlayerStats.CurrentHp]
+        PS_C[PlayerStats.Coins]
+        PM_Pos[PlayerModel.Position]
+        TTS[TileTimerService.TimerCompleted]
     end
 
     subgraph Presentation
-        TV["TileView<br/>スプライト切替"]
-        HUD_T["HUD Timer"]
-        HUD_HP["HUD HP Bar"]
-        HUD_C["HUD Coins"]
-        PV["PlayerView<br/>移動アニメ"]
-        TVFX["Tile VFX<br/>崩落/炎エフェクト"]
-        OV["Overlay<br/>強化UI/リザルト"]
+        TV[TileView]
+        HUD_T[HUD Timer]
+        HUD_HP[HUD HP Bar]
+        HUD_C[HUD Coins]
+        PV[PlayerView]
+        TVFX[Tile VFX]
+        OV[Overlay UI]
     end
 
     SM_TC --> TV
