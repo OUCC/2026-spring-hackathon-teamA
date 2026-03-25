@@ -1,6 +1,27 @@
 # FLOOR BREAKER — 作業ログ
 
-## 2026-03-26: Phase 0 — プロジェクト基盤 (PR #TBD)
+## 2026-03-26: Phase 1 — 共通プリミティブ (PR #TBD)
+
+### 完了タスク
+- **T-1.1** GridPos 値型 — 算術、ManhattanDistance/ChebyshevDistance、Neighbors4/8、ToWorldCenter/FromWorld
+- **T-1.2** Direction8 / CardinalDirection4 — ToOffset, Opposite, IsCardinal, ToDirection8
+- **T-1.3** PlayerId — Player1/Player2/Opponent
+- **T-1.4** GamePhase 列挙型
+- **T-1.5** MatchClock — R3 ReactiveProperty で Remaining/CurrentPhase/IsPaused を公開
+- **T-1.6** TileCoordRange — Contains, Shrink, GetAllPositions, GetOuterRing
+- **T-1.7** ITimeProvider / IRandomProvider / IAudioService インターフェース
+- **T-1.8** UnityTimeProvider / SeededRandomProvider 実装
+- Float2 (Domain 用軽量ベクトル) + Float2Extensions (Vector2 変換)
+- EditMode テスト 4 ファイル (GridPos, Direction8, TileCoordRange, SeededRandomProvider)
+
+### 設計判断
+- Domain に Float2 を自作し UnityEngine.Vector2 を排除、noEngineReferences: true を維持
+- R3.dll を precompiledReferences で Domain asmdef から参照し MatchClock を Domain/Timing に配置
+- GridPos.ToWorldCenter() は Float2 を返し、Presentation 層で Vector2 に変換
+
+---
+
+## 2026-03-26: Phase 0 — プロジェクト基盤 (PR #19)
 
 ### 完了タスク
 - **T-0.1** ディレクトリ構造の作成 — CLAUDE.md §3 に従い Assets/App/ 配下のフルツリーを作成
