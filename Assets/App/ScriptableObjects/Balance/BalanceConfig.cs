@@ -61,8 +61,13 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [SerializeField] private int upgradeChoiceCount = 3;
         [SerializeField] private int rerollCost = 1;
 
-        [Header("Forced Move")]
+        [Header("Forced Move / Combat")]
         [SerializeField] private float forcedMoveDuration = 1f;
+        [SerializeField] private float invulnerabilityDuration = 1.5f;
+
+        [Header("Bomb Flight")]
+        [SerializeField] private float bombFlightSpeed = 12f;
+        [SerializeField] private float stageShrinkAnimDuration = 1f;
 
         [Header("Upgrade: HP Recovery")]
         [SerializeField] private int hpRecoveryAmount = 3;
@@ -119,6 +124,10 @@ namespace FloorBreaker.ScriptableObjects.Balance
         public int RerollCost => rerollCost;
 
         public float ForcedMoveDuration => forcedMoveDuration;
+        public float InvulnerabilityDuration => invulnerabilityDuration;
+
+        public float BombFlightSpeed => bombFlightSpeed;
+        public float StageShrinkAnimDuration => stageShrinkAnimDuration;
 
         public int HpRecoveryAmount => hpRecoveryAmount;
         public int HpRecoveryThreshold => hpRecoveryThreshold;

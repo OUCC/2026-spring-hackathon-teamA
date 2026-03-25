@@ -139,6 +139,9 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public float ForcedMoveDuration => 1f;
             public int HpRecoveryAmount => 3;
             public int HpRecoveryThreshold => 5;
+            public float InvulnerabilityDuration => 1.5f;
+            public float BombFlightSpeed => 12f;
+            public float StageShrinkAnimDuration => 1f;
         }
     }
 }
