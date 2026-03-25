@@ -1,6 +1,27 @@
 # FLOOR BREAKER — 作業ログ
 
-## 2026-03-26: Phase 1 — 共通プリミティブ (PR #TBD)
+## 2026-03-26: Phase 2 — ステージ Domain (PR #TBD)
+
+### 完了タスク
+- **T-2.1** TileState 列挙型 (Normal/OnFire/Collapsing/Collapsed/PermanentlyDestroyed/Wall)
+- **T-2.2** StageModel — 30x30 TileState 2D配列 + R3 Subject で変更通知
+- **T-2.3** StageBounds — TileCoordRange ラッパー、Shrink/GetOuterRing
+- **T-2.4** WallGenerationService — シード 8% + 成長 40% → 目標 20%、5x5 スポーン保護
+- **T-2.5** StageShrinkService — 外周を PermanentlyDestroyed に設定し境界縮小
+- **T-2.6** SafeTileSearchService — BFS で最近の安全マスを探索
+- **T-2.7** StageQueryService — GetPassableTiles, GetTilesInCross, RaycastGrid
+- **T-2.8** TileTimerService — 崩落→復帰の自動チェーン、炎タイマー、R3 完了通知
+- **T-2.9** EditMode テスト 6 ファイル
+
+### 設計判断
+- App.Stage asmdef は noEngineReferences: true、pure C# Domain
+- WallGenerationService は壁位置を返すだけ (副作用なし)、呼び出し側が StageModel に適用
+- TileTimerService は崩落完了後に自動で復帰タイマーを開始
+- SafeTileSearchService は BFS のみ (3x3 優先探索は省略しシンプルに)
+
+---
+
+## 2026-03-26: Phase 1 — 共通プリミティブ (PR #21)
 
 ### 完了タスク
 - **T-1.1** GridPos 値型 — 算術、ManhattanDistance/ChebyshevDistance、Neighbors4/8、ToWorldCenter/FromWorld
