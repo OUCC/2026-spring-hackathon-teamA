@@ -1,0 +1,62 @@
+/* ==============================================
+   FLOOR BREAKER — デザイントークン
+   .match-root に定義して全子孫に継承させる
+   ============================================== */
+
+.match-root {
+    /* --- カラー --- */
+    --color-bg-panel: rgba(20, 15, 30, 0.75);
+    --color-text: #F0E8D8;
+    --color-text-dim: #A09888;
+
+    --color-p1: #4A90D9;
+    --color-p2: #D94A4A;
+
+    --color-fire: #F08030;
+    --color-fall: #3080C0;
+    --color-general: #40A050;
+
+    --color-coin: #F0C040;
+    --color-hp: #E04040;
+    --color-hp-bg: #401010;
+    --color-cd: #80D0F0;
+    --color-cd-bg: #1A2A30;
+
+    --color-disabled: #606060;
+    --color-backdrop: rgba(0, 0, 0, 0.6);
+
+    --color-card-bg: rgba(30, 25, 40, 0.9);
+    --color-card-border: rgba(240, 232, 216, 0.15);
+    --color-card-selected: rgba(255, 255, 200, 0.15);
+    --color-card-selected-border: #F0C040;
+    --color-card-locked: rgba(96, 96, 96, 0.6);
+
+    /* --- サイズ --- */
+    --font-size-xl: 48px;
+    --font-size-lg: 28px;
+    --font-size-md: 20px;
+    --font-size-sm: 14px;
+    --font-size-xs: 11px;
+
+    --hud-bar-height: 40px;
+    --hp-bar-width: 120px;
+    --hp-bar-height: 14px;
+    --cd-bar-width: 100px;
+    --cd-bar-height: 10px;
+
+    --card-width: 180px;
+    --card-height: 220px;
+    --card-band-height: 6px;
+
+    /* --- 間隔 --- */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 40px;
+
+    /* --- 角丸 --- */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+}

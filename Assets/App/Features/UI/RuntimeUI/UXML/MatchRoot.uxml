@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="UnityEngine.UIElements"
+      xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
+
+    <Style src="../USS/Variables.uss" />
+    <Style src="../USS/MatchRoot.uss" />
+    <Style src="../USS/PlayerHud.uss" />
+    <Style src="../USS/UpgradeOverlay.uss" />
+    <Style src="../USS/UpgradeCard.uss" />
+    <Style src="../USS/Result.uss" />
+
+    <VisualElement name="MatchRoot" class="match-root">
+
+        <!-- MatchLayer: プレイヤー HUD 群 -->
+        <VisualElement name="MatchLayer" class="match-layer">
+            <Template src="PlayerHud.uxml" name="PlayerHudTemplate" />
+
+            <VisualElement name="LeftHudRoot" class="hud-root hud-root--p1">
+                <Instance template="PlayerHudTemplate" name="LeftHud" />
+            </VisualElement>
+
+            <VisualElement class="match-divider" />
+
+            <VisualElement name="RightHudRoot" class="hud-root hud-root--p2">
+                <Instance template="PlayerHudTemplate" name="RightHud" />
+            </VisualElement>
+        </VisualElement>
+
+        <!-- OverlayLayer -->
+        <VisualElement name="OverlayLayer" class="overlay-layer">
+
+            <!-- 強化オーバーレイ: 左右独立ペイン -->
+            <VisualElement name="UpgradeOverlayRoot" class="upgrade-overlay upgrade-overlay--hidden">
+                <VisualElement class="upgrade-backdrop" />
+                <VisualElement class="upgrade-panes">
+                    <VisualElement name="LeftUpgradePane" class="upgrade-pane upgrade-pane--p1">
+                        <Label class="upgrade-pane__title" text="強化フェーズ" />
+                        <Label name="LeftCountdown" class="upgrade-pane__countdown" text="10" />
+                        <VisualElement name="LeftCards" class="upgrade-pane__cards" />
+                        <VisualElement class="upgrade-pane__actions">
+                            <Button name="LeftRerollBtn" class="upgrade-pane__reroll-btn" text="リロール (1コイン)" />
+                        </VisualElement>
+                        <Label name="LeftStatus" class="upgrade-pane__status" />
+                    </VisualElement>
+
+                    <VisualElement class="upgrade-divider" />
+
+                    <VisualElement name="RightUpgradePane" class="upgrade-pane upgrade-pane--p2">
+                        <Label class="upgrade-pane__title" text="強化フェーズ" />
+                        <Label name="RightCountdown" class="upgrade-pane__countdown" text="10" />
+                        <VisualElement name="RightCards" class="upgrade-pane__cards" />
+                        <VisualElement class="upgrade-pane__actions">
+                            <Button name="RightRerollBtn" class="upgrade-pane__reroll-btn" text="リロール (1コイン)" />
+                        </VisualElement>
+                        <Label name="RightStatus" class="upgrade-pane__status" />
+                    </VisualElement>
+                </VisualElement>
+            </VisualElement>
+
+            <!-- リザルト: 左右独立ペイン -->
+            <VisualElement name="ResultRoot" class="result-root result-root--hidden">
+                <VisualElement class="result-backdrop" />
+                <VisualElement class="result-panes">
+                    <VisualElement name="LeftResultPane" class="result-pane result-pane--p1">
+                        <Label name="LeftResultLabel" class="result-pane__result" text="" />
+                        <VisualElement class="result-pane__buttons">
+                            <Button name="RematchButton" class="result-btn" text="リマッチ" />
+                            <Button name="TitleButton" class="result-btn result-btn--secondary" text="タイトルへ" />
+                        </VisualElement>
+                    </VisualElement>
+
+                    <VisualElement class="result-divider" />
+
+                    <VisualElement name="RightResultPane" class="result-pane result-pane--p2">
+                        <Label name="RightResultLabel" class="result-pane__result" text="" />
+                    </VisualElement>
+                </VisualElement>
+            </VisualElement>
+
+        </VisualElement>
+
+    </VisualElement>
+
+</UXML>

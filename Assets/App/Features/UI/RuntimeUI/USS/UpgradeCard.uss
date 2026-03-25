@@ -1,0 +1,103 @@
+/* ==============================================
+   FLOOR BREAKER — UpgradeCard スタイル
+   ============================================== */
+
+.card {
+    width: var(--card-width);
+    height: var(--card-height);
+    background-color: var(--color-card-bg);
+    border-radius: var(--radius-md);
+    border-width: 2px;
+    border-color: var(--color-card-border);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- カテゴリ色帯 --- */
+.card__band {
+    height: var(--card-band-height);
+    width: 100%;
+}
+
+.card__band--fire {
+    background-color: var(--color-fire);
+}
+
+.card__band--fall {
+    background-color: var(--color-fall);
+}
+
+.card__band--general {
+    background-color: var(--color-general);
+}
+
+/* --- カード本体 --- */
+.card__body {
+    flex-grow: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    justify-content: flex-start;
+}
+
+.card__name {
+    font-size: 18px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: var(--spacing-sm);
+}
+
+.card__desc {
+    font-size: 13px;
+    color: var(--color-text-dim);
+    white-space: normal;
+}
+
+/* --- フッター (コスト) --- */
+.card__footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    border-top-width: 1px;
+    border-top-color: var(--color-card-border);
+}
+
+.card__cost-icon {
+    font-size: var(--font-size-md);
+    color: var(--color-coin);
+    margin-right: var(--spacing-xs);
+}
+
+.card__cost {
+    font-size: var(--font-size-lg);
+    color: var(--color-coin);
+    -unity-font-style: bold;
+}
+
+/* --- 状態: 選択中 --- */
+.card--selected {
+    border-color: var(--color-card-selected-border);
+    background-color: var(--color-card-selected);
+    scale: 1.05 1.05;
+}
+
+/* --- 状態: コイン不足 --- */
+.card--locked .card__name,
+.card--locked .card__desc {
+    color: var(--color-disabled);
+}
+
+.card--locked .card__cost-icon,
+.card--locked .card__cost {
+    color: var(--color-disabled);
+}
+
+.card--locked {
+    background-color: var(--color-card-locked);
+    border-color: var(--color-disabled);
+}
+
+/* --- 状態: 選択完了後 --- */
+.card--done {
+    opacity: 0.4;
+}

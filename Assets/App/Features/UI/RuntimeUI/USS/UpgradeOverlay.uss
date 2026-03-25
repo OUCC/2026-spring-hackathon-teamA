@@ -1,0 +1,120 @@
+/* ==============================================
+   FLOOR BREAKER — UpgradeOverlay スタイル
+   各プレイヤーペインが完全に自己完結
+   ============================================== */
+
+.upgrade-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    picking-mode: position;
+}
+
+.upgrade-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-backdrop);
+}
+
+/* --- 左右ペイン配置 --- */
+.upgrade-panes {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: row;
+}
+
+.upgrade-pane {
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+}
+
+.upgrade-divider {
+    width: 2px;
+    background-color: rgba(240, 232, 216, 0.2);
+}
+
+/* --- ペイン内要素 --- */
+.upgrade-pane__title {
+    font-size: var(--font-size-lg);
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-xs);
+}
+
+.upgrade-pane__countdown {
+    font-size: 40px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-md);
+}
+
+.upgrade-pane__cards {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.upgrade-pane__cards > .card {
+    margin: 0 var(--spacing-xs);
+}
+
+/* --- リロールボタン --- */
+.upgrade-pane__actions {
+    margin-bottom: var(--spacing-sm);
+}
+
+.upgrade-pane__reroll-btn {
+    font-size: var(--font-size-sm);
+    color: var(--color-coin);
+    background-color: rgba(240, 192, 64, 0.1);
+    border-width: 1px;
+    border-color: rgba(240, 192, 64, 0.3);
+    border-radius: var(--radius-md);
+    padding: 6px 20px;
+}
+
+.upgrade-pane__reroll-btn:hover {
+    background-color: rgba(240, 192, 64, 0.2);
+    border-color: var(--color-coin);
+}
+
+/* --- ステータス --- */
+.upgrade-pane__status {
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+    -unity-text-align: middle-center;
+    min-height: 28px;
+}
+
+/* --- P1/P2 アクセント --- */
+.upgrade-pane--p1 {
+    border-right-width: 0;
+}
+
+.upgrade-pane--p1 > .upgrade-pane__title {
+    color: var(--color-p1);
+}
+
+.upgrade-pane--p2 > .upgrade-pane__title {
+    color: var(--color-p2);
+}
+
+/* --- ペイン完了状態 --- */
+.upgrade-pane--done {
+    opacity: 0.5;
+}
+
+.upgrade-pane--done .upgrade-pane__reroll-btn {
+    display: none;
+}

@@ -1,0 +1,238 @@
+/* ==============================================
+   FLOOR BREAKER — PlayerHud スタイル
+   ============================================== */
+
+.hud {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* ==========================
+   上辺バー
+   ========================== */
+.hud__top-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background-color: var(--color-bg-panel);
+}
+
+/* --- タイマーバッジ --- */
+.hud__timer-badge {
+    flex-direction: row;
+    align-items: flex-end;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 4px 12px;
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.12);
+}
+
+.hud__timer-value {
+    font-size: 32px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.hud__timer-unit {
+    font-size: 12px;
+    color: var(--color-text-dim);
+    margin-left: 2px;
+    margin-bottom: 6px;
+}
+
+/* --- HP --- */
+.hud__hp-container {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    margin: 0 12px;
+}
+
+.hud__hp-icon-wrap {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    background-color: rgba(224, 64, 64, 0.2);
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+}
+
+.hud__hp-icon {
+    font-size: 16px;
+    color: var(--color-hp);
+    -unity-text-align: middle-center;
+}
+
+.hud__hp-bar {
+    flex-grow: 1;
+    height: 16px;
+    max-width: 140px;
+    background-color: var(--color-hp-bg);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.hud__hp-fill {
+    height: 100%;
+    width: 100%;
+    background-color: var(--color-hp);
+    border-radius: 8px;
+}
+
+.hud__hp-value {
+    font-size: 16px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-left: 6px;
+    min-width: 24px;
+    -unity-text-align: middle-left;
+}
+
+/* --- コインバッジ --- */
+.hud__coin-badge {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(240, 192, 64, 0.12);
+    border-radius: 12px;
+    padding: 4px 10px;
+    border-width: 1px;
+    border-color: rgba(240, 192, 64, 0.25);
+}
+
+.hud__coin-icon {
+    font-size: 16px;
+    color: var(--color-coin);
+    margin-right: 4px;
+}
+
+.hud__coin-value {
+    font-size: 18px;
+    color: var(--color-coin);
+    -unity-font-style: bold;
+    min-width: 20px;
+    -unity-text-align: middle-left;
+}
+
+/* ==========================
+   下辺バー
+   ========================== */
+.hud__bottom-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background-color: var(--color-bg-panel);
+}
+
+.hud__cd-container {
+    flex-direction: row;
+    align-items: center;
+}
+
+.hud__cd-slot {
+    flex-direction: row;
+    align-items: center;
+    margin-right: 12px;
+}
+
+.hud__cd-icon-wrap {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+}
+
+.hud__cd-icon-wrap--fire {
+    background-color: rgba(240, 128, 48, 0.2);
+}
+
+.hud__cd-icon-wrap--fall {
+    background-color: rgba(48, 128, 192, 0.2);
+}
+
+.hud__cd-icon {
+    font-size: 12px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.hud__cd-bar {
+    width: 80px;
+    height: 8px;
+    background-color: var(--color-cd-bg);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.hud__cd-fill {
+    height: 100%;
+    width: 100%;
+    border-radius: var(--radius-sm);
+}
+
+.hud__cd-fill--fire {
+    background-color: var(--color-fire);
+}
+
+.hud__cd-fill--fall {
+    background-color: var(--color-fall);
+}
+
+/* --- 取得済み強化アイコン列 --- */
+.hud__upgrades-row {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.hud__upgrade-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    margin: 1px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.hud__upgrade-dot--fire {
+    background-color: var(--color-fire);
+}
+
+.hud__upgrade-dot--fall {
+    background-color: var(--color-fall);
+}
+
+.hud__upgrade-dot--general {
+    background-color: var(--color-general);
+}
+
+/* ==========================
+   P1/P2 アクセント
+   ========================== */
+.hud-root--p1 > .hud > .hud__top-bar {
+    border-bottom-color: var(--color-p1);
+    border-bottom-width: 2px;
+}
+
+.hud-root--p2 > .hud > .hud__top-bar {
+    border-bottom-color: var(--color-p2);
+    border-bottom-width: 2px;
+}
+
+.hud-root--p1 > .hud > .hud__bottom-bar {
+    border-top-color: var(--color-p1);
+    border-top-width: 2px;
+}
+
+.hud-root--p2 > .hud > .hud__bottom-bar {
+    border-top-color: var(--color-p2);
+    border-top-width: 2px;
+}
