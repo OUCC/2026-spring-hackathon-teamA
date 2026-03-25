@@ -6,6 +6,8 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Bombs.Domain;
+using FloorBreaker.Slimes.Domain;
+using FloorBreaker.Upgrades.Domain;
 
 namespace FloorBreaker.Bombs.Application
 {
@@ -18,6 +20,9 @@ namespace FloorBreaker.Bombs.Application
         private readonly TileTimerService _tileTimerService;
         private readonly PlayerDamageService _damageService;
         private readonly SafeTileSearchService _safeTileSearch;
+        private readonly SlimeRegistry _slimeRegistry;
+        private readonly SlimeDropResolver _slimeDropResolver;
+        private readonly IRandomProvider _random;
         private readonly float _fallBombRecoveryDuration;
 
         public BombLaunchUseCase(
@@ -28,7 +33,10 @@ namespace FloorBreaker.Bombs.Application
             TileTimerService tileTimerService,
             PlayerDamageService damageService,
             SafeTileSearchService safeTileSearch,
-            IBalanceParameters balance)
+            IBalanceParameters balance,
+            SlimeRegistry slimeRegistry = null,
+            SlimeDropResolver slimeDropResolver = null,
+            IRandomProvider random = null)
         {
             _landingResolver = landingResolver;
             _fallResolver = fallResolver;
@@ -38,6 +46,9 @@ namespace FloorBreaker.Bombs.Application
             _damageService = damageService;
             _safeTileSearch = safeTileSearch;
             _fallBombRecoveryDuration = balance.FallBombRecoveryDuration;
+            _slimeRegistry = slimeRegistry;
+            _slimeDropResolver = slimeDropResolver;
+            _random = random;
         }
 
         public BombSpec CreateFallBombSpec(PlayerBuild build)
@@ -87,18 +98,25 @@ namespace FloorBreaker.Bombs.Application
             IReadOnlyList<PlayerModel> players,
             Func<GridPos, bool> isEntityAt)
         {
+            // ボム所有者の PlayerModel を特定
+            PlayerModel owner = null;
+            foreach (var p in players)
+            {
+                if (p.Id == cmd.Owner) { owner = p; break; }
+            }
+
             switch (cmd.Spec.Type)
             {
                 case BombType.Fall:
-                    ExecuteFallBomb(landingPos, cmd.Spec, players);
+                    ExecuteFallBomb(landingPos, cmd.Spec, players, owner);
                     break;
                 case BombType.Fire:
-                    ExecuteFireBomb(landingPos, cmd.Spec, players);
+                    ExecuteFireBomb(landingPos, cmd.Spec, players, owner);
                     break;
             }
         }
 
-        private void ExecuteFallBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players)
+        private void ExecuteFallBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players, PlayerModel owner)
         {
             var result = _fallResolver.Resolve(landingPos, spec, _stage);
             var affectedSet = new HashSet<GridPos>(result.AffectedTiles);
@@ -125,9 +143,12 @@ namespace FloorBreaker.Bombs.Application
                         _stage, _safeTileSearch, occupied);
                 }
             }
+
+            // 4. 影響範囲内のスライム死亡 + ドロップ
+            KillSlimesInArea(result.AffectedTiles, owner);
         }
 
-        private void ExecuteFireBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players)
+        private void ExecuteFireBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players, PlayerModel owner)
         {
             var result = _fireResolver.Resolve(landingPos, spec, _stage);
             var affectedSet = new HashSet<GridPos>(result.AffectedTiles);
@@ -153,6 +174,22 @@ namespace FloorBreaker.Bombs.Application
                         player, result.ContactDamage, false,
                         _stage, _safeTileSearch, occupied);
                 }
+            }
+
+            // 4. 影響範囲内のスライム死亡 + ドロップ
+            KillSlimesInArea(result.AffectedTiles, owner);
+        }
+
+        private void KillSlimesInArea(IReadOnlyList<GridPos> affectedTiles, PlayerModel killer)
+        {
+            if (_slimeRegistry == null || _slimeDropResolver == null) return;
+
+            var slimes = _slimeRegistry.GetSlimesAt(affectedTiles);
+            foreach (var slime in slimes)
+            {
+                slime.Kill();
+                _slimeDropResolver.Resolve(slime, killer, _random);
+                _slimeRegistry.Remove(slime.Id);
             }
         }
 

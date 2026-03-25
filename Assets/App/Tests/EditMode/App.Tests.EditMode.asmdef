@@ -8,6 +8,8 @@
         "App.Stage",
         "App.Player",
         "App.Bombs",
+        "App.Upgrades",
+        "App.Slimes",
         "R3.Unity"
     ],
     "includePlatforms": [
