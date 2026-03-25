@@ -4,74 +4,97 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using CustomTiles;
+using R3;
+using VContainer;
+using VContainer.Unity;
 
 public class GridData: MonoBehaviour
 {
     [SerializeField]
-    private Tilemap tileMap;
+    private Tilemap _tileMapGround;
 
-    private TileMapUI tileMapUI;
-    // [row(y)][col(x)] の2次元リスト
+    [SerializeField]
+    private Tilemap _tileMapCustomTiles;
 
-    private Dictionary<Vector2Int, CustomTileData> gridDataDict;
-    
+    [SerializeField]
+    private TileMapUI _tileMapUI;
+
+    [SerializeField]
+    private GameManager _gameManager;
+
+    [SerializeField]
+    private TileGenerator _tileGenerator;
+
+    private HashSet<Vector2Int> _existingCells = new HashSet<Vector2Int>();
+    private Dictionary<Vector2Int, CustomTileData> _gridDataDict = new Dictionary<Vector2Int, CustomTileData>();
+
     public Dictionary<Vector2Int, CustomTileData> TilesChangeOnNextTurn { get; private set; } = new Dictionary<Vector2Int, CustomTileData>();
 
     void Start()
     {
-        gridDataDict = GenerateGridData();
+        _gameManager.OnNextTurn
+            .Subscribe(_ => 
+                {
+                    ChangeTilesOnNextTurn();
+                }
+            )
+            .AddTo(this);
+        GenerateGridData();
         printData();
-        tileMapUI = tileMap.GetComponent<TileMapUI>();
     }
 
     /// <summary>
     /// Tilemap からタイルリストを生成する
     /// </summary>
-    public Dictionary<Vector2Int, CustomTileData> GenerateGridData()
+    public void GenerateGridData()
     {
-        this.tileMap.CompressBounds();
-        BoundsInt bounds = this.tileMap.cellBounds;
-
-        gridDataDict = new Dictionary<Vector2Int, CustomTileData>();
+        _tileMapGround.CompressBounds();
+        BoundsInt bounds = _tileMapGround.cellBounds;
 
         // y 行ごとにリストを作成
         for (int y = bounds.yMin; y < bounds.yMax; y++)
         {
             for (int x = bounds.xMin; x < bounds.xMax; x++)
             {
-                Vector2Int cellPos = new Vector2Int(x, y);
-                TileBase tile = tileMap.GetTile(ConvertVector.ToVector3Int(cellPos));
+                Vector2Int cellPos = new Vector2Int(x, y);;
                 
-                if (tile == null)
+                if (!_tileMapGround.HasTile(ConvertVector.ToVector3Int(cellPos)))
                 {
-                    continue;
+                    continue; // Ground タイルがない場合はスキップ
                 }
-
-                //アカンコード
-                CustomTileData newTile;
-                if (tile.name.Contains("Fire"))
-                {
-                    newTile = new FireTile();
-                }
-                else if (tile.name.Contains("Water"))
-                {
-                    newTile = new WaterTile();
-                }
-                else
-                {
-                    newTile = new NormalTile();
-                }
-
-                gridDataDict[cellPos] = newTile;
+                
+                _existingCells.Add(cellPos);
             }
         }
-        return gridDataDict;
+
+        foreach(Vector2Int cellPos in _existingCells)
+        {
+            TileBase tile = _tileMapCustomTiles.GetTile(ConvertVector.ToVector3Int(cellPos));
+                
+            if (tile == null)
+            {
+                continue;
+            }
+
+            // タイルの名前に応じてタイルを生成しているがアカンコードなので後々置換する
+            CustomTileData newTile;
+            if (tile.name.Contains("Fire"))
+            {
+                newTile = _tileGenerator.FireTile(spreadDepth: 0, damage: 1);
+            }
+            else
+            {
+                newTile = _tileGenerator.WaterTile();
+            }
+
+            _gridDataDict[cellPos] = newTile;
+        }
     }
 
     // デバッグ用：タイルの種類をコンソールに出力
     public void printData()
     {
-        BoundsInt bounds = this.tileMap.cellBounds;
+        BoundsInt bounds = this._tileMapCustomTiles.cellBounds;
         for(int y = bounds.yMin; y < bounds.yMax; y++)
         {
 
@@ -79,7 +102,7 @@ public class GridData: MonoBehaviour
             for(int x = bounds.xMin; x < bounds.xMax; x++)
             {
                 var cellPos2D = new Vector2Int(x, y);
-                if (gridDataDict.TryGetValue(cellPos2D, out CustomTiles.CustomTileData tileData))
+                if (_gridDataDict.TryGetValue(cellPos2D, out CustomTileData tileData))
                 {
                     rowStr += tileData.TileName + " ";
                 }
@@ -100,11 +123,11 @@ public class GridData: MonoBehaviour
             return;
         }
         
-        if (gridDataDict.ContainsKey(position))
+        if (_existingCells.Contains(position))
         {
-            gridDataDict[position] = newTile;
-            newTile.OnSet(position, this);
-            tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position), newTile);
+            _gridDataDict[position] = newTile;
+            _tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position), newTile);
+            newTile.OnSet(position);
         }
         else
         {
@@ -118,11 +141,11 @@ public class GridData: MonoBehaviour
         {
             Vector2Int position = kvp.Key;
             CustomTileData newTile = kvp.Value;
-            if (gridDataDict.ContainsKey(position))
+            if (_existingCells.Contains(position))
             {
-                gridDataDict[position] = newTile;
-                tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position), newTile);
-                newTile.OnSet(position, this);
+                _gridDataDict[position] = newTile;
+                _tileMapUI.ChangeTileUI(ConvertVector.ToVector3Int(position), newTile);
+                newTile.OnSet(position);
             }
             else
             {
@@ -133,7 +156,7 @@ public class GridData: MonoBehaviour
     
     public CustomTileData GetTileData(Vector2Int position)
     {
-        if (gridDataDict.TryGetValue(position, out CustomTileData tileData))
+        if (_gridDataDict.TryGetValue(position, out CustomTileData tileData))
         {
             return tileData;
         }
@@ -146,7 +169,7 @@ public class GridData: MonoBehaviour
 
     public bool HasTileData(Vector2Int position)
     {
-        return gridDataDict.ContainsKey(position);
+        return _gridDataDict.ContainsKey(position);
     }
 
     public void AddTileDataNextTurn(Vector2Int position, CustomTileData tileData)
@@ -159,37 +182,35 @@ public class GridData: MonoBehaviour
 
     public bool TryGetTileData(Vector2Int position, out CustomTileData tileData)
     {
-        return gridDataDict.TryGetValue(position, out tileData);
+        return _gridDataDict.TryGetValue(position, out tileData);
     }
 
     //ここから下のやつをイベントハンドラーで呼び出すように変更したい
-    public void OnNextTurn()
-    {
-        // ターン開始時にタイルの変化を処理
-        ChangeTilesOnNextTurn();
-        foreach (var kvp in gridDataDict)
-        {
-            Vector2Int position = kvp.Key;
-            CustomTileData tileData = kvp.Value;
-            tileData.OnNextTurn(position, this);
-        }
-    }
+   
 
     public void OnPlayerSteppedOnTile(Vector2Int position, Player player)
     {
-        var tileData = GetTileData(position);
-        tileData.OnPlayerSteppedOnTile(position, this, player);
+        if (TryGetTileData(position, out CustomTileData tileData))
+        {
+            tileData.OnPlayerStepped(position, player);
+        }
     }
 
     public void OnEnemySteppedOnTile(Vector2Int position, Enemy enemy)
     {
-        var tileData = GetTileData(position);
-        tileData.OnEnemySteppedOnTile(position, this, enemy);
+        if (TryGetTileData(position, out CustomTileData tileData))
+        {
+            tileData.OnEnemyStepped(position, enemy);
+        }
     }
 
     private void ChangeTilesOnNextTurn()
     {
         ChangeTiles(TilesChangeOnNextTurn);
         TilesChangeOnNextTurn.Clear(); // ターン開始時に辞書をクリアして次のターンに備える
+        foreach (var tiles in _gridDataDict.Values)
+        {
+            tiles.OnNextTurn();
+        }
     }
 }

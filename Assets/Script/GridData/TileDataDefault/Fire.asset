@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f5be7eaee128bb42b1e84c73bf0913a, type: 3}
-  m_Name: NormalTile
-  m_EditorClassIdentifier: Assembly-CSharp::NormalTile
-  _tileBase: {fileID: 11400000, guid: de37066ce26bd458e91976ba7f35aafb, type: 2}
-  TileName: Normal
+  m_Script: {fileID: 11500000, guid: 6e38310f38fd79942bbeb96689e1dc43, type: 3}
+  m_Name: Fire
+  m_EditorClassIdentifier: Assembly-CSharp::TileDataDefault
+  tileName: Fire
+  tileBase: {fileID: 11400000, guid: 3e4c9b32959484248a1e7940eb109007, type: 2}
