@@ -1,0 +1,25 @@
+{
+    "name": "App.Tests.EditMode",
+    "rootNamespace": "FloorBreaker.Tests.EditMode",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Shared.Infrastructure"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

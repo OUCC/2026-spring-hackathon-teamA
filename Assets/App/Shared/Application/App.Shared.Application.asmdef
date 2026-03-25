@@ -1,0 +1,16 @@
+{
+    "name": "App.Shared.Application",
+    "rootNamespace": "FloorBreaker.Shared.Application",
+    "references": [
+        "App.Shared.Domain"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

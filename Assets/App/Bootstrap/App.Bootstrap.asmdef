@@ -1,0 +1,22 @@
+{
+    "name": "App.Bootstrap",
+    "rootNamespace": "FloorBreaker.Bootstrap",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Shared.Infrastructure",
+        "App.ScriptableObjects",
+        "VContainer",
+        "UniTask",
+        "R3.Unity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

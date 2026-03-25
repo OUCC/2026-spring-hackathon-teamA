@@ -1,0 +1,19 @@
+{
+    "name": "App.Shared.Infrastructure",
+    "rootNamespace": "FloorBreaker.Shared.Infrastructure",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "R3.Unity",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
