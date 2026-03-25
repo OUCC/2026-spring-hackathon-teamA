@@ -1,3 +1,4 @@
+using System.Linq;
 using NUnit.Framework;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
@@ -75,6 +76,25 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
 
             Assert.GreaterOrEqual(_player.Build.FallCooldown, _player.Build.FallCooldownMin);
             Assert.AreEqual(_player.Build.FallCooldownMin, _player.Build.FallCooldown, 0.001f);
+        }
+
+        [Test]
+        public void Apply_MoveSpeed_RecordsInPlayerBuild()
+        {
+            _svc.Apply(UpgradeId.MoveSpeed, _player);
+
+            var acquired = _player.Build.AcquiredUpgrades.CurrentValue;
+            Assert.IsTrue(acquired.Contains(UpgradeId.MoveSpeed));
+        }
+
+        [Test]
+        public void Apply_HpRecovery_RecordsInPlayerBuild()
+        {
+            _player.Stats.TakeDamage(5);
+            _svc.Apply(UpgradeId.HpRecovery, _player);
+
+            var acquired = _player.Build.AcquiredUpgrades.CurrentValue;
+            Assert.IsTrue(acquired.Contains(UpgradeId.HpRecovery));
         }
 
         private class TestBalanceParameters : IBalanceParameters

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using R3;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
@@ -6,7 +8,7 @@ using FloorBreaker.Upgrades.Domain;
 
 namespace FloorBreaker.MatchFlow.Application
 {
-    public sealed class UpgradePhaseUseCase
+    public sealed class UpgradePhaseUseCase : IDisposable
     {
         private readonly UpgradeDraftService _draftP1;
         private readonly UpgradeDraftService _draftP2;
@@ -15,10 +17,12 @@ namespace FloorBreaker.MatchFlow.Application
         private float _elapsed;
         private bool _isActive;
 
+        private readonly ReactiveProperty<float> _remainingTime = new(0f);
+
         public UpgradeDraftService DraftP1 => _draftP1;
         public UpgradeDraftService DraftP2 => _draftP2;
         public bool IsActive => _isActive;
-        public float RemainingTime => _timeout - _elapsed;
+        public ReadOnlyReactiveProperty<float> RemainingTime => _remainingTime;
 
         public UpgradePhaseUseCase(
             UpgradeDraftService draftP1,
@@ -34,6 +38,7 @@ namespace FloorBreaker.MatchFlow.Application
         {
             _elapsed = 0f;
             _isActive = true;
+            _remainingTime.Value = _timeout;
 
             foreach (var player in players)
             {
@@ -48,6 +53,7 @@ namespace FloorBreaker.MatchFlow.Application
             if (!_isActive) return;
 
             _elapsed += deltaTime;
+            _remainingTime.Value = MathF.Max(0f, _timeout - _elapsed);
 
             if (_elapsed >= _timeout)
             {
@@ -71,6 +77,7 @@ namespace FloorBreaker.MatchFlow.Application
         {
             _isActive = false;
             _elapsed = 0f;
+            _remainingTime.Value = 0f;
             _draftP1.Reset();
             _draftP2.Reset();
         }
@@ -78,6 +85,11 @@ namespace FloorBreaker.MatchFlow.Application
         public UpgradeDraftService GetDraft(PlayerId id)
         {
             return id == PlayerId.Player1 ? _draftP1 : _draftP2;
+        }
+
+        public void Dispose()
+        {
+            _remainingTime.Dispose();
         }
     }
 }
