@@ -108,10 +108,12 @@ namespace FloorBreaker.MatchFlow.Application
             var fallResolver = new FallBombResolver(areaResolver);
             var fireResolver = new FireBombResolver(areaResolver);
             var slimeDropResolver = new SlimeDropResolver(catalog, applyService);
+            var spreadService = new BombEffectSpreadService(
+                _stage, _tileTimerService, damageService, safeTileSearch,
+                _slimeRegistry, slimeDropResolver, _random);
             var launchUseCase = new BombLaunchUseCase(
                 landingResolver, fallResolver, fireResolver,
-                _stage, _tileTimerService, damageService, safeTileSearch, _balance,
-                _slimeRegistry, slimeDropResolver, _random);
+                _stage, _balance, spreadService);
 
             var bombFlightTracker = new BombFlightTracker(
                 launchUseCase, _p1Cooldown, _p2Cooldown,
@@ -130,7 +132,7 @@ namespace FloorBreaker.MatchFlow.Application
             _scheduler = new MatchPhaseScheduler(
                 _clock, _tileTimerService, _p1Cooldown, _p2Cooldown,
                 _slimeTickService, fireDamageTickService, bombFlightTracker,
-                shrinkService, upgradePhaseUseCase, matchEndUseCase,
+                spreadService, shrinkService, upgradePhaseUseCase, matchEndUseCase,
                 damageService, safeTileSearch, players, _stage,
                 _slimeRegistry, _balance, _random);
         }

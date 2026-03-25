@@ -42,10 +42,11 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var fireResolver = new FireBombResolver(areaResolver);
             var balance = new TestBalanceParameters();
 
+            var spreadService = new BombEffectSpreadService(
+                _stage, _tileTimerService, damageService, safeTileSearch, _slimeRegistry);
             var launchUseCase = new BombLaunchUseCase(
                 landingResolver, fallResolver, fireResolver,
-                _stage, _tileTimerService, damageService, safeTileSearch,
-                balance, _slimeRegistry);
+                _stage, balance, spreadService);
 
             _tracker = new BombFlightTracker(
                 launchUseCase, _p1Cooldown, _p2Cooldown,
@@ -222,6 +223,8 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             public float InvulnerabilityDuration => 1.5f;
             public float BombFlightSpeed => 12f;
             public float StageShrinkAnimDuration => 1f;
+            public float FireBombSpreadInterval => 0.15f;
+            public float FallBombSpreadInterval => 0.3f;
             public int HpRecoveryAmount => 3;
             public int HpRecoveryThreshold => 5;
         }

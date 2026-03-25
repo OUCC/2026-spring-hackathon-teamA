@@ -69,6 +69,10 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [SerializeField] private float bombFlightSpeed = 12f;
         [SerializeField] private float stageShrinkAnimDuration = 1f;
 
+        [Header("Bomb Effect Spread")]
+        [SerializeField] private float fireBombSpreadInterval = 0.15f;
+        [SerializeField] private float fallBombSpreadInterval = 0.3f;
+
         [Header("Upgrade: HP Recovery")]
         [SerializeField] private int hpRecoveryAmount = 3;
         [SerializeField] private int hpRecoveryThreshold = 5;
@@ -128,6 +132,9 @@ namespace FloorBreaker.ScriptableObjects.Balance
 
         public float BombFlightSpeed => bombFlightSpeed;
         public float StageShrinkAnimDuration => stageShrinkAnimDuration;
+
+        public float FireBombSpreadInterval => fireBombSpreadInterval;
+        public float FallBombSpreadInterval => fallBombSpreadInterval;
 
         public int HpRecoveryAmount => hpRecoveryAmount;
         public int HpRecoveryThreshold => hpRecoveryThreshold;

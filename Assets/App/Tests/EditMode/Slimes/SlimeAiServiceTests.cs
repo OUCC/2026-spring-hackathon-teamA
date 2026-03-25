@@ -146,6 +146,8 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public float InvulnerabilityDuration => 1.5f;
             public float BombFlightSpeed => 12f;
             public float StageShrinkAnimDuration => 1f;
+            public float FireBombSpreadInterval => 0.15f;
+            public float FallBombSpreadInterval => 0.3f;
         }
     }
 }

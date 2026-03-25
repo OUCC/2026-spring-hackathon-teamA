@@ -140,6 +140,8 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             public float InvulnerabilityDuration => 1.5f;
             public float BombFlightSpeed => 12f;
             public float StageShrinkAnimDuration => 1f;
+            public float FireBombSpreadInterval => 0.15f;
+            public float FallBombSpreadInterval => 0.3f;
             public int HpRecoveryAmount => 3;
             public int HpRecoveryThreshold => 5;
         }
