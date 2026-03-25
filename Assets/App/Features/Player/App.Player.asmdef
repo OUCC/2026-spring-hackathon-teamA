@@ -1,0 +1,20 @@
+{
+    "name": "App.Player",
+    "rootNamespace": "FloorBreaker.Player.Domain",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Stage"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
