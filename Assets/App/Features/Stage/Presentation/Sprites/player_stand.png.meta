@@ -161,7 +161,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: player_stand_0
+      name: player_stand_down_left
       rect:
         serializedVersion: 2
         x: 0
@@ -183,7 +183,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_stand_1
+      name: player_stand_up
       rect:
         serializedVersion: 2
         x: 366
@@ -205,7 +205,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_stand_2
+      name: player_stand_up_right
       rect:
         serializedVersion: 2
         x: 722
@@ -227,29 +227,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_stand_6
-      rect:
-        serializedVersion: 2
-        x: 351
-        y: 540
-        width: 326
-        height: 454
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: da5313b9147df13a0800000000000000
-      internalID: -6692393844472728147
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: player_stand_7
+      name: player_stand_right
       rect:
         serializedVersion: 2
         x: 737
@@ -271,7 +249,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_stand_10
+      name: player_stand_down
       rect:
         serializedVersion: 2
         x: 346
@@ -293,7 +271,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_stand_11
+      name: player_stand_down_right
       rect:
         serializedVersion: 2
         x: 729
@@ -315,7 +293,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_stand_17
+      name: player_stand_left
       rect:
         serializedVersion: 2
         x: 19
@@ -337,7 +315,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player_stand_18
+      name: player_stand_up_left
       rect:
         serializedVersion: 2
         x: 11
@@ -372,25 +350,25 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      player_stand_0: 5426992086352664609
-      player_stand_1: -6713635969278435144
-      player_stand_10: 4068065577127153978
-      player_stand_11: -3674104804530789618
       player_stand_12: 7579747608312378149
       player_stand_13: 2242852410323771072
       player_stand_14: -5455840580072263543
       player_stand_15: 5526746455084040115
       player_stand_16: -3587505396128949555
-      player_stand_17: 812583524
-      player_stand_18: -2129490419
-      player_stand_2: -8152492354831192930
       player_stand_3: -5645684021975253929
       player_stand_4: -8165341231518857377
       player_stand_5: -2071477791154956422
       player_stand_6: -6692393844472728147
-      player_stand_7: 5274665985968424310
       player_stand_8: 1752084326595806345
       player_stand_9: 6655529407399074169
+      player_stand_down: 4068065577127153978
+      player_stand_down_left: 5426992086352664609
+      player_stand_down_right: -3674104804530789618
+      player_stand_left: 812583524
+      player_stand_right: 5274665985968424310
+      player_stand_up: -6713635969278435144
+      player_stand_up_left: -2129490419
+      player_stand_up_right: -8152492354831192930
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
