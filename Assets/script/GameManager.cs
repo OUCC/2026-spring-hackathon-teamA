@@ -3,6 +3,11 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Tilemaps;
+using R3;
+using System;
+using VContainer;
+using VContainer.Unity;
+using CustomTiles;
 
 public enum TurnPhase { Player, Enemy }
 
@@ -14,7 +19,7 @@ public class EnemySpawnData
 	public int overrideMaxHp = -1;
 }
 
-[System.Serializable]
+[Serializable]
 public class WaveData
 {
 	public List<EnemySpawnData> enemies = new List<EnemySpawnData>();
@@ -37,9 +42,13 @@ public class GameManager : MonoBehaviour
 	private int currentWaveIndex = -1;
 	private bool isGameFinished = false;
 
-    [Header("グリッドのデータ")]
+    private Subject<Unit> onNextTurn = new Subject<Unit>();
+    public Observable<Unit> OnNextTurn => onNextTurn;
+
     [SerializeField]
-    private GridData gridData;
+    private GridData _gridData;
+    [SerializeField]
+    private TileGenerator _tileGenerator;
 
 	void Awake()
 	{
@@ -66,7 +75,7 @@ public class GameManager : MonoBehaviour
 
 		if (currentPhase == TurnPhase.Player)
 		{
-            gridData.OnNextTurn(); // ターン開始時にタイルの変化を処理
+            onNextTurn.OnNext(Unit.Default); // ターン開始時にタイルの変化を処理
 			StartCoroutine(EnemyTurnRoutine());
             //ターン終了
 		}
@@ -190,6 +199,7 @@ public class GameManager : MonoBehaviour
 
 			Vector3 spawnPos = new Vector3(spawnData.spawnGridPos.x, spawnData.spawnGridPos.y, 0f);
 			Enemy spawnedEnemy = Instantiate(spawnData.enemyPrefab, spawnPos, Quaternion.identity);
+            spawnedEnemy.Init(_gridData, _tileGenerator);
 
 			if (spawnedEnemy != null)
 			{
@@ -197,15 +207,6 @@ public class GameManager : MonoBehaviour
 				{
 					spawnedEnemy.groundTilemap = enemyGroundTilemap;
 				}
-
-                if (gridData != null)
-                {
-                    spawnedEnemy.gridData = gridData;
-                } 
-                else
-                {
-                    Debug.LogError("GridData reference is missing in GameManager. Enemy won't be able to interact with tiles.");
-                }
 
 				if (spawnData.overrideMaxHp > 0)
 				{

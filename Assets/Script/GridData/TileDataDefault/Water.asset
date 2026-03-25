@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7e5124e4b0a5d740a70dfac600f3e6d, type: 3}
-  m_Name: WaterTile
-  m_EditorClassIdentifier: Assembly-CSharp::WaterTile
-  _tileBase: {fileID: 11400000, guid: 45ece8e9a53c70c4f8cf071591f74fc8, type: 2}
-  TileName: Water
+  m_Script: {fileID: 11500000, guid: 6e38310f38fd79942bbeb96689e1dc43, type: 3}
+  m_Name: Water
+  m_EditorClassIdentifier: Assembly-CSharp::TileDataDefault
+  tileName: Water
+  tileBase: {fileID: 11400000, guid: 45ece8e9a53c70c4f8cf071591f74fc8, type: 2}

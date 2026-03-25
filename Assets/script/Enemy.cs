@@ -1,10 +1,18 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using CustomTiles;
+using VContainer;
+using VContainer.Unity;
+using R3;
+
+public struct EnemySteppedOnTileInfo
+{
+    public Vector2Int position;
+    public Enemy enemy;
+}
 
 public class Enemy : MonoBehaviour
 {   
-    public GridData gridData;
-
 	public float moveSpeed = 5f;
 	public Tilemap groundTilemap;
 	protected Vector3 targetPosition;
@@ -17,6 +25,12 @@ public class Enemy : MonoBehaviour
 	public bool IsDead => isDead || currentHp <= 0;
 	protected GameObject player;
 
+    private GridData _gridData;
+    private TileGenerator _tileGenerator;
+
+    private Subject<EnemySteppedOnTileInfo> _onEnemySteppedOnTile = new Subject<EnemySteppedOnTileInfo>();
+    public Observable<EnemySteppedOnTileInfo> OnEnemySteppedOnTile => _onEnemySteppedOnTile;
+
 	protected virtual void Start()
 	{
 		currentHp = maxHp;
@@ -24,7 +38,15 @@ public class Enemy : MonoBehaviour
 		targetPosition = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), 0);
 		transform.position = targetPosition;
 		player = GameObject.FindGameObjectWithTag("Player");
+
+        _onEnemySteppedOnTile.AddTo(this);
 	}
+
+    public void Init(GridData gridData, TileGenerator tileGenerator)
+    {
+        _gridData = gridData;
+        _tileGenerator = tileGenerator;
+    }
 
 	// 敵のターンになったらBattleManagerから呼ばれる関数
 	public virtual void StartEnemyTurn()
@@ -81,7 +103,7 @@ public class Enemy : MonoBehaviour
 
                 //炎のマスに入ったときにダメージ（簡易版)
                 Vector2Int targetPositionGrid = ConvertVector.ToVector2Int(groundTilemap.WorldToCell(targetPosition));
-                gridData.OnEnemySteppedOnTile(targetPositionGrid, this);
+                _gridData.OnEnemySteppedOnTile(targetPositionGrid, this);
                 Debug.Log($"Enemy stepped on tile at {targetPositionGrid}");
 			}
 		}

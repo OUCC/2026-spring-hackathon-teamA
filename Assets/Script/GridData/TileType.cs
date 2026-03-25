@@ -46,9 +46,3 @@ public class TileBaseMapping : ScriptableObject
         }
     }
 }
-public enum TileBaseType
-{
-    Normal,
-    Fire,
-    Water
-}
