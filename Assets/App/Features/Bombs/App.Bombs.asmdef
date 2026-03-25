@@ -1,0 +1,21 @@
+{
+    "name": "App.Bombs",
+    "rootNamespace": "FloorBreaker.Bombs.Domain",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Stage",
+        "App.Player"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
