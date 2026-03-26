@@ -234,6 +234,26 @@ namespace FloorBreaker.Bootstrap
             if (inputActions != null)
             {
                 _presenters.InputMapSwitcher = new InputMapSwitcher(inputActions, _clock);
+
+                // 16. UpgradeUI アクションマップとの接続
+                var upgradeP1 = inputActions.FindActionMap("UpgradeUI_P1");
+                var upgradeP2 = inputActions.FindActionMap("UpgradeUI_P2");
+
+                if (upgradeP1 != null)
+                {
+                    upgradeP1["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP1;
+                    upgradeP1["Submit"].performed += _upgradeUIInputBridge.OnSubmitP1;
+                    upgradeP1["Skip"].performed += _upgradeUIInputBridge.OnSkipP1;
+                    upgradeP1["Reroll"].performed += _upgradeUIInputBridge.OnRerollP1;
+                }
+
+                if (upgradeP2 != null)
+                {
+                    upgradeP2["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP2;
+                    upgradeP2["Submit"].performed += _upgradeUIInputBridge.OnSubmitP2;
+                    upgradeP2["Skip"].performed += _upgradeUIInputBridge.OnSkipP2;
+                    upgradeP2["Reroll"].performed += _upgradeUIInputBridge.OnRerollP2;
+                }
             }
 
             await UniTask.CompletedTask;
