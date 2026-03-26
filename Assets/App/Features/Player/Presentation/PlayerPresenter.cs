@@ -2,6 +2,7 @@ using System;
 using R3;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Player.Domain;
 
@@ -17,6 +18,7 @@ namespace FloorBreaker.Player.Presentation
         private readonly PlayerView _view;
         private readonly PlayerAnimationService _animService;
         private readonly PlayerSpriteConfig _config;
+        private readonly IAudioService _audio;
         private readonly CompositeDisposable _subscriptions = new();
 
         // Walk animation state
@@ -35,12 +37,14 @@ namespace FloorBreaker.Player.Presentation
             PlayerModel model,
             PlayerView view,
             PlayerAnimationService animService,
-            PlayerSpriteConfig config)
+            PlayerSpriteConfig config,
+            IAudioService audio = null)
         {
             _model = model;
             _view = view;
             _animService = animService;
             _config = config;
+            _audio = audio;
 
             // Position change → movement animation
             model.Position.Subscribe(OnPositionChanged).AddTo(_subscriptions);
@@ -64,8 +68,11 @@ namespace FloorBreaker.Player.Presentation
             }
             else
             {
-                _animService.PlayMove(_view, worldPos);
-                _moveEndTimer = _config.MoveDuration;
+                float speed = _model.Stats.MoveSpeed;
+                if (speed <= 0f) speed = 0.1f;
+                float moveDuration = _config.BaseMoveInterval / speed;
+                _animService.PlayMove(_view, worldPos, moveDuration);
+                _moveEndTimer = moveDuration;
             }
             _isMoving = true;
             _walkTimer = 0f;
@@ -82,11 +89,13 @@ namespace FloorBreaker.Player.Presentation
             if (pair.Current < pair.Previous && !_isDead)
             {
                 _animService.PlayHitFlash(_view);
+                _audio?.PlaySfx(SfxIds.PlayerHit);
             }
             if (pair.Current <= 0 && !_isDead)
             {
                 _isDead = true;
                 _animService.PlayDeath(_view);
+                _audio?.PlaySfx(SfxIds.PlayerDeath);
             }
         }
 

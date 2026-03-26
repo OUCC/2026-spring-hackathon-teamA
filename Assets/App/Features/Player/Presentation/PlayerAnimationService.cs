@@ -23,12 +23,12 @@ namespace FloorBreaker.Player.Presentation
 
         // ─── Movement ───────────────────────────────────────────
 
-        public void PlayMove(PlayerView view, Vector3 target)
+        public void PlayMove(PlayerView view, Vector3 target, float duration)
         {
             KillMoveTween(view.PlayerId);
             var tween = view.transform
-                .DOMove(target, _config.MoveDuration)
-                .SetEase(Ease.OutQuad)
+                .DOMove(target, duration)
+                .SetEase(Ease.Linear)
                 .SetLink(view.gameObject);
             _moveTweens[view.PlayerId] = tween;
         }

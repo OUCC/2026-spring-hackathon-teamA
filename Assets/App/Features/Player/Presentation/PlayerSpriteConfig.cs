@@ -21,7 +21,8 @@ namespace FloorBreaker.Player.Presentation
         [SerializeField] private float _moveDuration = 0.12f;
         [SerializeField] private float _forcedMoveDuration = 0.4f;
         [SerializeField] private float _forcedMoveArcHeight = 0.6f;
-        [SerializeField] private float _walkFrameInterval = 0.12f;
+        [SerializeField] private float _walkFrameInterval = 0.08f;
+        [SerializeField] private float _baseMoveInterval = 0.2f;
 
         [Header("Damage")]
         [SerializeField] private float _hitFlashDuration = 0.08f;
@@ -63,6 +64,7 @@ namespace FloorBreaker.Player.Presentation
         public float ForcedMoveDuration => _forcedMoveDuration;
         public float ForcedMoveArcHeight => _forcedMoveArcHeight;
         public float WalkFrameInterval => _walkFrameInterval;
+        public float BaseMoveInterval => _baseMoveInterval;
         public float HitFlashDuration => _hitFlashDuration;
         public int HitFlashCount => _hitFlashCount;
         public Color HitFlashColor => _hitFlashColor;
