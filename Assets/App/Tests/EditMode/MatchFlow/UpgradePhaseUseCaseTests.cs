@@ -69,16 +69,18 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         }
 
         [Test]
-        public void IsComplete_WhenBothSelected_ReturnsTrue()
+        public void IsComplete_WhenBothDone_ReturnsTrue()
         {
             _useCase.Start(_players, _random);
 
-            // Give coins so players can afford upgrades
+            // 複数選択対応: 購入後に Skip で完了
             _player1.Stats.AddCoins(10);
             _player2.Stats.AddCoins(10);
 
             _draftP1.SelectChoice(0, _player1);
+            _draftP1.Skip();
             _draftP2.SelectChoice(0, _player2);
+            _draftP2.Skip();
 
             Assert.IsTrue(_useCase.IsComplete);
         }

@@ -82,6 +82,10 @@ namespace FloorBreaker.Input.Application
                 var adapter = kvp.Value;
                 var state = _moveStates[idx];
 
+                // グローバル移動クールダウンを常に減算（ホールド状態に依存しない）
+                if (state.CooldownRemaining > 0f)
+                    state.CooldownRemaining -= deltaTime;
+
                 if (!state.IsHolding) continue;
 
                 var player = GetPlayer(adapter.Owner);
@@ -113,12 +117,15 @@ namespace FloorBreaker.Input.Application
 
                 state.Timer += deltaTime;
 
+                float moveInterval = GetMoveInterval(player);
+
                 // 初回移動: バッファ時間経過後に実行（同時押しの中間状態を吸収）
                 if (!state.FirstMoveDone)
                 {
-                    if (state.Timer >= InputBufferTime)
+                    if (state.Timer >= InputBufferTime && state.CooldownRemaining <= 0f)
                     {
                         _moveService.TryMove(player, state.Direction, _stage);
+                        state.CooldownRemaining = moveInterval;
                         state.FirstMoveDone = true;
                         state.Timer = 0f;
                         state.RepeatCount = 0;
@@ -127,7 +134,6 @@ namespace FloorBreaker.Input.Application
                 }
 
                 // リピート移動
-                float moveInterval = GetMoveInterval(player);
                 float threshold = state.RepeatCount == 0
                     ? moveInterval + InitialRepeatDelay
                     : moveInterval;
@@ -137,6 +143,7 @@ namespace FloorBreaker.Input.Application
                     state.Timer -= threshold;
                     state.RepeatCount++;
                     _moveService.TryMove(player, state.Direction, _stage);
+                    state.CooldownRemaining = moveInterval;
                 }
             }
         }
@@ -227,12 +234,16 @@ namespace FloorBreaker.Input.Application
             public int RepeatCount;
             public bool FirstMoveDone;
 
+            /// <summary>前回移動からの残りクールダウン。ボタン離しでもリセットしない。</summary>
+            public float CooldownRemaining;
+
             public void Reset()
             {
                 IsHolding = false;
                 Timer = 0f;
                 RepeatCount = 0;
                 FirstMoveDone = false;
+                // CooldownRemaining はリセットしない（連打防止）
             }
         }
     }

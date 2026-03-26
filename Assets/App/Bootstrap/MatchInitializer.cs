@@ -2,6 +2,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using R3;
 using VContainer.Unity;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
@@ -30,7 +31,7 @@ namespace FloorBreaker.Bootstrap
     /// Match シーンの初期化シーケンスを実行する EntryPoint。
     /// VContainer から全依存を注入され、ランタイム初期化のみを行う。
     /// </summary>
-    public sealed class MatchInitializer : IAsyncStartable
+    public sealed class MatchInitializer : IAsyncStartable, System.IDisposable
     {
         private readonly IBalanceParameters _balance;
         private readonly IRandomProvider _random;
@@ -59,6 +60,12 @@ namespace FloorBreaker.Bootstrap
         private readonly MatchPresenters _presenters;
         private readonly GameplayInputBridge _gameplayInputBridge;
         private readonly UpgradeUIInputBridge _upgradeUIInputBridge;
+        private readonly IAudioService _audio;
+
+        // Dispose 用: アクション購読の解除
+        private InputActionMap _upgradeP1Map;
+        private InputActionMap _upgradeP2Map;
+        private System.IDisposable _phaseSub;
 
         public MatchInitializer(
             IBalanceParameters balance,
@@ -87,7 +94,8 @@ namespace FloorBreaker.Bootstrap
             UpgradeSelectionState selectionState,
             MatchPresenters presenters,
             GameplayInputBridge gameplayInputBridge,
-            UpgradeUIInputBridge upgradeUIInputBridge)
+            UpgradeUIInputBridge upgradeUIInputBridge,
+            IAudioService audio)
         {
             _balance = balance;
             _random = random;
@@ -116,6 +124,7 @@ namespace FloorBreaker.Bootstrap
             _presenters = presenters;
             _gameplayInputBridge = gameplayInputBridge;
             _upgradeUIInputBridge = upgradeUIInputBridge;
+            _audio = audio;
         }
 
         public async UniTask StartAsync(CancellationToken ct)
@@ -140,7 +149,7 @@ namespace FloorBreaker.Bootstrap
 
             // 4. StagePresenter 生成
             var stagePresenter = new StagePresenter(
-                _stage, tileViews, _tileAnimService, fireVfxPool, stageConfig);
+                _stage, tileViews, _tileAnimService, fireVfxPool, stageConfig, _audio);
             _presenters.Stage = stagePresenter;
 
             // 5. StageShrinkAnimator 生成
@@ -156,12 +165,12 @@ namespace FloorBreaker.Bootstrap
             var p1View = _playerViewFactory.CreatePlayerView(
                 PlayerId.Player1, p1Spawn);
             _presenters.PlayerP1 = new PlayerPresenter(
-                _players.Player1, p1View, _playerAnimService, playerConfig);
+                _players.Player1, p1View, _playerAnimService, playerConfig, _audio);
 
             var p2View = _playerViewFactory.CreatePlayerView(
                 PlayerId.Player2, p2Spawn);
             _presenters.PlayerP2 = new PlayerPresenter(
-                _players.Player2, p2View, _playerAnimService, playerConfig);
+                _players.Player2, p2View, _playerAnimService, playerConfig, _audio);
 
             // 7. BombExplosionVfxPool + BombPresenter 生成
             var bombConfig = _bombViewFactory.Config;
@@ -174,12 +183,12 @@ namespace FloorBreaker.Bootstrap
             _presenters.Bomb = new BombPresenter(
                 _bombFlightTracker, _bombViewFactory, _bombAnimService,
                 bombVfxPool, bombConfig, _stageQuery, tileViews,
-                _balance.BombFlightSpeed);
+                _balance.BombFlightSpeed, _audio);
 
             // 8. SlimePresenter 生成
             var slimeConfig = _slimeViewFactory.Config;
             _presenters.Slime = new SlimePresenter(
-                _slimeRegistry, _slimeViewFactory, _slimeAnimService, slimeConfig);
+                _slimeRegistry, _slimeViewFactory, _slimeAnimService, slimeConfig, _audio);
 
             // 9. カメラセットアップ
             _cameraSetup.Initialize(_players.Player1, _players.Player2, _stage.Bounds);
@@ -204,7 +213,7 @@ namespace FloorBreaker.Bootstrap
             _presenters.UpgradeOverlay = new UpgradeOverlayPresenter(
                 overlayView, _clock, _upgradePhase, _selectionState,
                 _players.Player1.Stats, _players.Player2.Stats,
-                _matchUIDocument.UpgradeCardTemplate);
+                _matchUIDocument.UpgradeCardTemplate, _audio);
 
             // 13. Result Presenter 生成
             var resultView = new ResultView(_matchUIDocument.ResultRoot);
@@ -241,23 +250,57 @@ namespace FloorBreaker.Bootstrap
                 _presenters.InputMapSwitcher = new InputMapSwitcher(inputActions, _clock);
 
                 // 16. UpgradeUI アクションマップとの接続
-                var upgradeP1 = inputActions.FindActionMap("UpgradeUI_P1");
-                var upgradeP2 = inputActions.FindActionMap("UpgradeUI_P2");
+                _upgradeP1Map = inputActions.FindActionMap("UpgradeUI_P1");
+                _upgradeP2Map = inputActions.FindActionMap("UpgradeUI_P2");
 
-                if (upgradeP1 != null)
+                if (_upgradeP1Map != null)
                 {
-                    upgradeP1["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP1;
-                    upgradeP1["Submit"].performed += _upgradeUIInputBridge.OnSubmitP1;
+                    _upgradeP1Map["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP1;
+                    _upgradeP1Map["Submit"].performed += _upgradeUIInputBridge.OnSubmitP1;
                 }
 
-                if (upgradeP2 != null)
+                if (_upgradeP2Map != null)
                 {
-                    upgradeP2["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP2;
-                    upgradeP2["Submit"].performed += _upgradeUIInputBridge.OnSubmitP2;
+                    _upgradeP2Map["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP2;
+                    _upgradeP2Map["Submit"].performed += _upgradeUIInputBridge.OnSubmitP2;
                 }
             }
 
+            // 17. フェーズ遷移 SE
+            _phaseSub = _clock.CurrentPhase.Subscribe(phase =>
+            {
+                switch (phase)
+                {
+                    case GamePhase.StageShrink:
+                        _audio?.PlaySfx(SfxIds.PhaseShrink);
+                        break;
+                    case GamePhase.UpgradePhase:
+                        _audio?.PlaySfx(SfxIds.PhaseUpgrade);
+                        break;
+                    case GamePhase.Result:
+                        _audio?.PlaySfx(SfxIds.MatchResult);
+                        break;
+                }
+            });
+
             await UniTask.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+            // UpgradeUI アクションマップのコールバック解除
+            if (_upgradeP1Map != null)
+            {
+                _upgradeP1Map["Navigate"].performed -= _upgradeUIInputBridge.OnNavigateP1;
+                _upgradeP1Map["Submit"].performed -= _upgradeUIInputBridge.OnSubmitP1;
+            }
+            if (_upgradeP2Map != null)
+            {
+                _upgradeP2Map["Navigate"].performed -= _upgradeUIInputBridge.OnNavigateP2;
+                _upgradeP2Map["Submit"].performed -= _upgradeUIInputBridge.OnSubmitP2;
+            }
+
+            _phaseSub?.Dispose();
         }
     }
 }

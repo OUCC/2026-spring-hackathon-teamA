@@ -6,6 +6,7 @@ using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Domain.Timing;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.UI.RuntimeUI.Controls;
 
@@ -22,6 +23,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         private readonly VisualTreeAsset _cardTemplate;
         private readonly PlayerStats _p1Stats;
         private readonly PlayerStats _p2Stats;
+        private readonly IAudioService _audio;
 
         private readonly List<UpgradeCardElement> _leftCardElements = new();
         private readonly List<UpgradeCardElement> _rightCardElements = new();
@@ -34,7 +36,8 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             UpgradeSelectionState selectionState,
             PlayerStats p1Stats,
             PlayerStats p2Stats,
-            VisualTreeAsset cardTemplate)
+            VisualTreeAsset cardTemplate,
+            IAudioService audio = null)
         {
             _view = view;
             _upgradePhase = upgradePhase;
@@ -42,6 +45,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             _cardTemplate = cardTemplate;
             _p1Stats = p1Stats;
             _p2Stats = p2Stats;
+            _audio = audio;
 
             _subscriptions.Add(clock.CurrentPhase.Subscribe(phase =>
             {
@@ -62,6 +66,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
                 _view.SetLeftStatus(GetStatusText(state));
                 _view.SetLeftDone(state != DraftState.Choosing);
                 SetCardsDone(_leftCardElements, state != DraftState.Choosing);
+                if (state == DraftState.Skipped) _audio?.PlaySfx(SfxIds.UpgradeDone);
             }));
 
             _subscriptions.Add(upgradePhase.DraftP2.State.Subscribe(state =>
@@ -69,19 +74,32 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
                 _view.SetRightStatus(GetStatusText(state));
                 _view.SetRightDone(state != DraftState.Choosing);
                 SetCardsDone(_rightCardElements, state != DraftState.Choosing);
+                if (state == DraftState.Skipped) _audio?.PlaySfx(SfxIds.UpgradeDone);
             }));
 
-            // カード行 + リロールの選択ハイライト
-            _subscriptions.Add(selectionState.P1Index.Subscribe(
-                _ => RefreshHighlight(PlayerId.Player1, _leftCardElements)));
-            _subscriptions.Add(selectionState.P2Index.Subscribe(
-                _ => RefreshHighlight(PlayerId.Player2, _rightCardElements)));
+            // カード行 + リロールの選択ハイライト + ナビゲーション SE
+            _subscriptions.Add(selectionState.P1Index.Subscribe(_ =>
+            {
+                RefreshHighlight(PlayerId.Player1, _leftCardElements);
+                _audio?.PlaySfx(SfxIds.UiNavigate);
+            }));
+            _subscriptions.Add(selectionState.P2Index.Subscribe(_ =>
+            {
+                RefreshHighlight(PlayerId.Player2, _rightCardElements);
+                _audio?.PlaySfx(SfxIds.UiNavigate);
+            }));
 
-            // 購入通知 → カードの見た目を更新
-            _subscriptions.Add(selectionState.P1PurchaseCount.Subscribe(
-                _ => RefreshCardStates(_leftCardElements, PlayerId.Player1, p1Stats)));
-            _subscriptions.Add(selectionState.P2PurchaseCount.Subscribe(
-                _ => RefreshCardStates(_rightCardElements, PlayerId.Player2, p2Stats)));
+            // 購入通知 → カードの見た目を更新 + SE
+            _subscriptions.Add(selectionState.P1PurchaseCount.Subscribe(count =>
+            {
+                RefreshCardStates(_leftCardElements, PlayerId.Player1, p1Stats);
+                if (count > 0) _audio?.PlaySfx(SfxIds.UpgradeSelect);
+            }));
+            _subscriptions.Add(selectionState.P2PurchaseCount.Subscribe(count =>
+            {
+                RefreshCardStates(_rightCardElements, PlayerId.Player2, p2Stats);
+                if (count > 0) _audio?.PlaySfx(SfxIds.UpgradeSelect);
+            }));
 
             // 行切替: カード行 (row=0) ↔ 完了行 (row=1)
             _subscriptions.Add(selectionState.P1Row.Subscribe(

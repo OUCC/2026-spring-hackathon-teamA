@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using R3;
 using FloorBreaker.Shared.Domain.Grid;
+using FloorBreaker.Shared.Domain.Primitives;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Slimes.Domain;
 
@@ -17,6 +19,7 @@ namespace FloorBreaker.Slimes.Presentation
         private readonly SlimeViewFactory _factory;
         private readonly SlimeAnimationService _animService;
         private readonly SlimeSpriteConfig _config;
+        private readonly IAudioService _audio;
         private readonly Dictionary<SlimeId, SlimeView> _views = new();
         private readonly CompositeDisposable _subscriptions = new();
 
@@ -24,11 +27,13 @@ namespace FloorBreaker.Slimes.Presentation
             SlimeRegistry registry,
             SlimeViewFactory factory,
             SlimeAnimationService animService,
-            SlimeSpriteConfig config)
+            SlimeSpriteConfig config,
+            IAudioService audio = null)
         {
             _factory = factory;
             _animService = animService;
             _config = config;
+            _audio = audio;
 
             registry.Spawned.Subscribe(OnSlimeSpawned).AddTo(_subscriptions);
             registry.Moved.Subscribe(OnSlimeMoved).AddTo(_subscriptions);
@@ -41,6 +46,8 @@ namespace FloorBreaker.Slimes.Presentation
             var view = _factory.CreateSlimeView(evt.Id, evt.Type, evt.Position);
             _views[evt.Id] = view;
             _animService.PlaySpawn(view);
+            var pos = evt.Position.ToWorldCenter();
+            _audio?.PlaySfx(SfxIds.SlimeSpawn, pos);
         }
 
         private void OnSlimeMoved(SlimeMovedEvent evt)
@@ -64,6 +71,8 @@ namespace FloorBreaker.Slimes.Presentation
             _views.Remove(evt.Id);
             SpawnDeathVfx(view.transform.position);
             _animService.PlayDeath(view, () => _factory.DestroySlimeView(view));
+            var deathPos = view.transform.position;
+            _audio?.PlaySfx(SfxIds.SlimeDeath, new Float2(deathPos.x, deathPos.y));
         }
 
         private void SpawnDeathVfx(Vector3 position)
@@ -92,6 +101,7 @@ namespace FloorBreaker.Slimes.Presentation
             // 攻撃 VFX をターゲット位置に再生
             var targetWorld = evt.TargetPosition.ToWorldCenter().ToVector3(-1f);
             SpawnAttackVfx(targetWorld);
+            _audio?.PlaySfx(SfxIds.SlimeAttack, new Float2(targetWorld.x, targetWorld.y));
 
             // 攻撃者の突進アニメーション
             if (_views.TryGetValue(evt.AttackerId, out var attackerView))
