@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
+using R3;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Slimes.Domain;
 

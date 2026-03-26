@@ -1,12 +1,24 @@
+using System;
 using System.Collections.Generic;
+using R3;
 using FloorBreaker.Shared.Domain.Grid;
 
 namespace FloorBreaker.Slimes.Domain
 {
-    public sealed class SlimeRegistry
+    public sealed class SlimeRegistry : IDisposable
     {
         private readonly Dictionary<SlimeId, SlimeModel> _slimes = new();
         private readonly Dictionary<GridPos, SlimeId> _positionIndex = new();
+
+        private readonly Subject<SlimeSpawnedEvent> _spawned = new();
+        private readonly Subject<SlimeMovedEvent> _moved = new();
+        private readonly Subject<SlimeKilledEvent> _killed = new();
+        private readonly Subject<SlimeAttackedEvent> _attacked = new();
+
+        public Observable<SlimeSpawnedEvent> Spawned => _spawned;
+        public Observable<SlimeMovedEvent> Moved => _moved;
+        public Observable<SlimeKilledEvent> Killed => _killed;
+        public Observable<SlimeAttackedEvent> Attacked => _attacked;
 
         public int AliveCount => _slimes.Count;
 
@@ -14,12 +26,14 @@ namespace FloorBreaker.Slimes.Domain
         {
             _slimes[slime.Id] = slime;
             _positionIndex[slime.Position] = slime.Id;
+            _spawned.OnNext(new SlimeSpawnedEvent(slime.Id, slime.Type, slime.Position));
         }
 
         public void Remove(SlimeId id)
         {
             if (_slimes.TryGetValue(id, out var slime))
             {
+                _killed.OnNext(new SlimeKilledEvent(slime.Id, slime.Type, slime.Position));
                 _positionIndex.Remove(slime.Position);
                 _slimes.Remove(id);
             }
@@ -55,6 +69,23 @@ namespace FloorBreaker.Slimes.Domain
         {
             _positionIndex.Remove(oldPos);
             _positionIndex[newPos] = slime.Id;
+            _moved.OnNext(new SlimeMovedEvent(slime.Id, oldPos, newPos));
+        }
+
+        /// <summary>
+        /// スライム攻撃時に呼び出し、攻撃イベントを発火する。
+        /// </summary>
+        public void NotifyAttack(SlimeId attackerId, GridPos attackerPosition, GridPos targetPosition)
+        {
+            _attacked.OnNext(new SlimeAttackedEvent(attackerId, attackerPosition, targetPosition));
+        }
+
+        public void Dispose()
+        {
+            _spawned.Dispose();
+            _moved.Dispose();
+            _killed.Dispose();
+            _attacked.Dispose();
         }
     }
 }

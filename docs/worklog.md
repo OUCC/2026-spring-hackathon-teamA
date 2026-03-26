@@ -1,5 +1,43 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 14 — カメラシステム
+
+### 完了タスク
+- **T-14.0** App.Cameras.Presentation.asmdef 新設 (参照: App.Shared.* + App.Player + App.Stage + R3)
+- **T-14.1** SplitScreenCameraSetup MonoBehaviour (2カメラ生成、ビューポート 0-50% / 50-100%、orthographicSize=5、Initialize/Tick/IDisposable)
+- **T-14.2** CameraFollower pure C# (R3 購読 PlayerModel.Position、Lerp 追従 SmoothSpeed=8、ステージ境界クランプ、orthographic 視錐台考慮)
+- **T-14.3** ICameraShakeService インターフェース + NullCameraShakeService No-op 実装 (ShakeIntensity enum: Light/Medium/Heavy、Feel 統合は Phase 18)
+- **T-14.4** CameraPreviewController + CameraPreview.unity デバッグシーン (WASD/矢印で P1/P2 移動、Space でステージ縮小、手動壁生成)
+
+### 設計判断
+- **CameraFollower は pure C#**: MonoBehaviour ではなく、SplitScreenCameraSetup が Tick で座標を受け取り Camera.transform に適用。テスト可能性を維持
+- **ICameraShakeService + Null 実装**: Feel の MMCameraShaker 統合は Phase 18 に委ねる。インターフェースを先に定義し、Bootstrap で差し替え可能にする
+- **orthographicSize = 5**: 仕様「視界範囲 縦横10マス」→ 縦10タイル ÷ 2 = 5。ビューポート半幅による水平方向のアスペクト比自動調整
+
+---
+
+## 2026-03-26: Phase 13 — スライム Presentation
+
+### 完了タスク
+- **T-13.0** SlimeEvents.cs 新規 (3 readonly struct: SlimeSpawnedEvent/SlimeMovedEvent/SlimeKilledEvent)
+- **T-13.0** SlimeRegistry に R3 イベント通知追加 (IDisposable + 3 Subject/Observable、Add/Remove/UpdatePosition から自動発火)
+- **T-13.0t** SlimeRegistryTests にイベントテスト 4件追加 (Spawned/Killed/Moved 発火 + 非存在 Remove 不発火)
+- **T-13.1** App.Slimes.Presentation.asmdef 新設 (参照: App.Shared.* + App.Slimes + App.Stage/Stage.Presentation + App.Player/Player.Presentation + App.Bombs + App.MatchFlow + App.ScriptableObjects + R3 + DOTween)
+- **T-13.2** SlimeSpriteConfig ScriptableObject (8方向スプライト、3種別色 Normal/Gold/Red、スケール・ソートオーダー・アニメーションパラメータ一元管理)
+- **T-13.3** SlimeView MonoBehaviour (薄い View、SpriteRenderer + Initialize/SetDirection/SetPositionImmediate、R3 購読なし)
+- **T-13.4** SlimeViewFactory MonoBehaviour (SlimeView の GameObject 生成・破棄、SerializeField SlimeSpriteConfig)
+- **T-13.5** SlimeAnimationService (DOTween: PlaySpawn OutBack ポップイン / PlayMove OutQuad / PlayDeath InBack 縮小+フェード、SlimeId 別 tween 追跡)
+- **T-13.6** SlimePresenter pure C# (R3 購読 Spawned/Moved/Killed → View/AnimService ディスパッチ、方向導出 dx/dy→Direction8、Tick() 不要)
+- **T-13.7** SlimePreviewController + SlimePreview.unity デバッグシーン (T/Y/U でスライムスポーン、N で撃破、M で自動スポーン ON/OFF、WASD/矢印で P1/P2 移動、ランダムボム 1.5秒間隔)
+
+### 設計判断
+- **SlimeRegistry にイベント追加 (Option C)**: 全ミューテーションが Registry 経由のため、4箇所のキルサイト (BombEffectSpreadService, SlimeTickService, FireDamageTickService, MatchPhaseScheduler) の変更不要。StageModel.TileChanged と同パターン
+- **SlimePresenter に Tick() 不要**: PlayerPresenter と異なり、スライムには無敵ブリンク・歩行フレームトグルがない。全更新がイベント駆動で完結
+- **方向導出**: SlimeAiService.PickMoveTarget は X or Y 軸のみ移動するため、SlimeMovedEvent の OldPosition→NewPosition 差分から 4方向を導出。念のため 8方向に対応
+- **KilledEvent は Remove 前に発火**: SlimeRegistry.Remove() で辞書削除前に SlimeModel の Type/Position を取得しイベント発火。Presenter が View を特定できるようにする
+
+---
+
 ## 2026-03-26: Phase 12 — ボム Presentation
 
 ### 完了タスク
