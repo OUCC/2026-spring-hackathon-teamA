@@ -1,5 +1,57 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 16 — オーディオ基盤
+
+### 完了タスク
+- **T-16.1** SfxIds.cs 新設 (20 SE ID を const string で定義、Application 層配置)
+- **T-16.2** AudioCatalog.cs 新設 (ScriptableObject: sfxId → AudioClip + volume マッピング、Dictionary ルックアップ)
+- **T-16.3** AudioService.cs 新設 (MonoBehaviour + IAudioService 実装、AudioSource プール最大8、ステレオパン対応)
+- **T-16.4** NullAudioService.cs 新設 (無音フォールバック、Match 単体起動用)
+- **T-16.5** AudioCatalog.asset 作成 (Medieval Fantasy SFX Bundle から 19 クリップ割り当て)
+- **T-16.6** ProjectLifetimeScope: AudioService を子 GameObject として GetComponentInChildren + RegisterInstance
+- **T-16.7** MatchLifetimeScope フォールバック: NullAudioService 登録追加
+- **T-16.8** MatchInitializer: IAudioService 注入 + 全 Presenter 生成時に渡す + フェーズ遷移 SE 購読 + IDisposable 実装
+- **T-16.9** BombPresenter: ボム発射 SE + 爆発 SE (炎/滑落で分岐)
+- **T-16.10** PlayerPresenter: 被弾 SE + 死亡 SE
+- **T-16.11** SlimePresenter: スポーン SE + 攻撃 SE + 死亡 SE
+- **T-16.12** StagePresenter: 炎上 SE + 崩落 SE + 永久消滅 SE
+- **T-16.13** UpgradeOverlayPresenter: 購入 SE + 完了 SE + ナビゲーション SE
+- **T-16.14** SplitScreenCameraSetup: P1 カメラに AudioListener 追加
+- **T-16.15** テスト修正: 複数選択対応で UpgradeDraftServiceTests + UpgradePhaseUseCaseTests を更新
+- コンパイルエラー 0 件、EditMode テスト 244 件全件グリーン
+
+### 設計判断
+- **Medieval Fantasy SFX Bundle で統一**: Epic Toon FX / Feel の SE は使わず、バンドル内の音源のみで統一感を維持
+- **AudioService を ProjectLifetimeScope の子 GameObject に配置**: DontDestroyOnLoad で一緒に生存。RegisterComponentInHierarchy ではなく GetComponentInChildren + RegisterInstance で DontDestroyOnLoad 前の検索問題を回避
+- **IAudioService をオプション引数 (= null) で Presenter に注入**: デバッグコントローラーの既存コンストラクタを破壊しない
+- **NullAudioService パターン**: Match 単体起動時に AudioService が無い場合のフォールバック。null チェック不要
+- **MatchInitializer に IDisposable 追加**: Play 停止時に UpgradeUI アクションマップのコールバック + フェーズ SE 購読を解除し ObjectDisposedException を防止
+
+### SE マッピング
+| sfxId | 用途 | クリップ |
+|---|---|---|
+| bomb_launch | ボム発射 | blade_whoosh_02 |
+| bomb_explode_fire | 炎ボム爆発 | magic_elemental_fire_03 |
+| bomb_explode_fall | 滑落ボム爆発 | magic_elemental_earth_05 |
+| tile_collapse | タイル崩落 | trap_activate_03 |
+| tile_fire | タイル炎上 | magic_elemental_fire_10 |
+| tile_destroy | タイル永久消滅 | trap_activate_05 |
+| slime_spawn | スライムスポーン | monster_small_A_voice_01 |
+| slime_attack | スライム攻撃 | monster_small_B_voice_03 |
+| slime_death | スライム死亡 | monster_small_A_voice_04 |
+| player_hit | プレイヤー被弾 | bone_flesh_crunch_A_02 |
+| player_death | プレイヤー死亡 | bone_flesh_crunch_A_05 |
+| coin_pickup | コイン取得 | coins_pickup_shake_03 |
+| upgrade_select | 強化購入 | fnt_ui_confirm_levelup_05 |
+| upgrade_reroll | リロール | fnt_ui_confirm_cancel_03 |
+| upgrade_done | 完了 | fnt_ui_confirm_cancel_01 |
+| phase_shrink | ステージ縮小 | heartbeat_accel |
+| phase_upgrade | 強化フェーズ開始 | fnt_ui_confirm_levelup_20 |
+| match_result | 試合終了 | fnt_ui_confirm_levelup_36 |
+| ui_navigate | UI カーソル移動 | fnt_ui_raise_lower_01 |
+
+---
+
 ## 2026-03-26: Phase 15 — Bootstrap / 完全 DI 化
 
 ### 完了タスク

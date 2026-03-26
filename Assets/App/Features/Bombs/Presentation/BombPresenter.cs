@@ -4,6 +4,7 @@ using R3;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Presentation.Common;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Bombs.Application;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Stage.Presentation;
@@ -24,6 +25,7 @@ namespace FloorBreaker.Bombs.Presentation
         private readonly StageQueryService _stageQuery;
         private readonly Dictionary<GridPos, TileView> _tileViews;
         private readonly float _flightSpeed;
+        private readonly IAudioService _audio;
         private readonly CompositeDisposable _subscriptions = new();
         private readonly Dictionary<PlayerId, BombFlightView> _activeFlights = new();
 
@@ -35,7 +37,8 @@ namespace FloorBreaker.Bombs.Presentation
             BombSpriteConfig config,
             StageQueryService stageQuery,
             Dictionary<GridPos, TileView> tileViews,
-            float flightSpeed)
+            float flightSpeed,
+            IAudioService audio = null)
         {
             _tracker = tracker;
             _factory = factory;
@@ -45,6 +48,7 @@ namespace FloorBreaker.Bombs.Presentation
             _stageQuery = stageQuery;
             _tileViews = tileViews;
             _flightSpeed = flightSpeed;
+            _audio = audio;
 
             tracker.FlightStarted.Subscribe(OnFlightStarted).AddTo(_subscriptions);
             tracker.BombLanded.Subscribe(OnBombLanded).AddTo(_subscriptions);
@@ -65,6 +69,9 @@ namespace FloorBreaker.Bombs.Presentation
             var view = _factory.GetView(evt.Owner, evt.Spec.Type, startWorld);
             _animService.PlayFlight(view, startWorld, endWorld, duration);
             _activeFlights[evt.Owner] = view;
+
+            var pos = new Float2(startWorld.x, startWorld.y);
+            _audio?.PlaySfx(SfxIds.BombLaunch, pos);
         }
 
         private void OnBombLanded(BombLandedEvent evt)
@@ -81,9 +88,13 @@ namespace FloorBreaker.Bombs.Presentation
                 _activeFlights.Remove(evt.Owner);
             }
 
-            // 3. 爆発 VFX
+            // 3. 爆発 VFX + SE
             var vfxPos = evt.LandingPos.ToWorldCenter().ToVector3(0f);
             _vfxPool.Spawn(evt.Type, vfxPos);
+
+            var landAudioPos = new Float2(vfxPos.x, vfxPos.y);
+            var sfxId = evt.Type == BombType.Fire ? SfxIds.BombExplodeFire : SfxIds.BombExplodeFall;
+            _audio?.PlaySfx(sfxId, landAudioPos);
 
             // 4. インパクトフラッシュ
             PlayImpactHighlights(evt);

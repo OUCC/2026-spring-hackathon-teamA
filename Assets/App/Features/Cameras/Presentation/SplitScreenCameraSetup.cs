@@ -25,6 +25,7 @@ namespace FloorBreaker.Cameras.Presentation
         public void Initialize(PlayerModel p1, PlayerModel p2, StageBounds bounds)
         {
             _cameraP1 = CreateCamera("Camera_P1", new Rect(0f, 0f, 0.5f, 1f));
+            _cameraP1.gameObject.AddComponent<AudioListener>();
             _cameraP2 = CreateCamera("Camera_P2", new Rect(0.5f, 0f, 0.5f, 1f));
 
             float viewportAspect = CalculateViewportAspect();

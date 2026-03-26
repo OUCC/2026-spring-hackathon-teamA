@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using R3;
 using FloorBreaker.Shared.Domain.Grid;
-
+using FloorBreaker.Shared.Domain.Primitives;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 
 namespace FloorBreaker.Stage.Presentation
@@ -13,6 +14,7 @@ namespace FloorBreaker.Stage.Presentation
         private readonly TileAnimationService _animService;
         private readonly TileFireVfxPool _fireVfxPool;
         private readonly TileSpriteConfig _config;
+        private readonly IAudioService _audio;
         private readonly IDisposable _subscription;
 
         private StageShrinkAnimator _shrinkAnimator;
@@ -22,12 +24,14 @@ namespace FloorBreaker.Stage.Presentation
             Dictionary<GridPos, TileView> views,
             TileAnimationService animService,
             TileFireVfxPool fireVfxPool,
-            TileSpriteConfig config)
+            TileSpriteConfig config,
+            IAudioService audio = null)
         {
             _views = views;
             _animService = animService;
             _fireVfxPool = fireVfxPool;
             _config = config;
+            _audio = audio;
 
             _subscription = model.TileChanged.Subscribe(HandleTileChanged);
         }
@@ -89,10 +93,12 @@ namespace FloorBreaker.Stage.Presentation
                     view.ApplyState(TileState.OnFire, _config);
                     _animService.PlayFirePulse(view);
                     _fireVfxPool.SpawnAt(pos, view.BasePosition);
+                    _audio?.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
                 case TileState.Collapsing:
                     _animService.PlayCollapse(view, permanent: false);
+                    _audio?.PlaySfx(SfxIds.TileCollapse, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
                 case TileState.Collapsed:
@@ -101,6 +107,7 @@ namespace FloorBreaker.Stage.Presentation
 
                 case TileState.PermanentlyDestroyed:
                     _animService.PlayPermanentDestroy(view);
+                    _audio?.PlaySfx(SfxIds.TileDestroy, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
             }
         }

@@ -433,4 +433,5 @@ flowchart LR
 | 13 | スライム Presentation | SlimeEvents, Registry IDisposable | — | SlimeView, AnimService, Presenter, Factory 7クラス | **完了** |
 | 14 | カメラシステム | — | — | SplitScreenCameraSetup, CameraFollower, ICameraShakeService 5クラス | **完了** |
 | 15 | Bootstrap | MatchPlayers | MatchInitializer, MatchTickRunner | ProjectLifetimeScope, MatchLifetimeScope, MatchPresenters 8クラス | **完了** |
-| 16-18 | 統合/ポリッシュ | — | — | テスト, FX, SE | 未着手 |
+| 16 | オーディオ基盤 | SfxIds | — | AudioService, AudioCatalog, NullAudioService 4クラス | **完了** |
+| 17-18 | 統合/ポリッシュ | — | — | テスト, FX | 未着手 |

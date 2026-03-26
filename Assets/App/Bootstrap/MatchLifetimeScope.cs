@@ -44,6 +44,14 @@ namespace FloorBreaker.Bootstrap
                     Lifetime.Singleton);
                 builder.Register<Shared.Infrastructure.UnityTime.UnityTimeProvider>(Lifetime.Singleton)
                     .As<ITimeProvider>();
+
+                // AudioService フォールバック: シーン内に AudioService があれば使う、なければ null 許容
+                var audioService = FindAnyObjectByType<Shared.Infrastructure.Audio.AudioService>();
+                if (audioService != null)
+                    builder.RegisterInstance<IAudioService>(audioService);
+                else
+                    builder.Register<IAudioService>(
+                        c => new Shared.Infrastructure.Audio.NullAudioService(), Lifetime.Singleton);
             }
 
             RegisterStage(builder);

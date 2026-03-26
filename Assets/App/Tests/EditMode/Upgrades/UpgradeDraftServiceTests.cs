@@ -57,7 +57,8 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
 
             var result = _draft.SelectChoice(0, _player);
             Assert.IsTrue(result);
-            Assert.AreEqual(DraftState.Selected, _draft.State.CurrentValue);
+            // 複数選択対応: SelectChoice は Choosing を維持する (Skip で完了)
+            Assert.AreEqual(DraftState.Choosing, _draft.State.CurrentValue);
         }
 
         [Test]
