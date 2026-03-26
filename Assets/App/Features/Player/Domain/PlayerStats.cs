@@ -16,6 +16,13 @@ namespace FloorBreaker.Player.Domain
 
         public bool IsDead => _currentHp.Value <= 0;
 
+        // --- 一時効果 ---
+        private readonly ReactiveProperty<bool> _fireShieldActive = new(false);
+        private readonly ReactiveProperty<bool> _levitationActive = new(false);
+
+        public ReadOnlyReactiveProperty<bool> FireShieldActive => _fireShieldActive;
+        public ReadOnlyReactiveProperty<bool> LevitationActive => _levitationActive;
+
         public PlayerStats(int maxHp, float baseMoveSpeed, float maxMoveSpeed)
         {
             MaxHp = maxHp;
@@ -51,10 +58,24 @@ namespace FloorBreaker.Player.Domain
             return true;
         }
 
+        public void ActivateFireShield() => _fireShieldActive.Value = true;
+        public void ActivateLevitation() => _levitationActive.Value = true;
+
+        /// <summary>
+        /// フェーズ開始時に全一時効果をリセットする。
+        /// </summary>
+        public void ClearTemporaryEffects()
+        {
+            _fireShieldActive.Value = false;
+            _levitationActive.Value = false;
+        }
+
         public void Dispose()
         {
             _currentHp.Dispose();
             _coins.Dispose();
+            _fireShieldActive.Dispose();
+            _levitationActive.Dispose();
         }
     }
 }

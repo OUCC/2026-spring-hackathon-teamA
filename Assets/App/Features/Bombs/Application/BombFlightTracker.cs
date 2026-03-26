@@ -72,6 +72,10 @@ namespace FloorBreaker.Bombs.Application
         private BombFlightState _p1Flight;
         private BombFlightState _p2Flight;
 
+        // DualShot 用の2発目スロット
+        private BombFlightState _p1DualFlight;
+        private BombFlightState _p2DualFlight;
+
         public BombFlightTracker(
             BombLaunchUseCase launchUseCase,
             BombCooldownState p1Cooldown,
@@ -91,6 +95,21 @@ namespace FloorBreaker.Bombs.Application
         public bool IsFlying(PlayerId player)
         {
             return GetFlight(player).IsFlying;
+        }
+
+        /// <summary>DualShot の2発目を開始する。クールダウン / IsFlying チェックなし。</summary>
+        public bool StartDualFlight(PlayerId owner, GridPos origin, Direction8 direction, BombSpec spec)
+        {
+            var cmd = new BombFlightCommand(origin, direction, spec, owner);
+            SetDualFlight(owner, new BombFlightState
+            {
+                IsFlying = true,
+                Command = cmd,
+                DistanceAccumulator = 0f,
+                CurrentTileDistance = 0,
+            });
+            _flightStarted.OnNext(new BombFlightStartedEvent(owner, origin, direction, spec));
+            return true;
         }
 
         public bool StartFlight(PlayerId owner, GridPos origin, Direction8 direction, BombSpec spec)
@@ -113,17 +132,32 @@ namespace FloorBreaker.Bombs.Application
         public void ReleaseBomb(PlayerId owner, IReadOnlyList<PlayerModel> players)
         {
             var state = GetFlight(owner);
-            if (!state.IsFlying) return;
-
-            // 最小飛行距離に達していれば即着弾、未達なら飛行継続
-            if (state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
+            if (state.IsFlying)
             {
-                Land(owner, state, players);
+                if (state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
+                {
+                    Land(owner, state, players);
+                }
+                else
+                {
+                    state.IsReleased = true;
+                    SetFlight(owner, state);
+                }
             }
-            else
+
+            // DualShot 2発目もリリース
+            var dual = GetDualFlight(owner);
+            if (dual.IsFlying)
             {
-                state.IsReleased = true;
-                SetFlight(owner, state);
+                if (dual.CurrentTileDistance >= dual.Command.Spec.MinFlightDistance)
+                {
+                    LandDual(owner, dual, players);
+                }
+                else
+                {
+                    dual.IsReleased = true;
+                    SetDualFlight(owner, dual);
+                }
             }
         }
 
@@ -131,6 +165,9 @@ namespace FloorBreaker.Bombs.Application
         {
             TickPlayer(PlayerId.Player1, deltaTime, players);
             TickPlayer(PlayerId.Player2, deltaTime, players);
+            // DualShot 2発目
+            TickDualPlayer(PlayerId.Player1, deltaTime, players);
+            TickDualPlayer(PlayerId.Player2, deltaTime, players);
         }
 
         private void TickPlayer(PlayerId owner, float deltaTime, IReadOnlyList<PlayerModel> players)
@@ -165,18 +202,26 @@ namespace FloorBreaker.Bombs.Application
 
                 if (tileState == TileState.Wall)
                 {
-                    state.CurrentTileDistance = nextTile;
-                    SetFlight(owner, state);
-                    Land(owner, state, players);
-                    return;
+                    if (!state.Command.Spec.FlightPenetration)
+                    {
+                        state.CurrentTileDistance = nextTile;
+                        SetFlight(owner, state);
+                        Land(owner, state, players);
+                        return;
+                    }
+                    // 貫通: 壁を無視して飛行続行
                 }
 
                 if (CheckEntityAt(nextPos, players))
                 {
-                    state.CurrentTileDistance = nextTile;
-                    SetFlight(owner, state);
-                    Land(owner, state, players);
-                    return;
+                    if (!state.Command.Spec.FlightPenetration)
+                    {
+                        state.CurrentTileDistance = nextTile;
+                        SetFlight(owner, state);
+                        Land(owner, state, players);
+                        return;
+                    }
+                    // 貫通: エンティティを無視して飛行続行
                 }
 
                 state.CurrentTileDistance = nextTile;
@@ -250,6 +295,111 @@ namespace FloorBreaker.Bombs.Application
         {
             if (player == PlayerId.Player1) _p1Flight = state;
             else _p2Flight = state;
+        }
+
+        private ref BombFlightState GetDualFlight(PlayerId player)
+        {
+            if (player == PlayerId.Player1) return ref _p1DualFlight;
+            return ref _p2DualFlight;
+        }
+
+        private void SetDualFlight(PlayerId player, BombFlightState state)
+        {
+            if (player == PlayerId.Player1) _p1DualFlight = state;
+            else _p2DualFlight = state;
+        }
+
+        /// <summary>DualShot 2発目用 Tick。メインの TickPlayer と同じロジック。</summary>
+        private void TickDualPlayer(PlayerId owner, float deltaTime, IReadOnlyList<PlayerModel> players)
+        {
+            var state = GetDualFlight(owner);
+            if (!state.IsFlying) return;
+
+            state.DistanceAccumulator += deltaTime * _flightSpeed;
+
+            while (state.CurrentTileDistance < (int)state.DistanceAccumulator
+                && state.CurrentTileDistance < state.Command.Spec.MaxFlightDistance)
+            {
+                int nextTile = state.CurrentTileDistance + 1;
+                var offset = state.Command.Direction.ToOffset();
+                var nextPos = state.Command.Origin + offset * nextTile;
+
+                if (!_stage.IsInBounds(nextPos))
+                {
+                    SetDualFlight(owner, state);
+                    LandDual(owner, state, players);
+                    return;
+                }
+
+                var tileState = _stage.GetTileState(nextPos);
+
+                if (tileState == TileState.Collapsed || tileState == TileState.PermanentlyDestroyed)
+                {
+                    SetDualFlight(owner, state);
+                    LandDual(owner, state, players);
+                    return;
+                }
+
+                if (tileState == TileState.Wall && !state.Command.Spec.FlightPenetration)
+                {
+                    state.CurrentTileDistance = nextTile;
+                    SetDualFlight(owner, state);
+                    LandDual(owner, state, players);
+                    return;
+                }
+
+                if (CheckEntityAt(nextPos, players) && !state.Command.Spec.FlightPenetration)
+                {
+                    state.CurrentTileDistance = nextTile;
+                    SetDualFlight(owner, state);
+                    LandDual(owner, state, players);
+                    return;
+                }
+
+                state.CurrentTileDistance = nextTile;
+
+                if (state.IsReleased
+                    && state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
+                {
+                    SetDualFlight(owner, state);
+                    LandDual(owner, state, players);
+                    return;
+                }
+            }
+
+            if (state.IsReleased
+                && state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
+            {
+                SetDualFlight(owner, state);
+                LandDual(owner, state, players);
+                return;
+            }
+
+            if (state.CurrentTileDistance >= state.Command.Spec.MaxFlightDistance)
+            {
+                SetDualFlight(owner, state);
+                LandDual(owner, state, players);
+                return;
+            }
+
+            SetDualFlight(owner, state);
+        }
+
+        private void LandDual(PlayerId owner, BombFlightState state, IReadOnlyList<PlayerModel> players)
+        {
+            SetDualFlight(owner, default);
+
+            var offset = state.Command.Direction.ToOffset();
+            var landingPos = state.CurrentTileDistance > 0
+                ? state.Command.Origin + offset * state.CurrentTileDistance
+                : state.Command.Origin;
+
+            // DualShot 2発目はクールダウンを開始しない（1発目で既に開始済み）
+            _launchUseCase.ExecuteLanding(state.Command, landingPos, players, null);
+
+            _bombLanded.OnNext(new BombLandedEvent(
+                owner, landingPos, state.Command.Spec.Type,
+                state.Command.Spec.EffectRange, state.Command.Spec.WallPenetration));
         }
 
         private BombCooldownState GetCooldown(PlayerId player)

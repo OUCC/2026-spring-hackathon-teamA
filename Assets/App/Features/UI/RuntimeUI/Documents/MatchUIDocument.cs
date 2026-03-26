@@ -22,6 +22,9 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         // --- リザルト ---
         public VisualElement ResultRoot { get; private set; }
 
+        // --- インパクトフラッシュ ---
+        public VisualElement ImpactFlashOverlay { get; private set; }
+
         // --- カードテンプレート ---
         [SerializeField] private VisualTreeAsset _upgradeCardTemplate;
         public VisualTreeAsset UpgradeCardTemplate => _upgradeCardTemplate;
@@ -35,6 +38,7 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             RightHudRoot = root.Q("RightHud");
             UpgradeOverlayRoot = root.Q("UpgradeOverlayRoot");
             ResultRoot = root.Q("ResultRoot");
+            ImpactFlashOverlay = root.Q("ImpactFlashOverlay");
         }
     }
 }

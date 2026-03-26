@@ -46,14 +46,38 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             RightSkipBtn = overlayRoot.Q<Button>("RightSkipBtn");
         }
 
-        public void Show() => _overlayRoot.RemoveFromClassList("upgrade-overlay--hidden");
-        public void Hide() => _overlayRoot.AddToClassList("upgrade-overlay--hidden");
+        public void Show()
+        {
+            _overlayRoot.AddToClassList("upgrade-overlay--entering");
+            _overlayRoot.RemoveFromClassList("upgrade-overlay--hidden");
+            _overlayRoot.schedule.Execute(() =>
+                _overlayRoot.RemoveFromClassList("upgrade-overlay--entering"));
+        }
+
+        public void Hide()
+        {
+            _overlayRoot.AddToClassList("upgrade-overlay--entering");
+            _overlayRoot.schedule.Execute(() =>
+                _overlayRoot.AddToClassList("upgrade-overlay--hidden"))
+                .StartingIn(300);
+        }
 
         public void SetCountdown(int seconds)
         {
             string text = seconds.ToString();
             _leftCountdown.text = text;
             _rightCountdown.text = text;
+        }
+
+        /// <summary>カウントダウンをパルスさせる (3-2-1 演出)。</summary>
+        public void PulseCountdown()
+        {
+            _leftCountdown.AddToClassList("upgrade-pane__countdown--pulse");
+            _rightCountdown.AddToClassList("upgrade-pane__countdown--pulse");
+            _leftCountdown.schedule.Execute(() =>
+                _leftCountdown.RemoveFromClassList("upgrade-pane__countdown--pulse")).StartingIn(50);
+            _rightCountdown.schedule.Execute(() =>
+                _rightCountdown.RemoveFromClassList("upgrade-pane__countdown--pulse")).StartingIn(50);
         }
 
         public void SetLeftStatus(string text) => _leftStatus.text = text;

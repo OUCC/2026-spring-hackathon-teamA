@@ -28,6 +28,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         private readonly List<UpgradeCardElement> _leftCardElements = new();
         private readonly List<UpgradeCardElement> _rightCardElements = new();
         private readonly List<IDisposable> _subscriptions = new();
+        private int _lastPulseSecond = -1;
 
         public UpgradeOverlayPresenter(
             UpgradeOverlayView view,
@@ -110,9 +111,21 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
 
         public void UpdateCountdown()
         {
-            if (!_upgradePhase.IsActive) return;
+            if (!_upgradePhase.IsActive)
+            {
+                _lastPulseSecond = -1;
+                return;
+            }
             int seconds = (int)MathF.Ceiling(_upgradePhase.RemainingTime.CurrentValue);
             _view.SetCountdown(seconds);
+
+            // 残り 3 秒以下でパルス演出
+            if (seconds <= 3 && seconds > 0 && seconds != _lastPulseSecond)
+            {
+                _lastPulseSecond = seconds;
+                _view.PulseCountdown();
+                _audio?.PlaySfx(SfxIds.CountdownTick);
+            }
         }
 
         public void Dispose()

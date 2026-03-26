@@ -12,16 +12,16 @@ namespace FloorBreaker.Shared.Application.Interfaces
         float MaxMovementSpeed { get; }
         float MovementSpeedIncrement { get; }
 
-        // --- Fall Bomb ---
-        int FallBombMaxFlightDistance { get; }
-        int FallBombEffectRange { get; }
-        int FallBombDamage { get; }
-        float FallBombCollapseDuration { get; }
-        float FallBombRecoveryDuration { get; }
-        float FallBombCooldown { get; }
-        float FallBombCooldownMin { get; }
-        float FallBombCooldownReduction { get; }
-        bool FallBombDefaultWallPenetration { get; }
+        // --- Break Bomb ---
+        int BreakBombMaxFlightDistance { get; }
+        int BreakBombEffectRange { get; }
+        int BreakBombDamage { get; }
+        float BreakBombCollapseDuration { get; }
+        float BreakBombRecoveryDuration { get; }
+        float BreakBombCooldown { get; }
+        float BreakBombCooldownMin { get; }
+        float BreakBombCooldownReduction { get; }
+        bool BreakBombDefaultWallPenetration { get; }
 
         // --- Fire Bomb ---
         int FireBombMaxFlightDistance { get; }
@@ -72,10 +72,14 @@ namespace FloorBreaker.Shared.Application.Interfaces
 
         // --- Bomb Effect Spread ---
         float FireBombSpreadInterval { get; }
-        float FallBombSpreadInterval { get; }
+        float BreakBombSpreadInterval { get; }
 
         // --- Upgrade: HP Recovery ---
         int HpRecoveryAmount { get; }
         int HpRecoveryThreshold { get; }
+
+        // --- Dash ---
+        float DashCooldown { get; }
+        float DashDoubleTapWindow { get; }
     }
 }

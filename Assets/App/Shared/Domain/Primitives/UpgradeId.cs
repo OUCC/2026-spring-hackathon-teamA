@@ -8,21 +8,29 @@ namespace FloorBreaker.Shared.Domain.Primitives
         FireFlightRange,
         FireEffectRange,
         FireDamage,
-        FireFlightDamage,
         FireDuration,
         FireWallPenetration,
         FireCooldown,
+        FireBombPenetration,
 
-        // 滑落ボム強化
-        FallFlightRange,
-        FallEffectRange,
-        FallDamage,
-        FallFlightDamage,
-        FallCollapseTime,
-        FallCooldown,
+        // ブレークボム強化
+        BreakFlightRange,
+        BreakEffectRange,
+        BreakDamage,
+        BreakCollapseTime,
+        BreakCooldown,
+        BreakBombPenetration,
 
         // 汎用強化
         MoveSpeed,
         HpRecovery,
+
+        // 汎用強化 — 一時効果
+        FireShield,
+        Levitation,
+
+        // 汎用強化 — 永続アビリティ
+        Dash,
+        DualShot,
     }
 }

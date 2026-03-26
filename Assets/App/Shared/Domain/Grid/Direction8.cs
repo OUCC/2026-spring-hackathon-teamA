@@ -43,5 +43,17 @@ namespace FloorBreaker.Shared.Domain.Grid
         {
             return (int)dir % 2 == 0;
         }
+
+        /// <summary>時計回り90度回転。</summary>
+        public static Direction8 RotateCW90(this Direction8 dir)
+        {
+            return (Direction8)(((int)dir + 2) % 8);
+        }
+
+        /// <summary>反時計回り90度回転。</summary>
+        public static Direction8 RotateCCW90(this Direction8 dir)
+        {
+            return (Direction8)(((int)dir + 6) % 8);
+        }
     }
 }

@@ -19,6 +19,8 @@ namespace FloorBreaker.Player.Presentation
         private readonly PlayerAnimationService _animService;
         private readonly PlayerSpriteConfig _config;
         private readonly IAudioService _audio;
+        private readonly ICameraShakeService _cameraShake;
+        private readonly IImpactFreezeService _impactFreeze;
         private readonly CompositeDisposable _subscriptions = new();
 
         // Walk animation state
@@ -38,13 +40,17 @@ namespace FloorBreaker.Player.Presentation
             PlayerView view,
             PlayerAnimationService animService,
             PlayerSpriteConfig config,
-            IAudioService audio = null)
+            IAudioService audio = null,
+            ICameraShakeService cameraShake = null,
+            IImpactFreezeService impactFreeze = null)
         {
             _model = model;
             _view = view;
             _animService = animService;
             _config = config;
             _audio = audio;
+            _cameraShake = cameraShake;
+            _impactFreeze = impactFreeze;
 
             // Position change → movement animation
             model.Position.Subscribe(OnPositionChanged).AddTo(_subscriptions);
@@ -96,6 +102,8 @@ namespace FloorBreaker.Player.Presentation
                 _isDead = true;
                 _animService.PlayDeath(_view);
                 _audio?.PlaySfx(SfxIds.PlayerDeath);
+                _cameraShake?.Shake(ShakeIntensity.Medium);
+                _impactFreeze?.PlayImpact(ImpactLevel.Heavy);
             }
         }
 

@@ -25,7 +25,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(10, 8, 18, 0.95);
+    background-color: rgba(10, 8, 18, 0.65);
 }
 
 .title-content {
@@ -37,7 +37,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px;
+    padding: 20px;
 }
 
 /* --- ロゴ --- */
@@ -54,14 +54,14 @@
 .title-subtitle {
     font-size: 20px;
     color: var(--color-text-dim);
-    margin-bottom: 48px;
+    margin-bottom: 32px;
 }
 
 /* --- モード選択 --- */
 .title-mode-select {
     flex-direction: column;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 16px;
 }
 
 .title-btn {
@@ -111,7 +111,7 @@
     font-size: 16px;
     padding: 8px 32px;
     min-width: 160px;
-    margin-top: 24px;
+    margin-top: 12px;
     color: var(--color-text-dim);
     border-color: rgba(160, 152, 136, 0.2);
 }
@@ -120,23 +120,87 @@
     border-color: var(--color-text-dim);
 }
 
+/* --- 設定ボタン行 --- */
+.title-settings-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.title-btn--settings {
+    font-size: 18px;
+    padding: 8px 32px;
+    min-width: 200px;
+    color: var(--color-text-dim);
+    border-color: rgba(160, 152, 136, 0.2);
+}
+
+.title-btn--settings:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
+}
+
+/* --- 音量調整 --- */
+.title-volume {
+    background-color: rgba(20, 15, 30, 0.6);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.1);
+    padding: 12px 20px;
+    margin-bottom: 12px;
+    max-width: 400px;
+    width: 400px;
+}
+
+.title-volume__header {
+    font-size: 14px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
+.title-volume__row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.title-volume__label {
+    font-size: 13px;
+    color: var(--color-text-dim);
+    min-width: 70px;
+}
+
+.title-volume__slider {
+    flex-grow: 1;
+    margin: 0 8px;
+}
+
+.title-volume__value {
+    font-size: 13px;
+    color: var(--color-text);
+    min-width: 40px;
+    -unity-text-align: middle-right;
+}
+
 /* --- 操作説明 --- */
 .title-controls {
     background-color: rgba(20, 15, 30, 0.6);
     border-radius: 8px;
     border-width: 1px;
     border-color: rgba(240, 232, 216, 0.1);
-    padding: 16px 24px;
+    padding: 12px 24px;
     margin-bottom: 8px;
     max-width: 600px;
 }
 
 .title-controls__header {
-    font-size: 16px;
+    font-size: 14px;
     color: var(--color-text);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .title-controls__grid {
@@ -153,11 +217,11 @@
     font-size: 14px;
     color: var(--color-coin);
     -unity-text-align: middle-center;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .title-controls__item {
     font-size: 13px;
     color: var(--color-text-dim);
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }

@@ -19,7 +19,7 @@ namespace FloorBreaker.Tests.EditMode.Player
         public void SetUp()
         {
             _stage = new StageModel(TileCoordRange.FromSize(10));
-            var stats = new PlayerStats(10, 1f, 2f);
+            var stats = new PlayerStats(10, 1f, 3f);
             var build = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player = new PlayerModel(PlayerId.Player1, new GridPos(5, 5), stats, build);
             _svc = new PlayerDamageService(invulnerabilityDuration: 1.5f, forcedMoveDuration: 1f);

@@ -66,6 +66,7 @@ namespace FloorBreaker.Input.Application
             adapter.OnMoveInput += HandleMovePressed;
             adapter.OnMoveReleased += HandleMoveReleased;
             adapter.OnBombHoldInput += HandleBombHold;
+            adapter.OnDashTriggered += HandleDash;
         }
 
         /// <summary>
@@ -75,6 +76,16 @@ namespace FloorBreaker.Input.Application
         public void Tick(float deltaTime)
         {
             if (_clock.CurrentPhaseValue != GamePhase.MatchRunning) return;
+
+            // ダッシュクールダウン減算
+            foreach (var key in new List<int>(_dashCooldowns.Keys))
+            {
+                float val = _dashCooldowns[key] - deltaTime;
+                if (val <= 0f)
+                    _dashCooldowns.Remove(key);
+                else
+                    _dashCooldowns[key] = val;
+            }
 
             foreach (var kvp in _adapters)
             {
@@ -188,15 +199,48 @@ namespace FloorBreaker.Input.Application
             {
                 var adapter = _adapters.GetValueOrDefault(cmd.Owner.Index);
                 var direction = adapter?.LastDirection ?? player.CurrentFacing;
-                var spec = cmd.Type == BombType.Fall
-                    ? _bombLaunchUseCase.CreateFallBombSpec(player.Build)
+                var spec = cmd.Type == BombType.Break
+                    ? _bombLaunchUseCase.CreateBreakBombSpec(player.Build)
                     : _bombLaunchUseCase.CreateFireBombSpec(player.Build);
 
-                _bombFlightTracker.StartFlight(cmd.Owner, player.CurrentPosition, direction, spec);
+                if (player.Build.HasDualShot)
+                {
+                    // 双射の書: 左右に同時発射
+                    var leftDir = direction.RotateCCW90();
+                    var rightDir = direction.RotateCW90();
+                    _bombFlightTracker.StartFlight(cmd.Owner, player.CurrentPosition, leftDir, spec);
+                    _bombFlightTracker.StartDualFlight(cmd.Owner, player.CurrentPosition, rightDir, spec);
+                }
+                else
+                {
+                    _bombFlightTracker.StartFlight(cmd.Owner, player.CurrentPosition, direction, spec);
+                }
             }
             else
             {
                 _bombFlightTracker.ReleaseBomb(cmd.Owner, _players);
+            }
+        }
+
+        // ダッシュクールダウン (プレイヤーごと)
+        private readonly Dictionary<int, float> _dashCooldowns = new();
+
+        private void HandleDash(PlayerId playerId, Direction8 direction)
+        {
+            if (_clock.CurrentPhaseValue != GamePhase.MatchRunning) return;
+
+            var player = GetPlayer(playerId);
+            if (player == null) return;
+            if (!player.Build.HasDash) return;
+
+            // クールダウンチェック
+            _dashCooldowns.TryGetValue(playerId.Index, out float remaining);
+            if (remaining > 0f) return;
+
+            if (_moveService.TryDash(player, direction, _stage))
+            {
+                // ダッシュ成功 → クールダウン開始（Tick で減算される）
+                _dashCooldowns[playerId.Index] = 1f; // TODO: BalanceParameters から取得
             }
         }
 
@@ -223,6 +267,7 @@ namespace FloorBreaker.Input.Application
                 adapter.OnMoveInput -= HandleMovePressed;
                 adapter.OnMoveReleased -= HandleMoveReleased;
                 adapter.OnBombHoldInput -= HandleBombHold;
+                adapter.OnDashTriggered -= HandleDash;
             }
         }
 

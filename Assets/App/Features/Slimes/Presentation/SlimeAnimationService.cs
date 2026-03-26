@@ -126,17 +126,40 @@ namespace FloorBreaker.Slimes.Presentation
             KillMoveTween(view.SlimeId);
             KillEffectTween(view.SlimeId);
             var renderer = view.Renderer;
+            var mat = renderer.material; // インスタンス化
 
-            var seq = DOTween.Sequence();
-            seq.Append(view.transform
-                .DOScale(_config.DeathShrinkScale, _config.DeathDuration)
-                .SetEase(Ease.InBack));
-            seq.Join(DOTween.ToAlpha(
-                () => renderer.color, c => renderer.color = c,
-                0f, _config.DeathDuration));
-            seq.OnComplete(() => onComplete?.Invoke());
-            seq.SetLink(view.gameObject);
-            _effectTweens[view.SlimeId] = seq;
+            // All In 1 Sprite Shader のディゾルブを試行
+            if (mat.HasProperty("_FadeAmount"))
+            {
+                mat.EnableKeyword("FADE_ON");
+                mat.SetColor("_FadeBurnColor", _config.DissolveBurnColor);
+                mat.SetFloat("_FadeBurnWidth", _config.DissolveBurnWidth);
+                mat.SetFloat("_FadeBurnGlow", _config.DissolveBurnGlow);
+
+                var seq = DOTween.Sequence();
+                seq.Append(DOTween.To(
+                    () => mat.GetFloat("_FadeAmount"),
+                    v => mat.SetFloat("_FadeAmount", v),
+                    1f, _config.DeathDuration)
+                    .SetEase(Ease.InQuad));
+                seq.OnComplete(() => onComplete?.Invoke());
+                seq.SetLink(view.gameObject);
+                _effectTweens[view.SlimeId] = seq;
+            }
+            else
+            {
+                // フォールバック: 従来の shrink + fade
+                var seq = DOTween.Sequence();
+                seq.Append(view.transform
+                    .DOScale(_config.DeathShrinkScale, _config.DeathDuration)
+                    .SetEase(Ease.InBack));
+                seq.Join(DOTween.ToAlpha(
+                    () => renderer.color, c => renderer.color = c,
+                    0f, _config.DeathDuration));
+                seq.OnComplete(() => onComplete?.Invoke());
+                seq.SetLink(view.gameObject);
+                _effectTweens[view.SlimeId] = seq;
+            }
         }
 
         // ─── Cleanup ───────────────────────────────────────────

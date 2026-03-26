@@ -34,21 +34,21 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var queryService = new StageQueryService(_stage);
             var areaResolver = new BombAreaResolver(queryService);
             var landingResolver = new BombLandingResolver(_stage);
-            var fallResolver = new FallBombResolver(areaResolver);
+            var breakResolver = new BreakBombResolver(areaResolver);
             var fireResolver = new FireBombResolver(areaResolver);
 
             _spreadService = new BombEffectSpreadService(
                 _stage, _timerService, _damageService, _safeTileSearch);
 
             _useCase = new BombLaunchUseCase(
-                landingResolver, fallResolver, fireResolver,
+                landingResolver, breakResolver, fireResolver,
                 _stage, new TestBalanceParameters(), _spreadService);
 
-            var stats1 = new PlayerStats(10, 1f, 2f);
+            var stats1 = new PlayerStats(10, 1f, 3f);
             var build1 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player1 = new PlayerModel(PlayerId.Player1, new GridPos(2, 5), stats1, build1);
 
-            var stats2 = new PlayerStats(10, 1f, 2f);
+            var stats2 = new PlayerStats(10, 1f, 3f);
             var build2 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player2 = new PlayerModel(PlayerId.Player2, new GridPos(8, 5), stats2, build2);
 
@@ -65,11 +65,11 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void CreateFallBombSpec_UsesBalanceRecoveryTime()
+        public void CreateBreakBombSpec_UsesBalanceRecoveryTime()
         {
-            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             Assert.AreEqual(5f, spec.RecoveryTime);
-            Assert.AreEqual(BombType.Fall, spec.Type);
+            Assert.AreEqual(BombType.Break, spec.Type);
             Assert.IsTrue(spec.WallPenetration);
         }
 
@@ -83,9 +83,9 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void ExecuteLanding_FallBomb_CenterTileCollapsingImmediately()
+        public void ExecuteLanding_BreakBomb_CenterTileCollapsingImmediately()
         {
-            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
             var landingPos = new GridPos(5, 5);
 
@@ -96,9 +96,9 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void ExecuteLanding_FallBomb_AdjacentTilesCollapsingAfterSpread()
+        public void ExecuteLanding_BreakBomb_AdjacentTilesCollapsingAfterSpread()
         {
-            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
             var landingPos = new GridPos(5, 5);
 
@@ -117,9 +117,9 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void ExecuteLanding_FallBomb_StartsTimers()
+        public void ExecuteLanding_BreakBomb_StartsTimers()
         {
-            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
@@ -130,10 +130,10 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void ExecuteLanding_FallBomb_DamagesPlayerOnCenterTile()
+        public void ExecuteLanding_BreakBomb_DamagesPlayerOnCenterTile()
         {
             _player1.CurrentPosition = new GridPos(5, 5);
-            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player2);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
@@ -143,10 +143,10 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void ExecuteLanding_FallBomb_ForcesRelocate()
+        public void ExecuteLanding_BreakBomb_ForcesRelocate()
         {
             _player1.CurrentPosition = new GridPos(5, 5);
-            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player2);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
@@ -155,10 +155,10 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void ExecuteLanding_FallBomb_DestroysWalls()
+        public void ExecuteLanding_BreakBomb_DestroysWalls()
         {
             _stage.SetTileState(new GridPos(6, 5), TileState.Wall);
-            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
@@ -238,7 +238,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void ExecuteLanding_PlayerNotOnAffectedTile_NoDamage()
         {
             // player1 is at (2,5), bomb lands at (5,5) — player not in range
-            var spec = _useCase.CreateFallBombSpec(_player1.Build);
+            var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player2);
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
@@ -251,17 +251,17 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             public int InitialHp => 10;
             public float BaseMovementSpeed => 1f;
-            public float MaxMovementSpeed => 2f;
+            public float MaxMovementSpeed => 3f;
             public float MovementSpeedIncrement => 0.2f;
-            public int FallBombMaxFlightDistance => 3;
-            public int FallBombEffectRange => 1;
-            public int FallBombDamage => 2;
-            public float FallBombCollapseDuration => 3f;
-            public float FallBombRecoveryDuration => 5f;
-            public float FallBombCooldown => 4f;
-            public float FallBombCooldownMin => 1f;
-            public float FallBombCooldownReduction => 0.5f;
-            public bool FallBombDefaultWallPenetration => true;
+            public int BreakBombMaxFlightDistance => 3;
+            public int BreakBombEffectRange => 1;
+            public int BreakBombDamage => 2;
+            public float BreakBombCollapseDuration => 3f;
+            public float BreakBombRecoveryDuration => 5f;
+            public float BreakBombCooldown => 4f;
+            public float BreakBombCooldownMin => 1f;
+            public float BreakBombCooldownReduction => 0.5f;
+            public bool BreakBombDefaultWallPenetration => true;
             public int FireBombMaxFlightDistance => 3;
             public int FireBombEffectRange => 1;
             public int FireBombContactDamage => 1;
@@ -300,7 +300,9 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             public int BombMinFlightDistance => 3;
             public float StageShrinkAnimDuration => 1f;
             public float FireBombSpreadInterval => 0.15f;
-            public float FallBombSpreadInterval => 0.3f;
+            public float BreakBombSpreadInterval => 0.3f;
+            public float DashCooldown => 1f;
+            public float DashDoubleTapWindow => 0.3f;
         }
     }
 }

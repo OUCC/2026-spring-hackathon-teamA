@@ -30,6 +30,9 @@
         <!-- OverlayLayer -->
         <VisualElement name="OverlayLayer" class="overlay-layer">
 
+            <!-- インパクトフラッシュ (ヒットストップ演出用) -->
+            <VisualElement name="ImpactFlashOverlay" class="impact-flash" />
+
             <!-- 強化オーバーレイ: 左右独立ペイン -->
             <VisualElement name="UpgradeOverlayRoot" class="upgrade-overlay upgrade-overlay--hidden">
                 <VisualElement class="upgrade-backdrop" />

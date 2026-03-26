@@ -4,17 +4,29 @@
     "references": [
         "App.Shared.Domain",
         "App.Shared.Application",
+        "App.Shared.Infrastructure",
+        "App.Shared.Presentation",
+        "App.ScriptableObjects",
+        "App.Stage",
+        "App.Stage.Presentation",
         "App.Player",
+        "App.Player.Presentation",
         "App.Bombs",
+        "App.Bombs.Presentation",
+        "App.Slimes",
         "App.Upgrades",
-        "App.MatchFlow"
+        "App.MatchFlow",
+        "App.Input",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "R3.dll"
+        "R3.dll",
+        "DOTween.dll",
+        "DOTweenPro.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [],

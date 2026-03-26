@@ -31,6 +31,14 @@ namespace FloorBreaker.Input.Infrastructure
         public event Action<PlayerId, Direction8> OnMoveInput;
         public event Action<PlayerId> OnMoveReleased;
         public event Action<BombHoldCommand> OnBombHoldInput;
+        public event Action<PlayerId, Direction8> OnDashTriggered;
+
+        // ダブルタップ検出
+        private Direction8? _lastTapDirection;
+        private float _lastTapTime;
+        private float _doubleTapWindow = 0.3f;
+
+        public void SetDoubleTapWindow(float window) => _doubleTapWindow = window;
 
         public void Initialize(PlayerId playerId, InputActionAsset actions = null)
         {
@@ -57,8 +65,8 @@ namespace FloorBreaker.Input.Infrastructure
 
             _gameplayMap["Move"].performed += OnMove;
             _gameplayMap["Move"].canceled += OnMoveCanceled;
-            _gameplayMap["FallBombHold"].started += OnFallBombStarted;
-            _gameplayMap["FallBombHold"].canceled += OnFallBombCanceled;
+            _gameplayMap["BreakBombHold"].started += OnBreakBombStarted;
+            _gameplayMap["BreakBombHold"].canceled += OnBreakBombCanceled;
             _gameplayMap["FireBombHold"].started += OnFireBombStarted;
             _gameplayMap["FireBombHold"].canceled += OnFireBombCanceled;
 
@@ -76,8 +84,8 @@ namespace FloorBreaker.Input.Infrastructure
 
             _gameplayMap["Move"].performed -= OnMove;
             _gameplayMap["Move"].canceled -= OnMoveCanceled;
-            _gameplayMap["FallBombHold"].started -= OnFallBombStarted;
-            _gameplayMap["FallBombHold"].canceled -= OnFallBombCanceled;
+            _gameplayMap["BreakBombHold"].started -= OnBreakBombStarted;
+            _gameplayMap["BreakBombHold"].canceled -= OnBreakBombCanceled;
             _gameplayMap["FireBombHold"].started -= OnFireBombStarted;
             _gameplayMap["FireBombHold"].canceled -= OnFireBombCanceled;
 
@@ -95,6 +103,21 @@ namespace FloorBreaker.Input.Infrastructure
             var dir = Vector2ToDirection8(vec);
             if (dir.HasValue)
             {
+                // ダブルタップ検出
+                float now = Time.unscaledTime;
+                if (_lastTapDirection.HasValue
+                    && _lastTapDirection.Value == dir.Value
+                    && now - _lastTapTime <= _doubleTapWindow)
+                {
+                    OnDashTriggered?.Invoke(_playerId, dir.Value);
+                    _lastTapDirection = null; // リセットして連続発動防止
+                }
+                else
+                {
+                    _lastTapDirection = dir.Value;
+                    _lastTapTime = now;
+                }
+
                 _lastDirection = dir.Value;
                 _heldDirection = dir.Value;
                 OnMoveInput?.Invoke(_playerId, dir.Value);
@@ -107,11 +130,11 @@ namespace FloorBreaker.Input.Infrastructure
             OnMoveReleased?.Invoke(_playerId);
         }
 
-        private void OnFallBombStarted(InputAction.CallbackContext ctx)
-            => OnBombHoldInput?.Invoke(new BombHoldCommand(_playerId, BombType.Fall, true));
+        private void OnBreakBombStarted(InputAction.CallbackContext ctx)
+            => OnBombHoldInput?.Invoke(new BombHoldCommand(_playerId, BombType.Break, true));
 
-        private void OnFallBombCanceled(InputAction.CallbackContext ctx)
-            => OnBombHoldInput?.Invoke(new BombHoldCommand(_playerId, BombType.Fall, false));
+        private void OnBreakBombCanceled(InputAction.CallbackContext ctx)
+            => OnBombHoldInput?.Invoke(new BombHoldCommand(_playerId, BombType.Break, false));
 
         private void OnFireBombStarted(InputAction.CallbackContext ctx)
             => OnBombHoldInput?.Invoke(new BombHoldCommand(_playerId, BombType.Fire, true));

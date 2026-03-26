@@ -40,7 +40,7 @@ namespace FloorBreaker.Stage.Presentation.Debug
 
         // Bomb simulation (Application 層と同じロジック)
         private BombEffectSpreadService _spreadService;
-        private FallBombResolver _fallResolver;
+        private BreakBombResolver _breakResolver;
         private FireBombResolver _fireResolver;
 
         // Presentation
@@ -88,7 +88,7 @@ namespace FloorBreaker.Stage.Presentation.Debug
             var safeTileSearch = new SafeTileSearchService();
             var damageService = new PlayerDamageService(1.5f, 1f);
             var areaResolver = new BombAreaResolver(_queryService);
-            _fallResolver = new FallBombResolver(areaResolver);
+            _breakResolver = new BreakBombResolver(areaResolver);
             _fireResolver = new FireBombResolver(areaResolver);
             _spreadService = new BombEffectSpreadService(
                 _model, _tileTimerService, damageService, safeTileSearch);
@@ -126,7 +126,7 @@ namespace FloorBreaker.Stage.Presentation.Debug
             UnityEngine.Debug.Log("  矢印キー: カーソル移動");
             UnityEngine.Debug.Log("  1: Normal  |  2: OnFire(単体)  |  3: Collapsing(単体)  |  4: Collapsed");
             UnityEngine.Debug.Log("  5: PermanentlyDestroyed  |  6: Wall");
-            UnityEngine.Debug.Log("  F: 炎ボム十字 (壁で停止)  |  C: 滑落ボム十字 (壁貫通)");
+            UnityEngine.Debug.Log("  F: 炎ボム十字 (壁で停止)  |  C: ブレークボム十字 (壁貫通)");
             UnityEngine.Debug.Log("  +/-: 効果範囲変更 (現在=" + _effectRange + ")");
             UnityEngine.Debug.Log("  S: ステージ縮小  |  R: 全タイルリセット  |  Space: 状態サイクル");
         }
@@ -158,7 +158,7 @@ namespace FloorBreaker.Stage.Presentation.Debug
 
             // 十字パターン (ボムシミュレーション)
             if (Input.GetKeyDown(KeyCode.F)) FireBombCross();
-            if (Input.GetKeyDown(KeyCode.C)) FallBombCross();
+            if (Input.GetKeyDown(KeyCode.C)) BreakBombCross();
 
             // 効果範囲変更
             if (Input.GetKeyDown(KeyCode.Equals) || Input.GetKeyDown(KeyCode.Plus)
@@ -208,28 +208,28 @@ namespace FloorBreaker.Stage.Presentation.Debug
         }
 
         private const float FireSpreadInterval = 0.15f;
-        private const float FallSpreadInterval = 0.3f;
+        private const float BreakSpreadInterval = 0.3f;
 
         /// <summary>
         /// 炎ボムシミュレーション: BombEffectSpreadService 経由の段階的十字広がり。
         /// </summary>
         private void FireBombCross()
         {
-            var spec = new BombSpec(BombType.Fire, 3, 3, _effectRange, 1, 2f, false, false, FireDuration, 0f, 0f);
+            var spec = new BombSpec(BombType.Fire, 3, 3, _effectRange, 1, 2f, false, FireDuration, 0f, 0f);
             var result = _fireResolver.Resolve(_cursorPos, spec, _model);
             _spreadService.EnqueueFireBomb(result, _cursorPos, new List<PlayerModel>(), null, FireSpreadInterval);
             UnityEngine.Debug.Log("[StagePreview] 炎ボム十字 (壁貫通なし, 0.15s/マス): " + result.AffectedTiles.Count + " タイル, 範囲=" + _effectRange);
         }
 
         /// <summary>
-        /// 滑落ボムシミュレーション: BombEffectSpreadService 経由の段階的十字広がり。
+        /// ブレークボムシミュレーション: BombEffectSpreadService 経由の段階的十字広がり。
         /// </summary>
-        private void FallBombCross()
+        private void BreakBombCross()
         {
-            var spec = new BombSpec(BombType.Fall, 3, 3, _effectRange, 2, 4f, false, true, 0f, CollapseDuration, RecoveryDuration);
-            var result = _fallResolver.Resolve(_cursorPos, spec, _model);
-            _spreadService.EnqueueFallBomb(result, _cursorPos, new List<PlayerModel>(), null, FallSpreadInterval);
-            UnityEngine.Debug.Log("[StagePreview] 滑落ボム十字 (壁貫通, 0.3s/マス): " + result.AffectedTiles.Count + " タイル, 範囲=" + _effectRange);
+            var spec = new BombSpec(BombType.Break, 3, 3, _effectRange, 2, 4f, true, 0f, CollapseDuration, RecoveryDuration);
+            var result = _breakResolver.Resolve(_cursorPos, spec, _model);
+            _spreadService.EnqueueBreakBomb(result, _cursorPos, new List<PlayerModel>(), null, BreakSpreadInterval);
+            UnityEngine.Debug.Log("[StagePreview] ブレークボム十字 (壁貫通, 0.3s/マス): " + result.AffectedTiles.Count + " タイル, 範囲=" + _effectRange);
         }
 
         private void ShrinkStage()

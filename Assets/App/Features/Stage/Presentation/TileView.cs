@@ -7,12 +7,24 @@ namespace FloorBreaker.Stage.Presentation
     public sealed class TileView : MonoBehaviour
     {
         private SpriteRenderer _renderer;
+        private Material _materialInstance;
         private GridPos _pos;
         private Vector3 _basePosition;
 
         public SpriteRenderer Renderer => _renderer;
         public GridPos Pos => _pos;
         public Vector3 BasePosition => _basePosition;
+
+        /// <summary>
+        /// All In 1 Sprite Shader 用のマテリアルインスタンスを遅延取得する。
+        /// 900 タイル全てをインスタンス化しないよう、必要時のみ呼ぶこと。
+        /// </summary>
+        public Material GetOrCreateMaterialInstance()
+        {
+            if (_materialInstance == null)
+                _materialInstance = _renderer.material; // 初回のみインスタンス化
+            return _materialInstance;
+        }
 
         public void Initialize(GridPos pos, SpriteRenderer renderer)
         {

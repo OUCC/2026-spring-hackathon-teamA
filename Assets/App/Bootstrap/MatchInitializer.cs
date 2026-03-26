@@ -17,6 +17,7 @@ using FloorBreaker.Slimes.Domain;
 using FloorBreaker.Slimes.Presentation;
 using FloorBreaker.Upgrades.Domain;
 using FloorBreaker.MatchFlow.Application;
+using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Cameras.Presentation;
 using FloorBreaker.Input.Application;
 using FloorBreaker.Input.Infrastructure;
@@ -61,6 +62,8 @@ namespace FloorBreaker.Bootstrap
         private readonly GameplayInputBridge _gameplayInputBridge;
         private readonly UpgradeUIInputBridge _upgradeUIInputBridge;
         private readonly IAudioService _audio;
+        private readonly ICameraShakeService _cameraShake;
+        private readonly ImpactFreezeService _impactFreeze;
 
         // Dispose 用: アクション購読の解除
         private InputActionMap _upgradeP1Map;
@@ -95,7 +98,9 @@ namespace FloorBreaker.Bootstrap
             MatchPresenters presenters,
             GameplayInputBridge gameplayInputBridge,
             UpgradeUIInputBridge upgradeUIInputBridge,
-            IAudioService audio)
+            IAudioService audio,
+            ICameraShakeService cameraShake,
+            ImpactFreezeService impactFreeze)
         {
             _balance = balance;
             _random = random;
@@ -125,6 +130,8 @@ namespace FloorBreaker.Bootstrap
             _gameplayInputBridge = gameplayInputBridge;
             _upgradeUIInputBridge = upgradeUIInputBridge;
             _audio = audio;
+            _cameraShake = cameraShake;
+            _impactFreeze = impactFreeze;
         }
 
         public async UniTask StartAsync(CancellationToken ct)
@@ -159,7 +166,7 @@ namespace FloorBreaker.Bootstrap
             // 5. StageShrinkAnimator 生成
             var shrinkAnimator = new StageShrinkAnimator(
                 _stage, tileViews, _tileAnimService, stageConfig,
-                _balance.StageShrinkAnimDuration);
+                _balance.StageShrinkAnimDuration, _cameraShake, _audio);
             stagePresenter.SetShrinkAnimator(shrinkAnimator);
             _presenters.ShrinkAnimator = shrinkAnimator;
 
@@ -169,33 +176,36 @@ namespace FloorBreaker.Bootstrap
             var p1View = _playerViewFactory.CreatePlayerView(
                 PlayerId.Player1, p1Spawn);
             _presenters.PlayerP1 = new PlayerPresenter(
-                _players.Player1, p1View, _playerAnimService, playerConfig, _audio);
+                _players.Player1, p1View, _playerAnimService, playerConfig, _audio, _cameraShake, _impactFreeze);
 
             var p2View = _playerViewFactory.CreatePlayerView(
                 PlayerId.Player2, p2Spawn);
             _presenters.PlayerP2 = new PlayerPresenter(
-                _players.Player2, p2View, _playerAnimService, playerConfig, _audio);
+                _players.Player2, p2View, _playerAnimService, playerConfig, _audio, _cameraShake, _impactFreeze);
 
             // 7. BombExplosionVfxPool + BombPresenter 生成
             var bombConfig = _bombViewFactory.Config;
             var bombVfxPool = new BombExplosionVfxPool(
                 bombConfig.GetExplosionPrefab(BombType.Fire),
-                bombConfig.GetExplosionPrefab(BombType.Fall),
+                bombConfig.GetExplosionPrefab(BombType.Break),
                 _bombViewFactory.transform,
                 bombConfig.ExplosionVfxScale,
                 bombConfig.ExplosionVfxDuration);
             _presenters.Bomb = new BombPresenter(
                 _bombFlightTracker, _bombViewFactory, _bombAnimService,
                 bombVfxPool, bombConfig, _stageQuery, tileViews,
-                _balance.BombFlightSpeed, _audio);
+                _balance.BombFlightSpeed, _audio, _cameraShake, _impactFreeze);
 
             // 8. SlimePresenter 生成
             var slimeConfig = _slimeViewFactory.Config;
             _presenters.Slime = new SlimePresenter(
-                _slimeRegistry, _slimeViewFactory, _slimeAnimService, slimeConfig, _audio);
+                _slimeRegistry, _slimeViewFactory, _slimeAnimService, slimeConfig, _audio, _cameraShake);
 
             // 9. カメラセットアップ
             _cameraSetup.Initialize(_players.Player1, _players.Player2, _stage.Bounds);
+
+            // 9.5. ImpactFreezeService にフラッシュオーバーレイを設定
+            _impactFreeze?.SetFlashOverlay(_matchUIDocument.ImpactFlashOverlay);
 
             // 10. 初期スライムスポーン
             _slimeSpawnService.SpawnIfNeeded(
@@ -280,6 +290,10 @@ namespace FloorBreaker.Bootstrap
                         break;
                     case GamePhase.UpgradePhase:
                         _audio?.PlaySfx(SfxIds.PhaseUpgrade);
+                        _audio?.SetBgmVolume(0.3f, 0.5f);
+                        break;
+                    case GamePhase.MatchRunning:
+                        _audio?.SetBgmVolume(1.0f, 0.5f);
                         break;
                     case GamePhase.Result:
                         _audio?.PlaySfx(SfxIds.MatchResult);

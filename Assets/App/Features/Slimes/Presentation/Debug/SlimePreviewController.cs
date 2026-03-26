@@ -57,7 +57,7 @@ namespace FloorBreaker.Slimes.Presentation.Debug
         // Bomb simulation
         private StageQueryService _queryService;
         private BombAreaResolver _areaResolver;
-        private FallBombResolver _fallResolver;
+        private BreakBombResolver _breakResolver;
         private FireBombResolver _fireResolver;
         private BombEffectSpreadService _spreadService;
         private FireDamageTickService _fireDamageTickService;
@@ -91,7 +91,7 @@ namespace FloorBreaker.Slimes.Presentation.Debug
         private const float RandomBombInterval = 1.5f;
         private const int BombEffectRange = 2;
         private const float FireSpreadInterval = 0.15f;
-        private const float FallSpreadInterval = 0.3f;
+        private const float BreakSpreadInterval = 0.3f;
 
         // Auto-spawn toggle
         private bool _autoSpawnEnabled = true;
@@ -132,7 +132,7 @@ namespace FloorBreaker.Slimes.Presentation.Debug
             _random = new SeededRandomProvider(123);
             _queryService = new StageQueryService(_stageModel);
             _areaResolver = new BombAreaResolver(_queryService);
-            _fallResolver = new FallBombResolver(_areaResolver);
+            _breakResolver = new BreakBombResolver(_areaResolver);
             _fireResolver = new FireBombResolver(_areaResolver);
 
             // Stage Presentation
@@ -171,7 +171,7 @@ namespace FloorBreaker.Slimes.Presentation.Debug
 
         private PlayerModel CreatePlayerModel(PlayerId id, GridPos spawn)
         {
-            var stats = new PlayerStats(10, 1f, 2f);
+            var stats = new PlayerStats(10, 1f, 3f);
             var build = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             return new PlayerModel(id, spawn, stats, build);
         }
@@ -432,15 +432,15 @@ namespace FloorBreaker.Slimes.Presentation.Debug
 
             if (isFire)
             {
-                var spec = new BombSpec(BombType.Fire, 3, 3, BombEffectRange, 1, 2f, false, false, 3.5f, 0f, 0f);
+                var spec = new BombSpec(BombType.Fire, 3, 3, BombEffectRange, 1, 2f, false, 3.5f, 0f, 0f);
                 var result = _fireResolver.Resolve(center, spec, _stageModel);
                 _spreadService.EnqueueFireBomb(result, center, players, null, FireSpreadInterval);
             }
             else
             {
-                var spec = new BombSpec(BombType.Fall, 3, 3, BombEffectRange, 2, 4f, false, true, 0f, 3f, 5f);
-                var result = _fallResolver.Resolve(center, spec, _stageModel);
-                _spreadService.EnqueueFallBomb(result, center, players, null, FallSpreadInterval);
+                var spec = new BombSpec(BombType.Break, 3, 3, BombEffectRange, 2, 4f, true, 0f, 3f, 5f);
+                var result = _breakResolver.Resolve(center, spec, _stageModel);
+                _spreadService.EnqueueBreakBomb(result, center, players, null, BreakSpreadInterval);
             }
         }
 

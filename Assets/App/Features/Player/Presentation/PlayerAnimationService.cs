@@ -52,6 +52,40 @@ namespace FloorBreaker.Player.Presentation
         public void PlayHitFlash(PlayerView view)
         {
             KillEffectTween(view.PlayerId);
+            var mat = view.MaterialInstance;
+            if (mat == null)
+            {
+                // フォールバック: シェーダー未対応の場合は従来の color flash
+                PlayHitFlashFallback(view);
+                return;
+            }
+
+            mat.EnableKeyword("HITEFFECT_ON");
+            var flashDur = _config.HitFlashDuration * 0.5f;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < _config.HitFlashCount; i++)
+            {
+                seq.Append(DOTween.To(
+                    () => mat.GetFloat("_HitEffectBlend"),
+                    v => mat.SetFloat("_HitEffectBlend", v),
+                    1f, flashDur));
+                seq.Append(DOTween.To(
+                    () => mat.GetFloat("_HitEffectBlend"),
+                    v => mat.SetFloat("_HitEffectBlend", v),
+                    0f, flashDur));
+            }
+            seq.OnComplete(() =>
+            {
+                mat.SetFloat("_HitEffectBlend", 0f);
+                mat.DisableKeyword("HITEFFECT_ON");
+            });
+            seq.SetLink(view.gameObject);
+            _effectTweens[view.PlayerId] = seq;
+        }
+
+        private void PlayHitFlashFallback(PlayerView view)
+        {
             var renderer = view.Renderer;
             var originalColor = renderer.color;
             var flashDur = _config.HitFlashDuration * 0.5f;

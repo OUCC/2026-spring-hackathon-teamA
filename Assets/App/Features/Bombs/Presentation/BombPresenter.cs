@@ -26,6 +26,8 @@ namespace FloorBreaker.Bombs.Presentation
         private readonly Dictionary<GridPos, TileView> _tileViews;
         private readonly float _flightSpeed;
         private readonly IAudioService _audio;
+        private readonly ICameraShakeService _cameraShake;
+        private readonly IImpactFreezeService _impactFreeze;
         private readonly CompositeDisposable _subscriptions = new();
         private readonly Dictionary<PlayerId, BombFlightView> _activeFlights = new();
 
@@ -38,7 +40,9 @@ namespace FloorBreaker.Bombs.Presentation
             StageQueryService stageQuery,
             Dictionary<GridPos, TileView> tileViews,
             float flightSpeed,
-            IAudioService audio = null)
+            IAudioService audio = null,
+            ICameraShakeService cameraShake = null,
+            IImpactFreezeService impactFreeze = null)
         {
             _tracker = tracker;
             _factory = factory;
@@ -49,6 +53,8 @@ namespace FloorBreaker.Bombs.Presentation
             _tileViews = tileViews;
             _flightSpeed = flightSpeed;
             _audio = audio;
+            _cameraShake = cameraShake;
+            _impactFreeze = impactFreeze;
 
             tracker.FlightStarted.Subscribe(OnFlightStarted).AddTo(_subscriptions);
             tracker.BombLanded.Subscribe(OnBombLanded).AddTo(_subscriptions);
@@ -95,6 +101,8 @@ namespace FloorBreaker.Bombs.Presentation
             var landAudioPos = new Float2(vfxPos.x, vfxPos.y);
             var sfxId = evt.Type == BombType.Fire ? SfxIds.BombExplodeFire : SfxIds.BombExplodeFall;
             _audio?.PlaySfx(sfxId, landAudioPos);
+            _cameraShake?.Shake(ShakeIntensity.Medium);
+            _impactFreeze?.PlayImpact(ImpactLevel.Medium);
 
             // 4. インパクトフラッシュ
             PlayImpactHighlights(evt);

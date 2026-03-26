@@ -19,7 +19,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [SetUp]
         public void SetUp()
         {
-            var stats = new PlayerStats(10, 1f, 2f);
+            var stats = new PlayerStats(10, 1f, 3f);
             var build = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player = new PlayerModel(PlayerId.Player1, new GridPos(5, 5), stats, build);
 
@@ -62,11 +62,11 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             int fireDamageBefore = _player.Build.FireDamage;
             float fireDurationBefore = _player.Build.FireDuration;
             float fireCD_Before = _player.Build.FireCooldown;
-            int fallFlightBefore = _player.Build.FallFlightRange;
-            int fallEffectBefore = _player.Build.FallEffectRange;
-            int fallDamageBefore = _player.Build.FallDamage;
-            float fallCollapseBefore = _player.Build.FallCollapseTime;
-            float fallCD_Before = _player.Build.FallCooldown;
+            int breakFlightBefore = _player.Build.BreakFlightRange;
+            int breakEffectBefore = _player.Build.BreakEffectRange;
+            int breakDamageBefore = _player.Build.BreakDamage;
+            float breakCollapseBefore = _player.Build.BreakCollapseTime;
+            float breakCD_Before = _player.Build.BreakCooldown;
             float moveSpeedBefore = _player.Stats.MoveSpeed;
 
             _resolver.Resolve(slime, _player, _random);
@@ -78,11 +78,11 @@ namespace FloorBreaker.Tests.EditMode.Slimes
                 _player.Build.FireDamage != fireDamageBefore ||
                 _player.Build.FireDuration != fireDurationBefore ||
                 _player.Build.FireCooldown != fireCD_Before ||
-                _player.Build.FallFlightRange != fallFlightBefore ||
-                _player.Build.FallEffectRange != fallEffectBefore ||
-                _player.Build.FallDamage != fallDamageBefore ||
-                _player.Build.FallCollapseTime != fallCollapseBefore ||
-                _player.Build.FallCooldown != fallCD_Before ||
+                _player.Build.BreakFlightRange != breakFlightBefore ||
+                _player.Build.BreakEffectRange != breakEffectBefore ||
+                _player.Build.BreakDamage != breakDamageBefore ||
+                _player.Build.BreakCollapseTime != breakCollapseBefore ||
+                _player.Build.BreakCooldown != breakCD_Before ||
                 _player.Stats.MoveSpeed != moveSpeedBefore;
 
             Assert.IsTrue(anyChanged, "Red slime should apply a random upgrade");
@@ -104,15 +104,15 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public float BaseMovementSpeed => 1f;
             public float MaxMovementSpeed => 2f;
             public float MovementSpeedIncrement => 0.2f;
-            public int FallBombMaxFlightDistance => 3;
-            public int FallBombEffectRange => 1;
-            public int FallBombDamage => 2;
-            public float FallBombCollapseDuration => 3f;
-            public float FallBombRecoveryDuration => 5f;
-            public float FallBombCooldown => 4f;
-            public float FallBombCooldownMin => 1f;
-            public float FallBombCooldownReduction => 0.5f;
-            public bool FallBombDefaultWallPenetration => false;
+            public int BreakBombMaxFlightDistance => 3;
+            public int BreakBombEffectRange => 1;
+            public int BreakBombDamage => 2;
+            public float BreakBombCollapseDuration => 3f;
+            public float BreakBombRecoveryDuration => 5f;
+            public float BreakBombCooldown => 4f;
+            public float BreakBombCooldownMin => 1f;
+            public float BreakBombCooldownReduction => 0.5f;
+            public bool BreakBombDefaultWallPenetration => false;
             public int FireBombMaxFlightDistance => 3;
             public int FireBombEffectRange => 1;
             public int FireBombContactDamage => 1;
@@ -151,7 +151,9 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public int BombMinFlightDistance => 3;
             public float StageShrinkAnimDuration => 1f;
             public float FireBombSpreadInterval => 0.15f;
-            public float FallBombSpreadInterval => 0.3f;
+            public float BreakBombSpreadInterval => 0.3f;
+            public float DashCooldown => 1f;
+            public float DashDoubleTapWindow => 0.3f;
         }
     }
 }

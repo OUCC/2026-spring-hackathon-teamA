@@ -133,7 +133,39 @@ namespace FloorBreaker.Stage.Presentation
 
         public void PlayPermanentDestroy(TileView view, float delay = 0f)
         {
-            PlayCollapse(view, permanent: true, delay: delay);
+            KillAnimation(view.Pos);
+
+            // All In 1 Sprite Shader ディゾルブを試行
+            var mat = view.GetOrCreateMaterialInstance();
+            if (mat != null && mat.HasProperty("_FadeAmount"))
+            {
+                mat.EnableKeyword("FADE_ON");
+                mat.SetColor("_FadeBurnColor", _config.BurningPulseBright);
+                mat.SetFloat("_FadeBurnWidth", 0.04f);
+                mat.SetFloat("_FadeBurnGlow", 3f);
+                mat.SetFloat("_FadeAmount", -0.1f);
+
+                var renderer = view.Renderer;
+                var seq = DOTween.Sequence();
+                seq.SetDelay(delay);
+                seq.Append(DOTween.To(
+                    () => mat.GetFloat("_FadeAmount"),
+                    v => mat.SetFloat("_FadeAmount", v),
+                    1f, _config.CollapseAnimDuration)
+                    .SetEase(Ease.InQuad));
+                seq.OnComplete(() =>
+                {
+                    _activeTweens.Remove(view.Pos);
+                    renderer.enabled = false;
+                });
+                seq.SetLink(view.gameObject);
+                _activeTweens[view.Pos] = seq;
+            }
+            else
+            {
+                // フォールバック: 従来の collapse アニメーション
+                PlayCollapse(view, permanent: true, delay: delay);
+            }
         }
 
         public void KillAnimation(GridPos pos)

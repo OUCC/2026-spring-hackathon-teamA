@@ -18,6 +18,7 @@ using FloorBreaker.Slimes.Presentation;
 using FloorBreaker.Upgrades.Domain;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Input.Application;
+using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Cameras.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
 
@@ -142,7 +143,7 @@ namespace FloorBreaker.Bootstrap
         {
             builder.Register<BombAreaResolver>(Lifetime.Scoped);
             builder.Register<BombLandingResolver>(Lifetime.Scoped);
-            builder.Register<FallBombResolver>(Lifetime.Scoped);
+            builder.Register<BreakBombResolver>(Lifetime.Scoped);
             builder.Register<FireBombResolver>(Lifetime.Scoped);
             builder.Register<BombLaunchUseCase>(Lifetime.Scoped);
             builder.Register<BombEffectSpreadService>(Lifetime.Scoped);
@@ -180,7 +181,7 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var mp = c.Resolve<MatchPlayers>();
-                return new UpgradePhaseUseCase(mp.Draft1, mp.Draft2, c.Resolve<IBalanceParameters>());
+                return new UpgradePhaseUseCase(mp.Draft1, mp.Draft2, c.Resolve<UpgradeSelectionState>(), c.Resolve<IBalanceParameters>());
             }, Lifetime.Scoped);
 
             builder.Register(c =>
@@ -264,8 +265,12 @@ namespace FloorBreaker.Bootstrap
                 new SlimeAnimationService(c.Resolve<SlimeViewFactory>().Config),
                 Lifetime.Scoped);
 
-            builder.Register<NullCameraShakeService>(Lifetime.Scoped)
+            builder.Register<DOTweenCameraShakeService>(Lifetime.Scoped)
                 .As<ICameraShakeService>();
+
+            builder.Register<ImpactFreezeService>(Lifetime.Scoped)
+                .AsSelf()
+                .As<IImpactFreezeService>();
         }
 
         private static void RegisterEntryPoints(IContainerBuilder builder)
@@ -281,9 +286,9 @@ namespace FloorBreaker.Bootstrap
                 b.FireBombContactDamage, b.FireBombCooldown,
                 b.FireBombDuration, b.FireBombDefaultWallPenetration,
                 b.FireBombCooldownMin,
-                b.FallBombMaxFlightDistance, b.FallBombEffectRange,
-                b.FallBombDamage, b.FallBombCooldown,
-                b.FallBombCollapseDuration, b.FallBombCooldownMin);
+                b.BreakBombMaxFlightDistance, b.BreakBombEffectRange,
+                b.BreakBombDamage, b.BreakBombCooldown,
+                b.BreakBombCollapseDuration, b.BreakBombCooldownMin);
         }
     }
 }

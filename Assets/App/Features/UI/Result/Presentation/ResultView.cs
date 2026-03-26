@@ -28,7 +28,14 @@ namespace FloorBreaker.UI.Result.Presentation
             TitleButton2 = resultRoot.Q<Button>("TitleButton2");
         }
 
-        public void Show() => _resultRoot.RemoveFromClassList("result-root--hidden");
+        public void Show()
+        {
+            _resultRoot.AddToClassList("result-root--entering");
+            _resultRoot.RemoveFromClassList("result-root--hidden");
+            _resultRoot.schedule.Execute(() =>
+                _resultRoot.RemoveFromClassList("result-root--entering"));
+        }
+
         public void Hide() => _resultRoot.AddToClassList("result-root--hidden");
 
         public void SetResult(bool p1Won)

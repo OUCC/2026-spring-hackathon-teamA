@@ -12,6 +12,7 @@ namespace FloorBreaker.MatchFlow.Application
     {
         private readonly UpgradeDraftService _draftP1;
         private readonly UpgradeDraftService _draftP2;
+        private readonly UpgradeSelectionState _selectionState;
         private readonly float _timeout;
 
         private float _elapsed;
@@ -27,10 +28,12 @@ namespace FloorBreaker.MatchFlow.Application
         public UpgradePhaseUseCase(
             UpgradeDraftService draftP1,
             UpgradeDraftService draftP2,
+            UpgradeSelectionState selectionState,
             IBalanceParameters balance)
         {
             _draftP1 = draftP1;
             _draftP2 = draftP2;
+            _selectionState = selectionState;
             _timeout = balance.UpgradeSelectionTimeout;
         }
 
@@ -39,6 +42,9 @@ namespace FloorBreaker.MatchFlow.Application
             _elapsed = 0f;
             _isActive = true;
             _remainingTime.Value = _timeout;
+
+            // 前フェーズの選択状態をリセット
+            _selectionState.Reset();
 
             foreach (var player in players)
             {

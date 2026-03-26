@@ -18,7 +18,7 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         [SetUp]
         public void SetUp()
         {
-            var stats = new PlayerStats(10, 1f, 2f);
+            var stats = new PlayerStats(10, 1f, 3f);
             var build = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player = new PlayerModel(PlayerId.Player1, new GridPos(5, 5), stats, build);
             _catalog = new UpgradeCatalog();
@@ -67,7 +67,7 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         [Test]
         public void IsAvailable_MoveSpeed_WhenAtMax_ReturnsFalse()
         {
-            _player.Stats.MoveSpeed = 2.0f;
+            _player.Stats.MoveSpeed = 3.0f;
 
             var def = _catalog.GetById(UpgradeId.MoveSpeed);
             Assert.IsFalse(_rule.IsAvailable(def, _player));
@@ -97,17 +97,17 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         {
             public int InitialHp => 10;
             public float BaseMovementSpeed => 1f;
-            public float MaxMovementSpeed => 2f;
+            public float MaxMovementSpeed => 3f;
             public float MovementSpeedIncrement => 0.2f;
-            public int FallBombMaxFlightDistance => 3;
-            public int FallBombEffectRange => 1;
-            public int FallBombDamage => 2;
-            public float FallBombCollapseDuration => 3f;
-            public float FallBombRecoveryDuration => 5f;
-            public float FallBombCooldown => 4f;
-            public float FallBombCooldownMin => 1f;
-            public float FallBombCooldownReduction => 0.5f;
-            public bool FallBombDefaultWallPenetration => false;
+            public int BreakBombMaxFlightDistance => 3;
+            public int BreakBombEffectRange => 1;
+            public int BreakBombDamage => 2;
+            public float BreakBombCollapseDuration => 3f;
+            public float BreakBombRecoveryDuration => 5f;
+            public float BreakBombCooldown => 4f;
+            public float BreakBombCooldownMin => 1f;
+            public float BreakBombCooldownReduction => 0.5f;
+            public bool BreakBombDefaultWallPenetration => false;
             public int FireBombMaxFlightDistance => 3;
             public int FireBombEffectRange => 1;
             public int FireBombContactDamage => 1;
@@ -146,7 +146,9 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             public int BombMinFlightDistance => 3;
             public float StageShrinkAnimDuration => 1f;
             public float FireBombSpreadInterval => 0.15f;
-            public float FallBombSpreadInterval => 0.3f;
+            public float BreakBombSpreadInterval => 0.3f;
+            public float DashCooldown => 1f;
+            public float DashDoubleTapWindow => 0.3f;
         }
     }
 }

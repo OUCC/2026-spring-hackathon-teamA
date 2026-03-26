@@ -10,6 +10,12 @@
     right: 0;
     bottom: 0;
     picking-mode: position;
+    transition: opacity 0.3s ease-in-out, translate 0.3s ease-out;
+}
+
+.upgrade-overlay--entering {
+    opacity: 0;
+    translate: 0 30px;
 }
 
 .upgrade-backdrop {
@@ -52,6 +58,12 @@
     color: var(--color-text);
     -unity-font-style: bold;
     margin-bottom: var(--spacing-md);
+    transition: scale 0.4s ease-out, color 0.4s ease-out;
+}
+
+.upgrade-pane__countdown--pulse {
+    scale: 1.4 1.4;
+    color: var(--color-hp);
 }
 
 /* --- カード行 (カード3枚 + リロール) --- */

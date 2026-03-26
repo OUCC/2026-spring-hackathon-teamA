@@ -32,6 +32,11 @@ namespace FloorBreaker.Slimes.Presentation
         [SerializeField] private float _deathDuration = 0.4f;
         [SerializeField] private float _deathShrinkScale = 0.1f;
 
+        [Header("Death Dissolve (All In 1 Sprite Shader)")]
+        [SerializeField] private Color _dissolveBurnColor = new Color(1f, 0.5f, 0.2f, 1f);
+        [SerializeField] private float _dissolveBurnWidth = 0.04f;
+        [SerializeField] private float _dissolveBurnGlow = 3f;
+
         [Header("Death VFX (optional)")]
         [SerializeField] private GameObject _deathVfxPrefab;
 
@@ -64,6 +69,9 @@ namespace FloorBreaker.Slimes.Presentation
         public float SpawnPopScale => _spawnPopScale;
         public float DeathDuration => _deathDuration;
         public float DeathShrinkScale => _deathShrinkScale;
+        public Color DissolveBurnColor => _dissolveBurnColor;
+        public float DissolveBurnWidth => _dissolveBurnWidth;
+        public float DissolveBurnGlow => _dissolveBurnGlow;
         public GameObject DeathVfxPrefab => _deathVfxPrefab;
         public GameObject AttackVfxPrefab => _attackVfxPrefab;
     }

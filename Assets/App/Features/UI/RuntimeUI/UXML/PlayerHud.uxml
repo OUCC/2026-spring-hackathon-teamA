@@ -42,11 +42,11 @@
                     </VisualElement>
                 </VisualElement>
                 <VisualElement class="hud__cd-slot">
-                    <VisualElement class="hud__cd-icon-wrap hud__cd-icon-wrap--fall">
-                        <Label class="hud__cd-icon" text="滑" />
+                    <VisualElement class="hud__cd-icon-wrap hud__cd-icon-wrap--break">
+                        <Label class="hud__cd-icon" text="壊" />
                     </VisualElement>
                     <VisualElement class="hud__cd-bar">
-                        <VisualElement name="FallCdFill" class="hud__cd-fill hud__cd-fill--fall" />
+                        <VisualElement name="BreakCdFill" class="hud__cd-fill hud__cd-fill--break" />
                     </VisualElement>
                 </VisualElement>
             </VisualElement>

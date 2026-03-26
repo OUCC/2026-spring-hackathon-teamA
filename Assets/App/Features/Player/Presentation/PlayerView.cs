@@ -11,11 +11,14 @@ namespace FloorBreaker.Player.Presentation
     public sealed class PlayerView : MonoBehaviour
     {
         private SpriteRenderer _renderer;
+        private Material _materialInstance;
         private PlayerId _playerId;
         private Direction8 _currentDirection;
         private bool _isWalkFrame;
 
         public SpriteRenderer Renderer => _renderer;
+        /// <summary>All In 1 Sprite Shader 用のマテリアルインスタンス。</summary>
+        public Material MaterialInstance => _materialInstance;
         public PlayerId PlayerId => _playerId;
         public Direction8 CurrentDirection => _currentDirection;
 
@@ -28,6 +31,25 @@ namespace FloorBreaker.Player.Presentation
             _currentDirection = Direction8.S;
             _isWalkFrame = false;
             ApplySprite(config);
+            InitializeShaderEffects(id, config);
+        }
+
+        private void InitializeShaderEffects(PlayerId id, PlayerSpriteConfig config)
+        {
+            // マテリアルインスタンスを作成 (sharedMaterial を汚さない)
+            _materialInstance = _renderer.material;
+
+            // Hit effect プリセット (まだ非表示)
+            _materialInstance.SetColor("_HitEffectColor", config.ShaderHitEffectColor);
+            _materialInstance.SetFloat("_HitEffectGlow", config.ShaderHitEffectGlow);
+            _materialInstance.SetFloat("_HitEffectBlend", 0f);
+
+            // アウトライン常時表示
+            _materialInstance.EnableKeyword("OUTBASE_ON");
+            _materialInstance.SetColor("_OutlineColor", config.GetOutlineColor(id));
+            _materialInstance.SetFloat("_OutlineAlpha", 1f);
+            _materialInstance.SetFloat("_OutlineWidth", config.OutlineWidth);
+            _materialInstance.SetFloat("_OutlineGlow", config.OutlineGlow);
         }
 
         public void SetDirection(Direction8 dir, PlayerSpriteConfig config)

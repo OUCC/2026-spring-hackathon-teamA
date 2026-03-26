@@ -6,18 +6,18 @@ namespace FloorBreaker.Bombs.Domain
 {
     public sealed class BombCooldownState : IDisposable
     {
-        private readonly ReactiveProperty<float> _fallRemaining = new(0f);
+        private readonly ReactiveProperty<float> _breakRemaining = new(0f);
         private readonly ReactiveProperty<float> _fireRemaining = new(0f);
 
-        public ReadOnlyReactiveProperty<float> FallBombRemaining => _fallRemaining;
+        public ReadOnlyReactiveProperty<float> BreakBombRemaining => _breakRemaining;
         public ReadOnlyReactiveProperty<float> FireBombRemaining => _fireRemaining;
 
         public void StartCooldown(BombType type, float duration)
         {
             switch (type)
             {
-                case BombType.Fall:
-                    _fallRemaining.Value = duration;
+                case BombType.Break:
+                    _breakRemaining.Value = duration;
                     break;
                 case BombType.Fire:
                     _fireRemaining.Value = duration;
@@ -29,7 +29,7 @@ namespace FloorBreaker.Bombs.Domain
         {
             return type switch
             {
-                BombType.Fall => _fallRemaining.Value <= 0f,
+                BombType.Break => _breakRemaining.Value <= 0f,
                 BombType.Fire => _fireRemaining.Value <= 0f,
                 _ => false,
             };
@@ -37,8 +37,8 @@ namespace FloorBreaker.Bombs.Domain
 
         public void Tick(float deltaTime)
         {
-            if (_fallRemaining.Value > 0f)
-                _fallRemaining.Value = MathF.Max(0f, _fallRemaining.Value - deltaTime);
+            if (_breakRemaining.Value > 0f)
+                _breakRemaining.Value = MathF.Max(0f, _breakRemaining.Value - deltaTime);
 
             if (_fireRemaining.Value > 0f)
                 _fireRemaining.Value = MathF.Max(0f, _fireRemaining.Value - deltaTime);
@@ -46,7 +46,7 @@ namespace FloorBreaker.Bombs.Domain
 
         public void Dispose()
         {
-            _fallRemaining.Dispose();
+            _breakRemaining.Dispose();
             _fireRemaining.Dispose();
         }
     }

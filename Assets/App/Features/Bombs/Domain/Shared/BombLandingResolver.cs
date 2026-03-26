@@ -22,6 +22,7 @@ namespace FloorBreaker.Bombs.Domain
         {
             var offset = cmd.Direction.ToOffset();
             var lastValid = cmd.Origin;
+            bool penetrating = cmd.Spec.FlightPenetration;
 
             for (int i = 1; i <= actualFlightDistance; i++)
             {
@@ -32,17 +33,31 @@ namespace FloorBreaker.Bombs.Domain
 
                 var state = _stage.GetTileState(pos);
 
-                // 通行不可タイル（Collapsed, PermanentlyDestroyed）: 手前で着弾
+                // 穴（Collapsed, PermanentlyDestroyed）: 貫通でも手前で着弾
                 if (state == TileState.Collapsed || state == TileState.PermanentlyDestroyed)
                     return lastValid;
 
-                // 壁衝突: 壁の位置で着弾（効果範囲で壁が破壊される）
+                // 壁衝突
                 if (state == TileState.Wall)
-                    return pos;
+                {
+                    if (penetrating)
+                    {
+                        lastValid = pos;
+                        continue; // 貫通: 壁を無視して飛行続行
+                    }
+                    return pos; // 通常: 壁の位置で着弾
+                }
 
-                // エンティティ衝突: そのマスで着弾
+                // エンティティ衝突
                 if (isEntityAt != null && isEntityAt(pos))
-                    return pos;
+                {
+                    if (penetrating)
+                    {
+                        lastValid = pos;
+                        continue; // 貫通: エンティティを無視して飛行続行
+                    }
+                    return pos; // 通常: そのマスで着弾
+                }
 
                 lastValid = pos;
             }

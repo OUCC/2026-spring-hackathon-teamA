@@ -37,6 +37,16 @@ namespace FloorBreaker.Player.Presentation
         [SerializeField] private float _deathDuration = 0.6f;
         [SerializeField] private float _deathShrinkScale = 0.2f;
 
+        [Header("Shader — Hit Effect (All In 1 Sprite Shader)")]
+        [SerializeField] private Color _shaderHitEffectColor = Color.white;
+        [SerializeField] private float _shaderHitEffectGlow = 10f;
+
+        [Header("Shader — Outline (All In 1 Sprite Shader)")]
+        [SerializeField] private Color _outlineColorP1 = new Color(0.29f, 0.56f, 0.85f, 1f);
+        [SerializeField] private Color _outlineColorP2 = new Color(0.85f, 0.29f, 0.29f, 1f);
+        [SerializeField] private float _outlineWidth = 0.04f;
+        [SerializeField] private float _outlineGlow = 5f;
+
         [Header("Scale")]
         [SerializeField] private float _playerScale = 0.22f;
 
@@ -72,6 +82,12 @@ namespace FloorBreaker.Player.Presentation
         public float BlinkAlphaMin => _blinkAlphaMin;
         public float DeathDuration => _deathDuration;
         public float DeathShrinkScale => _deathShrinkScale;
+        public Color ShaderHitEffectColor => _shaderHitEffectColor;
+        public float ShaderHitEffectGlow => _shaderHitEffectGlow;
+        public Color GetOutlineColor(PlayerId id) =>
+            id == PlayerId.Player1 ? _outlineColorP1 : _outlineColorP2;
+        public float OutlineWidth => _outlineWidth;
+        public float OutlineGlow => _outlineGlow;
         public float PlayerScale => _playerScale;
         public int BaseSortingOrder => _baseSortingOrder;
     }
