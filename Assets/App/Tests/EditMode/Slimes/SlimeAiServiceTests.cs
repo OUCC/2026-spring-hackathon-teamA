@@ -66,7 +66,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         {
             // Place slime cardinally adjacent to player (5,5) => (5,4)
             var slimePos = new GridPos(5, 4);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
             _registry.Add(slime);
 
             _ai.TickAll(_registry, _players, _stage, 0.1f, _balance);
@@ -79,7 +79,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         public void TickAll_RespectsAttackCooldown()
         {
             var slimePos = new GridPos(5, 4);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
             _registry.Add(slime);
 
             // First tick: attacks
