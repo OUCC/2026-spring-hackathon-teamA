@@ -27,7 +27,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
         private BombFlightCommand MakeCmd(GridPos origin, Direction8 dir, int maxFlight = 3)
         {
-            var spec = new BombSpec(BombType.Fall, maxFlight, 1, 2, 4f, false, true, 0f, 3f, 5f);
+            var spec = new BombSpec(BombType.Fall, maxFlight, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
             return new BombFlightCommand(origin, dir, spec, PlayerId.Player1);
         }
 

@@ -1,33 +1,31 @@
 {
-    "name": "App.Tests.EditMode",
-    "rootNamespace": "FloorBreaker.Tests.EditMode",
+    "name": "App.Bombs.Presentation",
+    "rootNamespace": "FloorBreaker.Bombs.Presentation",
     "references": [
         "App.Shared.Domain",
         "App.Shared.Application",
+        "App.Shared.Presentation",
         "App.Shared.Infrastructure",
-        "App.Stage",
-        "App.Player",
         "App.Bombs",
-        "App.Upgrades",
+        "App.Stage",
+        "App.Stage.Presentation",
+        "App.Player",
+        "App.Player.Presentation",
         "App.Slimes",
         "App.MatchFlow",
-        "App.Bombs.Presentation",
-        "R3.Unity"
+        "App.ScriptableObjects"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll",
-        "R3.dll"
+        "R3.dll",
+        "DOTween.dll",
+        "DOTweenPro.dll"
     ],
     "autoReferenced": false,
-    "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
-    ],
+    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

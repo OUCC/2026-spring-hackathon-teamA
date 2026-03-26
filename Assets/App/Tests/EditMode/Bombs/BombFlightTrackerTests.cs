@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
+using R3;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
@@ -66,6 +67,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [TearDown]
         public void TearDown()
         {
+            _tracker?.Dispose();
             _p1Cooldown.Dispose();
             _p2Cooldown.Dispose();
             _player1.Dispose();
@@ -77,14 +79,14 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         private BombSpec CreateFallSpec()
         {
             return new BombSpec(
-                BombType.Fall, 3, 1, 2, 4f,
+                BombType.Fall, 3, 3, 1, 2, 4f,
                 false, true, 0f, 3f, 5f);
         }
 
         private BombSpec CreateFireSpec()
         {
             return new BombSpec(
-                BombType.Fire, 3, 1, 1, 2f,
+                BombType.Fire, 3, 3, 1, 1, 2f,
                 false, false, 3.5f, 0f, 0f);
         }
 
@@ -150,15 +152,20 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void ReleaseBomb_LandsAtCurrentPosition()
+        public void ReleaseBomb_LandsWhenMinDistanceReached()
         {
+            // Min=3, Max=3: リリース → min まで飛行 → 自動着弾
             _tracker.StartFlight(
                 PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
 
-            // Tick a small amount so bomb has moved slightly
             _tracker.Tick(0.05f, _players);
-
             _tracker.ReleaseBomb(PlayerId.Player1, _players);
+
+            // MinFlightDistance=3 未達なので飛行継続
+            Assert.IsTrue(_tracker.IsFlying(PlayerId.Player1));
+
+            // 十分 Tick → MinFlightDistance=3 に達して着弾
+            _tracker.Tick(0.5f, _players);
             Assert.IsFalse(_tracker.IsFlying(PlayerId.Player1));
         }
 
@@ -171,6 +178,125 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             // MaxFlightDistance = 3, speed = 12. Need 3/12 = 0.25s to cover 3 tiles.
             _tracker.Tick(0.5f, _players);
 
+            Assert.IsFalse(_tracker.IsFlying(PlayerId.Player1));
+        }
+
+        [Test]
+        public void StartFlight_EmitsFlightStartedEvent()
+        {
+            BombFlightStartedEvent? received = null;
+            _tracker.FlightStarted.Subscribe(evt => received = evt);
+
+            var origin = new GridPos(2, 2);
+            var spec = CreateFallSpec();
+            _tracker.StartFlight(PlayerId.Player1, origin, Direction8.E, spec);
+
+            Assert.IsNotNull(received);
+            Assert.AreEqual(PlayerId.Player1, received.Value.Owner);
+            Assert.AreEqual(origin, received.Value.Origin);
+            Assert.AreEqual(Direction8.E, received.Value.Direction);
+            Assert.AreEqual(BombType.Fall, received.Value.Spec.Type);
+        }
+
+        [Test]
+        public void ReleaseBomb_EmitsBombLandedEvent()
+        {
+            BombLandedEvent? received = null;
+            _tracker.BombLanded.Subscribe(evt => received = evt);
+
+            // Min=3, Max=3: リリース → Tick で min に到達 → 着弾イベント
+            _tracker.StartFlight(
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFireSpec());
+
+            _tracker.Tick(0.05f, _players);
+            _tracker.ReleaseBomb(PlayerId.Player1, _players);
+
+            // min 未達なので Tick で飛行継続 → min 到達で着弾
+            _tracker.Tick(0.5f, _players);
+
+            Assert.IsNotNull(received);
+            Assert.AreEqual(PlayerId.Player1, received.Value.Owner);
+            Assert.AreEqual(BombType.Fire, received.Value.Type);
+        }
+
+        [Test]
+        public void Tick_MaxDistance_EmitsBombLandedEvent()
+        {
+            BombLandedEvent? received = null;
+            _tracker.BombLanded.Subscribe(evt => received = evt);
+
+            var origin = new GridPos(2, 2);
+            _tracker.StartFlight(
+                PlayerId.Player1, origin, Direction8.E, CreateFallSpec());
+
+            // MaxFlightDistance=3, speed=12 → 0.25s. Tick 0.5s to ensure landing.
+            _tracker.Tick(0.5f, _players);
+
+            Assert.IsNotNull(received);
+            Assert.AreEqual(PlayerId.Player1, received.Value.Owner);
+            // Landing at origin + E*3 = (5, 2)
+            Assert.AreEqual(new GridPos(5, 2), received.Value.LandingPos);
+            Assert.AreEqual(BombType.Fall, received.Value.Type);
+        }
+
+        // maxFlightDistance=10, minFlightDistance=3 の spec (最小飛行距離テスト用)
+        private BombSpec CreateLongRangeFallSpec()
+        {
+            return new BombSpec(
+                BombType.Fall, 10, 3, 1, 2, 4f,
+                false, true, 0f, 3f, 5f);
+        }
+
+        [Test]
+        public void ReleaseBomb_BeforeMinDistance_ContinuesFlying()
+        {
+            _tracker.StartFlight(
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeFallSpec());
+
+            // Tick 少しだけ (1マス未満)
+            _tracker.Tick(0.05f, _players);
+            _tracker.ReleaseBomb(PlayerId.Player1, _players);
+
+            // MinFlightDistance=3 に未達なので飛行継続
+            Assert.IsTrue(_tracker.IsFlying(PlayerId.Player1));
+        }
+
+        [Test]
+        public void ReleaseBomb_BeforeMinDistance_LandsAtMinDistance()
+        {
+            BombLandedEvent? received = null;
+            _tracker.BombLanded.Subscribe(evt => received = evt);
+
+            _tracker.StartFlight(
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeFallSpec());
+
+            // 少し進めてからリリース
+            _tracker.Tick(0.05f, _players);
+            _tracker.ReleaseBomb(PlayerId.Player1, _players);
+
+            // MinFlightDistance=3 に達するまで Tick
+            _tracker.Tick(0.5f, _players);
+
+            Assert.IsFalse(_tracker.IsFlying(PlayerId.Player1));
+            Assert.IsNotNull(received);
+            // origin(2,2) + E*3 = (5,2)
+            Assert.AreEqual(new GridPos(5, 2), received.Value.LandingPos);
+        }
+
+        [Test]
+        public void ReleaseBomb_AfterMinDistance_LandsImmediately()
+        {
+            _tracker.StartFlight(
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeFallSpec());
+
+            // MinFlightDistance=3 を超えるまで Tick (3/12 = 0.25s)
+            _tracker.Tick(0.4f, _players);
+
+            Assert.IsTrue(_tracker.IsFlying(PlayerId.Player1));
+
+            _tracker.ReleaseBomb(PlayerId.Player1, _players);
+
+            // MinFlightDistance 超過済みなので即着弾
             Assert.IsFalse(_tracker.IsFlying(PlayerId.Player1));
         }
 
@@ -222,6 +348,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             public float ForcedMoveDuration => 1f;
             public float InvulnerabilityDuration => 1.5f;
             public float BombFlightSpeed => 12f;
+            public int BombMinFlightDistance => 3;
             public float StageShrinkAnimDuration => 1f;
             public float FireBombSpreadInterval => 0.15f;
             public float FallBombSpreadInterval => 0.3f;

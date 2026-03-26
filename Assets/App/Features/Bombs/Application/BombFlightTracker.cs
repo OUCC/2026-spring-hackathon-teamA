@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using R3;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
@@ -10,15 +11,50 @@ using FloorBreaker.Slimes.Domain;
 
 namespace FloorBreaker.Bombs.Application
 {
+    public readonly struct BombFlightStartedEvent
+    {
+        public readonly PlayerId Owner;
+        public readonly GridPos Origin;
+        public readonly Direction8 Direction;
+        public readonly BombSpec Spec;
+
+        public BombFlightStartedEvent(PlayerId owner, GridPos origin, Direction8 direction, BombSpec spec)
+        {
+            Owner = owner;
+            Origin = origin;
+            Direction = direction;
+            Spec = spec;
+        }
+    }
+
+    public readonly struct BombLandedEvent
+    {
+        public readonly PlayerId Owner;
+        public readonly GridPos LandingPos;
+        public readonly BombType Type;
+        public readonly int EffectRange;
+        public readonly bool WallPenetration;
+
+        public BombLandedEvent(PlayerId owner, GridPos landingPos, BombType type, int effectRange, bool wallPenetration)
+        {
+            Owner = owner;
+            LandingPos = landingPos;
+            Type = type;
+            EffectRange = effectRange;
+            WallPenetration = wallPenetration;
+        }
+    }
+
     internal struct BombFlightState
     {
         public bool IsFlying;
+        public bool IsReleased;
         public BombFlightCommand Command;
         public float DistanceAccumulator;
         public int CurrentTileDistance;
     }
 
-    public sealed class BombFlightTracker
+    public sealed class BombFlightTracker : IDisposable
     {
         private readonly BombLaunchUseCase _launchUseCase;
         private readonly BombCooldownState _p1Cooldown;
@@ -26,6 +62,12 @@ namespace FloorBreaker.Bombs.Application
         private readonly StageModel _stage;
         private readonly SlimeRegistry _slimeRegistry;
         private readonly float _flightSpeed;
+
+        private readonly Subject<BombFlightStartedEvent> _flightStarted = new();
+        private readonly Subject<BombLandedEvent> _bombLanded = new();
+
+        public Observable<BombFlightStartedEvent> FlightStarted => _flightStarted;
+        public Observable<BombLandedEvent> BombLanded => _bombLanded;
 
         private BombFlightState _p1Flight;
         private BombFlightState _p2Flight;
@@ -64,6 +106,7 @@ namespace FloorBreaker.Bombs.Application
                 DistanceAccumulator = 0f,
                 CurrentTileDistance = 0,
             });
+            _flightStarted.OnNext(new BombFlightStartedEvent(owner, origin, direction, spec));
             return true;
         }
 
@@ -71,7 +114,17 @@ namespace FloorBreaker.Bombs.Application
         {
             var state = GetFlight(owner);
             if (!state.IsFlying) return;
-            Land(owner, state, players);
+
+            // 最小飛行距離に達していれば即着弾、未達なら飛行継続
+            if (state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
+            {
+                Land(owner, state, players);
+            }
+            else
+            {
+                state.IsReleased = true;
+                SetFlight(owner, state);
+            }
         }
 
         public void Tick(float deltaTime, IReadOnlyList<PlayerModel> players)
@@ -127,8 +180,27 @@ namespace FloorBreaker.Bombs.Application
                 }
 
                 state.CurrentTileDistance = nextTile;
+
+                // リリース済みかつ最小飛行距離に到達 → ループ内で即着弾
+                if (state.IsReleased
+                    && state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
+                {
+                    SetFlight(owner, state);
+                    Land(owner, state, players);
+                    return;
+                }
             }
 
+            // リリース済みかつ最小飛行距離に到達 → 着弾
+            if (state.IsReleased
+                && state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
+            {
+                SetFlight(owner, state);
+                Land(owner, state, players);
+                return;
+            }
+
+            // 最大飛行距離に到達 → 着弾
             if (state.CurrentTileDistance >= state.Command.Spec.MaxFlightDistance)
             {
                 SetFlight(owner, state);
@@ -152,6 +224,10 @@ namespace FloorBreaker.Bombs.Application
                 state.Command.Spec.Type, state.Command.Spec.Cooldown);
 
             _launchUseCase.ExecuteLanding(state.Command, landingPos, players, null);
+
+            _bombLanded.OnNext(new BombLandedEvent(
+                owner, landingPos, state.Command.Spec.Type,
+                state.Command.Spec.EffectRange, state.Command.Spec.WallPenetration));
         }
 
         private bool CheckEntityAt(GridPos pos, IReadOnlyList<PlayerModel> players)
@@ -179,6 +255,12 @@ namespace FloorBreaker.Bombs.Application
         private BombCooldownState GetCooldown(PlayerId player)
         {
             return player == PlayerId.Player1 ? _p1Cooldown : _p2Cooldown;
+        }
+
+        public void Dispose()
+        {
+            _flightStarted.Dispose();
+            _bombLanded.Dispose();
         }
     }
 }

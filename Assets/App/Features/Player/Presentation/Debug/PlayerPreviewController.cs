@@ -333,13 +333,13 @@ namespace FloorBreaker.Player.Presentation.Debug
 
             if (isFire)
             {
-                var spec = new BombSpec(BombType.Fire, 3, BombEffectRange, 1, 2f, false, false, 3.5f, 0f, 0f);
+                var spec = new BombSpec(BombType.Fire, 3, 3, BombEffectRange, 1, 2f, false, false, 3.5f, 0f, 0f);
                 var result = _fireResolver.Resolve(center, spec, _stageModel);
                 _spreadService.EnqueueFireBomb(result, center, players, null, FireSpreadInterval);
             }
             else
             {
-                var spec = new BombSpec(BombType.Fall, 3, BombEffectRange, 2, 4f, false, true, 0f, 3f, 5f);
+                var spec = new BombSpec(BombType.Fall, 3, 3, BombEffectRange, 2, 4f, false, true, 0f, 3f, 5f);
                 var result = _fallResolver.Resolve(center, spec, _stageModel);
                 _spreadService.EnqueueFallBomb(result, center, players, null, FallSpreadInterval);
             }

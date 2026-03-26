@@ -30,7 +30,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
         private BombSpec MakeFireSpec(int range = 1, int damage = 1, float duration = 3.5f, bool wallPen = false)
         {
-            return new BombSpec(BombType.Fire, 3, range, damage, 2f, false, wallPen, duration, 0f, 0f);
+            return new BombSpec(BombType.Fire, 3, 3, range, damage, 2f, false, wallPen, duration, 0f, 0f);
         }
 
         [Test]

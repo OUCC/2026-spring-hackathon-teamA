@@ -6,6 +6,7 @@ namespace FloorBreaker.Bombs.Domain
     {
         public readonly BombType Type;
         public readonly int MaxFlightDistance;
+        public readonly int MinFlightDistance;
         public readonly int EffectRange;
         public readonly int Damage;
         public readonly float Cooldown;
@@ -18,6 +19,7 @@ namespace FloorBreaker.Bombs.Domain
         public BombSpec(
             BombType type,
             int maxFlightDistance,
+            int minFlightDistance,
             int effectRange,
             int damage,
             float cooldown,
@@ -29,6 +31,7 @@ namespace FloorBreaker.Bombs.Domain
         {
             Type = type;
             MaxFlightDistance = maxFlightDistance;
+            MinFlightDistance = minFlightDistance;
             EffectRange = effectRange;
             Damage = damage;
             Cooldown = cooldown;

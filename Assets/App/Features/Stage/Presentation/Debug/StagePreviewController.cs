@@ -215,7 +215,7 @@ namespace FloorBreaker.Stage.Presentation.Debug
         /// </summary>
         private void FireBombCross()
         {
-            var spec = new BombSpec(BombType.Fire, 3, _effectRange, 1, 2f, false, false, FireDuration, 0f, 0f);
+            var spec = new BombSpec(BombType.Fire, 3, 3, _effectRange, 1, 2f, false, false, FireDuration, 0f, 0f);
             var result = _fireResolver.Resolve(_cursorPos, spec, _model);
             _spreadService.EnqueueFireBomb(result, _cursorPos, new List<PlayerModel>(), null, FireSpreadInterval);
             UnityEngine.Debug.Log("[StagePreview] 炎ボム十字 (壁貫通なし, 0.15s/マス): " + result.AffectedTiles.Count + " タイル, 範囲=" + _effectRange);
@@ -226,7 +226,7 @@ namespace FloorBreaker.Stage.Presentation.Debug
         /// </summary>
         private void FallBombCross()
         {
-            var spec = new BombSpec(BombType.Fall, 3, _effectRange, 2, 4f, false, true, 0f, CollapseDuration, RecoveryDuration);
+            var spec = new BombSpec(BombType.Fall, 3, 3, _effectRange, 2, 4f, false, true, 0f, CollapseDuration, RecoveryDuration);
             var result = _fallResolver.Resolve(_cursorPos, spec, _model);
             _spreadService.EnqueueFallBomb(result, _cursorPos, new List<PlayerModel>(), null, FallSpreadInterval);
             UnityEngine.Debug.Log("[StagePreview] 滑落ボム十字 (壁貫通, 0.3s/マス): " + result.AffectedTiles.Count + " タイル, 範囲=" + _effectRange);

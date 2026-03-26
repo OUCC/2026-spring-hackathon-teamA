@@ -1,5 +1,34 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 12 — ボム Presentation
+
+### 完了タスク
+- **T-12.0** App.Bombs.Presentation.asmdef 新設 (参照: App.Bombs + App.Stage.Presentation + App.Player.Presentation + App.MatchFlow + App.ScriptableObjects + R3 + DOTween)
+- **T-12.1** BombSpriteConfig ScriptableObject (滑落/炎ボム各スプライト・色・トレイル・爆発VFX・インパクトフラッシュパラメータ)
+- **T-12.2** BombFlightView MonoBehaviour (薄い View、SpriteRenderer + TrailRenderer 保持、Initialize/Reinitialize/Show/Hide)
+- **T-12.3** BombAnimationService (DOTween: PlayFlight/KillFlight/PlayImpactFlash、PlayerId 別 tween 追跡)
+- **T-12.4** BombExplosionVfxPool (Epic Toon FX 爆発パーティクル 2 種プール、Tick で自動返却)
+- **T-12.5** BombPresenter (pure C#、R3 購読 FlightStarted/BombLanded → View/AnimService/VfxPool ディスパッチ、Tick で VFX 管理)
+- **T-12.6** BombViewFactory (MonoBehaviour、BombFlightView の生成 + プーリング)
+- **T-12.7** BombPreviewController + BombPreview.unity デバッグシーン (F/G/I/O ホールドで炎/滑落ボム、+/- で最大飛行距離、1-5 で効果範囲、BalanceConfig SO 参照)
+- **T-12.8** BombSpriteConfig.asset 作成
+- **前提修正** BombFlightTracker: R3 Subject (FlightStarted/BombLanded) + IDisposable 追加
+- **前提修正** MatchFlowOrchestrator: BombFlightTracker フィールド化 + Dispose
+- **機能追加** BombSpec: MinFlightDistance フィールド追加 (ボタン即離しでも最低距離まで飛行)
+- **機能追加** BombFlightTracker: IsReleased フラグ + MinFlightDistance ロジック (ReleaseBomb で min 未達なら飛行継続、TickPlayer ループ内で min 到達チェック)
+- **機能追加** IBalanceParameters + BalanceConfig: BombMinFlightDistance (デフォルト 3)
+- コンパイルエラー 0 件、EditMode テスト 240 件全件グリーン
+
+### 設計判断
+- **BombFlightTracker に Observable 追加**: Presentation が飛行開始/着弾を購読するために R3 Subject を追加。BombFlightStartedEvent / BombLandedEvent を Bombs/Application namespace 内に定義
+- **Presenter パターン踏襲**: Phase 10/11 と同じ構造 (thin View + pure C# Presenter + AnimationService + VfxPool + Factory)
+- **直線飛行**: 放物線ではなく DOTween DOMove Linear で直線飛行。BombLanded イベントで tween 即キル + スナップ
+- **MinFlightDistance**: BombSpec に追加し Domain レベルで最小飛行距離を保証。BombFlightState.IsReleased フラグで「リリース済みだが min 未達」状態を管理。TickPlayer のタイル進行ループ内でも min チェック (一気に複数タイル進む場合に正確な着弾位置を保証)
+- **デバッグコントローラーでの BalanceConfig 参照**: PreviewBalanceParameters 重複クラスを廃止し、DefaultBalance.asset を SerializeField で参照 (Phase 11 で確立したパターン)
+- **VFX フォールバック廃止**: SerializeField が未設定の場合はエラーログを出し初期化をスキップ。暗黙のフォールバックは行わない
+
+---
+
 ## 2026-03-26: Phase 11 — プレイヤー Presentation
 
 ### 完了タスク

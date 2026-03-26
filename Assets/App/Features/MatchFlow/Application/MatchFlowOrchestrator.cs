@@ -34,6 +34,7 @@ namespace FloorBreaker.MatchFlow.Application
         private MatchClock _clock;
         private MatchPhaseScheduler _scheduler;
         private SlimeTickService _slimeTickService;
+        private BombFlightTracker _bombFlightTracker;
 
         public MatchPhaseScheduler Scheduler => _scheduler;
         public StageModel Stage => _stage;
@@ -115,7 +116,7 @@ namespace FloorBreaker.MatchFlow.Application
                 landingResolver, fallResolver, fireResolver,
                 _stage, _balance, spreadService);
 
-            var bombFlightTracker = new BombFlightTracker(
+            _bombFlightTracker = new BombFlightTracker(
                 launchUseCase, _p1Cooldown, _p2Cooldown,
                 _stage, _slimeRegistry, _balance);
 
@@ -131,7 +132,7 @@ namespace FloorBreaker.MatchFlow.Application
             // 8. スケジューラ生成
             _scheduler = new MatchPhaseScheduler(
                 _clock, _tileTimerService, _p1Cooldown, _p2Cooldown,
-                _slimeTickService, fireDamageTickService, bombFlightTracker,
+                _slimeTickService, fireDamageTickService, _bombFlightTracker,
                 spreadService, shrinkService, upgradePhaseUseCase, matchEndUseCase,
                 damageService, safeTileSearch, players, _stage,
                 _slimeRegistry, _balance, _random);
@@ -151,6 +152,7 @@ namespace FloorBreaker.MatchFlow.Application
 
         public void Dispose()
         {
+            _bombFlightTracker?.Dispose();
             _slimeTickService?.Dispose();
             _p1Cooldown?.Dispose();
             _p2Cooldown?.Dispose();

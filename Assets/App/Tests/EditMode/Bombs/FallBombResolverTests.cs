@@ -30,7 +30,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
         private BombSpec MakeFallSpec(int range = 1, int damage = 2, float collapse = 3f, float recovery = 5f)
         {
-            return new BombSpec(BombType.Fall, 3, range, damage, 4f, false, true, 0f, collapse, recovery);
+            return new BombSpec(BombType.Fall, 3, 3, range, damage, 4f, false, true, 0f, collapse, recovery);
         }
 
         [Test]
