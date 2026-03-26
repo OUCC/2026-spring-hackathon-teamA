@@ -46,7 +46,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             var center = new GridPos(5, 5);
             var fallResolver = new FallBombResolver(_areaResolver);
-            var spec = new BombSpec(BombType.Fall, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
+            var spec = new BombSpec(BombType.Fall, 3, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
             var result = fallResolver.Resolve(center, spec, _stage);
 
             _service.EnqueueFallBomb(result, center, new List<PlayerModel>(), null, 0.3f);
@@ -59,7 +59,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             var center = new GridPos(5, 5);
             var fallResolver = new FallBombResolver(_areaResolver);
-            var spec = new BombSpec(BombType.Fall, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
+            var spec = new BombSpec(BombType.Fall, 3, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
             var result = fallResolver.Resolve(center, spec, _stage);
 
             _service.EnqueueFallBomb(result, center, new List<PlayerModel>(), null, 0.3f);
@@ -74,7 +74,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             var center = new GridPos(5, 5);
             var fallResolver = new FallBombResolver(_areaResolver);
-            var spec = new BombSpec(BombType.Fall, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
+            var spec = new BombSpec(BombType.Fall, 3, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
             var result = fallResolver.Resolve(center, spec, _stage);
 
             _service.EnqueueFallBomb(result, center, new List<PlayerModel>(), null, 0.3f);
@@ -91,7 +91,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             var center = new GridPos(5, 5);
             var fireResolver = new FireBombResolver(_areaResolver);
-            var spec = new BombSpec(BombType.Fire, 3, 1, 1, 2f, false, false, 3.5f, 0f, 0f);
+            var spec = new BombSpec(BombType.Fire, 3, 3, 1, 1, 2f, false, false, 3.5f, 0f, 0f);
             var result = fireResolver.Resolve(center, spec, _stage);
 
             _service.EnqueueFireBomb(result, center, new List<PlayerModel>(), null, 0.15f);
@@ -111,7 +111,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var center = new GridPos(5, 5);
             var fallResolver = new FallBombResolver(_areaResolver);
             // 範囲2 のスペック
-            var spec = new BombSpec(BombType.Fall, 3, 2, 2, 4f, false, true, 0f, 3f, 5f);
+            var spec = new BombSpec(BombType.Fall, 3, 3, 2, 2, 4f, false, true, 0f, 3f, 5f);
             var result = fallResolver.Resolve(center, spec, _stage);
 
             _service.EnqueueFallBomb(result, center, new List<PlayerModel>(), null, 0.3f);
@@ -132,7 +132,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             var center = new GridPos(5, 5);
             var fallResolver = new FallBombResolver(_areaResolver);
-            var spec = new BombSpec(BombType.Fall, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
+            var spec = new BombSpec(BombType.Fall, 3, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
             var result = fallResolver.Resolve(center, spec, _stage);
 
             _service.EnqueueFallBomb(result, center, new List<PlayerModel>(), null, 0.3f);
@@ -149,7 +149,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             // 炎ボム (0.15s)
             var fireResolver = new FireBombResolver(_areaResolver);
-            var fireSpec = new BombSpec(BombType.Fire, 3, 1, 1, 2f, false, false, 3.5f, 0f, 0f);
+            var fireSpec = new BombSpec(BombType.Fire, 3, 3, 1, 1, 2f, false, false, 3.5f, 0f, 0f);
             var fireResult = fireResolver.Resolve(center, fireSpec, _stage);
             _service.EnqueueFireBomb(fireResult, center, new List<PlayerModel>(), null, 0.15f);
 
@@ -166,7 +166,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             // 滑落ボム (0.3s)
             var fallResolver = new FallBombResolver(_areaResolver);
-            var fallSpec = new BombSpec(BombType.Fall, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
+            var fallSpec = new BombSpec(BombType.Fall, 3, 3, 1, 2, 4f, false, true, 0f, 3f, 5f);
             var fallResult = fallResolver.Resolve(center, fallSpec, _stage);
             _service.EnqueueFallBomb(fallResult, center, new List<PlayerModel>(), null, 0.3f);
 
@@ -186,7 +186,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void FallBomb_OverlappingWaves_TimerResetKeepsTileCollapsing()
         {
             var fallResolver = new FallBombResolver(_areaResolver);
-            var spec = new BombSpec(BombType.Fall, 3, 2, 2, 4f, false, true, 0f, 3f, 5f);
+            var spec = new BombSpec(BombType.Fall, 3, 3, 2, 2, 4f, false, true, 0f, 3f, 5f);
 
             // 重なるタイル: (5,6) — A の距離1, B の距離1
             var centerA = new GridPos(5, 5);

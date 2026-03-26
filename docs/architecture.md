@@ -429,6 +429,7 @@ flowchart LR
 | 9 | UI | UpgradeSelectionState | — | UXML/USS/Presenter/View 10クラス | **完了** |
 | 10 | ステージ Presentation | — | — | TileView, AnimService, VfxPool, Presenter 8クラス | **完了** |
 | 11 | プレイヤー Presentation | — | — | PlayerView, AnimService, Presenter, Factory 7クラス | **完了** |
-| 12-14 | Bomb/Slime/Camera Pres | — | — | View, VFX, Camera | 未着手 |
+| 12 | ボム Presentation | MinFlightDistance, FlightEvents | — | BombFlightView, AnimService, VfxPool, Presenter 8クラス | **完了** |
+| 13-14 | Slime/Camera Pres | — | — | View, VFX, Camera | 未着手 |
 | 15 | Bootstrap | — | — | LifetimeScope | 未着手 |
 | 16-18 | 統合/ポリッシュ | — | — | テスト, FX, SE | 未着手 |

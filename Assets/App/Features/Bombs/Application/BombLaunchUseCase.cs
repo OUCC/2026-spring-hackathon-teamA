@@ -16,6 +16,7 @@ namespace FloorBreaker.Bombs.Application
         private readonly FireBombResolver _fireResolver;
         private readonly StageModel _stage;
         private readonly float _fallBombRecoveryDuration;
+        private readonly int _bombMinFlightDistance;
         private readonly BombEffectSpreadService _spreadService;
         private readonly float _fireSpreadInterval;
         private readonly float _fallSpreadInterval;
@@ -33,6 +34,7 @@ namespace FloorBreaker.Bombs.Application
             _fireResolver = fireResolver;
             _stage = stage;
             _fallBombRecoveryDuration = balance.FallBombRecoveryDuration;
+            _bombMinFlightDistance = balance.BombMinFlightDistance;
             _spreadService = spreadService;
             _fireSpreadInterval = balance.FireBombSpreadInterval;
             _fallSpreadInterval = balance.FallBombSpreadInterval;
@@ -43,6 +45,7 @@ namespace FloorBreaker.Bombs.Application
             return new BombSpec(
                 BombType.Fall,
                 build.FallFlightRange,
+                _bombMinFlightDistance,
                 build.FallEffectRange,
                 build.FallDamage,
                 build.FallCooldown,
@@ -58,6 +61,7 @@ namespace FloorBreaker.Bombs.Application
             return new BombSpec(
                 BombType.Fire,
                 build.FireFlightRange,
+                _bombMinFlightDistance,
                 build.FireEffectRange,
                 build.FireDamage,
                 build.FireCooldown,

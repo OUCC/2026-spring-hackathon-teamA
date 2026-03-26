@@ -96,5 +96,72 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             Assert.IsNotNull(_registry.GetAt(newPos));
             Assert.AreEqual(slime.Id, _registry.GetAt(newPos).Id);
         }
+
+        // ─── Event Tests ───────────────────────────────────────
+
+        [Test]
+        public void Add_EmitsSpawnedEvent()
+        {
+            SlimeSpawnedEvent? received = null;
+            _registry.Spawned.Subscribe(e => received = e);
+
+            var pos = new GridPos(5, 5);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Gold, pos);
+            _registry.Add(slime);
+
+            Assert.IsNotNull(received);
+            Assert.AreEqual(slime.Id, received.Value.Id);
+            Assert.AreEqual(SlimeType.Gold, received.Value.Type);
+            Assert.AreEqual(pos, received.Value.Position);
+        }
+
+        [Test]
+        public void Remove_EmitsKilledEvent()
+        {
+            SlimeKilledEvent? received = null;
+            _registry.Killed.Subscribe(e => received = e);
+
+            var pos = new GridPos(3, 3);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Red, pos);
+            _registry.Add(slime);
+
+            _registry.Remove(slime.Id);
+
+            Assert.IsNotNull(received);
+            Assert.AreEqual(slime.Id, received.Value.Id);
+            Assert.AreEqual(SlimeType.Red, received.Value.Type);
+            Assert.AreEqual(pos, received.Value.Position);
+        }
+
+        [Test]
+        public void UpdatePosition_EmitsMovedEvent()
+        {
+            SlimeMovedEvent? received = null;
+            _registry.Moved.Subscribe(e => received = e);
+
+            var oldPos = new GridPos(1, 1);
+            var newPos = new GridPos(1, 2);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, oldPos);
+            _registry.Add(slime);
+
+            slime.MoveTo(newPos);
+            _registry.UpdatePosition(slime, oldPos, newPos);
+
+            Assert.IsNotNull(received);
+            Assert.AreEqual(slime.Id, received.Value.Id);
+            Assert.AreEqual(oldPos, received.Value.OldPosition);
+            Assert.AreEqual(newPos, received.Value.NewPosition);
+        }
+
+        [Test]
+        public void Remove_NonExistent_DoesNotEmitKilledEvent()
+        {
+            SlimeKilledEvent? received = null;
+            _registry.Killed.Subscribe(e => received = e);
+
+            _registry.Remove(SlimeId.Next());
+
+            Assert.IsNull(received);
+        }
     }
 }
