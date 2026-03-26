@@ -155,18 +155,25 @@ namespace FloorBreaker.MatchFlow.Application
             // 外周を永久消滅
             var destroyed = _stageShrinkService.ShrinkOuterRing(_stage);
 
-            // 縮小マス上のプレイヤーにダメージ + 強制移動
-            var destroyedSet = new HashSet<GridPos>(destroyed);
+            // 縮小後に通行不可マスにいるプレイヤーをダメージ + BFS 強制移動
+            // (外周リング上 + リング外の既に PermanentlyDestroyed なマスの両方を処理)
             var occupied = new HashSet<GridPos>();
             foreach (var p in _players) occupied.Add(p.CurrentPosition);
 
             foreach (var player in _players)
             {
-                if (destroyedSet.Contains(player.CurrentPosition))
+                if (!_stage.IsPassable(player.CurrentPosition)
+                    || !_stage.IsInBounds(player.CurrentPosition))
                 {
-                    _playerDamageService.ApplyDamage(
-                        player, _balance.FallBombDamage, true,
-                        _stage, _safeTileSearch, occupied);
+                    // 無敵でもダメージ + 強制移動 (縮小は回避不可)
+                    player.Stats.TakeDamage(_balance.FallBombDamage);
+                    var safeTile = _safeTileSearch.FindSafeTile(_stage, player.CurrentPosition, occupied);
+                    if (safeTile.HasValue)
+                    {
+                        player.ForcedMove.Start(safeTile.Value, _balance.ForcedMoveDuration);
+                        player.CurrentPosition = safeTile.Value;
+                        occupied.Add(safeTile.Value);
+                    }
                 }
             }
 

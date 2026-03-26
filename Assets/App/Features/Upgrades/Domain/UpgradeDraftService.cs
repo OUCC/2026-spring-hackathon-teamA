@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using R3;
+using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
 
@@ -16,6 +17,9 @@ namespace FloorBreaker.Upgrades.Domain
         private readonly ReactiveProperty<IReadOnlyList<UpgradeDefinition>> _currentChoices
             = new(Array.Empty<UpgradeDefinition>());
 
+        // 同一フェーズ内で購入済みの UpgradeId (リロール時の除外用)
+        private readonly HashSet<UpgradeId> _purchasedThisPhase = new();
+
         public ReadOnlyReactiveProperty<DraftState> State => _state;
         public ReadOnlyReactiveProperty<IReadOnlyList<UpgradeDefinition>> CurrentChoices => _currentChoices;
 
@@ -29,7 +33,8 @@ namespace FloorBreaker.Upgrades.Domain
         public void GenerateChoices(PlayerModel player, IRandomProvider random)
         {
             _state.Value = DraftState.Choosing;
-            _currentChoices.Value = _rollRule.Roll(player, _balance.UpgradeChoiceCount, random);
+            _purchasedThisPhase.Clear();
+            _currentChoices.Value = _rollRule.Roll(player, _balance.UpgradeChoiceCount, random, _purchasedThisPhase);
         }
 
         public bool Reroll(PlayerModel player, IRandomProvider random)
@@ -37,10 +42,14 @@ namespace FloorBreaker.Upgrades.Domain
             if (_state.Value != DraftState.Choosing) return false;
             if (!player.Stats.SpendCoins(_balance.RerollCost)) return false;
 
-            _currentChoices.Value = _rollRule.Roll(player, _balance.UpgradeChoiceCount, random);
+            _currentChoices.Value = _rollRule.Roll(player, _balance.UpgradeChoiceCount, random, _purchasedThisPhase);
             return true;
         }
 
+        /// <summary>
+        /// 選択した強化を購入・適用する。複数回呼び出し可能（Choosing を維持）。
+        /// 終了は Skip() で明示的に行う。
+        /// </summary>
         public bool SelectChoice(int index, PlayerModel player)
         {
             if (_state.Value != DraftState.Choosing) return false;
@@ -52,7 +61,8 @@ namespace FloorBreaker.Upgrades.Domain
             if (!player.Stats.SpendCoins(chosen.Cost)) return false;
 
             _applyService.Apply(chosen.Id, player);
-            _state.Value = DraftState.Selected;
+            _purchasedThisPhase.Add(chosen.Id);
+            // Choosing を維持 — 複数選択可能
             return true;
         }
 

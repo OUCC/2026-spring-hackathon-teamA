@@ -23,7 +23,8 @@ namespace FloorBreaker.Input.Infrastructure
 
         private void SwitchMaps(GamePhase phase)
         {
-            var gameplay = _actions.FindActionMap("Gameplay");
+            var gameplayP1 = _actions.FindActionMap("Gameplay_P1");
+            var gameplayP2 = _actions.FindActionMap("Gameplay_P2");
             var upgradeP1 = _actions.FindActionMap("UpgradeUI_P1");
             var upgradeP2 = _actions.FindActionMap("UpgradeUI_P2");
             var system = _actions.FindActionMap("System");
@@ -31,25 +32,29 @@ namespace FloorBreaker.Input.Infrastructure
             switch (phase)
             {
                 case GamePhase.MatchRunning:
-                    gameplay?.Enable();
+                    gameplayP1?.Enable();
+                    gameplayP2?.Enable();
                     upgradeP1?.Disable();
                     upgradeP2?.Disable();
                     system?.Enable();
                     break;
                 case GamePhase.UpgradePhase:
-                    gameplay?.Disable();
+                    gameplayP1?.Disable();
+                    gameplayP2?.Disable();
                     upgradeP1?.Enable();
                     upgradeP2?.Enable();
                     system?.Enable();
                     break;
                 case GamePhase.Result:
-                    gameplay?.Disable();
+                    gameplayP1?.Disable();
+                    gameplayP2?.Disable();
                     upgradeP1?.Disable();
                     upgradeP2?.Disable();
                     system?.Enable();
                     break;
                 default:
-                    gameplay?.Disable();
+                    gameplayP1?.Disable();
+                    gameplayP2?.Disable();
                     upgradeP1?.Disable();
                     upgradeP2?.Disable();
                     system?.Disable();

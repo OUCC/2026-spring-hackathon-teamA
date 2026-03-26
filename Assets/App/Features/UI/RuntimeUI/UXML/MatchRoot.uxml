@@ -37,9 +37,12 @@
                     <VisualElement name="LeftUpgradePane" class="upgrade-pane upgrade-pane--p1">
                         <Label class="upgrade-pane__title" text="強化フェーズ" />
                         <Label name="LeftCountdown" class="upgrade-pane__countdown" text="10" />
-                        <VisualElement name="LeftCards" class="upgrade-pane__cards" />
-                        <VisualElement class="upgrade-pane__actions">
-                            <Button name="LeftRerollBtn" class="upgrade-pane__reroll-btn" text="リロール (1コイン)" />
+                        <VisualElement class="upgrade-pane__card-row">
+                            <VisualElement name="LeftCards" class="upgrade-pane__cards" />
+                            <Button name="LeftRerollBtn" class="upgrade-pane__reroll-btn" text="リロール&#10;(1コイン)" />
+                        </VisualElement>
+                        <VisualElement name="LeftActions" class="upgrade-pane__actions">
+                            <Button name="LeftSkipBtn" class="upgrade-pane__done-btn" text="完了" />
                         </VisualElement>
                         <Label name="LeftStatus" class="upgrade-pane__status" />
                     </VisualElement>
@@ -49,9 +52,12 @@
                     <VisualElement name="RightUpgradePane" class="upgrade-pane upgrade-pane--p2">
                         <Label class="upgrade-pane__title" text="強化フェーズ" />
                         <Label name="RightCountdown" class="upgrade-pane__countdown" text="10" />
-                        <VisualElement name="RightCards" class="upgrade-pane__cards" />
-                        <VisualElement class="upgrade-pane__actions">
-                            <Button name="RightRerollBtn" class="upgrade-pane__reroll-btn" text="リロール (1コイン)" />
+                        <VisualElement class="upgrade-pane__card-row">
+                            <VisualElement name="RightCards" class="upgrade-pane__cards" />
+                            <Button name="RightRerollBtn" class="upgrade-pane__reroll-btn" text="リロール&#10;(1コイン)" />
+                        </VisualElement>
+                        <VisualElement name="RightActions" class="upgrade-pane__actions">
+                            <Button name="RightSkipBtn" class="upgrade-pane__done-btn" text="完了" />
                         </VisualElement>
                         <Label name="RightStatus" class="upgrade-pane__status" />
                     </VisualElement>

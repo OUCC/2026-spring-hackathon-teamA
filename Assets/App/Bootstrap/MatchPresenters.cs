@@ -36,6 +36,7 @@ namespace FloorBreaker.Bootstrap
             Bomb?.Tick(deltaTime);
             HudP1?.UpdatePerFrame();
             HudP2?.UpdatePerFrame();
+            UpgradeOverlay?.UpdateCountdown();
         }
 
         public void Dispose()
