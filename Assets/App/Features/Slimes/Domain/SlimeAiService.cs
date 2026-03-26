@@ -52,6 +52,7 @@ namespace FloorBreaker.Slimes.Domain
                             nearest, balance.SlimeAttackDamage, false,
                             stage, _safeTileSearch, occupied);
                         slime.ResetAttackCooldown(balance.SlimeAttackCooldown);
+                        registry.NotifyAttack(slime.Id, slime.Position, nearest.CurrentPosition);
                     }
                     continue;
                 }

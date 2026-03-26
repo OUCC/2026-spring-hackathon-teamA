@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e909ba255092ab047a4e4d96c65a4db0, type: 3}
+  m_Name: SlimeSpriteConfig
+  m_EditorClassIdentifier: App.Slimes.Presentation::FloorBreaker.Slimes.Presentation.SlimeSpriteConfig
+  _standSprites:
+  - {fileID: 5306371304166015693, guid: 2d6bb60d704dfd84e901d5055b3364ce, type: 3}
+  - {fileID: -8227651011553350252, guid: 2d6bb60d704dfd84e901d5055b3364ce, type: 3}
+  - {fileID: 6867324059850451580, guid: 2d6bb60d704dfd84e901d5055b3364ce, type: 3}
+  - {fileID: -5551157758290161881, guid: 2d6bb60d704dfd84e901d5055b3364ce, type: 3}
+  - {fileID: -9120126418537301299, guid: 2d6bb60d704dfd84e901d5055b3364ce, type: 3}
+  - {fileID: -6122147780449102023, guid: 2d6bb60d704dfd84e901d5055b3364ce, type: 3}
+  - {fileID: -1323534250621733272, guid: 2d6bb60d704dfd84e901d5055b3364ce, type: 3}
+  - {fileID: 7759507617609238065, guid: 2d6bb60d704dfd84e901d5055b3364ce, type: 3}
+  _normalTint: {r: 0.38, g: 0.78, b: 0.5, a: 1}
+  _goldTint: {r: 0.94, g: 0.75, b: 0.25, a: 1}
+  _redTint: {r: 0.88, g: 0.25, b: 0.25, a: 1}
+  _slimeScale: 0.2
+  _baseSortingOrder: 5
+  _moveDuration: 0.15
+  _spawnPopDuration: 0.3
+  _spawnPopScale: 1.3
+  _deathDuration: 0.4
+  _deathShrinkScale: 0.1
+  _deathVfxPrefab: {fileID: 173590, guid: 7469283484e0dcc4887fa575d1fd7ecc, type: 3}
+  _attackVfxPrefab: {fileID: 1274793349893442, guid: 02a6f9dd941131e4d85d39332183eeb6, type: 3}

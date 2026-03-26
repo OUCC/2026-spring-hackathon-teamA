@@ -430,6 +430,7 @@ flowchart LR
 | 10 | ステージ Presentation | — | — | TileView, AnimService, VfxPool, Presenter 8クラス | **完了** |
 | 11 | プレイヤー Presentation | — | — | PlayerView, AnimService, Presenter, Factory 7クラス | **完了** |
 | 12 | ボム Presentation | MinFlightDistance, FlightEvents | — | BombFlightView, AnimService, VfxPool, Presenter 8クラス | **完了** |
-| 13-14 | Slime/Camera Pres | — | — | View, VFX, Camera | 未着手 |
+| 13 | スライム Presentation | SlimeEvents, Registry IDisposable | — | SlimeView, AnimService, Presenter, Factory 7クラス | **完了** |
+| 14 | カメラシステム | — | — | SplitScreenCameraSetup, CameraFollower, ICameraShakeService 5クラス | **完了** |
 | 15 | Bootstrap | — | — | LifetimeScope | 未着手 |
 | 16-18 | 統合/ポリッシュ | — | — | テスト, FX, SE | 未着手 |
