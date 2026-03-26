@@ -129,6 +129,10 @@ namespace FloorBreaker.Bootstrap
 
         public async UniTask StartAsync(CancellationToken ct)
         {
+            // 0. BGM 切替 (タイトル BGM 停止 → ゲーム BGM 開始)
+            _audio?.StopBgm(0.3f);
+            _audio?.PlayBgm(SfxIds.BgmMatch);
+
             // 1. 壁生成
             var bounds = _stage.GetCurrentBounds();
             var p1Spawn = _players.Player1.CurrentPosition;

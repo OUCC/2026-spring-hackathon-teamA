@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
@@ -5,23 +6,27 @@ using FloorBreaker.Shared.Application.Interfaces;
 namespace FloorBreaker.Shared.Infrastructure.Audio
 {
     /// <summary>
-    /// IAudioService の実装。AudioSource プールで複数 SE 同時再生。
+    /// IAudioService の実装。SFX プール + BGM ループ再生。
     /// ProjectLifetimeScope に Singleton 登録し、DontDestroyOnLoad で生存する。
     /// </summary>
     public sealed class AudioService : MonoBehaviour, IAudioService
     {
         [SerializeField] private AudioCatalog _catalog;
         [SerializeField, Range(0f, 1f)] private float _masterVolume = 1f;
+        [SerializeField, Range(0f, 1f)] private float _bgmVolume = 0.5f;
 
         private const int InitialPoolSize = 4;
         private const int MaxPoolSize = 8;
         private const float StageWidth = 30f;
-
-        /// <summary>ステレオパンの最大強さ。1.0 = 完全左右、0.3 = 控えめなパン。</summary>
         private const float MaxPanStrength = 0.3f;
 
         private AudioSource[] _pool;
         private int _nextIndex;
+
+        // BGM 専用
+        private AudioSource _bgmSource;
+        private Coroutine _bgmFadeCoroutine;
+        private string _currentBgmId;
 
         private void Awake()
         {
@@ -30,7 +35,15 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
             {
                 _pool[i] = CreateAudioSource();
             }
+
+            _bgmSource = gameObject.AddComponent<AudioSource>();
+            _bgmSource.playOnAwake = false;
+            _bgmSource.spatialBlend = 0f;
+            _bgmSource.loop = true;
+            _bgmSource.volume = _bgmVolume * _masterVolume;
         }
+
+        // === SFX ===
 
         public void PlaySfx(string sfxId)
         {
@@ -50,7 +63,6 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
             if (!_catalog.TryGetEntry(sfxId, out var clip, out var volume)) return;
 
             var source = GetAvailableSource();
-            // ステージ中央を 0 とし、左右に控えめにパンする
             float rawPan = Mathf.Clamp((worldPosition.X - StageWidth * 0.5f) / (StageWidth * 0.5f), -1f, 1f);
             source.panStereo = rawPan * MaxPanStrength;
             source.volume = volume * _masterVolume;
@@ -58,16 +70,72 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
             source.Play();
         }
 
+        // === BGM ===
+
+        public void PlayBgm(string bgmId)
+        {
+            if (_catalog == null) return;
+            if (bgmId == _currentBgmId && _bgmSource.isPlaying) return;
+            if (!_catalog.TryGetEntry(bgmId, out var clip, out var volume)) return;
+
+            // フェード中なら停止
+            if (_bgmFadeCoroutine != null)
+            {
+                StopCoroutine(_bgmFadeCoroutine);
+                _bgmFadeCoroutine = null;
+            }
+
+            _currentBgmId = bgmId;
+            _bgmSource.clip = clip;
+            _bgmSource.volume = volume * _bgmVolume * _masterVolume;
+            _bgmSource.Play();
+        }
+
+        public void StopBgm(float fadeOutDuration = 0.5f)
+        {
+            if (!_bgmSource.isPlaying) return;
+
+            if (fadeOutDuration <= 0f)
+            {
+                _bgmSource.Stop();
+                _currentBgmId = null;
+                return;
+            }
+
+            if (_bgmFadeCoroutine != null)
+                StopCoroutine(_bgmFadeCoroutine);
+
+            _bgmFadeCoroutine = StartCoroutine(FadeOutBgm(fadeOutDuration));
+        }
+
+        private IEnumerator FadeOutBgm(float duration)
+        {
+            float startVolume = _bgmSource.volume;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                _bgmSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
+                yield return null;
+            }
+
+            _bgmSource.Stop();
+            _bgmSource.volume = startVolume;
+            _currentBgmId = null;
+            _bgmFadeCoroutine = null;
+        }
+
+        // === Pool ===
+
         private AudioSource GetAvailableSource()
         {
-            // 再生中でないソースを探す
             for (int i = 0; i < _pool.Length; i++)
             {
                 if (_pool[i] != null && !_pool[i].isPlaying)
                     return _pool[i];
             }
 
-            // 全て再生中 → プールに空きがあれば新規作成
             for (int i = 0; i < MaxPoolSize; i++)
             {
                 if (_pool[i] == null)
@@ -77,7 +145,6 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
                 }
             }
 
-            // 全て埋まっている → ラウンドロビンで上書き
             var source = _pool[_nextIndex];
             _nextIndex = (_nextIndex + 1) % MaxPoolSize;
             return source;
@@ -87,7 +154,7 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
         {
             var source = gameObject.AddComponent<AudioSource>();
             source.playOnAwake = false;
-            source.spatialBlend = 0f; // 2D
+            source.spatialBlend = 0f;
             return source;
         }
     }

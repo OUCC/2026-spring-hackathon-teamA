@@ -1,5 +1,23 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: タイトル UI + BGM
+
+### 完了タスク
+- IAudioService 拡張: PlayBgm / StopBgm 追加
+- AudioService: BGM 専用 AudioSource (ループ + フェードアウト)
+- TitleRoot.uxml/uss: ロゴ + モード選択 + 操作説明 + 終了
+- TitleUIDocument + TitlePresenter: ボタンイベント + BGM 再生
+- Title.unity 再構築: AutoMatchLoader 削除、TitleUIDocument 配置
+- MatchInitializer: BGM 切替 (タイトル→バトル)
+- AudioCatalog: bgm_title (castle), bgm_match (battle) 追加
+- Action RPG Music Free インポート
+
+### 設計判断
+- TitlePresenter は VContainer 不使用 (TitleUIDocument.Start で直接生成)
+- BGM は AudioService 内の専用 AudioSource で SFX プールと分離
+
+---
+
 ## 2026-03-26: Phase 16 — オーディオ基盤
 
 ### 完了タスク

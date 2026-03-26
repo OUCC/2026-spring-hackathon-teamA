@@ -70,3 +70,9 @@ MonoBehaviour:
   - _sfxId: ui_navigate
     _clip: {fileID: 8300000, guid: a1b171a1a6c76459189db6b0ece46637, type: 3}
     _volume: 0.4
+  - _sfxId: bgm_title
+    _clip: {fileID: 8300000, guid: 7f0b0878750742e4fb9edde53f091d32, type: 3}
+    _volume: 0.8
+  - _sfxId: bgm_match
+    _clip: {fileID: 8300000, guid: 031bbb98a7e1a3c4684afe0c45789da8, type: 3}
+    _volume: 0.6

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="UnityEngine.UIElements"
+      xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
+
+    <Style src="../USS/TitleRoot.uss" />
+
+    <VisualElement name="TitleRoot" class="title-root">
+
+        <!-- 背景 -->
+        <VisualElement class="title-bg" />
+
+        <!-- メインコンテンツ -->
+        <VisualElement class="title-content">
+
+            <!-- ロゴ -->
+            <Label name="TitleLogo" class="title-logo" text="FLOOR BREAKER" />
+            <Label class="title-subtitle" text="床破壊対戦ゲーム" />
+
+            <!-- モード選択 -->
+            <VisualElement class="title-mode-select">
+                <Button name="ModeButton_2P" class="title-btn title-btn--primary" text="2P 対戦" />
+                <Button name="ModeButton_1P" class="title-btn title-btn--disabled" text="1P vs CPU  (Coming Soon)" />
+                <Button name="ModeButton_CPU" class="title-btn title-btn--disabled" text="観戦モード  (Coming Soon)" />
+            </VisualElement>
+
+            <!-- 操作説明 -->
+            <VisualElement class="title-controls">
+                <Label class="title-controls__header" text="操作説明" />
+                <VisualElement class="title-controls__grid">
+                    <VisualElement class="title-controls__column">
+                        <Label class="title-controls__label" text="── Player 1 ──" />
+                        <Label class="title-controls__item" text="移動:  W A S D" />
+                        <Label class="title-controls__item" text="照準:  Space (押しながら)" />
+                        <Label class="title-controls__item" text="炎ボム:  P (ホールド)" />
+                        <Label class="title-controls__item" text="滑落ボム:  L (ホールド)" />
+                    </VisualElement>
+                    <VisualElement class="title-controls__column">
+                        <Label class="title-controls__label" text="── Player 2 ──" />
+                        <Label class="title-controls__item" text="移動:  ↑ ← ↓ →" />
+                        <Label class="title-controls__item" text="照準:  Numpad 0 (押しながら)" />
+                        <Label class="title-controls__item" text="炎ボム:  Numpad 6 (ホールド)" />
+                        <Label class="title-controls__item" text="滑落ボム:  Numpad 2 (ホールド)" />
+                    </VisualElement>
+                </VisualElement>
+            </VisualElement>
+
+            <!-- 終了 -->
+            <Button name="QuitButton" class="title-btn title-btn--quit" text="終了" />
+        </VisualElement>
+
+    </VisualElement>
+
+</UXML>

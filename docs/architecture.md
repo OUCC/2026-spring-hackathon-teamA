@@ -434,4 +434,5 @@ flowchart LR
 | 14 | カメラシステム | — | — | SplitScreenCameraSetup, CameraFollower, ICameraShakeService 5クラス | **完了** |
 | 15 | Bootstrap | MatchPlayers | MatchInitializer, MatchTickRunner | ProjectLifetimeScope, MatchLifetimeScope, MatchPresenters 8クラス | **完了** |
 | 16 | オーディオ基盤 | SfxIds | — | AudioService, AudioCatalog, NullAudioService 4クラス | **完了** |
+| 16.5 | タイトル UI + BGM | — | TitlePresenter | TitleUIDocument, TitleRoot UXML/USS, BGM 再生 | **完了** |
 | 17-18 | 統合/ポリッシュ | — | — | テスト, FX | 未着手 |

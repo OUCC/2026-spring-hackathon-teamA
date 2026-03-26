@@ -10,5 +10,7 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
     {
         public void PlaySfx(string sfxId) { }
         public void PlaySfx(string sfxId, Float2 worldPosition) { }
+        public void PlayBgm(string bgmId) { }
+        public void StopBgm(float fadeOutDuration = 0.5f) { }
     }
 }
