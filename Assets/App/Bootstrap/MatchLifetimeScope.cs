@@ -269,6 +269,7 @@ namespace FloorBreaker.Bootstrap
                 .As<ICameraShakeService>();
 
             builder.Register<ImpactFreezeService>(Lifetime.Scoped)
+                .AsSelf()
                 .As<IImpactFreezeService>();
         }
 
