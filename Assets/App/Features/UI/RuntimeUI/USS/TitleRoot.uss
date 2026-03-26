@@ -1,0 +1,163 @@
+/* ==============================================
+   FLOOR BREAKER — Title Screen
+   ============================================== */
+
+.title-root {
+    /* Variables (match-root と同じトークン) */
+    --color-bg-panel: rgba(20, 15, 30, 0.75);
+    --color-text: #F0E8D8;
+    --color-text-dim: #A09888;
+    --color-p1: #4A90D9;
+    --color-p2: #D94A4A;
+    --color-coin: #F0C040;
+    --color-disabled: #606060;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.title-bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(10, 8, 18, 0.95);
+}
+
+.title-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+/* --- ロゴ --- */
+.title-logo {
+    font-size: 72px;
+    color: var(--color-coin);
+    -unity-font-style: bold;
+    letter-spacing: 8px;
+    margin-bottom: 4px;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: rgba(200, 150, 30, 0.4);
+}
+
+.title-subtitle {
+    font-size: 20px;
+    color: var(--color-text-dim);
+    margin-bottom: 48px;
+}
+
+/* --- モード選択 --- */
+.title-mode-select {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.title-btn {
+    font-size: 22px;
+    color: var(--color-text);
+    background-color: var(--color-bg-panel);
+    border-width: 2px;
+    border-color: rgba(240, 232, 216, 0.2);
+    border-radius: 8px;
+    padding: 12px 48px;
+    margin: 6px 0;
+    min-width: 320px;
+    -unity-text-align: middle-center;
+    transition-duration: 0.15s;
+}
+
+.title-btn:hover {
+    background-color: rgba(40, 35, 60, 0.9);
+    border-color: var(--color-coin);
+    scale: 1.03 1.03;
+}
+
+.title-btn--primary {
+    border-color: var(--color-coin);
+    color: var(--color-coin);
+    font-size: 26px;
+    -unity-font-style: bold;
+}
+
+.title-btn--primary:hover {
+    background-color: rgba(240, 192, 64, 0.15);
+}
+
+.title-btn--disabled {
+    color: var(--color-disabled);
+    border-color: rgba(96, 96, 96, 0.3);
+    opacity: 0.5;
+}
+
+.title-btn--disabled:hover {
+    scale: 1 1;
+    border-color: rgba(96, 96, 96, 0.3);
+    background-color: var(--color-bg-panel);
+}
+
+.title-btn--quit {
+    font-size: 16px;
+    padding: 8px 32px;
+    min-width: 160px;
+    margin-top: 24px;
+    color: var(--color-text-dim);
+    border-color: rgba(160, 152, 136, 0.2);
+}
+
+.title-btn--quit:hover {
+    border-color: var(--color-text-dim);
+}
+
+/* --- 操作説明 --- */
+.title-controls {
+    background-color: rgba(20, 15, 30, 0.6);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.1);
+    padding: 16px 24px;
+    margin-bottom: 8px;
+    max-width: 600px;
+}
+
+.title-controls__header {
+    font-size: 16px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+}
+
+.title-controls__grid {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.title-controls__column {
+    flex-direction: column;
+    margin: 0 20px;
+}
+
+.title-controls__label {
+    font-size: 14px;
+    color: var(--color-coin);
+    -unity-text-align: middle-center;
+    margin-bottom: 6px;
+}
+
+.title-controls__item {
+    font-size: 13px;
+    color: var(--color-text-dim);
+    margin-bottom: 3px;
+}

@@ -36,5 +36,9 @@ namespace FloorBreaker.Shared.Application.Interfaces
 
         // UI
         public const string UiNavigate = "ui_navigate";
+
+        // BGM
+        public const string BgmTitle = "bgm_title";
+        public const string BgmMatch = "bgm_match";
     }
 }
