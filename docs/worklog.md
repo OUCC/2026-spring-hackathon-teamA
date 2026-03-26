@@ -1,5 +1,34 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 15 — Bootstrap / 完全 DI 化
+
+### 完了タスク
+- **T-15.1** MatchPlayers ホルダー新設 (P1/P2 ペア: PlayerModel, BombCooldownState, UpgradeDraftService、IDisposable)
+- **T-15.2** TileViewRegistry ラッパー新設 (Dictionary<GridPos,TileView> の遅延格納ラッパー)
+- **T-15.3** MatchPresenters ホルダー新設 (全 Presenter 保持 + TickPresenters(dt) + IDisposable、Bootstrap 配置)
+- **T-15.4** ProjectLifetimeScope 新設 (Singleton: IBalanceParameters/IRandomProvider/ITimeProvider、DontDestroyOnLoad)
+- **T-15.5** MatchLifetimeScope 新設 (~30 サービス Scoped 登録、メソッド分割、ファクトリラムダで P1/P2 ペア解決、フォールバック対応)
+- **T-15.6** MatchInitializer 新設 (IAsyncStartable: 壁生成→View→Presenter→Input の初期化シーケンス)
+- **T-15.7** MatchTickRunner 新設 (ITickable: Scheduler + Presenter + Camera の毎フレーム Tick)
+- **T-15.8** AutoMatchLoader 新設 (Title→Match 一時自動遷移)
+- **T-15.9** MatchFlowOrchestrator.cs 削除 (神ファクトリ → VContainer + MatchInitializer に完全置換)
+- **T-15.10** App.Bootstrap.asmdef: 全 feature asmdef + Unity.InputSystem 参照追加
+- **T-15.11** Match.unity シーン構築 (9 GameObject: LifetimeScope, 4 Factory, Camera, UIDocument, InputAdapter x2)
+- **T-15.12** Title.unity シーン構築 (ProjectLifetimeScope + AutoMatchLoader)
+- **T-15.13** EditorBuildSettings 登録 (Title → Match → Result)
+- コンパイルエラー 0 件、EditMode テスト 244 件全件グリーン
+
+### 設計判断
+- **MatchFlowOrchestrator 解体**: 内部で ~30 サービスを手動 new していた神ファクトリを完全削除。VContainer のコンストラクタインジェクション + ファクトリラムダに移行
+- **MatchPlayers ホルダーパターン**: VContainer にキー付き登録がないため、P1/P2 ペアを明示的なホルダークラスで管理。MatchLifetimeScope のファクトリラムダ内で PlayerModel/BombCooldownState/UpgradeDraftService を生成し MatchPlayers に格納。MatchPhaseScheduler 等は MatchPlayers から Cooldown1/2, All を受け取る
+- **MatchPresenters を Bootstrap 配置**: Presentation 型を参照するが App.MatchFlow は noEngineReferences: true のため、Bootstrap 層に配置
+- **MatchInitializer を Bootstrap 配置**: 同上。UnityEngine/MonoBehaviour 参照が必要なため Bootstrap 層に配置。App.MatchFlow の pure C# 制約を維持
+- **MatchTickRunner で一元 Tick**: VContainer の ITickable で PlayerLoop にフック。ITimeProvider.DeltaTime で dt 取得し Scheduler → Presenter → Camera の順で更新
+- **フォールバック登録**: Match シーン単体起動時に Parent == null を検出し、_fallbackBalance から IBalanceParameters 等を自前登録。開発中のイテレーション高速化
+- **デバッグシーン変更不要**: 全デバッグコントローラーは MatchFlowOrchestrator を参照しておらず、手動 new パターンで独立動作
+
+---
+
 ## 2026-03-26: Phase 14 — カメラシステム
 
 ### 完了タスク
