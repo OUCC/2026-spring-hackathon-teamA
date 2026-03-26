@@ -20,6 +20,7 @@ namespace FloorBreaker.Slimes.Presentation
         private readonly SlimeAnimationService _animService;
         private readonly SlimeSpriteConfig _config;
         private readonly IAudioService _audio;
+        private readonly ICameraShakeService _cameraShake;
         private readonly Dictionary<SlimeId, SlimeView> _views = new();
         private readonly CompositeDisposable _subscriptions = new();
 
@@ -28,12 +29,14 @@ namespace FloorBreaker.Slimes.Presentation
             SlimeViewFactory factory,
             SlimeAnimationService animService,
             SlimeSpriteConfig config,
-            IAudioService audio = null)
+            IAudioService audio = null,
+            ICameraShakeService cameraShake = null)
         {
             _factory = factory;
             _animService = animService;
             _config = config;
             _audio = audio;
+            _cameraShake = cameraShake;
 
             registry.Spawned.Subscribe(OnSlimeSpawned).AddTo(_subscriptions);
             registry.Moved.Subscribe(OnSlimeMoved).AddTo(_subscriptions);
@@ -102,6 +105,7 @@ namespace FloorBreaker.Slimes.Presentation
             var targetWorld = evt.TargetPosition.ToWorldCenter().ToVector3(-1f);
             SpawnAttackVfx(targetWorld);
             _audio?.PlaySfx(SfxIds.SlimeAttack, new Float2(targetWorld.x, targetWorld.y));
+            _cameraShake?.Shake(ShakeIntensity.Light);
 
             // 攻撃者の突進アニメーション
             if (_views.TryGetValue(evt.AttackerId, out var attackerView))

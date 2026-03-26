@@ -1,14 +1,3 @@
-namespace FloorBreaker.Cameras.Presentation
-{
-    public enum ShakeIntensity
-    {
-        Light,
-        Medium,
-        Heavy,
-    }
-
-    public interface ICameraShakeService
-    {
-        void Shake(ShakeIntensity intensity);
-    }
-}
+// This file intentionally left empty.
+// ICameraShakeService and ShakeIntensity have been moved to
+// FloorBreaker.Shared.Presentation.Common (Assets/App/Shared/Presentation/Common/).

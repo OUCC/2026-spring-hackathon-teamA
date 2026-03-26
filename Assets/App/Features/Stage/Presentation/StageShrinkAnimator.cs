@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using R3;
 using FloorBreaker.Shared.Domain.Grid;
+using FloorBreaker.Shared.Application.Interfaces;
+using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Stage.Domain;
 
 namespace FloorBreaker.Stage.Presentation
@@ -13,6 +15,8 @@ namespace FloorBreaker.Stage.Presentation
         private readonly TileAnimationService _animService;
         private readonly TileSpriteConfig _config;
         private readonly float _totalDuration;
+        private readonly ICameraShakeService _cameraShake;
+        private readonly IAudioService _audio;
         private readonly IDisposable _subscription;
 
         private readonly List<GridPos> _pendingDestroys = new();
@@ -25,12 +29,16 @@ namespace FloorBreaker.Stage.Presentation
             Dictionary<GridPos, TileView> views,
             TileAnimationService animService,
             TileSpriteConfig config,
-            float shrinkAnimDuration)
+            float shrinkAnimDuration,
+            ICameraShakeService cameraShake = null,
+            IAudioService audio = null)
         {
             _views = views;
             _animService = animService;
             _config = config;
             _totalDuration = shrinkAnimDuration;
+            _cameraShake = cameraShake;
+            _audio = audio;
 
             _subscription = model.TileChanged.Subscribe(HandleTileChanged);
         }
@@ -87,6 +95,7 @@ namespace FloorBreaker.Stage.Presentation
             if (isWave)
             {
                 IsShrinkAnimating = true;
+                _cameraShake?.Shake(ShakeIntensity.Heavy);
                 SortClockwise(tiles);
 
                 float staggerWindow = _totalDuration * _config.ShrinkWaveStagger;

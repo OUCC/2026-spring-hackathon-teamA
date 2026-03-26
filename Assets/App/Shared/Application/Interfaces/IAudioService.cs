@@ -12,5 +12,28 @@ namespace FloorBreaker.Shared.Application.Interfaces
 
         /// <summary>BGM をフェードアウトして停止する。</summary>
         void StopBgm(float fadeOutDuration = 0.5f);
+
+        /// <summary>BGM の音量を変更する (ダッキング用)。</summary>
+        void SetBgmVolume(float volume, float fadeDuration = 0.3f);
+
+        // --- 音量設定 ---
+
+        /// <summary>マスター音量 (0-1)。</summary>
+        float MasterVolume { get; }
+
+        /// <summary>BGM 音量 (0-1)。</summary>
+        float BgmVolume { get; }
+
+        /// <summary>SE 音量 (0-1)。</summary>
+        float SfxVolume { get; }
+
+        /// <summary>マスター音量を設定して永続化する。</summary>
+        void SetMasterVolume(float volume);
+
+        /// <summary>BGM 音量レベルを設定して永続化する。</summary>
+        void SetBgmVolumeLevel(float volume);
+
+        /// <summary>SE 音量を設定して永続化する。</summary>
+        void SetSfxVolume(float volume);
     }
 }

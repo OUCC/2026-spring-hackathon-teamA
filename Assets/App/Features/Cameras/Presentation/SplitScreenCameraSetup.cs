@@ -22,6 +22,12 @@ namespace FloorBreaker.Cameras.Presentation
         public Camera CameraP1 => _cameraP1;
         public Camera CameraP2 => _cameraP2;
 
+        /// <summary>
+        /// 画面シェイク用オフセット。DOTweenCameraShakeService から書き込まれる。
+        /// </summary>
+        public Vector3 ShakeOffsetP1 { get; set; }
+        public Vector3 ShakeOffsetP2 { get; set; }
+
         public void Initialize(PlayerModel p1, PlayerModel p2, StageBounds bounds)
         {
             _cameraP1 = CreateCamera("Camera_P1", new Rect(0f, 0f, 0.5f, 1f));
@@ -64,9 +70,9 @@ namespace FloorBreaker.Cameras.Presentation
         public void Tick(float deltaTime)
         {
             if (_followerP1 != null)
-                _cameraP1.transform.position = _followerP1.Tick(deltaTime);
+                _cameraP1.transform.position = _followerP1.Tick(deltaTime) + ShakeOffsetP1;
             if (_followerP2 != null)
-                _cameraP2.transform.position = _followerP2.Tick(deltaTime);
+                _cameraP2.transform.position = _followerP2.Tick(deltaTime) + ShakeOffsetP2;
         }
 
         private Camera CreateCamera(string cameraName, Rect viewportRect)

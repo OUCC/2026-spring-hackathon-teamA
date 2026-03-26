@@ -36,6 +36,7 @@ namespace FloorBreaker.Shared.Application.Interfaces
 
         // UI
         public const string UiNavigate = "ui_navigate";
+        public const string CountdownTick = "countdown_tick";
 
         // BGM
         public const string BgmTitle = "bgm_title";

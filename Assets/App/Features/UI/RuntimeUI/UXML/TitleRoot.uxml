@@ -4,6 +4,7 @@
       xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
 
     <Style src="../USS/TitleRoot.uss" />
+    <Style src="../USS/KeyRebindingOverlay.uss" />
 
     <VisualElement name="TitleRoot" class="title-root">
 
@@ -20,8 +21,33 @@
             <!-- モード選択 -->
             <VisualElement class="title-mode-select">
                 <Button name="ModeButton_2P" class="title-btn title-btn--primary" text="2P 対戦" />
-                <Button name="ModeButton_1P" class="title-btn title-btn--disabled" text="1P vs CPU  (Coming Soon)" />
+                <Button name="ModeButton_1P" class="title-btn title-btn--disabled" text="CPU 対戦 (Coming Soon)" />
                 <Button name="ModeButton_CPU" class="title-btn title-btn--disabled" text="観戦モード  (Coming Soon)" />
+            </VisualElement>
+
+            <!-- 設定ボタン行 -->
+            <VisualElement class="title-settings-row">
+                <Button name="KeyConfigButton" class="title-btn title-btn--settings" text="キーコンフィグ" />
+            </VisualElement>
+
+            <!-- 音量調整 -->
+            <VisualElement class="title-volume">
+                <Label class="title-volume__header" text="音量" />
+                <VisualElement class="title-volume__row">
+                    <Label class="title-volume__label" text="マスター" />
+                    <Slider name="VolumeSlider_Master" class="title-volume__slider" low-value="0" high-value="100" value="50" />
+                    <Label name="VolumeLabel_Master" class="title-volume__value" text="50%" />
+                </VisualElement>
+                <VisualElement class="title-volume__row">
+                    <Label class="title-volume__label" text="BGM" />
+                    <Slider name="VolumeSlider_Bgm" class="title-volume__slider" low-value="0" high-value="100" value="50" />
+                    <Label name="VolumeLabel_Bgm" class="title-volume__value" text="50%" />
+                </VisualElement>
+                <VisualElement class="title-volume__row">
+                    <Label class="title-volume__label" text="SE" />
+                    <Slider name="VolumeSlider_Sfx" class="title-volume__slider" low-value="0" high-value="100" value="50" />
+                    <Label name="VolumeLabel_Sfx" class="title-volume__value" text="50%" />
+                </VisualElement>
             </VisualElement>
 
             <!-- 操作説明 -->
@@ -30,23 +56,43 @@
                 <VisualElement class="title-controls__grid">
                     <VisualElement class="title-controls__column">
                         <Label class="title-controls__label" text="── Player 1 ──" />
-                        <Label class="title-controls__item" text="移動:  W A S D" />
-                        <Label class="title-controls__item" text="照準:  Space (押しながら)" />
-                        <Label class="title-controls__item" text="炎ボム:  P (ホールド)" />
-                        <Label class="title-controls__item" text="ブレークボム:  L (ホールド)" />
+                        <Label name="P1_Move" class="title-controls__item" text="移動:  W A S D" />
+                        <Label name="P1_AimLock" class="title-controls__item" text="照準:  Space (押しながら)" />
+                        <Label name="P1_FireBomb" class="title-controls__item" text="炎ボム:  P (ホールド)" />
+                        <Label name="P1_BreakBomb" class="title-controls__item" text="ブレークボム:  L (ホールド)" />
                     </VisualElement>
                     <VisualElement class="title-controls__column">
                         <Label class="title-controls__label" text="── Player 2 ──" />
-                        <Label class="title-controls__item" text="移動:  ↑ ← ↓ →" />
-                        <Label class="title-controls__item" text="照準:  Numpad 0 (押しながら)" />
-                        <Label class="title-controls__item" text="炎ボム:  Numpad 6 (ホールド)" />
-                        <Label class="title-controls__item" text="ブレークボム:  Numpad 2 (ホールド)" />
+                        <Label name="P2_Move" class="title-controls__item" text="移動:  ↑ ← ↓ →" />
+                        <Label name="P2_AimLock" class="title-controls__item" text="照準:  Numpad 0 (押しながら)" />
+                        <Label name="P2_FireBomb" class="title-controls__item" text="炎ボム:  Numpad 6 (ホールド)" />
+                        <Label name="P2_BreakBomb" class="title-controls__item" text="ブレークボム:  Numpad 2 (ホールド)" />
                     </VisualElement>
                 </VisualElement>
             </VisualElement>
 
             <!-- 終了 -->
             <Button name="QuitButton" class="title-btn title-btn--quit" text="終了" />
+        </VisualElement>
+
+        <!-- キーコンフィグオーバーレイ (初期非表示) -->
+        <VisualElement name="KeyConfigOverlay" class="keyconfig-overlay" style="display: none;">
+            <VisualElement class="keyconfig-panel">
+                <Label class="keyconfig-title" text="キーコンフィグ" />
+                <VisualElement class="keyconfig-players">
+                    <VisualElement name="KeyConfigP1" class="keyconfig-column keyconfig-column--p1">
+                        <Label class="keyconfig-player-label keyconfig-player-label--p1" text="── Player 1 ──" />
+                        <!-- C# でバインド行を動的生成 -->
+                    </VisualElement>
+                    <VisualElement name="KeyConfigP2" class="keyconfig-column keyconfig-column--p2">
+                        <Label class="keyconfig-player-label keyconfig-player-label--p2" text="── Player 2 ──" />
+                    </VisualElement>
+                </VisualElement>
+                <VisualElement class="keyconfig-buttons">
+                    <Button name="KeyConfigResetButton" class="title-btn keyconfig-btn" text="リセット" />
+                    <Button name="KeyConfigCloseButton" class="title-btn keyconfig-btn" text="閉じる" />
+                </VisualElement>
+            </VisualElement>
         </VisualElement>
 
     </VisualElement>

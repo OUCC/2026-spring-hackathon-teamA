@@ -14,7 +14,8 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "R3.dll"
+        "R3.dll",
+        "DOTween.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [],

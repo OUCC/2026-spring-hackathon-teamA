@@ -181,7 +181,7 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var mp = c.Resolve<MatchPlayers>();
-                return new UpgradePhaseUseCase(mp.Draft1, mp.Draft2, c.Resolve<IBalanceParameters>());
+                return new UpgradePhaseUseCase(mp.Draft1, mp.Draft2, c.Resolve<UpgradeSelectionState>(), c.Resolve<IBalanceParameters>());
             }, Lifetime.Scoped);
 
             builder.Register(c =>

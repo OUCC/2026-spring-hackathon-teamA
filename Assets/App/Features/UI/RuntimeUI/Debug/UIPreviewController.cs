@@ -158,20 +158,20 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             UpdateCdBars();
 
             // キー入力
-            if (Input.GetKeyDown(KeyCode.Alpha1)) { _p1Hp = Mathf.Max(0, _p1Hp - 2); UpdateHud(); }
-            if (Input.GetKeyDown(KeyCode.Alpha2)) { _p2Hp = Mathf.Max(0, _p2Hp - 2); UpdateHud(); }
-            if (Input.GetKeyDown(KeyCode.Alpha3)) { _p1Coins++; UpdateHud(); }
-            if (Input.GetKeyDown(KeyCode.Alpha4)) { _p2Coins++; UpdateHud(); }
-            if (Input.GetKeyDown(KeyCode.Q) && _fireCd <= 0f) { _fireCd = 2f; }
-            if (Input.GetKeyDown(KeyCode.W) && _fallCd <= 0f) { _fallCd = 4f; }
-            if (Input.GetKeyDown(KeyCode.E)) { AddUpgrade(_p1AcquiredRow); }
-            if (Input.GetKeyDown(KeyCode.Tab)) CyclePhase();
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha1)) { _p1Hp = Mathf.Max(0, _p1Hp - 2); UpdateHud(); }
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha2)) { _p2Hp = Mathf.Max(0, _p2Hp - 2); UpdateHud(); }
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha3)) { _p1Coins++; UpdateHud(); }
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha4)) { _p2Coins++; UpdateHud(); }
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Q) && _fireCd <= 0f) { _fireCd = 2f; }
+            if (UnityEngine.Input.GetKeyDown(KeyCode.W) && _fallCd <= 0f) { _fallCd = 4f; }
+            if (UnityEngine.Input.GetKeyDown(KeyCode.E)) { AddUpgrade(_p1AcquiredRow); }
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Tab)) CyclePhase();
 
             if (_currentPhase == "upgrade")
             {
-                if (Input.GetKeyDown(KeyCode.LeftArrow)) { _selectedCard = Mathf.Max(0, _selectedCard - 1); UpdateCardSelection(); }
-                if (Input.GetKeyDown(KeyCode.RightArrow)) { _selectedCard = Mathf.Min(2, _selectedCard + 1); UpdateCardSelection(); }
-                if (Input.GetKeyDown(KeyCode.Space)) { _leftStatus.text = "選択完了"; }
+                if (UnityEngine.Input.GetKeyDown(KeyCode.LeftArrow)) { _selectedCard = Mathf.Max(0, _selectedCard - 1); UpdateCardSelection(); }
+                if (UnityEngine.Input.GetKeyDown(KeyCode.RightArrow)) { _selectedCard = Mathf.Min(2, _selectedCard + 1); UpdateCardSelection(); }
+                if (UnityEngine.Input.GetKeyDown(KeyCode.Space)) { _leftStatus.text = "選択完了"; }
             }
         }
 
