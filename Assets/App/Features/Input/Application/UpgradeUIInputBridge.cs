@@ -134,11 +134,11 @@ namespace FloorBreaker.Input.Application
 
                 if (index == RerollIndex)
                 {
-                    // リロール — 購入済みインデックスをクリア (新カードが出るため)
-                    if (draft.Reroll(playerModel, _random))
-                    {
-                        _selectionState.ClearPurchased(player);
-                    }
+                    // リロール — 購入済みインデックスを先にクリア
+                    // (Reroll が新カードをセット → R3 が PopulateCards を発火するため、
+                    //  先にクリアしないと古い購入済み状態で描画されてしまう)
+                    _selectionState.ClearPurchased(player);
+                    draft.Reroll(playerModel, _random);
                 }
                 else
                 {
