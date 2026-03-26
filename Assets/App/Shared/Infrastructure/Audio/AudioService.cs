@@ -17,6 +17,9 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
         private const int MaxPoolSize = 8;
         private const float StageWidth = 30f;
 
+        /// <summary>ステレオパンの最大強さ。1.0 = 完全左右、0.3 = 控えめなパン。</summary>
+        private const float MaxPanStrength = 0.3f;
+
         private AudioSource[] _pool;
         private int _nextIndex;
 
@@ -47,9 +50,9 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
             if (!_catalog.TryGetEntry(sfxId, out var clip, out var volume)) return;
 
             var source = GetAvailableSource();
-            // ステージ中央を 0、左端を -1、右端を +1 にマッピング
-            float pan = Mathf.Clamp((worldPosition.X - StageWidth * 0.5f) / (StageWidth * 0.5f), -1f, 1f);
-            source.panStereo = pan;
+            // ステージ中央を 0 とし、左右に控えめにパンする
+            float rawPan = Mathf.Clamp((worldPosition.X - StageWidth * 0.5f) / (StageWidth * 0.5f), -1f, 1f);
+            source.panStereo = rawPan * MaxPanStrength;
             source.volume = volume * _masterVolume;
             source.clip = clip;
             source.Play();
