@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4dd39ee73e356644ab1dabdc0a7abd9, type: 3}
   m_Name: BombSpriteConfig
   m_EditorClassIdentifier: App.Bombs.Presentation::FloorBreaker.Bombs.Presentation.BombSpriteConfig
-  _fallBombSprite: {fileID: 0}
+  _breakBombSprite: {fileID: 0}
   _fireBombSprite: {fileID: 0}
-  _fallBombTint: {r: 0.19, g: 0.5, b: 0.75, a: 1}
+  _breakBombTint: {r: 0.19, g: 0.5, b: 0.75, a: 1}
   _fireBombTint: {r: 0.94, g: 0.5, b: 0.19, a: 1}
   _bombScale: 0.18
   _bombSortingOrder: 15
   _trailStartWidth: 0.15
   _trailEndWidth: 0
   _trailDuration: 0.15
-  _fallTrailGradient:
+  _breakTrailGradient:
     serializedVersion: 2
     key0: {r: 1, g: 1, b: 1, a: 1}
     key1: {r: 1, g: 1, b: 1, a: 1}
@@ -82,10 +82,10 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   _explosionVfxPrefabFire: {fileID: 0}
-  _explosionVfxPrefabFall: {fileID: 0}
+  _explosionVfxPrefabBreak: {fileID: 0}
   _explosionVfxScale: 0.8
   _explosionVfxDuration: 0.8
   _impactFlashDuration: 0.3
   _impactFlashAlpha: 0.5
-  _fallImpactColor: {r: 0.19, g: 0.5, b: 0.75, a: 0.5}
+  _breakImpactColor: {r: 0.19, g: 0.5, b: 0.75, a: 0.5}
   _fireImpactColor: {r: 0.94, g: 0.5, b: 0.19, a: 0.5}

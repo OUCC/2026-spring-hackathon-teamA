@@ -38,9 +38,15 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
 
             // カテゴリ色帯
             _band.RemoveFromClassList("card__band--fire");
-            _band.RemoveFromClassList("card__band--fall");
+            _band.RemoveFromClassList("card__band--break");
             _band.RemoveFromClassList("card__band--general");
             _band.AddToClassList(GetBandClass(def.Id));
+
+            // レアリティ装飾
+            _root.RemoveFromClassList("card--common");
+            _root.RemoveFromClassList("card--rare");
+            _root.RemoveFromClassList("card--epic");
+            _root.AddToClassList(GetRarityClass(def.Rarity));
         }
 
         public void SetSelected(bool selected)
@@ -63,25 +69,39 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
             return UpgradeIdDisplayHelper.GetBandClass(id);
         }
 
+        private static string GetRarityClass(UpgradeRarity rarity)
+        {
+            return rarity switch
+            {
+                UpgradeRarity.Rare => "card--rare",
+                UpgradeRarity.Epic => "card--epic",
+                _ => "card--common",
+            };
+        }
+
         private static string GetDescription(UpgradeId id)
         {
             return id switch
             {
-                UpgradeId.FireFlightRange => "最大飛行距離+1",
-                UpgradeId.FireEffectRange => "効果範囲+1",
+                UpgradeId.FireFlightRange => "飛距離+2マス",
+                UpgradeId.FireEffectRange => "効果範囲+1マス",
                 UpgradeId.FireDamage => "接触ダメージ+1",
-                UpgradeId.FireFlightDamage => "飛行中に当たり判定追加",
-                UpgradeId.FireDuration => "炎の持続時間+2秒",
+                UpgradeId.FireDuration => "炎の持続+2秒",
                 UpgradeId.FireWallPenetration => "炎が壁を貫通",
-                UpgradeId.FireCooldown => "クールダウン-0.3秒",
-                UpgradeId.FallFlightRange => "最大飛行距離+1",
-                UpgradeId.FallEffectRange => "効果範囲+1",
-                UpgradeId.FallDamage => "崩落ダメージ+1",
-                UpgradeId.FallFlightDamage => "飛行中に当たり判定追加",
-                UpgradeId.FallCollapseTime => "崩落持続時間+2秒",
-                UpgradeId.FallCooldown => "クールダウン-0.5秒",
-                UpgradeId.MoveSpeed => "移動速度+0.2",
+                UpgradeId.FireCooldown => "CD-0.3秒(下限0.5秒)",
+                UpgradeId.FireBombPenetration => "炎ボムが障害物を貫通",
+                UpgradeId.BreakFlightRange => "飛距離+2マス",
+                UpgradeId.BreakEffectRange => "効果範囲+1マス",
+                UpgradeId.BreakDamage => "崩落ダメージ+1",
+                UpgradeId.BreakCollapseTime => "崩落持続+2秒",
+                UpgradeId.BreakCooldown => "CD-0.5秒(下限1.0秒)",
+                UpgradeId.BreakBombPenetration => "ブレークボムが障害物を貫通",
+                UpgradeId.MoveSpeed => "移動速度+0.2(上限3.0)",
                 UpgradeId.HpRecovery => "HP3回復",
+                UpgradeId.FireShield => "炎ダメージ無効(1フェーズ)",
+                UpgradeId.Levitation => "空中浮遊・崩落無効(1フェーズ)",
+                UpgradeId.Dash => "2マス瞬間移動(障害無視)",
+                UpgradeId.DualShot => "左右に同時発射",
                 _ => "",
             };
         }

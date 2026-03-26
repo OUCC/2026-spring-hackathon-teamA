@@ -4,7 +4,7 @@ using FloorBreaker.Stage.Domain;
 
 namespace FloorBreaker.Bombs.Domain
 {
-    public readonly struct FallBombResult
+    public readonly struct BreakBombResult
     {
         public readonly IReadOnlyList<GridPos> AffectedTiles;
         public readonly IReadOnlyList<GridPos> WallsDestroyed;
@@ -12,7 +12,7 @@ namespace FloorBreaker.Bombs.Domain
         public readonly float CollapseTime;
         public readonly float RecoveryTime;
 
-        public FallBombResult(
+        public BreakBombResult(
             IReadOnlyList<GridPos> affectedTiles,
             IReadOnlyList<GridPos> wallsDestroyed,
             int damage,
@@ -27,16 +27,16 @@ namespace FloorBreaker.Bombs.Domain
         }
     }
 
-    public sealed class FallBombResolver
+    public sealed class BreakBombResolver
     {
         private readonly BombAreaResolver _areaResolver;
 
-        public FallBombResolver(BombAreaResolver areaResolver)
+        public BreakBombResolver(BombAreaResolver areaResolver)
         {
             _areaResolver = areaResolver;
         }
 
-        public FallBombResult Resolve(GridPos landingPos, BombSpec spec, StageModel stage)
+        public BreakBombResult Resolve(GridPos landingPos, BombSpec spec, StageModel stage)
         {
             var allTiles = _areaResolver.Resolve(landingPos, spec.EffectRange, spec.WallPenetration);
 
@@ -62,7 +62,7 @@ namespace FloorBreaker.Bombs.Domain
                 }
             }
 
-            return new FallBombResult(affectedTiles, wallsDestroyed,
+            return new BreakBombResult(affectedTiles, wallsDestroyed,
                 spec.Damage, spec.CollapseTime, spec.RecoveryTime);
         }
     }

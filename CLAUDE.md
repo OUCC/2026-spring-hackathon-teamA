@@ -16,7 +16,7 @@
 - テーマは「床」のリアルタイム対戦ゲーム。
 - プレイヤーは 2 人、画面は左右分割。
 - フィールドは 30x30 のグリッド。
-- ボムは「滑落ボム」と「炎ボム」の 2 種。
+- ボムは「ブレークボム」と「炎ボム」の 2 種。
 - 20 秒ごとに
   - ステージ外周 1 列が永久消滅し
   - 強化フェーズが始まり
@@ -187,7 +187,7 @@ Assets/App/
 
     Bombs/
       Domain/
-        FallBomb/
+        BreakBomb/
         FireBomb/
         Shared/
       Application/
@@ -367,7 +367,7 @@ Assets/App/
 - `BombFlightCommand`
 - `BombLandingResolver`
 - `BombAreaResolver`
-- `FallBombResolver`
+- `BreakBombResolver`
 - `FireBombResolver`
 - `BombCooldownState`
 
@@ -634,7 +634,7 @@ MatchRoot (.match-root)
 | P1 アクセント | `#4A90D9`（青） |
 | P2 アクセント | `#D94A4A`（赤） |
 | 炎ボム系 | `#F08030`（オレンジ） |
-| 滑落ボム系 | `#3080C0`（ブルー） |
+| ブレークボム系 | `#3080C0`（ブルー） |
 | 汎用強化 | `#40A050`（グリーン） |
 | コイン | `#F0C040`（金） |
 | HP | `#E04040`（赤） |
@@ -648,7 +648,7 @@ MatchRoot (.match-root)
 
 #### 強化カード
 
-- カテゴリ色帯（上部 6px）で炎/滑落/汎用を色分け。
+- カテゴリ色帯（上部 6px）で炎/ブレーク/汎用を色分け。
 - テキスト主体。アイコンは将来追加可能だが必須ではない。
 - 状態: `.card--selected`（金ボーダー + スケール）、`.card--locked`（グレーアウト）、`.card--done`（半透明）。
 
@@ -780,7 +780,7 @@ Presenter の明示更新を優先する対象:
 ```text
 Gameplay
   Move
-  FallBombHold
+  BreakBombHold
   FireBombHold
 
 UpgradeUI_P1
@@ -832,7 +832,7 @@ System
 - 飛行中の見た目は presentation。
 - 着弾判定は grid 側で決める。
 - 「壁に当たった時点で着弾」「効果範囲の壁貫通有無」は bomb resolver が決める。
-- 滑落ボムと炎ボムの差分は spec class / strategy で表現する。
+- ブレークボムと炎ボムの差分は spec class / strategy で表現する。
 - 共有ロジックを base class に寄せすぎない。
 
 ### 13.4 崩落・炎

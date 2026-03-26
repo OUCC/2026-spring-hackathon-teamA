@@ -30,8 +30,18 @@ namespace FloorBreaker.Upgrades.Domain
                     player.Build.RecordUpgrade(id);
                     break;
 
+                case UpgradeId.FireShield:
+                    player.Stats.ActivateFireShield();
+                    player.Build.RecordUpgrade(id);
+                    break;
+
+                case UpgradeId.Levitation:
+                    player.Stats.ActivateLevitation();
+                    player.Build.RecordUpgrade(id);
+                    break;
+
                 default:
-                    // ボム強化は PlayerBuild に委譲
+                    // ボム強化・永続アビリティは PlayerBuild に委譲
                     player.Build.ApplyUpgrade(id);
                     break;
             }

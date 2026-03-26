@@ -7,11 +7,11 @@ namespace FloorBreaker.Bombs.Presentation
     public sealed class BombSpriteConfig : ScriptableObject
     {
         [Header("Bomb Sprites")]
-        [SerializeField] private Sprite _fallBombSprite;
+        [SerializeField] private Sprite _breakBombSprite;
         [SerializeField] private Sprite _fireBombSprite;
 
         [Header("Bomb Colors")]
-        [SerializeField] private Color _fallBombTint = new Color(0.19f, 0.50f, 0.75f, 1f); // #3080C0
+        [SerializeField] private Color _breakBombTint = new Color(0.19f, 0.50f, 0.75f, 1f); // #3080C0
         [SerializeField] private Color _fireBombTint = new Color(0.94f, 0.50f, 0.19f, 1f); // #F08030
 
         [Header("Scale / Sorting")]
@@ -22,37 +22,37 @@ namespace FloorBreaker.Bombs.Presentation
         [SerializeField] private float _trailStartWidth = 0.15f;
         [SerializeField] private float _trailEndWidth = 0f;
         [SerializeField] private float _trailDuration = 0.15f;
-        [SerializeField] private Gradient _fallTrailGradient;
+        [SerializeField] private Gradient _breakTrailGradient;
         [SerializeField] private Gradient _fireTrailGradient;
 
         [Header("Explosion VFX")]
         [SerializeField] private GameObject _explosionVfxPrefabFire;
-        [SerializeField] private GameObject _explosionVfxPrefabFall;
+        [SerializeField] private GameObject _explosionVfxPrefabBreak;
         [SerializeField] private float _explosionVfxScale = 0.8f;
         [SerializeField] private float _explosionVfxDuration = 0.8f;
 
         [Header("Impact Flash")]
         [SerializeField] private float _impactFlashDuration = 0.3f;
         [SerializeField] private float _impactFlashAlpha = 0.5f;
-        [SerializeField] private Color _fallImpactColor = new Color(0.19f, 0.50f, 0.75f, 0.5f);
+        [SerializeField] private Color _breakImpactColor = new Color(0.19f, 0.50f, 0.75f, 0.5f);
         [SerializeField] private Color _fireImpactColor = new Color(0.94f, 0.50f, 0.19f, 0.5f);
 
         // --- Accessors ---
 
         public Sprite GetBombSprite(BombType type) =>
-            type == BombType.Fall ? _fallBombSprite : _fireBombSprite;
+            type == BombType.Break ? _breakBombSprite : _fireBombSprite;
 
         public Color GetBombTint(BombType type) =>
-            type == BombType.Fall ? _fallBombTint : _fireBombTint;
+            type == BombType.Break ? _breakBombTint : _fireBombTint;
 
         public Gradient GetTrailGradient(BombType type) =>
-            type == BombType.Fall ? _fallTrailGradient : _fireTrailGradient;
+            type == BombType.Break ? _breakTrailGradient : _fireTrailGradient;
 
         public GameObject GetExplosionPrefab(BombType type) =>
-            type == BombType.Fall ? _explosionVfxPrefabFall : _explosionVfxPrefabFire;
+            type == BombType.Break ? _explosionVfxPrefabBreak : _explosionVfxPrefabFire;
 
         public Color GetImpactColor(BombType type) =>
-            type == BombType.Fall ? _fallImpactColor : _fireImpactColor;
+            type == BombType.Break ? _breakImpactColor : _fireImpactColor;
 
         public float BombScale => _bombScale;
         public int BombSortingOrder => _bombSortingOrder;

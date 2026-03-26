@@ -7,38 +7,38 @@ namespace FloorBreaker.Bombs.Presentation
 {
     /// <summary>
     /// ボム着弾時の爆発 VFX パーティクルプール。
-    /// 炎ボム / 滑落ボム で別プールを管理。TileFireVfxPool と同じパターン。
+    /// 炎ボム / ブレークボム で別プールを管理。TileFireVfxPool と同じパターン。
     /// </summary>
     public sealed class BombExplosionVfxPool : IDisposable
     {
         private static readonly Vector3 VfxOffset = new(0f, 0.1f, -0.5f);
 
         private readonly GameObject _firePrefab;
-        private readonly GameObject _fallPrefab;
+        private readonly GameObject _breakPrefab;
         private readonly Transform _poolParent;
         private readonly float _scale;
         private readonly float _duration;
 
         private readonly Stack<GameObject> _fireAvailable = new();
-        private readonly Stack<GameObject> _fallAvailable = new();
+        private readonly Stack<GameObject> _breakAvailable = new();
         private readonly List<(GameObject go, float timer, BombType type)> _active = new();
 
         public BombExplosionVfxPool(
             GameObject firePrefab,
-            GameObject fallPrefab,
+            GameObject breakPrefab,
             Transform poolParent,
             float scale,
             float duration,
             int initialCapacity = 4)
         {
             _firePrefab = firePrefab;
-            _fallPrefab = fallPrefab;
+            _breakPrefab = breakPrefab;
             _poolParent = poolParent;
             _scale = scale;
             _duration = duration;
 
             PreWarm(_firePrefab, _fireAvailable, initialCapacity);
-            PreWarm(_fallPrefab, _fallAvailable, initialCapacity);
+            PreWarm(_breakPrefab, _breakAvailable, initialCapacity);
         }
 
         private void PreWarm(GameObject prefab, Stack<GameObject> pool, int count)
@@ -54,10 +54,10 @@ namespace FloorBreaker.Bombs.Presentation
 
         public void Spawn(BombType type, Vector3 worldPos)
         {
-            var prefab = type == BombType.Fire ? _firePrefab : _fallPrefab;
+            var prefab = type == BombType.Fire ? _firePrefab : _breakPrefab;
             if (prefab == null) return;
 
-            var pool = type == BombType.Fire ? _fireAvailable : _fallAvailable;
+            var pool = type == BombType.Fire ? _fireAvailable : _breakAvailable;
             GameObject go;
 
             if (pool.Count > 0)
@@ -107,7 +107,7 @@ namespace FloorBreaker.Bombs.Presentation
             if (ps != null) ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
             go.SetActive(false);
-            var pool = type == BombType.Fire ? _fireAvailable : _fallAvailable;
+            var pool = type == BombType.Fire ? _fireAvailable : _breakAvailable;
             pool.Push(go);
         }
 
@@ -120,7 +120,7 @@ namespace FloorBreaker.Bombs.Presentation
             _active.Clear();
 
             DestroyPool(_fireAvailable);
-            DestroyPool(_fallAvailable);
+            DestroyPool(_breakAvailable);
         }
 
         private static void DestroyPool(Stack<GameObject> pool)

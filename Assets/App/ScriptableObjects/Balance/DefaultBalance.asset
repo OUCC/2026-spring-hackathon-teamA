@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: App.ScriptableObjects::FloorBreaker.ScriptableObjects.Balance.BalanceConfig
   initialHp: 10
   baseMovementSpeed: 0.5
-  maxMovementSpeed: 2
+  maxMovementSpeed: 3
   movementSpeedIncrement: 0.2
-  fallBombMaxFlightDistance: 3
-  fallBombEffectRange: 1
-  fallBombDamage: 2
-  fallBombCollapseDuration: 3
-  fallBombRecoveryDuration: 5
-  fallBombCooldown: 4
-  fallBombCooldownMin: 1
-  fallBombCooldownReduction: 0.5
-  fallBombDefaultWallPenetration: 1
+  breakBombMaxFlightDistance: 3
+  breakBombEffectRange: 1
+  breakBombDamage: 2
+  breakBombCollapseDuration: 3
+  breakBombRecoveryDuration: 5
+  breakBombCooldown: 4
+  breakBombCooldownMin: 1
+  breakBombCooldownReduction: 0.5
+  breakBombDefaultWallPenetration: 1
   fireBombMaxFlightDistance: 3
   fireBombEffectRange: 1
   fireBombContactDamage: 1
@@ -61,6 +61,6 @@ MonoBehaviour:
   bombMinFlightDistance: 3
   stageShrinkAnimDuration: 1
   fireBombSpreadInterval: 0.15
-  fallBombSpreadInterval: 0.3
+  breakBombSpreadInterval: 0.3
   hpRecoveryAmount: 3
   hpRecoveryThreshold: 5

@@ -16,7 +16,7 @@ namespace FloorBreaker.UI.HUD.Presentation
         private readonly VisualElement _hpFill;
         private readonly Label _coinLabel;
         private readonly VisualElement _fireCdFill;
-        private readonly VisualElement _fallCdFill;
+        private readonly VisualElement _breakCdFill;
         private readonly VisualElement _acquiredRow;
 
         public PlayerHudView(VisualElement hudRoot)
@@ -26,7 +26,7 @@ namespace FloorBreaker.UI.HUD.Presentation
             _hpFill = hudRoot.Q("HpFill");
             _coinLabel = hudRoot.Q<Label>("CoinLabel");
             _fireCdFill = hudRoot.Q("FireCdFill");
-            _fallCdFill = hudRoot.Q("FallCdFill");
+            _breakCdFill = hudRoot.Q("BreakCdFill");
             _acquiredRow = hudRoot.Q("AcquiredUpgrades");
         }
 
@@ -53,10 +53,24 @@ namespace FloorBreaker.UI.HUD.Presentation
             _fireCdFill.style.width = Length.Percent(fillPercent);
         }
 
-        public void SetFallCooldown(float ratio)
+        public void SetBreakCooldown(float ratio)
         {
             float fillPercent = (1f - ratio) * 100f;
-            _fallCdFill.style.width = Length.Percent(fillPercent);
+            _breakCdFill.style.width = Length.Percent(fillPercent);
+        }
+
+        public void PunchHp()
+        {
+            _hpLabel.AddToClassList("hud__hp-value--punch");
+            _hpLabel.schedule.Execute(() =>
+                _hpLabel.RemoveFromClassList("hud__hp-value--punch")).StartingIn(50);
+        }
+
+        public void PunchCoin()
+        {
+            _coinLabel.AddToClassList("hud__coin-value--punch");
+            _coinLabel.schedule.Execute(() =>
+                _coinLabel.RemoveFromClassList("hud__coin-value--punch")).StartingIn(50);
         }
 
         public void SetAcquiredUpgrades(IReadOnlyList<UpgradeId> upgrades)

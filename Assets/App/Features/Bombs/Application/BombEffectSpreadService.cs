@@ -49,16 +49,16 @@ namespace FloorBreaker.Bombs.Application
             _random = random;
         }
 
-        public void EnqueueFallBomb(
-            FallBombResult result,
+        public void EnqueueBreakBomb(
+            BreakBombResult result,
             GridPos center,
             IReadOnlyList<PlayerModel> players,
             PlayerModel owner,
             float interval)
         {
             var wave = BuildWave(result.AffectedTiles, result.WallsDestroyed, center, players, owner, interval);
-            wave.IsFallBomb = true;
-            wave.FallDamage = result.Damage;
+            wave.IsBreakBomb = true;
+            wave.BreakDamage = result.Damage;
             wave.CollapseTime = result.CollapseTime;
             wave.RecoveryTime = result.RecoveryTime;
 
@@ -75,7 +75,7 @@ namespace FloorBreaker.Bombs.Application
             float interval)
         {
             var wave = BuildWave(result.AffectedTiles, result.WallsDestroyed, center, players, owner, interval);
-            wave.IsFallBomb = false;
+            wave.IsBreakBomb = false;
             wave.ContactDamage = result.ContactDamage;
             wave.FireDuration = result.FireDuration;
 
@@ -151,14 +151,14 @@ namespace FloorBreaker.Bombs.Application
 
                 // 炎ボム (壁貫通なし): 段階的広がり中に崩落したタイルで遮断
                 // 壁タイル (entry.IsWall) は破壊対象なのでスキップしない
-                if (!wave.IsFallBomb && !entry.IsWall && entry.Distance > 0
+                if (!wave.IsBreakBomb && !entry.IsWall && entry.Distance > 0
                     && !CanFireReach(wave.Center, entry.Pos, entry.Distance, wave.Players))
                 {
                     wave.Entries[i] = entry.WithApplied();
                     continue;
                 }
 
-                // 永久消滅タイルには適用しない (滑落ボム用 — 炎は上で遮断済み)
+                // 永久消滅タイルには適用しない (ブレークボム用 — 炎は上で遮断済み)
                 if (_stage.GetTileState(entry.Pos) == TileState.PermanentlyDestroyed)
                 {
                     wave.Entries[i] = entry.WithApplied();
@@ -170,7 +170,7 @@ namespace FloorBreaker.Bombs.Application
                     _stage.SetTileState(entry.Pos, TileState.Normal);
 
                 // タイル状態変更 + タイマー
-                if (wave.IsFallBomb)
+                if (wave.IsBreakBomb)
                 {
                     _stage.SetTileState(entry.Pos, TileState.Collapsing);
                     _tileTimerService.StartCollapseTimer(entry.Pos, wave.CollapseTime, wave.RecoveryTime);
@@ -212,8 +212,16 @@ namespace FloorBreaker.Bombs.Application
             {
                 if (player.CurrentPosition != pos) continue;
 
-                int damage = wave.IsFallBomb ? wave.FallDamage : wave.ContactDamage;
-                bool forceRelocate = wave.IsFallBomb;
+                // 炎守りのマント: 炎ボム接触ダメージ免疫
+                if (!wave.IsBreakBomb && player.Stats.FireShieldActive.CurrentValue)
+                    continue;
+
+                // 風の羽衣: ブレークボム崩落ダメージ免疫
+                if (wave.IsBreakBomb && player.Stats.LevitationActive.CurrentValue)
+                    continue;
+
+                int damage = wave.IsBreakBomb ? wave.BreakDamage : wave.ContactDamage;
+                bool forceRelocate = wave.IsBreakBomb;
 
                 _damageService.ApplyDamage(player, damage, forceRelocate,
                     _stage, _safeTileSearch, occupied);
@@ -336,9 +344,9 @@ namespace FloorBreaker.Bombs.Application
             public float Elapsed;
             public bool AllApplied;
 
-            // Fall 固有
-            public bool IsFallBomb;
-            public int FallDamage;
+            // Break 固有
+            public bool IsBreakBomb;
+            public int BreakDamage;
             public float CollapseTime;
             public float RecoveryTime;
 

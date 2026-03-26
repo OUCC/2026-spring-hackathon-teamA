@@ -50,6 +50,13 @@ namespace FloorBreaker.MatchFlow.Application
 
                 if (tileState == TileState.OnFire)
                 {
+                    // 炎守りのマント: 炎 DoT 免疫
+                    if (player.Stats.FireShieldActive.CurrentValue)
+                    {
+                        _playerFireAccum.Remove(key);
+                        continue;
+                    }
+
                     _playerFireAccum.TryGetValue(key, out float accum);
                     accum += deltaTime;
 

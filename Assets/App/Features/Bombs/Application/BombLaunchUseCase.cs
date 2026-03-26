@@ -12,48 +12,48 @@ namespace FloorBreaker.Bombs.Application
     public sealed class BombLaunchUseCase
     {
         private readonly BombLandingResolver _landingResolver;
-        private readonly FallBombResolver _fallResolver;
+        private readonly BreakBombResolver _breakResolver;
         private readonly FireBombResolver _fireResolver;
         private readonly StageModel _stage;
-        private readonly float _fallBombRecoveryDuration;
+        private readonly float _breakBombRecoveryDuration;
         private readonly int _bombMinFlightDistance;
         private readonly BombEffectSpreadService _spreadService;
         private readonly float _fireSpreadInterval;
-        private readonly float _fallSpreadInterval;
+        private readonly float _breakSpreadInterval;
 
         public BombLaunchUseCase(
             BombLandingResolver landingResolver,
-            FallBombResolver fallResolver,
+            BreakBombResolver breakResolver,
             FireBombResolver fireResolver,
             StageModel stage,
             IBalanceParameters balance,
             BombEffectSpreadService spreadService)
         {
             _landingResolver = landingResolver;
-            _fallResolver = fallResolver;
+            _breakResolver = breakResolver;
             _fireResolver = fireResolver;
             _stage = stage;
-            _fallBombRecoveryDuration = balance.FallBombRecoveryDuration;
+            _breakBombRecoveryDuration = balance.BreakBombRecoveryDuration;
             _bombMinFlightDistance = balance.BombMinFlightDistance;
             _spreadService = spreadService;
             _fireSpreadInterval = balance.FireBombSpreadInterval;
-            _fallSpreadInterval = balance.FallBombSpreadInterval;
+            _breakSpreadInterval = balance.BreakBombSpreadInterval;
         }
 
-        public BombSpec CreateFallBombSpec(PlayerBuild build)
+        public BombSpec CreateBreakBombSpec(PlayerBuild build)
         {
             return new BombSpec(
-                BombType.Fall,
-                build.FallFlightRange,
+                BombType.Break,
+                build.BreakFlightRange,
                 _bombMinFlightDistance,
-                build.FallEffectRange,
-                build.FallDamage,
-                build.FallCooldown,
-                build.FallHasFlightDamage,
-                true, // 滑落ボムは常に壁貫通
+                build.BreakEffectRange,
+                build.BreakDamage,
+                build.BreakCooldown,
+                true, // ブレークボムは常に壁貫通
                 0f,
-                build.FallCollapseTime,
-                _fallBombRecoveryDuration);
+                build.BreakCollapseTime,
+                _breakBombRecoveryDuration,
+                build.HasBreakBombPenetration);
         }
 
         public BombSpec CreateFireBombSpec(PlayerBuild build)
@@ -65,11 +65,11 @@ namespace FloorBreaker.Bombs.Application
                 build.FireEffectRange,
                 build.FireDamage,
                 build.FireCooldown,
-                build.FireHasFlightDamage,
                 build.FireWallPenetration,
                 build.FireDuration,
                 0f,
-                0f);
+                0f,
+                build.HasFireBombPenetration);
         }
 
         /// <summary>
@@ -98,8 +98,8 @@ namespace FloorBreaker.Bombs.Application
 
             switch (cmd.Spec.Type)
             {
-                case BombType.Fall:
-                    ExecuteFallBomb(landingPos, cmd.Spec, players, owner);
+                case BombType.Break:
+                    ExecuteBreakBomb(landingPos, cmd.Spec, players, owner);
                     break;
                 case BombType.Fire:
                     ExecuteFireBomb(landingPos, cmd.Spec, players, owner);
@@ -107,10 +107,10 @@ namespace FloorBreaker.Bombs.Application
             }
         }
 
-        private void ExecuteFallBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players, PlayerModel owner)
+        private void ExecuteBreakBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players, PlayerModel owner)
         {
-            var result = _fallResolver.Resolve(landingPos, spec, _stage);
-            _spreadService.EnqueueFallBomb(result, landingPos, players, owner, _fallSpreadInterval);
+            var result = _breakResolver.Resolve(landingPos, spec, _stage);
+            _spreadService.EnqueueBreakBomb(result, landingPos, players, owner, _breakSpreadInterval);
         }
 
         private void ExecuteFireBomb(GridPos landingPos, BombSpec spec, IReadOnlyList<PlayerModel> players, PlayerModel owner)

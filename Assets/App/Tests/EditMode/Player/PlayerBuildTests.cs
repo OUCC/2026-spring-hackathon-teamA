@@ -13,15 +13,15 @@ namespace FloorBreaker.Tests.EditMode.Player
         private PlayerBuild CreateDefault() => new PlayerBuild(
             fireFlightRange: 3, fireEffectRange: 1, fireDamage: 1, fireCooldown: 2f,
             fireDuration: 3.5f, fireWallPenetration: false, fireCooldownMin: 0.5f,
-            fallFlightRange: 3, fallEffectRange: 1, fallDamage: 2, fallCooldown: 4f,
-            fallCollapseTime: 3f, fallCooldownMin: 1f);
+            breakFlightRange: 3, breakEffectRange: 1, breakDamage: 2, breakCooldown: 4f,
+            breakCollapseTime: 3f, breakCooldownMin: 1f);
 
         [Test]
         public void ApplyUpgrade_FireFlightRange_Increments()
         {
             var build = CreateDefault();
             build.ApplyUpgrade(UpgradeId.FireFlightRange);
-            Assert.AreEqual(4, build.FireFlightRange);
+            Assert.AreEqual(5, build.FireFlightRange);
         }
 
         [Test]
@@ -36,13 +36,13 @@ namespace FloorBreaker.Tests.EditMode.Player
         }
 
         [Test]
-        public void ApplyUpgrade_FallCooldown_RespectsMin()
+        public void ApplyUpgrade_BreakCooldown_RespectsMin()
         {
             var build = CreateDefault(); // CD = 4.0, min = 1.0
             for (int i = 0; i < 20; i++)
-                build.ApplyUpgrade(UpgradeId.FallCooldown);
+                build.ApplyUpgrade(UpgradeId.BreakCooldown);
 
-            Assert.AreEqual(1.0f, build.FallCooldown, 0.01f);
+            Assert.AreEqual(1.0f, build.BreakCooldown, 0.01f);
         }
 
         [Test]
@@ -55,11 +55,11 @@ namespace FloorBreaker.Tests.EditMode.Player
         }
 
         [Test]
-        public void ApplyUpgrade_FallCollapseTime_Increases()
+        public void ApplyUpgrade_BreakCollapseTime_Increases()
         {
             var build = CreateDefault();
-            build.ApplyUpgrade(UpgradeId.FallCollapseTime);
-            Assert.AreEqual(5f, build.FallCollapseTime, 0.01f);
+            build.ApplyUpgrade(UpgradeId.BreakCollapseTime);
+            Assert.AreEqual(5f, build.BreakCollapseTime, 0.01f);
             build.Dispose();
         }
 
@@ -94,13 +94,13 @@ namespace FloorBreaker.Tests.EditMode.Player
         {
             _build = CreateDefault();
             _build.ApplyUpgrade(UpgradeId.FireDamage);
-            _build.ApplyUpgrade(UpgradeId.FallEffectRange);
+            _build.ApplyUpgrade(UpgradeId.BreakEffectRange);
             _build.RecordUpgrade(UpgradeId.HpRecovery);
 
             var acquired = _build.AcquiredUpgrades.CurrentValue;
             Assert.AreEqual(3, acquired.Count);
             Assert.AreEqual(UpgradeId.FireDamage, acquired[0]);
-            Assert.AreEqual(UpgradeId.FallEffectRange, acquired[1]);
+            Assert.AreEqual(UpgradeId.BreakEffectRange, acquired[1]);
             Assert.AreEqual(UpgradeId.HpRecovery, acquired[2]);
             _build.Dispose();
         }

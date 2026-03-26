@@ -10,7 +10,7 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
         public enum UpgradeCategory
         {
             Fire,
-            Fall,
+            Break,
             General,
         }
 
@@ -21,19 +21,19 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
                 case UpgradeId.FireFlightRange:
                 case UpgradeId.FireEffectRange:
                 case UpgradeId.FireDamage:
-                case UpgradeId.FireFlightDamage:
                 case UpgradeId.FireDuration:
                 case UpgradeId.FireWallPenetration:
                 case UpgradeId.FireCooldown:
+                case UpgradeId.FireBombPenetration:
                     return UpgradeCategory.Fire;
 
-                case UpgradeId.FallFlightRange:
-                case UpgradeId.FallEffectRange:
-                case UpgradeId.FallDamage:
-                case UpgradeId.FallFlightDamage:
-                case UpgradeId.FallCollapseTime:
-                case UpgradeId.FallCooldown:
-                    return UpgradeCategory.Fall;
+                case UpgradeId.BreakFlightRange:
+                case UpgradeId.BreakEffectRange:
+                case UpgradeId.BreakDamage:
+                case UpgradeId.BreakCollapseTime:
+                case UpgradeId.BreakCooldown:
+                case UpgradeId.BreakBombPenetration:
+                    return UpgradeCategory.Break;
 
                 default:
                     return UpgradeCategory.General;
@@ -45,7 +45,7 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
             return GetCategory(id) switch
             {
                 UpgradeCategory.Fire => "card__band--fire",
-                UpgradeCategory.Fall => "card__band--fall",
+                UpgradeCategory.Break => "card__band--break",
                 _ => "card__band--general",
             };
         }
@@ -55,7 +55,7 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
             return GetCategory(id) switch
             {
                 UpgradeCategory.Fire => "hud__upgrade-dot--fire",
-                UpgradeCategory.Fall => "hud__upgrade-dot--fall",
+                UpgradeCategory.Break => "hud__upgrade-dot--break",
                 _ => "hud__upgrade-dot--general",
             };
         }

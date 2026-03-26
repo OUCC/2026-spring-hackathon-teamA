@@ -33,8 +33,20 @@ namespace FloorBreaker.UI.HUD.Presentation
             _cooldown = cooldown;
             _clock = clock;
 
-            _hpSub = stats.CurrentHp.Subscribe(hp => _view.SetHp(hp, stats.MaxHp));
-            _coinsSub = stats.Coins.Subscribe(coins => _view.SetCoins(coins));
+            // 初期値を反映
+            _view.SetHp(stats.CurrentHp.CurrentValue, stats.MaxHp);
+            _view.SetCoins(stats.Coins.CurrentValue);
+
+            _hpSub = stats.CurrentHp.Pairwise().Subscribe(pair =>
+            {
+                _view.SetHp(pair.Current, stats.MaxHp);
+                if (pair.Current != pair.Previous) _view.PunchHp();
+            });
+            _coinsSub = stats.Coins.Pairwise().Subscribe(pair =>
+            {
+                _view.SetCoins(pair.Current);
+                if (pair.Current > pair.Previous) _view.PunchCoin();
+            });
             _upgradesSub = build.AcquiredUpgrades.Subscribe(
                 upgrades => _view.SetAcquiredUpgrades(upgrades));
         }
@@ -53,9 +65,9 @@ namespace FloorBreaker.UI.HUD.Presentation
             float fireRemaining = _cooldown.FireBombRemaining.CurrentValue;
             _view.SetFireCooldown(fireMax > 0f ? fireRemaining / fireMax : 0f);
 
-            float fallMax = _build.FallCooldown;
-            float fallRemaining = _cooldown.FallBombRemaining.CurrentValue;
-            _view.SetFallCooldown(fallMax > 0f ? fallRemaining / fallMax : 0f);
+            float breakMax = _build.BreakCooldown;
+            float breakRemaining = _cooldown.BreakBombRemaining.CurrentValue;
+            _view.SetBreakCooldown(breakMax > 0f ? breakRemaining / breakMax : 0f);
         }
 
         public void Dispose()

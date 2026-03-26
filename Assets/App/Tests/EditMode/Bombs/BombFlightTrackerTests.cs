@@ -39,25 +39,25 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             var queryService = new StageQueryService(_stage);
             var areaResolver = new BombAreaResolver(queryService);
             var landingResolver = new BombLandingResolver(_stage);
-            var fallResolver = new FallBombResolver(areaResolver);
+            var breakResolver = new BreakBombResolver(areaResolver);
             var fireResolver = new FireBombResolver(areaResolver);
             var balance = new TestBalanceParameters();
 
             var spreadService = new BombEffectSpreadService(
                 _stage, _tileTimerService, damageService, safeTileSearch, _slimeRegistry);
             var launchUseCase = new BombLaunchUseCase(
-                landingResolver, fallResolver, fireResolver,
+                landingResolver, breakResolver, fireResolver,
                 _stage, balance, spreadService);
 
             _tracker = new BombFlightTracker(
                 launchUseCase, _p1Cooldown, _p2Cooldown,
                 _stage, _slimeRegistry, balance);
 
-            var stats1 = new PlayerStats(10, 1f, 2f);
+            var stats1 = new PlayerStats(10, 1f, 3f);
             var build1 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player1 = new PlayerModel(PlayerId.Player1, new GridPos(2, 2), stats1, build1);
 
-            var stats2 = new PlayerStats(10, 1f, 2f);
+            var stats2 = new PlayerStats(10, 1f, 3f);
             var build2 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player2 = new PlayerModel(PlayerId.Player2, new GridPos(8, 8), stats2, build2);
 
@@ -76,25 +76,25 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _stage.Dispose();
         }
 
-        private BombSpec CreateFallSpec()
+        private BombSpec CreateBreakSpec()
         {
             return new BombSpec(
-                BombType.Fall, 3, 3, 1, 2, 4f,
-                false, true, 0f, 3f, 5f);
+                BombType.Break, 3, 3, 1, 2, 4f,
+                true, 0f, 3f, 5f);
         }
 
         private BombSpec CreateFireSpec()
         {
             return new BombSpec(
                 BombType.Fire, 3, 3, 1, 1, 2f,
-                false, false, 3.5f, 0f, 0f);
+                false, 3.5f, 0f, 0f);
         }
 
         [Test]
         public void StartFlight_WhenNotFlying_ReturnsTrue()
         {
             var result = _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
             Assert.IsTrue(result);
             Assert.IsTrue(_tracker.IsFlying(PlayerId.Player1));
         }
@@ -103,7 +103,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void StartFlight_WhenAlreadyFlying_ReturnsFalse()
         {
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
 
             var result = _tracker.StartFlight(
                 PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFireSpec());
@@ -115,12 +115,12 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             // Start and land a bomb to trigger cooldown
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
             _tracker.ReleaseBomb(PlayerId.Player1, _players);
 
-            // Now try to start another fall bomb flight (on cooldown)
+            // Now try to start another break bomb flight (on cooldown)
             var result = _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
             Assert.IsFalse(result);
         }
 
@@ -128,7 +128,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void Tick_AdvancesTileDistance()
         {
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
 
             // BombFlightSpeed = 12, so 1 tile in ~0.084s. Tick a small amount.
             // After 0.05s: accumulator = 0.6 tiles, still less than 1
@@ -143,7 +143,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _stage.SetTileState(new GridPos(4, 2), TileState.Wall);
 
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
 
             // Tick enough for bomb to reach the wall (2 tiles at speed 12 -> ~0.17s)
             _tracker.Tick(0.5f, _players);
@@ -156,7 +156,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             // Min=3, Max=3: リリース → min まで飛行 → 自動着弾
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
 
             _tracker.Tick(0.05f, _players);
             _tracker.ReleaseBomb(PlayerId.Player1, _players);
@@ -173,7 +173,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void Tick_MaxDistance_AutoLands()
         {
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
 
             // MaxFlightDistance = 3, speed = 12. Need 3/12 = 0.25s to cover 3 tiles.
             _tracker.Tick(0.5f, _players);
@@ -188,14 +188,14 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _tracker.FlightStarted.Subscribe(evt => received = evt);
 
             var origin = new GridPos(2, 2);
-            var spec = CreateFallSpec();
+            var spec = CreateBreakSpec();
             _tracker.StartFlight(PlayerId.Player1, origin, Direction8.E, spec);
 
             Assert.IsNotNull(received);
             Assert.AreEqual(PlayerId.Player1, received.Value.Owner);
             Assert.AreEqual(origin, received.Value.Origin);
             Assert.AreEqual(Direction8.E, received.Value.Direction);
-            Assert.AreEqual(BombType.Fall, received.Value.Spec.Type);
+            Assert.AreEqual(BombType.Break, received.Value.Spec.Type);
         }
 
         [Test]
@@ -227,7 +227,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             var origin = new GridPos(2, 2);
             _tracker.StartFlight(
-                PlayerId.Player1, origin, Direction8.E, CreateFallSpec());
+                PlayerId.Player1, origin, Direction8.E, CreateBreakSpec());
 
             // MaxFlightDistance=3, speed=12 → 0.25s. Tick 0.5s to ensure landing.
             _tracker.Tick(0.5f, _players);
@@ -236,22 +236,22 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             Assert.AreEqual(PlayerId.Player1, received.Value.Owner);
             // Landing at origin + E*3 = (5, 2)
             Assert.AreEqual(new GridPos(5, 2), received.Value.LandingPos);
-            Assert.AreEqual(BombType.Fall, received.Value.Type);
+            Assert.AreEqual(BombType.Break, received.Value.Type);
         }
 
         // maxFlightDistance=10, minFlightDistance=3 の spec (最小飛行距離テスト用)
-        private BombSpec CreateLongRangeFallSpec()
+        private BombSpec CreateLongRangeBreakSpec()
         {
             return new BombSpec(
-                BombType.Fall, 10, 3, 1, 2, 4f,
-                false, true, 0f, 3f, 5f);
+                BombType.Break, 10, 3, 1, 2, 4f,
+                true, 0f, 3f, 5f);
         }
 
         [Test]
         public void ReleaseBomb_BeforeMinDistance_ContinuesFlying()
         {
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeBreakSpec());
 
             // Tick 少しだけ (1マス未満)
             _tracker.Tick(0.05f, _players);
@@ -268,7 +268,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _tracker.BombLanded.Subscribe(evt => received = evt);
 
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeBreakSpec());
 
             // 少し進めてからリリース
             _tracker.Tick(0.05f, _players);
@@ -287,7 +287,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void ReleaseBomb_AfterMinDistance_LandsImmediately()
         {
             _tracker.StartFlight(
-                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeFallSpec());
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeBreakSpec());
 
             // MinFlightDistance=3 を超えるまで Tick (3/12 = 0.25s)
             _tracker.Tick(0.4f, _players);
@@ -306,15 +306,15 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             public float BaseMovementSpeed => 1f;
             public float MaxMovementSpeed => 2f;
             public float MovementSpeedIncrement => 0.2f;
-            public int FallBombMaxFlightDistance => 3;
-            public int FallBombEffectRange => 1;
-            public int FallBombDamage => 2;
-            public float FallBombCollapseDuration => 3f;
-            public float FallBombRecoveryDuration => 5f;
-            public float FallBombCooldown => 4f;
-            public float FallBombCooldownMin => 1f;
-            public float FallBombCooldownReduction => 0.5f;
-            public bool FallBombDefaultWallPenetration => true;
+            public int BreakBombMaxFlightDistance => 3;
+            public int BreakBombEffectRange => 1;
+            public int BreakBombDamage => 2;
+            public float BreakBombCollapseDuration => 3f;
+            public float BreakBombRecoveryDuration => 5f;
+            public float BreakBombCooldown => 4f;
+            public float BreakBombCooldownMin => 1f;
+            public float BreakBombCooldownReduction => 0.5f;
+            public bool BreakBombDefaultWallPenetration => true;
             public int FireBombMaxFlightDistance => 3;
             public int FireBombEffectRange => 1;
             public int FireBombContactDamage => 1;
@@ -351,9 +351,11 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             public int BombMinFlightDistance => 3;
             public float StageShrinkAnimDuration => 1f;
             public float FireBombSpreadInterval => 0.15f;
-            public float FallBombSpreadInterval => 0.3f;
+            public float BreakBombSpreadInterval => 0.3f;
             public int HpRecoveryAmount => 3;
             public int HpRecoveryThreshold => 5;
+            public float DashCooldown => 1f;
+            public float DashDoubleTapWindow => 0.3f;
         }
     }
 }

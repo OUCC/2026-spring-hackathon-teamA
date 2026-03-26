@@ -20,11 +20,11 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         {
             _useCase = new MatchEndUseCase();
 
-            var stats1 = new PlayerStats(10, 1f, 2f);
+            var stats1 = new PlayerStats(10, 1f, 3f);
             var build1 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player1 = new PlayerModel(PlayerId.Player1, new GridPos(2, 2), stats1, build1);
 
-            var stats2 = new PlayerStats(10, 1f, 2f);
+            var stats2 = new PlayerStats(10, 1f, 3f);
             var build2 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player2 = new PlayerModel(PlayerId.Player2, new GridPos(7, 7), stats2, build2);
 

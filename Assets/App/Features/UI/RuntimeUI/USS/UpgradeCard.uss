@@ -11,6 +11,7 @@
     border-color: var(--color-card-border);
     flex-direction: column;
     overflow: hidden;
+    transition: scale 0.15s ease-out, border-color 0.15s ease-out, background-color 0.15s ease-out;
 }
 
 /* --- カテゴリ色帯 --- */
@@ -23,8 +24,8 @@
     background-color: var(--color-fire);
 }
 
-.card__band--fall {
-    background-color: var(--color-fall);
+.card__band--break {
+    background-color: var(--color-break);
 }
 
 .card__band--general {
@@ -95,6 +96,28 @@
 .card--locked {
     background-color: var(--color-card-locked);
     border-color: var(--color-disabled);
+}
+
+/* --- レアリティ: Rare --- */
+.card--rare {
+    border-color: #60C0E0;
+    border-width: 2px;
+}
+
+.card--rare .card__name {
+    color: #60C0E0;
+}
+
+/* --- レアリティ: Epic --- */
+.card--epic {
+    border-color: #F0C040;
+    border-width: 3px;
+    background-color: rgba(240, 192, 64, 0.08);
+}
+
+.card--epic .card__name {
+    color: #F0C040;
+    -unity-font-style: bold;
 }
 
 /* --- 状態: 選択完了後 --- */

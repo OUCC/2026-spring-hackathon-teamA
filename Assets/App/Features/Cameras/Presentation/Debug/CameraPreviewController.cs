@@ -82,7 +82,7 @@ namespace FloorBreaker.Cameras.Presentation.Debug
 
         private PlayerModel CreatePlayerModel(PlayerId id, GridPos spawn)
         {
-            var stats = new PlayerStats(10, 1f, 2f);
+            var stats = new PlayerStats(10, 1f, 3f);
             var build = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             return new PlayerModel(id, spawn, stats, build);
         }

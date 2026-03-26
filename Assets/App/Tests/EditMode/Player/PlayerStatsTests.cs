@@ -6,7 +6,7 @@ namespace FloorBreaker.Tests.EditMode.Player
     [TestFixture]
     public class PlayerStatsTests
     {
-        private PlayerStats Create(int hp = 10) => new PlayerStats(hp, 1f, 2f);
+        private PlayerStats Create(int hp = 10) => new PlayerStats(hp, 1f, 3f);
 
         [Test]
         public void InitialHp_EqualsMax()

@@ -186,7 +186,7 @@ namespace FloorBreaker.Bombs.Presentation.Debug
 
             var areaResolver = new BombAreaResolver(_queryService);
             var landingResolver = new BombLandingResolver(_stageModel);
-            var fallResolver = new FallBombResolver(areaResolver);
+            var breakResolver = new BreakBombResolver(areaResolver);
             var fireResolver = new FireBombResolver(areaResolver);
 
             _spreadService = new BombEffectSpreadService(
@@ -194,7 +194,7 @@ namespace FloorBreaker.Bombs.Presentation.Debug
                 _slimeRegistry);
 
             _launchUseCase = new BombLaunchUseCase(
-                landingResolver, fallResolver, fireResolver,
+                landingResolver, breakResolver, fireResolver,
                 _stageModel, _balance, _spreadService);
 
             _tracker = new BombFlightTracker(
@@ -211,7 +211,7 @@ namespace FloorBreaker.Bombs.Presentation.Debug
             vfxParent.SetParent(transform, false);
             _bombVfxPool = new BombExplosionVfxPool(
                 bombConfig.GetExplosionPrefab(BombType.Fire),
-                bombConfig.GetExplosionPrefab(BombType.Fall),
+                bombConfig.GetExplosionPrefab(BombType.Break),
                 vfxParent, bombConfig.ExplosionVfxScale, bombConfig.ExplosionVfxDuration);
 
             _bombPresenter = new BombPresenter(
@@ -228,9 +228,9 @@ namespace FloorBreaker.Bombs.Presentation.Debug
                 _balance.FireBombContactDamage, _balance.FireBombCooldown,
                 _balance.FireBombDuration, _balance.FireBombDefaultWallPenetration,
                 _balance.FireBombCooldownMin,
-                _balance.FallBombMaxFlightDistance, _balance.FallBombEffectRange,
-                _balance.FallBombDamage, _balance.FallBombCooldown,
-                _balance.FallBombCollapseDuration, _balance.FallBombCooldownMin);
+                _balance.BreakBombMaxFlightDistance, _balance.BreakBombEffectRange,
+                _balance.BreakBombDamage, _balance.BreakBombCooldown,
+                _balance.BreakBombCollapseDuration, _balance.BreakBombCooldownMin);
             return new PlayerModel(id, spawn, stats, build);
         }
 
@@ -276,13 +276,13 @@ namespace FloorBreaker.Bombs.Presentation.Debug
             // Bomb input — P1
             if (Input.GetKeyDown(KeyCode.F)) StartBomb(PlayerId.Player1, BombType.Fire);
             if (Input.GetKeyUp(KeyCode.F)) _tracker.ReleaseBomb(PlayerId.Player1, _players);
-            if (Input.GetKeyDown(KeyCode.G)) StartBomb(PlayerId.Player1, BombType.Fall);
+            if (Input.GetKeyDown(KeyCode.G)) StartBomb(PlayerId.Player1, BombType.Break);
             if (Input.GetKeyUp(KeyCode.G)) _tracker.ReleaseBomb(PlayerId.Player1, _players);
 
             // Bomb input — P2
             if (Input.GetKeyDown(KeyCode.I)) StartBomb(PlayerId.Player2, BombType.Fire);
             if (Input.GetKeyUp(KeyCode.I)) _tracker.ReleaseBomb(PlayerId.Player2, _players);
-            if (Input.GetKeyDown(KeyCode.O)) StartBomb(PlayerId.Player2, BombType.Fall);
+            if (Input.GetKeyDown(KeyCode.O)) StartBomb(PlayerId.Player2, BombType.Break);
             if (Input.GetKeyUp(KeyCode.O)) _tracker.ReleaseBomb(PlayerId.Player2, _players);
 
             // Effect range
@@ -330,17 +330,17 @@ namespace FloorBreaker.Bombs.Presentation.Debug
                 spec = new BombSpec(BombType.Fire,
                     _maxFlightOverride, min, _effectRange,
                     build.FireDamage, build.FireCooldown,
-                    build.FireHasFlightDamage, build.FireWallPenetration,
+                    build.FireWallPenetration,
                     build.FireDuration, 0f, 0f);
             }
             else
             {
-                spec = new BombSpec(BombType.Fall,
+                spec = new BombSpec(BombType.Break,
                     _maxFlightOverride, min, _effectRange,
-                    build.FallDamage, build.FallCooldown,
-                    build.FallHasFlightDamage, true,
-                    0f, build.FallCollapseTime,
-                    _balance.FallBombRecoveryDuration);
+                    build.BreakDamage, build.BreakCooldown,
+                    true,
+                    0f, build.BreakCollapseTime,
+                    _balance.BreakBombRecoveryDuration);
             }
             _tracker.StartFlight(owner, player.CurrentPosition, player.CurrentFacing, spec);
         }
@@ -464,8 +464,8 @@ namespace FloorBreaker.Bombs.Presentation.Debug
         {
             UnityEngine.Debug.Log("[BombPreview] 操作ガイド:");
             UnityEngine.Debug.Log("  W/A/S/D: P1 移動  |  矢印キー: P2 移動");
-            UnityEngine.Debug.Log("  F (ホールド): P1 炎ボム  |  G (ホールド): P1 滑落ボム");
-            UnityEngine.Debug.Log("  I (ホールド): P2 炎ボム  |  O (ホールド): P2 滑落ボム");
+            UnityEngine.Debug.Log("  F (ホールド): P1 炎ボム  |  G (ホールド): P1 ブレークボム");
+            UnityEngine.Debug.Log("  I (ホールド): P2 炎ボム  |  O (ホールド): P2 ブレークボム");
             UnityEngine.Debug.Log("  1-5: 効果範囲変更 (現在=" + _effectRange + ")");
             UnityEngine.Debug.Log("  +/-: 最大飛行距離変更 (現在=" + _maxFlightOverride + ")");
             UnityEngine.Debug.Log("  H: P1 ダメージ  |  J: P2 ダメージ  |  R: リセット");

@@ -15,7 +15,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "FallBombHold",
+                    "name": "BreakBombHold",
                     "type": "Button",
                     "id": "a1b2c3d4-1111-4000-8000-000000000011",
                     "expectedControlType": "Button",
@@ -116,7 +116,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "FallBombHold",
+                    "action": "BreakBombHold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -127,7 +127,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "FallBombHold",
+                    "action": "BreakBombHold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -191,7 +191,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "FallBombHold",
+                    "name": "BreakBombHold",
                     "type": "Button",
                     "id": "a1b2c3d4-1112-4000-8000-000000000011",
                     "expectedControlType": "Button",
@@ -292,7 +292,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "FallBombHold",
+                    "action": "BreakBombHold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -303,7 +303,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "FallBombHold",
+                    "action": "BreakBombHold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

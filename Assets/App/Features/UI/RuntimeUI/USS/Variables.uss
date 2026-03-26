@@ -13,7 +13,7 @@
     --color-p2: #D94A4A;
 
     --color-fire: #F08030;
-    --color-fall: #3080C0;
+    --color-break: #3080C0;
     --color-general: #40A050;
 
     --color-coin: #F0C040;

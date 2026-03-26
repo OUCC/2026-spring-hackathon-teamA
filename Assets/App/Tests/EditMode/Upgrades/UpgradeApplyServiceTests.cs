@@ -17,7 +17,7 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         [SetUp]
         public void SetUp()
         {
-            var stats = new PlayerStats(10, 1f, 2f);
+            var stats = new PlayerStats(10, 1f, 3f);
             var build = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player = new PlayerModel(PlayerId.Player1, new GridPos(5, 5), stats, build);
             _svc = new UpgradeApplyService(new TestBalanceParameters());
@@ -40,10 +40,10 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         [Test]
         public void Apply_MoveSpeed_IncrementsCapped()
         {
-            _player.Stats.MoveSpeed = 1.9f;
+            _player.Stats.MoveSpeed = 2.9f;
             _svc.Apply(UpgradeId.MoveSpeed, _player);
-            // 1.9 + 0.2 = 2.1, capped at MaxMoveSpeed = 2.0
-            Assert.AreEqual(2.0f, _player.Stats.MoveSpeed, 0.001f);
+            // 2.9 + 0.2 = 3.1, capped at MaxMoveSpeed = 3.0
+            Assert.AreEqual(3.0f, _player.Stats.MoveSpeed, 0.001f);
         }
 
         [Test]
@@ -65,17 +65,17 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         }
 
         [Test]
-        public void Apply_FallCooldown_RespectsMin()
+        public void Apply_BreakCooldown_RespectsMin()
         {
-            // FallCooldown starts at 4f, min is 1f, reduction is 0.5f per apply
+            // BreakCooldown starts at 4f, min is 1f, reduction is 0.5f per apply
             // Apply enough times to hit the min
             for (int i = 0; i < 20; i++)
             {
-                _svc.Apply(UpgradeId.FallCooldown, _player);
+                _svc.Apply(UpgradeId.BreakCooldown, _player);
             }
 
-            Assert.GreaterOrEqual(_player.Build.FallCooldown, _player.Build.FallCooldownMin);
-            Assert.AreEqual(_player.Build.FallCooldownMin, _player.Build.FallCooldown, 0.001f);
+            Assert.GreaterOrEqual(_player.Build.BreakCooldown, _player.Build.BreakCooldownMin);
+            Assert.AreEqual(_player.Build.BreakCooldownMin, _player.Build.BreakCooldown, 0.001f);
         }
 
         [Test]
@@ -101,17 +101,17 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         {
             public int InitialHp => 10;
             public float BaseMovementSpeed => 1f;
-            public float MaxMovementSpeed => 2f;
+            public float MaxMovementSpeed => 3f;
             public float MovementSpeedIncrement => 0.2f;
-            public int FallBombMaxFlightDistance => 3;
-            public int FallBombEffectRange => 1;
-            public int FallBombDamage => 2;
-            public float FallBombCollapseDuration => 3f;
-            public float FallBombRecoveryDuration => 5f;
-            public float FallBombCooldown => 4f;
-            public float FallBombCooldownMin => 1f;
-            public float FallBombCooldownReduction => 0.5f;
-            public bool FallBombDefaultWallPenetration => false;
+            public int BreakBombMaxFlightDistance => 3;
+            public int BreakBombEffectRange => 1;
+            public int BreakBombDamage => 2;
+            public float BreakBombCollapseDuration => 3f;
+            public float BreakBombRecoveryDuration => 5f;
+            public float BreakBombCooldown => 4f;
+            public float BreakBombCooldownMin => 1f;
+            public float BreakBombCooldownReduction => 0.5f;
+            public bool BreakBombDefaultWallPenetration => false;
             public int FireBombMaxFlightDistance => 3;
             public int FireBombEffectRange => 1;
             public int FireBombContactDamage => 1;
@@ -150,7 +150,9 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             public int BombMinFlightDistance => 3;
             public float StageShrinkAnimDuration => 1f;
             public float FireBombSpreadInterval => 0.15f;
-            public float FallBombSpreadInterval => 0.3f;
+            public float BreakBombSpreadInterval => 0.3f;
+            public float DashCooldown => 1f;
+            public float DashDoubleTapWindow => 0.3f;
         }
     }
 }

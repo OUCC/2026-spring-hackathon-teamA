@@ -9,19 +9,19 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [Header("Player")]
         [SerializeField] private int initialHp = 10;
         [SerializeField] private float baseMovementSpeed = 1f;
-        [SerializeField] private float maxMovementSpeed = 2f;
+        [SerializeField] private float maxMovementSpeed = 3f;
         [SerializeField] private float movementSpeedIncrement = 0.2f;
 
-        [Header("Fall Bomb")]
-        [SerializeField] private int fallBombMaxFlightDistance = 3;
-        [SerializeField] private int fallBombEffectRange = 1;
-        [SerializeField] private int fallBombDamage = 2;
-        [SerializeField] private float fallBombCollapseDuration = 3f;
-        [SerializeField] private float fallBombRecoveryDuration = 5f;
-        [SerializeField] private float fallBombCooldown = 4f;
-        [SerializeField] private float fallBombCooldownMin = 1f;
-        [SerializeField] private float fallBombCooldownReduction = 0.5f;
-        [SerializeField] private bool fallBombDefaultWallPenetration = true;
+        [Header("Break Bomb")]
+        [SerializeField] private int breakBombMaxFlightDistance = 3;
+        [SerializeField] private int breakBombEffectRange = 1;
+        [SerializeField] private int breakBombDamage = 2;
+        [SerializeField] private float breakBombCollapseDuration = 3f;
+        [SerializeField] private float breakBombRecoveryDuration = 5f;
+        [SerializeField] private float breakBombCooldown = 4f;
+        [SerializeField] private float breakBombCooldownMin = 1f;
+        [SerializeField] private float breakBombCooldownReduction = 0.5f;
+        [SerializeField] private bool breakBombDefaultWallPenetration = true;
 
         [Header("Fire Bomb")]
         [SerializeField] private int fireBombMaxFlightDistance = 3;
@@ -72,11 +72,15 @@ namespace FloorBreaker.ScriptableObjects.Balance
 
         [Header("Bomb Effect Spread")]
         [SerializeField] private float fireBombSpreadInterval = 0.15f;
-        [SerializeField] private float fallBombSpreadInterval = 0.3f;
+        [SerializeField] private float breakBombSpreadInterval = 0.3f;
 
         [Header("Upgrade: HP Recovery")]
         [SerializeField] private int hpRecoveryAmount = 3;
         [SerializeField] private int hpRecoveryThreshold = 5;
+
+        [Header("Dash")]
+        [SerializeField] private float dashCooldown = 1f;
+        [SerializeField] private float dashDoubleTapWindow = 0.3f;
 
         // --- IBalanceParameters ---
         public int InitialHp => initialHp;
@@ -84,15 +88,15 @@ namespace FloorBreaker.ScriptableObjects.Balance
         public float MaxMovementSpeed => maxMovementSpeed;
         public float MovementSpeedIncrement => movementSpeedIncrement;
 
-        public int FallBombMaxFlightDistance => fallBombMaxFlightDistance;
-        public int FallBombEffectRange => fallBombEffectRange;
-        public int FallBombDamage => fallBombDamage;
-        public float FallBombCollapseDuration => fallBombCollapseDuration;
-        public float FallBombRecoveryDuration => fallBombRecoveryDuration;
-        public float FallBombCooldown => fallBombCooldown;
-        public float FallBombCooldownMin => fallBombCooldownMin;
-        public float FallBombCooldownReduction => fallBombCooldownReduction;
-        public bool FallBombDefaultWallPenetration => fallBombDefaultWallPenetration;
+        public int BreakBombMaxFlightDistance => breakBombMaxFlightDistance;
+        public int BreakBombEffectRange => breakBombEffectRange;
+        public int BreakBombDamage => breakBombDamage;
+        public float BreakBombCollapseDuration => breakBombCollapseDuration;
+        public float BreakBombRecoveryDuration => breakBombRecoveryDuration;
+        public float BreakBombCooldown => breakBombCooldown;
+        public float BreakBombCooldownMin => breakBombCooldownMin;
+        public float BreakBombCooldownReduction => breakBombCooldownReduction;
+        public bool BreakBombDefaultWallPenetration => breakBombDefaultWallPenetration;
 
         public int FireBombMaxFlightDistance => fireBombMaxFlightDistance;
         public int FireBombEffectRange => fireBombEffectRange;
@@ -136,9 +140,12 @@ namespace FloorBreaker.ScriptableObjects.Balance
         public float StageShrinkAnimDuration => stageShrinkAnimDuration;
 
         public float FireBombSpreadInterval => fireBombSpreadInterval;
-        public float FallBombSpreadInterval => fallBombSpreadInterval;
+        public float BreakBombSpreadInterval => breakBombSpreadInterval;
 
         public int HpRecoveryAmount => hpRecoveryAmount;
         public int HpRecoveryThreshold => hpRecoveryThreshold;
+
+        public float DashCooldown => dashCooldown;
+        public float DashDoubleTapWindow => dashDoubleTapWindow;
     }
 }

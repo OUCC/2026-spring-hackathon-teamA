@@ -18,21 +18,27 @@ namespace FloorBreaker.Player.Domain
         public int FireEffectRange { get; private set; }
         public int FireDamage { get; private set; }
         public float FireCooldown { get; private set; }
-        public bool FireHasFlightDamage { get; private set; }
         public float FireDuration { get; private set; }
         public bool FireWallPenetration { get; private set; }
 
-        // --- 滑落ボム ---
-        public int FallFlightRange { get; private set; }
-        public int FallEffectRange { get; private set; }
-        public int FallDamage { get; private set; }
-        public float FallCooldown { get; private set; }
-        public bool FallHasFlightDamage { get; private set; }
-        public float FallCollapseTime { get; private set; }
+        // --- ブレークボム ---
+        public int BreakFlightRange { get; private set; }
+        public int BreakEffectRange { get; private set; }
+        public int BreakDamage { get; private set; }
+        public float BreakCooldown { get; private set; }
+        public float BreakCollapseTime { get; private set; }
 
         // --- CD 下限 ---
         public float FireCooldownMin { get; }
-        public float FallCooldownMin { get; }
+        public float BreakCooldownMin { get; }
+
+        // --- ボム貫通 ---
+        public bool HasFireBombPenetration { get; private set; }
+        public bool HasBreakBombPenetration { get; private set; }
+
+        // --- 永続アビリティ ---
+        public bool HasDash { get; private set; }
+        public bool HasDualShot { get; private set; }
 
         // --- 移動速度 ---
         public float MoveSpeedBonus { get; private set; }
@@ -40,8 +46,8 @@ namespace FloorBreaker.Player.Domain
         public PlayerBuild(
             int fireFlightRange, int fireEffectRange, int fireDamage, float fireCooldown,
             float fireDuration, bool fireWallPenetration, float fireCooldownMin,
-            int fallFlightRange, int fallEffectRange, int fallDamage, float fallCooldown,
-            float fallCollapseTime, float fallCooldownMin)
+            int breakFlightRange, int breakEffectRange, int breakDamage, float breakCooldown,
+            float breakCollapseTime, float breakCooldownMin)
         {
             FireFlightRange = fireFlightRange;
             FireEffectRange = fireEffectRange;
@@ -51,12 +57,12 @@ namespace FloorBreaker.Player.Domain
             FireWallPenetration = fireWallPenetration;
             FireCooldownMin = fireCooldownMin;
 
-            FallFlightRange = fallFlightRange;
-            FallEffectRange = fallEffectRange;
-            FallDamage = fallDamage;
-            FallCooldown = fallCooldown;
-            FallCollapseTime = fallCollapseTime;
-            FallCooldownMin = fallCooldownMin;
+            BreakFlightRange = breakFlightRange;
+            BreakEffectRange = breakEffectRange;
+            BreakDamage = breakDamage;
+            BreakCooldown = breakCooldown;
+            BreakCollapseTime = breakCollapseTime;
+            BreakCooldownMin = breakCooldownMin;
         }
 
         public void ApplyUpgrade(UpgradeId id)
@@ -64,16 +70,13 @@ namespace FloorBreaker.Player.Domain
             switch (id)
             {
                 case UpgradeId.FireFlightRange:
-                    FireFlightRange++;
+                    FireFlightRange += 2;
                     break;
                 case UpgradeId.FireEffectRange:
                     FireEffectRange++;
                     break;
                 case UpgradeId.FireDamage:
                     FireDamage++;
-                    break;
-                case UpgradeId.FireFlightDamage:
-                    FireHasFlightDamage = true;
                     break;
                 case UpgradeId.FireDuration:
                     FireDuration += 2f;
@@ -84,25 +87,34 @@ namespace FloorBreaker.Player.Domain
                 case UpgradeId.FireCooldown:
                     FireCooldown = MathF.Max(FireCooldownMin, FireCooldown - 0.3f);
                     break;
-                case UpgradeId.FallFlightRange:
-                    FallFlightRange++;
+                case UpgradeId.BreakFlightRange:
+                    BreakFlightRange += 2;
                     break;
-                case UpgradeId.FallEffectRange:
-                    FallEffectRange++;
+                case UpgradeId.BreakEffectRange:
+                    BreakEffectRange++;
                     break;
-                case UpgradeId.FallDamage:
-                    FallDamage++;
+                case UpgradeId.BreakDamage:
+                    BreakDamage++;
                     break;
-                case UpgradeId.FallFlightDamage:
-                    FallHasFlightDamage = true;
+                case UpgradeId.BreakCollapseTime:
+                    BreakCollapseTime += 2f;
                     break;
-                case UpgradeId.FallCollapseTime:
-                    FallCollapseTime += 2f;
+                case UpgradeId.BreakCooldown:
+                    BreakCooldown = MathF.Max(BreakCooldownMin, BreakCooldown - 0.5f);
                     break;
-                case UpgradeId.FallCooldown:
-                    FallCooldown = MathF.Max(FallCooldownMin, FallCooldown - 0.5f);
+                case UpgradeId.FireBombPenetration:
+                    HasFireBombPenetration = true;
                     break;
-                // MoveSpeed と HpRecovery は PlayerStats 側で適用
+                case UpgradeId.BreakBombPenetration:
+                    HasBreakBombPenetration = true;
+                    break;
+                case UpgradeId.Dash:
+                    HasDash = true;
+                    break;
+                case UpgradeId.DualShot:
+                    HasDualShot = true;
+                    break;
+                // MoveSpeed, HpRecovery, FireShield, Levitation は PlayerStats/UpgradeApplyService 側で適用
             }
 
             RecordUpgrade(id);

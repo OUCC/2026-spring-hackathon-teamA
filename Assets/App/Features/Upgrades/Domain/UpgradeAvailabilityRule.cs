@@ -1,4 +1,3 @@
-using System;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
@@ -24,14 +23,20 @@ namespace FloorBreaker.Upgrades.Domain
             {
                 switch (def.Id)
                 {
-                    case UpgradeId.FireFlightDamage:
-                        if (build.FireHasFlightDamage) return false;
-                        break;
                     case UpgradeId.FireWallPenetration:
                         if (build.FireWallPenetration) return false;
                         break;
-                    case UpgradeId.FallFlightDamage:
-                        if (build.FallHasFlightDamage) return false;
+                    case UpgradeId.FireBombPenetration:
+                        if (build.HasFireBombPenetration) return false;
+                        break;
+                    case UpgradeId.BreakBombPenetration:
+                        if (build.HasBreakBombPenetration) return false;
+                        break;
+                    case UpgradeId.Dash:
+                        if (build.HasDash) return false;
+                        break;
+                    case UpgradeId.DualShot:
+                        if (build.HasDualShot) return false;
                         break;
                 }
             }
@@ -56,10 +61,20 @@ namespace FloorBreaker.Upgrades.Domain
                 if (build.FireCooldown <= build.FireCooldownMin)
                     return false;
             }
-            if (def.Id == UpgradeId.FallCooldown)
+            if (def.Id == UpgradeId.BreakCooldown)
             {
-                if (build.FallCooldown <= build.FallCooldownMin)
+                if (build.BreakCooldown <= build.BreakCooldownMin)
                     return false;
+            }
+
+            // 一時効果: 効果アクティブ中は出現しない
+            if (def.Id == UpgradeId.FireShield)
+            {
+                if (stats.FireShieldActive.CurrentValue) return false;
+            }
+            if (def.Id == UpgradeId.Levitation)
+            {
+                if (stats.LevitationActive.CurrentValue) return false;
             }
 
             return true;

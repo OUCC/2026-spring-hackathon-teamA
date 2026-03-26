@@ -166,7 +166,7 @@ namespace FloorBreaker.MatchFlow.Application
                     || !_stage.IsInBounds(player.CurrentPosition))
                 {
                     // 無敵でもダメージ + 強制移動 (縮小は回避不可)
-                    player.Stats.TakeDamage(_balance.FallBombDamage);
+                    player.Stats.TakeDamage(_balance.BreakBombDamage);
                     var safeTile = _safeTileSearch.FindSafeTile(_stage, player.CurrentPosition, occupied);
                     if (safeTile.HasValue)
                     {
@@ -218,6 +218,10 @@ namespace FloorBreaker.MatchFlow.Application
             _clock.SetPhase(GamePhase.MatchRunning);
             _clock.ResetTimer();
             _clock.Resume();
+
+            // 一時効果（炎守りのマント・風の羽衣）をリセット
+            foreach (var player in _players)
+                player.Stats.ClearTemporaryEffects();
         }
 
         private void TransitionToResult(PlayerId winner)
