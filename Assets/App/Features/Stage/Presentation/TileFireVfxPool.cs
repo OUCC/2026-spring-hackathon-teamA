@@ -9,7 +9,7 @@ namespace FloorBreaker.Stage.Presentation
     public sealed class TileFireVfxPool : IDisposable
     {
         private static readonly Vector3 VfxOffset = new(0f, 0.1f, -0.1f);
-        private static readonly Vector3 VfxScale = new(0.12f, 0.12f, 0.12f);
+        private static readonly Vector3 VfxScale = new(0.24f, 0.24f, 0.24f);
 
         private readonly GameObject _prefab;
         private readonly Transform _poolParent;

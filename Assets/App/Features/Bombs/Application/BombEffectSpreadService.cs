@@ -132,7 +132,7 @@ namespace FloorBreaker.Bombs.Application
                 entries.Add(new SpreadEntry(pos, dist, wallSet.Contains(pos)));
             }
 
-            return new SpreadWave(entries, players, owner, interval, maxDist);
+            return new SpreadWave(entries, players, owner, interval, maxDist, center);
         }
 
         /// <summary>
@@ -148,6 +148,22 @@ namespace FloorBreaker.Bombs.Application
             {
                 var entry = wave.Entries[i];
                 if (entry.Applied || entry.Distance > maxDist) continue;
+
+                // 炎ボム (壁貫通なし): 段階的広がり中に崩落したタイルで遮断
+                // 壁タイル (entry.IsWall) は破壊対象なのでスキップしない
+                if (!wave.IsFallBomb && !entry.IsWall && entry.Distance > 0
+                    && !CanFireReach(wave.Center, entry.Pos, entry.Distance, wave.Players))
+                {
+                    wave.Entries[i] = entry.WithApplied();
+                    continue;
+                }
+
+                // 永久消滅タイルには適用しない (滑落ボム用 — 炎は上で遮断済み)
+                if (_stage.GetTileState(entry.Pos) == TileState.PermanentlyDestroyed)
+                {
+                    wave.Entries[i] = entry.WithApplied();
+                    continue;
+                }
 
                 // 壁破壊
                 if (entry.IsWall)
@@ -231,6 +247,48 @@ namespace FloorBreaker.Bombs.Application
             return occupied;
         }
 
+        /// <summary>
+        /// 炎が center から pos まで到達できるか。
+        /// 経路上 (手前のマス) にタイル障害物またはエンティティがあれば遮断。
+        /// 対象マス自身の通行可否もチェックする。
+        /// </summary>
+        private bool CanFireReach(GridPos center, GridPos pos, int distance,
+            IReadOnlyList<PlayerModel> players)
+        {
+            int dx = pos.X - center.X;
+            int dy = pos.Y - center.Y;
+            int stepX = dx == 0 ? 0 : (dx > 0 ? 1 : -1);
+            int stepY = dy == 0 ? 0 : (dy > 0 ? 1 : -1);
+
+            for (int d = 1; d <= distance; d++)
+            {
+                var tile = new GridPos(center.X + stepX * d, center.Y + stepY * d);
+
+                // タイル自体が通行不可なら遮断
+                if (!_stage.IsPassable(tile))
+                    return false;
+
+                // 手前のマスにエンティティがいれば遮断 (対象マス自身は通す)
+                if (d < distance && IsEntityAt(tile, players))
+                    return false;
+            }
+            return true;
+        }
+
+        private bool IsEntityAt(GridPos pos, IReadOnlyList<PlayerModel> players)
+        {
+            if (players != null)
+            {
+                foreach (var p in players)
+                {
+                    if (p.CurrentPosition == pos) return true;
+                }
+            }
+            if (_slimeRegistry != null && _slimeRegistry.GetAt(pos) != null)
+                return true;
+            return false;
+        }
+
         private void RebuildPendingTiles()
         {
             _pendingTiles.Clear();
@@ -273,6 +331,7 @@ namespace FloorBreaker.Bombs.Application
             public readonly PlayerModel Owner;
             public readonly float Interval;
             public readonly int MaxDistance;
+            public readonly GridPos Center;
 
             public float Elapsed;
             public bool AllApplied;
@@ -292,13 +351,15 @@ namespace FloorBreaker.Bombs.Application
                 IReadOnlyList<PlayerModel> players,
                 PlayerModel owner,
                 float interval,
-                int maxDistance)
+                int maxDistance,
+                GridPos center)
             {
                 Entries = entries;
                 Players = players;
                 Owner = owner;
                 Interval = interval;
                 MaxDistance = maxDistance;
+                Center = center;
             }
         }
     }

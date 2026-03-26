@@ -428,6 +428,7 @@ flowchart LR
 | 8.5 | Phase 9 前提修正 | AcquiredUpgrades, Winner Observable | RemainingTime Observable | App.UI.asmdef | **完了** |
 | 9 | UI | UpgradeSelectionState | — | UXML/USS/Presenter/View 10クラス | **完了** |
 | 10 | ステージ Presentation | — | — | TileView, AnimService, VfxPool, Presenter 8クラス | **完了** |
-| 11-14 | Player/Bomb/Slime/Camera Pres | — | — | View, VFX, Camera | 未着手 |
+| 11 | プレイヤー Presentation | — | — | PlayerView, AnimService, Presenter, Factory 7クラス | **完了** |
+| 12-14 | Bomb/Slime/Camera Pres | — | — | View, VFX, Camera | 未着手 |
 | 15 | Bootstrap | — | — | LifetimeScope | 未着手 |
 | 16-18 | 統合/ポリッシュ | — | — | テスト, FX, SE | 未着手 |

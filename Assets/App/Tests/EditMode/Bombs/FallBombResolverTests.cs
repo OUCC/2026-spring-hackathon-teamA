@@ -67,12 +67,12 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void Resolve_SkipsCollapsedTiles()
+        public void Resolve_IncludesCollapsedTiles()
         {
             _stage.SetTileState(new GridPos(6, 5), TileState.Collapsed);
             var result = _resolver.Resolve(new GridPos(5, 5), MakeFallSpec(), _stage);
 
-            Assert.IsFalse(result.AffectedTiles.Contains(new GridPos(6, 5)));
+            Assert.IsTrue(result.AffectedTiles.Contains(new GridPos(6, 5)));
         }
 
         [Test]
@@ -85,12 +85,12 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void Resolve_SkipsCollapsingTiles()
+        public void Resolve_IncludesCollapsingTiles()
         {
             _stage.SetTileState(new GridPos(6, 5), TileState.Collapsing);
             var result = _resolver.Resolve(new GridPos(5, 5), MakeFallSpec(), _stage);
 
-            Assert.IsFalse(result.AffectedTiles.Contains(new GridPos(6, 5)));
+            Assert.IsTrue(result.AffectedTiles.Contains(new GridPos(6, 5)));
         }
 
         [Test]

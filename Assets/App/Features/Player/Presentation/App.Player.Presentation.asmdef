@@ -1,0 +1,30 @@
+{
+    "name": "App.Player.Presentation",
+    "rootNamespace": "FloorBreaker.Player.Presentation",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Shared.Presentation",
+        "App.Shared.Infrastructure",
+        "App.Player",
+        "App.Stage",
+        "App.Stage.Presentation",
+        "App.Bombs",
+        "App.Slimes",
+        "App.MatchFlow",
+        "App.ScriptableObjects"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "R3.dll",
+        "DOTween.dll",
+        "DOTweenPro.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
