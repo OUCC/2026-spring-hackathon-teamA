@@ -39,6 +39,7 @@ namespace FloorBreaker.Player.Domain
                 if (safeTile.HasValue)
                 {
                     player.ForcedMove.Start(safeTile.Value, _forcedMoveDuration);
+                    player.CurrentPosition = safeTile.Value;
                 }
             }
 

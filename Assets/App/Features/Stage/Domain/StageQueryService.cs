@@ -61,9 +61,11 @@ namespace FloorBreaker.Stage.Domain
                     if (!_model.IsInBounds(pos)) break;
 
                     var state = _model.GetTileState(pos);
-                    if (!penetrateWalls && state == TileState.Wall)
+                    if (!penetrateWalls && !_model.IsPassable(pos))
                     {
-                        result.Add(pos); // wall itself is included (will be destroyed)
+                        // 壁は破壊対象として含める、それ以外は含めない
+                        if (state == TileState.Wall)
+                            result.Add(pos);
                         break;
                     }
 

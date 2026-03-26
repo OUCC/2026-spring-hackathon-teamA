@@ -178,5 +178,55 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _service.Tick(0.15f);
             Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(6, 5)));
         }
+        /// <summary>
+        /// 滑落ボム A の後に B が同じタイルに重なる場合、
+        /// B のタイマーで上書きされ、A のタイマー完了後も Collapsing が維持されること。
+        /// </summary>
+        [Test]
+        public void FallBomb_OverlappingWaves_TimerResetKeepsTileCollapsing()
+        {
+            var fallResolver = new FallBombResolver(_areaResolver);
+            var spec = new BombSpec(BombType.Fall, 3, 2, 2, 4f, false, true, 0f, 3f, 5f);
+
+            // 重なるタイル: (5,6) — A の距離1, B の距離1
+            var centerA = new GridPos(5, 5);
+            var centerB = new GridPos(5, 7);
+            var overlap = new GridPos(5, 6);
+            var players = new List<PlayerModel>();
+
+            // A を投下 (t=0)
+            var resultA = fallResolver.Resolve(centerA, spec, _stage);
+            _service.EnqueueFallBomb(resultA, centerA, players, null, 0.3f);
+
+            // A の距離1 を適用 (t=0.3)
+            _service.Tick(0.3f);
+            _timerService.Tick(0.3f);
+            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(overlap));
+
+            // 1秒経過 (t=1.3) — A のタイマー残り = 3.0 - 1.0 = 2.0
+            _service.Tick(1.0f);
+            _timerService.Tick(1.0f);
+
+            // B を投下 (t=1.3)
+            var resultB = fallResolver.Resolve(centerB, spec, _stage);
+            _service.EnqueueFallBomb(resultB, centerB, players, null, 0.3f);
+
+            // B の距離1 を適用 (t=1.6) — overlap に StartCollapseTimer 上書き
+            _service.Tick(0.3f);
+            _timerService.Tick(0.3f);
+            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(overlap));
+
+            // A のタイマーだけなら t=0.3+3.0=3.3 で Collapsed になるはず
+            // B の上書きなら t=1.6+3.0=4.6 まで Collapsing が続くはず
+
+            // t=3.3 相当まで進める (t=1.6 から 1.7 秒進める)
+            _service.Tick(1.7f);
+            _timerService.Tick(1.7f);
+
+            // B の上書きが効いていれば、まだ Collapsing のはず
+            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(overlap),
+                "タイマー上書きが効いていれば B の 3 秒が経過するまで Collapsing が続く");
+        }
     }
 }
+

@@ -65,6 +65,15 @@ namespace FloorBreaker.Tests.EditMode.Player
         }
 
         [Test]
+        public void ApplyDamage_WithRelocate_UpdatesPosition()
+        {
+            _stage.SetTileState(new GridPos(5, 5), TileState.Collapsing);
+            _svc.ApplyDamage(_player, 2, true, _stage, _safeTile, new HashSet<GridPos>());
+            Assert.AreNotEqual(new GridPos(5, 5), _player.CurrentPosition);
+            Assert.AreEqual(_player.ForcedMove.Target, _player.CurrentPosition);
+        }
+
+        [Test]
         public void ApplyDamage_WithoutRelocate_NoForcedMove()
         {
             _svc.ApplyDamage(_player, 2, false, _stage, _safeTile, new HashSet<GridPos>());

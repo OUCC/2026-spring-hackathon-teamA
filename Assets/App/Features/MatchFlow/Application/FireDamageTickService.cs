@@ -71,6 +71,7 @@ namespace FloorBreaker.MatchFlow.Application
 
         private void TickSlimes(float deltaTime, StageModel stage)
         {
+            if (_slimeRegistry == null) return;
             var slimes = new List<SlimeModel>(_slimeRegistry.GetAll());
 
             foreach (var slime in slimes)

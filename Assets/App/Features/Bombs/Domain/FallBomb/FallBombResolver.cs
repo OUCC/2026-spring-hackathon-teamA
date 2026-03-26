@@ -54,9 +54,11 @@ namespace FloorBreaker.Bombs.Domain
                         break;
                     case TileState.Normal:
                     case TileState.OnFire:
+                    case TileState.Collapsing:
+                    case TileState.Collapsed:
                         affectedTiles.Add(pos);
                         break;
-                    // Collapsing, Collapsed, PermanentlyDestroyed はスキップ
+                    // PermanentlyDestroyed はスキップ
                 }
             }
 

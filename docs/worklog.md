@@ -1,5 +1,35 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-26: Phase 11 — プレイヤー Presentation
+
+### 完了タスク
+- **T-11.0** App.Player.Presentation.asmdef 新設 (noEngineReferences: false, 参照: App.Player + App.Stage + App.Stage.Presentation + App.Bombs + App.Slimes + App.MatchFlow + App.ScriptableObjects + R3 + DOTween)
+- **T-11.1** PlayerSpriteConfig ScriptableObject (8方向 stand/walk スプライト、P1/P2 色、移動/被弾/無敵/死亡アニメーションパラメータ、スケール)
+- **T-11.2** PlayerView MonoBehaviour (薄い View、Initialize/SetDirection/SetWalkFrame/SetPositionImmediate、R3 購読なし)
+- **T-11.3** PlayerAnimationService (DOTween 一元管理: PlayMove/PlayForcedMove/PlayHitFlash/Start・StopInvulnerabilityBlink/PlayDeath、PlayerId 別 tween 追跡)
+- **T-11.4** PlayerPresenter (pure C#、R3 購読 Position/FacingDirection/CurrentHp.Pairwise → View/AnimService ディスパッチ、Tick で歩行フレームトグル + 無敵エッジ検出)
+- **T-11.5** PlayerViewFactory (MonoBehaviour、PlayerView の GameObject 生成 + スケール適用)
+- **T-11.6** PlayerPreviewController + PlayerPreview.unity デバッグシーン (WASD/矢印キーで P1/P2 移動、ダメージ/強制移動/即死/リセット、1.5秒ごとランダムボム範囲10、FireDamageTickService 配線)
+- **T-11.7** PlayerSpriteConfig.asset (全16スプライト割り当て済み)
+- **バグ修正** PlayerDamageService: 強制移動時に CurrentPosition を即座に更新
+- **バグ修正** FallBombResolver: Collapsing/Collapsed タイルを affectedTiles に含める (タイマーリセット)
+- **バグ修正** StageQueryService.GetTilesInCross: penetrateWalls=false 時に通行不可タイル全般で停止
+- **バグ修正** BombEffectSpreadService: 炎ボム段階広がり中の崩落タイル遮断 + エンティティ遮断 (CanFireReach)
+- **バグ修正** FireDamageTickService: SlimeRegistry null 安全チェック追加
+- **改善** TileFireVfxPool: VFX スケール 0.12 → 0.24 (2倍)
+- コンパイルエラー 0 件、EditMode テスト 234 件全件グリーン
+
+### 設計判断
+- **Presenter パターン踏襲**: Phase 10 の StagePresenter と同じ構造 (thin View + pure C# Presenter + AnimationService)。PlayerView は 2 個しかないが一貫性のため Presenter 経由
+- **R3 Pairwise でダメージ検出**: HP の前回値→現在値を比較してダメージ/死亡を検出。Domain に明示イベントを追加不要
+- **スケール問題**: プレイヤースプライト (363x473px, PPU=100) がタイル (32x32px, PPU=32) の約4倍 → PlayerSpriteConfig._playerScale=0.22 で調整
+- **FallBombResolver の仕様変更**: Collapsing/Collapsed タイルを affectedTiles に含めるように変更。滑落ボムの再適用でタイマーがリセットされ、効果が正しく延長される
+- **GetTilesInCross の遮断強化**: penetrateWalls=false 時に壁だけでなく通行不可タイル全般 (IsPassable) で停止。炎ボムの十字パターンが崩落タイルで止まる
+- **CanFireReach (段階的広がり用)**: Resolve 時点と適用時点でタイル状態が変わるケースに対応。GetTilesInCross と同じ IsPassable 判定基準 + エンティティ位置チェック
+- **BalanceConfig SO 参照**: デバッグコントローラーでは IBalanceParameters の再実装を避け、既存の DefaultBalance.asset を SerializeField で参照
+
+---
+
 ## 2026-03-26: Phase 10 追補 — ボム効果の段階的十字広がり
 
 ### 完了タスク
