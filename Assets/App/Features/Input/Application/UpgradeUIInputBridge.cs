@@ -10,10 +10,14 @@ namespace FloorBreaker.Input.Application
 {
     /// <summary>
     /// UpgradeUI アクションマップからの入力を UpgradeDraftService にディスパッチする。
-    /// 強化フェーズ中のみアクティブ。
+    /// Row 0 = カード行 (左右でカード選択、Submit で購入)
+    /// Row 1 = アクション行 (左右でリロール/スキップ切替、Submit で実行)
     /// </summary>
     public sealed class UpgradeUIInputBridge
     {
+        /// <summary>カード行のインデックス上限。0,1,2=カード、3=リロール。</summary>
+        private const int RerollIndex = 3;
+
         private readonly UpgradeDraftService _draftP1;
         private readonly UpgradeDraftService _draftP2;
         private readonly PlayerModel _player1;
@@ -21,6 +25,7 @@ namespace FloorBreaker.Input.Application
         private readonly MatchClock _clock;
         private readonly IRandomProvider _random;
         private readonly UpgradeSelectionState _selectionState;
+
 
         public UpgradeUIInputBridge(
             UpgradeDraftService draftP1,
@@ -40,19 +45,18 @@ namespace FloorBreaker.Input.Application
             _selectionState = selectionState;
         }
 
+        // --- P1 ---
+
         public void OnNavigateP1(InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase()) return;
-            var v = ctx.ReadValue<UnityEngine.Vector2>();
-            int current = _selectionState.GetIndex(PlayerId.Player1);
-            if (v.x > 0.5f) _selectionState.SetIndex(PlayerId.Player1, Math.Min(2, current + 1));
-            else if (v.x < -0.5f) _selectionState.SetIndex(PlayerId.Player1, Math.Max(0, current - 1));
+            Navigate(PlayerId.Player1, ctx.ReadValue<UnityEngine.Vector2>());
         }
 
         public void OnSubmitP1(InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
-            _draftP1.SelectChoice(_selectionState.GetIndex(PlayerId.Player1), _player1);
+            Submit(PlayerId.Player1, _draftP1, _player1);
         }
 
         public void OnSkipP1(InputAction.CallbackContext ctx)
@@ -67,19 +71,18 @@ namespace FloorBreaker.Input.Application
             _draftP1.Reroll(_player1, _random);
         }
 
+        // --- P2 ---
+
         public void OnNavigateP2(InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase()) return;
-            var v = ctx.ReadValue<UnityEngine.Vector2>();
-            int current = _selectionState.GetIndex(PlayerId.Player2);
-            if (v.x > 0.5f) _selectionState.SetIndex(PlayerId.Player2, Math.Min(2, current + 1));
-            else if (v.x < -0.5f) _selectionState.SetIndex(PlayerId.Player2, Math.Max(0, current - 1));
+            Navigate(PlayerId.Player2, ctx.ReadValue<UnityEngine.Vector2>());
         }
 
         public void OnSubmitP2(InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
-            _draftP2.SelectChoice(_selectionState.GetIndex(PlayerId.Player2), _player2);
+            Submit(PlayerId.Player2, _draftP2, _player2);
         }
 
         public void OnSkipP2(InputAction.CallbackContext ctx)
@@ -94,10 +97,68 @@ namespace FloorBreaker.Input.Application
             _draftP2.Reroll(_player2, _random);
         }
 
-        private bool IsUpgradePhase()
+        // --- 共通 ---
+
+        private void Navigate(PlayerId player, UnityEngine.Vector2 v)
         {
-            return _clock.CurrentPhaseValue == GamePhase.UpgradePhase;
+            int row = _selectionState.GetRow(player);
+
+            // 上下: カード行 (row=0) ↔ 完了行 (row=1)
+            if (v.y < -0.5f && row == 0)
+            {
+                _selectionState.SetRow(player, 1);
+                return;
+            }
+            if (v.y > 0.5f && row == 1)
+            {
+                _selectionState.SetRow(player, 0);
+                return;
+            }
+
+            // 左右 (カード行のみ: 0,1,2=カード、3=リロール)
+            if (row == 0)
+            {
+                int current = _selectionState.GetIndex(player);
+                if (v.x > 0.5f) _selectionState.SetIndex(player, Math.Min(RerollIndex, current + 1));
+                else if (v.x < -0.5f) _selectionState.SetIndex(player, Math.Max(0, current - 1));
+            }
         }
+
+        private void Submit(PlayerId player, UpgradeDraftService draft, PlayerModel playerModel)
+        {
+            int row = _selectionState.GetRow(player);
+
+            if (row == 0)
+            {
+                int index = _selectionState.GetIndex(player);
+
+                if (index == RerollIndex)
+                {
+                    // リロール — 購入済みインデックスをクリア (新カードが出るため)
+                    if (draft.Reroll(playerModel, _random))
+                    {
+                        _selectionState.ClearPurchased(player);
+                    }
+                }
+                else
+                {
+                    // カード購入
+                    if (_selectionState.IsPurchased(player, index)) return;
+                    if (draft.SelectChoice(index, playerModel))
+                    {
+                        _selectionState.MarkPurchased(player, index);
+                    }
+                }
+            }
+            else
+            {
+                // 完了行
+                draft.Skip();
+            }
+        }
+
+        private bool IsUpgradePhase()
+            => _clock.CurrentPhaseValue == GamePhase.UpgradePhase;
 
         public void ResetSelection()
         {

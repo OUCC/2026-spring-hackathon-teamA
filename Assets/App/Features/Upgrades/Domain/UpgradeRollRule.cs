@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
 
@@ -15,17 +16,24 @@ namespace FloorBreaker.Upgrades.Domain
             _availabilityRule = availabilityRule;
         }
 
-        public IReadOnlyList<UpgradeDefinition> Roll(PlayerModel player, int choiceCount, IRandomProvider random)
+        /// <summary>
+        /// 候補を抽選する。excludeIds で指定した UpgradeId は候補から除外される
+        /// （同一フェーズ内で購入済みの強化を再出現させない）。
+        /// </summary>
+        public IReadOnlyList<UpgradeDefinition> Roll(
+            PlayerModel player,
+            int choiceCount,
+            IRandomProvider random,
+            HashSet<UpgradeId> excludeIds = null)
         {
-            // 候補プール構築
             var pool = new List<UpgradeDefinition>();
             foreach (var def in _catalog.GetAll())
             {
-                if (_availabilityRule.IsAvailable(def, player))
-                    pool.Add(def);
+                if (!_availabilityRule.IsAvailable(def, player)) continue;
+                if (excludeIds != null && excludeIds.Contains(def.Id)) continue;
+                pool.Add(def);
             }
 
-            // ランダム選択（重複なし）
             var result = new List<UpgradeDefinition>();
             int count = System.Math.Min(choiceCount, pool.Count);
 

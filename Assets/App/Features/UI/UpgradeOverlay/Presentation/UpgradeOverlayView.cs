@@ -17,11 +17,15 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         private readonly Label _rightStatus;
         private readonly VisualElement _leftPane;
         private readonly VisualElement _rightPane;
+        private readonly VisualElement _leftActions;
+        private readonly VisualElement _rightActions;
 
         public VisualElement LeftCards => _leftCards;
         public VisualElement RightCards => _rightCards;
         public Button LeftRerollBtn { get; }
         public Button RightRerollBtn { get; }
+        public Button LeftSkipBtn { get; }
+        public Button RightSkipBtn { get; }
 
         public UpgradeOverlayView(VisualElement overlayRoot)
         {
@@ -34,8 +38,12 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             _rightCards = overlayRoot.Q("RightCards");
             _leftStatus = overlayRoot.Q<Label>("LeftStatus");
             _rightStatus = overlayRoot.Q<Label>("RightStatus");
+            _leftActions = overlayRoot.Q("LeftActions");
+            _rightActions = overlayRoot.Q("RightActions");
             LeftRerollBtn = overlayRoot.Q<Button>("LeftRerollBtn");
             RightRerollBtn = overlayRoot.Q<Button>("RightRerollBtn");
+            LeftSkipBtn = overlayRoot.Q<Button>("LeftSkipBtn");
+            RightSkipBtn = overlayRoot.Q<Button>("RightSkipBtn");
         }
 
         public void Show() => _overlayRoot.RemoveFromClassList("upgrade-overlay--hidden");
@@ -53,5 +61,17 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
 
         public void SetLeftDone(bool done) => _leftPane.EnableInClassList("upgrade-pane--done", done);
         public void SetRightDone(bool done) => _rightPane.EnableInClassList("upgrade-pane--done", done);
+
+        /// <summary>リロールボタンのハイライト。</summary>
+        public void SetLeftRerollHighlight(bool on)
+            => LeftRerollBtn?.EnableInClassList("upgrade-pane__reroll-btn--selected", on);
+        public void SetRightRerollHighlight(bool on)
+            => RightRerollBtn?.EnableInClassList("upgrade-pane__reroll-btn--selected", on);
+
+        /// <summary>完了ボタンのハイライト。</summary>
+        public void SetLeftDoneHighlight(bool on)
+            => LeftSkipBtn?.EnableInClassList("upgrade-pane__done-btn--selected", on);
+        public void SetRightDoneHighlight(bool on)
+            => RightSkipBtn?.EnableInClassList("upgrade-pane__done-btn--selected", on);
     }
 }

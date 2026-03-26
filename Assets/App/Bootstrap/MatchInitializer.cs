@@ -210,24 +210,29 @@ namespace FloorBreaker.Bootstrap
             var resultView = new ResultView(_matchUIDocument.ResultRoot);
             _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd);
 
-            // 14. Input 配線
+            // 14. Input 配線 (PlayerInput コンポーネント不要、InputActionAsset を直接使用)
             var inputAdapters = Object.FindObjectsByType<PlayerInputAdapter>(
                 FindObjectsSortMode.None);
-            InputActionAsset inputActions = null;
 
-            // P1, P2 の順に割り当て
+            // アダプターから InputActionAsset を取得、またはシーン上の InputActionAsset を検索
+            InputActionAsset inputActions = null;
+            foreach (var adapter in inputAdapters)
+            {
+                if (adapter.InputActions != null)
+                {
+                    inputActions = adapter.InputActions;
+                    break;
+                }
+            }
+
+            // P1, P2 アダプターを初期化
+            // 2つのアダプターが見つかることを前提（シーン上に配置済み）
             for (int i = 0; i < inputAdapters.Length && i < 2; i++)
             {
                 var adapter = inputAdapters[i];
                 var id = i == 0 ? PlayerId.Player1 : PlayerId.Player2;
-                adapter.Initialize(id);
-
+                adapter.Initialize(id, inputActions);
                 _gameplayInputBridge.RegisterAdapter(adapter);
-
-                // InputActionAsset を取得 (全アダプターで共通)
-                var pi = adapter.GetComponent<PlayerInput>();
-                if (pi != null && inputActions == null)
-                    inputActions = pi.actions;
             }
 
             // 15. InputMapSwitcher 生成
@@ -243,16 +248,12 @@ namespace FloorBreaker.Bootstrap
                 {
                     upgradeP1["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP1;
                     upgradeP1["Submit"].performed += _upgradeUIInputBridge.OnSubmitP1;
-                    upgradeP1["Skip"].performed += _upgradeUIInputBridge.OnSkipP1;
-                    upgradeP1["Reroll"].performed += _upgradeUIInputBridge.OnRerollP1;
                 }
 
                 if (upgradeP2 != null)
                 {
                     upgradeP2["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP2;
                     upgradeP2["Submit"].performed += _upgradeUIInputBridge.OnSubmitP2;
-                    upgradeP2["Skip"].performed += _upgradeUIInputBridge.OnSkipP2;
-                    upgradeP2["Reroll"].performed += _upgradeUIInputBridge.OnRerollP2;
                 }
             }
 
