@@ -18,11 +18,16 @@ namespace FloorBreaker.Input.Infrastructure
 
         private PlayerId _playerId;
         private Direction8 _lastDirection = Direction8.S;
+        private Direction8? _heldDirection;
 
         public PlayerId Owner => _playerId;
         public Direction8 LastDirection => _lastDirection;
 
+        /// <summary>現在ホールド中の方向。null = スティック/十字キーがニュートラル。</summary>
+        public Direction8? HeldDirection => _heldDirection;
+
         public event Action<PlayerId, Direction8> OnMoveInput;
+        public event Action<PlayerId> OnMoveReleased;
         public event Action<BombHoldCommand> OnBombHoldInput;
 
         public void Initialize(PlayerId playerId)
@@ -67,13 +72,15 @@ namespace FloorBreaker.Input.Infrastructure
             if (dir.HasValue)
             {
                 _lastDirection = dir.Value;
+                _heldDirection = dir.Value;
                 OnMoveInput?.Invoke(_playerId, dir.Value);
             }
         }
 
         private void OnMoveCanceled(InputAction.CallbackContext ctx)
         {
-            // 移動停止は特にディスパッチしない（グリッドベースのため）
+            _heldDirection = null;
+            OnMoveReleased?.Invoke(_playerId);
         }
 
         private void OnFallBombStarted(InputAction.CallbackContext ctx)

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DefaultBalance
   m_EditorClassIdentifier: App.ScriptableObjects::FloorBreaker.ScriptableObjects.Balance.BalanceConfig
   initialHp: 10
-  baseMovementSpeed: 1
+  baseMovementSpeed: 0.5
   maxMovementSpeed: 2
   movementSpeedIncrement: 0.2
   fallBombMaxFlightDistance: 3
@@ -56,5 +56,11 @@ MonoBehaviour:
   upgradeChoiceCount: 3
   rerollCost: 1
   forcedMoveDuration: 1
+  invulnerabilityDuration: 1.5
+  bombFlightSpeed: 12
+  bombMinFlightDistance: 3
+  stageShrinkAnimDuration: 1
+  fireBombSpreadInterval: 0.15
+  fallBombSpreadInterval: 0.3
   hpRecoveryAmount: 3
   hpRecoveryThreshold: 5
