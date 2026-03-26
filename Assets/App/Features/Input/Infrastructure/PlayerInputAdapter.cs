@@ -19,12 +19,16 @@ namespace FloorBreaker.Input.Infrastructure
         private PlayerId _playerId;
         private Direction8 _lastDirection = Direction8.S;
         private Direction8? _heldDirection;
+        private bool _isAimLocked;
 
         public PlayerId Owner => _playerId;
         public Direction8 LastDirection => _lastDirection;
 
         /// <summary>現在ホールド中の方向。null = スティック/十字キーがニュートラル。</summary>
         public Direction8? HeldDirection => _heldDirection;
+
+        /// <summary>AimLock ボタンが押されているか。true の間は移動せず向きだけ変える。</summary>
+        public bool IsAimLocked => _isAimLocked;
 
         public event Action<PlayerId, Direction8> OnMoveInput;
         public event Action<PlayerId> OnMoveReleased;
@@ -48,6 +52,13 @@ namespace FloorBreaker.Input.Infrastructure
             gameplay["FallBombHold"].canceled += OnFallBombCanceled;
             gameplay["FireBombHold"].started += OnFireBombStarted;
             gameplay["FireBombHold"].canceled += OnFireBombCanceled;
+
+            var aimLock = gameplay.FindAction("AimLock");
+            if (aimLock != null)
+            {
+                aimLock.started += OnAimLockStarted;
+                aimLock.canceled += OnAimLockCanceled;
+            }
         }
 
         private void OnDisable()
@@ -63,6 +74,13 @@ namespace FloorBreaker.Input.Infrastructure
             gameplay["FallBombHold"].canceled -= OnFallBombCanceled;
             gameplay["FireBombHold"].started -= OnFireBombStarted;
             gameplay["FireBombHold"].canceled -= OnFireBombCanceled;
+
+            var aimLock = gameplay.FindAction("AimLock");
+            if (aimLock != null)
+            {
+                aimLock.started -= OnAimLockStarted;
+                aimLock.canceled -= OnAimLockCanceled;
+            }
         }
 
         private void OnMove(InputAction.CallbackContext ctx)
@@ -101,6 +119,16 @@ namespace FloorBreaker.Input.Infrastructure
         private void OnFireBombCanceled(InputAction.CallbackContext ctx)
         {
             OnBombHoldInput?.Invoke(new BombHoldCommand(_playerId, BombType.Fire, false));
+        }
+
+        private void OnAimLockStarted(InputAction.CallbackContext ctx)
+        {
+            _isAimLocked = true;
+        }
+
+        private void OnAimLockCanceled(InputAction.CallbackContext ctx)
+        {
+            _isAimLocked = false;
         }
 
         private static Direction8? Vector2ToDirection8(Vector2 v)

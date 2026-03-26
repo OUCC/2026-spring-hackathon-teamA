@@ -22,7 +22,14 @@ namespace FloorBreaker.Input.Application
         private const float BaseMoveInterval = 0.2f;
 
         /// <summary>初回入力後の追加遅延。ホールド開始時に少し溜めてからリピート開始。</summary>
-        private const float InitialRepeatDelay = 0.12f;
+        private const float InitialRepeatDelay = 0.15f;
+
+        /// <summary>
+        /// 初回押下時のバッファ時間 (秒)。
+        /// 十字キーの同時押しで中間方向が発生するのを吸収する。
+        /// この時間内の方向変更は「本当に入力したかった方向」として扱う。
+        /// </summary>
+        private const float InputBufferTime = 0.04f;
 
         private readonly PlayerMoveService _moveService;
         private readonly BombFlightTracker _bombFlightTracker;
@@ -63,6 +70,7 @@ namespace FloorBreaker.Input.Application
 
         /// <summary>
         /// 毎フレーム呼び出し。ホールド中の方向キーリピート移動を処理する。
+        /// 全ての移動はここで実行される（イベントハンドラからは移動しない）。
         /// </summary>
         public void Tick(float deltaTime)
         {
@@ -84,30 +92,46 @@ namespace FloorBreaker.Input.Application
                     continue;
                 }
 
-                // ホールド中: 方向が変わったら即座に移動 + タイマーリセット
+                // アダプターの現在のホールド方向を常に反映
                 var currentDir = adapter.HeldDirection;
                 if (!currentDir.HasValue)
                 {
                     state.Reset();
                     continue;
                 }
+                state.Direction = currentDir.Value;
 
-                if (currentDir.Value != state.Direction)
+                // AimLock 中: 向きだけ更新して移動しない
+                if (adapter.IsAimLocked)
                 {
-                    state.Direction = currentDir.Value;
+                    player.CurrentFacing = state.Direction;
                     state.Timer = 0f;
-                    state.InitialMoveDone = false;
+                    state.FirstMoveDone = false;
+                    state.RepeatCount = 0;
+                    continue;
                 }
 
-                // 初回移動は HandleMovePressed で即座に実行済み
-                if (!state.InitialMoveDone) continue;
+                state.Timer += deltaTime;
 
+                // 初回移動: バッファ時間経過後に実行（同時押しの中間状態を吸収）
+                if (!state.FirstMoveDone)
+                {
+                    if (state.Timer >= InputBufferTime)
+                    {
+                        _moveService.TryMove(player, state.Direction, _stage);
+                        state.FirstMoveDone = true;
+                        state.Timer = 0f;
+                        state.RepeatCount = 0;
+                    }
+                    continue;
+                }
+
+                // リピート移動
                 float moveInterval = GetMoveInterval(player);
                 float threshold = state.RepeatCount == 0
                     ? moveInterval + InitialRepeatDelay
                     : moveInterval;
 
-                state.Timer += deltaTime;
                 if (state.Timer >= threshold)
                 {
                     state.Timer -= threshold;
@@ -121,21 +145,20 @@ namespace FloorBreaker.Input.Application
         {
             if (_clock.CurrentPhaseValue != GamePhase.MatchRunning) return;
 
-            var player = GetPlayer(playerId);
-            if (player == null) return;
-            if (player.ForcedMove.IsForced) return;
-
             int idx = playerId.Index;
             var state = _moveStates[idx];
 
-            // 初回押下: 即座に1マス移動
-            _moveService.TryMove(player, direction, _stage);
-
-            state.IsHolding = true;
-            state.Direction = direction;
-            state.Timer = 0f;
-            state.RepeatCount = 0;
-            state.InitialMoveDone = true;
+            if (!state.IsHolding)
+            {
+                // 新規押下: ホールド開始、Tick でバッファ後に移動
+                state.IsHolding = true;
+                state.Direction = direction;
+                state.Timer = 0f;
+                state.RepeatCount = 0;
+                state.FirstMoveDone = false;
+            }
+            // 既にホールド中の方向変更はアダプターの HeldDirection を
+            // Tick で読み取るため、ここでは何もしない
         }
 
         private void HandleMoveReleased(PlayerId playerId)
@@ -202,14 +225,14 @@ namespace FloorBreaker.Input.Application
             public Direction8 Direction;
             public float Timer;
             public int RepeatCount;
-            public bool InitialMoveDone;
+            public bool FirstMoveDone;
 
             public void Reset()
             {
                 IsHolding = false;
                 Timer = 0f;
                 RepeatCount = 0;
-                InitialMoveDone = false;
+                FirstMoveDone = false;
             }
         }
     }
