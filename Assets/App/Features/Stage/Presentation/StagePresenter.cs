@@ -25,7 +25,7 @@ namespace FloorBreaker.Stage.Presentation
             TileAnimationService animService,
             TileFireVfxPool fireVfxPool,
             TileSpriteConfig config,
-            IAudioService audio = null)
+            IAudioService audio)
         {
             _views = views;
             _animService = animService;
@@ -93,12 +93,12 @@ namespace FloorBreaker.Stage.Presentation
                     view.ApplyState(TileState.OnFire, _config);
                     _animService.PlayFirePulse(view);
                     _fireVfxPool.SpawnAt(pos, view.BasePosition);
-                    _audio?.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
+                    _audio.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
                 case TileState.Collapsing:
                     _animService.PlayCollapse(view, permanent: false);
-                    _audio?.PlaySfx(SfxIds.TileCollapse, new Float2(view.BasePosition.x, view.BasePosition.y));
+                    _audio.PlaySfx(SfxIds.TileCollapse, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
                 case TileState.Collapsed:
@@ -107,7 +107,7 @@ namespace FloorBreaker.Stage.Presentation
 
                 case TileState.PermanentlyDestroyed:
                     _animService.PlayPermanentDestroy(view);
-                    _audio?.PlaySfx(SfxIds.TileDestroy, new Float2(view.BasePosition.x, view.BasePosition.y));
+                    _audio.PlaySfx(SfxIds.TileDestroy, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
             }
         }

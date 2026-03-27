@@ -30,8 +30,8 @@ namespace FloorBreaker.Stage.Presentation
             TileAnimationService animService,
             TileSpriteConfig config,
             float shrinkAnimDuration,
-            ICameraShakeService cameraShake = null,
-            IAudioService audio = null)
+            ICameraShakeService cameraShake,
+            IAudioService audio)
         {
             _views = views;
             _animService = animService;
@@ -95,7 +95,7 @@ namespace FloorBreaker.Stage.Presentation
             if (isWave)
             {
                 IsShrinkAnimating = true;
-                _cameraShake?.Shake(ShakeIntensity.Heavy);
+                _cameraShake.Shake(ShakeIntensity.Heavy);
                 SortClockwise(tiles);
 
                 float staggerWindow = _totalDuration * _config.ShrinkWaveStagger;

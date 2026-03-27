@@ -29,8 +29,8 @@ namespace FloorBreaker.Slimes.Presentation
             SlimeViewFactory factory,
             SlimeAnimationService animService,
             SlimeSpriteConfig config,
-            IAudioService audio = null,
-            ICameraShakeService cameraShake = null)
+            IAudioService audio,
+            ICameraShakeService cameraShake)
         {
             _factory = factory;
             _animService = animService;
@@ -50,7 +50,7 @@ namespace FloorBreaker.Slimes.Presentation
             _views[evt.Id] = view;
             _animService.PlaySpawn(view);
             var pos = evt.Position.ToWorldCenter();
-            _audio?.PlaySfx(SfxIds.SlimeSpawn, pos);
+            _audio.PlaySfx(SfxIds.SlimeSpawn, pos);
         }
 
         private void OnSlimeMoved(SlimeMovedEvent evt)
@@ -75,7 +75,7 @@ namespace FloorBreaker.Slimes.Presentation
             SpawnDeathVfx(view.transform.position);
             _animService.PlayDeath(view, () => _factory.DestroySlimeView(view));
             var deathPos = view.transform.position;
-            _audio?.PlaySfx(SfxIds.SlimeDeath, new Float2(deathPos.x, deathPos.y));
+            _audio.PlaySfx(SfxIds.SlimeDeath, new Float2(deathPos.x, deathPos.y));
         }
 
         private void SpawnDeathVfx(Vector3 position)
@@ -104,8 +104,8 @@ namespace FloorBreaker.Slimes.Presentation
             // 攻撃 VFX をターゲット位置に再生
             var targetWorld = evt.TargetPosition.ToWorldCenter().ToVector3(-1f);
             SpawnAttackVfx(targetWorld);
-            _audio?.PlaySfx(SfxIds.SlimeAttack, new Float2(targetWorld.x, targetWorld.y));
-            _cameraShake?.Shake(ShakeIntensity.Light);
+            _audio.PlaySfx(SfxIds.SlimeAttack, new Float2(targetWorld.x, targetWorld.y));
+            _cameraShake.Shake(ShakeIntensity.Light);
 
             // 攻撃者の突進アニメーション
             if (_views.TryGetValue(evt.AttackerId, out var attackerView))

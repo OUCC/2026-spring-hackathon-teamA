@@ -15,6 +15,7 @@ using FloorBreaker.Bombs.Application;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Slimes.Domain;
 using FloorBreaker.ScriptableObjects.Balance;
+using FloorBreaker.Shared.Infrastructure.Audio;
 
 namespace FloorBreaker.Bombs.Presentation.Debug
 {
@@ -150,8 +151,9 @@ namespace FloorBreaker.Bombs.Presentation.Debug
             vfxParent.SetParent(transform, false);
             _fireVfxPool = new TileFireVfxPool(_fireVfxPrefab, vfxParent);
 
+            var nullAudio = new NullAudioService();
             _stagePresenter = new StagePresenter(
-                _stageModel, _tileViews, _tileAnimService, _fireVfxPool, config);
+                _stageModel, _tileViews, _tileAnimService, _fireVfxPool, config, nullAudio);
         }
 
         private void SetupPlayers()
@@ -174,10 +176,13 @@ namespace FloorBreaker.Bombs.Presentation.Debug
             _p1View = _playerFactory.CreatePlayerView(PlayerId.Player1, p1Spawn);
             _p2View = _playerFactory.CreatePlayerView(PlayerId.Player2, p2Spawn);
 
+            var nullAudio = new NullAudioService();
+            var nullCameraShake = new NullCameraShakeService();
+            var nullImpactFreeze = new NullImpactFreezeService();
             _p1Presenter = new PlayerPresenter(
-                _player1, _p1View, _playerAnimService, playerConfig);
+                _player1, _p1View, _playerAnimService, playerConfig, nullAudio, nullCameraShake, nullImpactFreeze);
             _p2Presenter = new PlayerPresenter(
-                _player2, _p2View, _playerAnimService, playerConfig);
+                _player2, _p2View, _playerAnimService, playerConfig, nullAudio, nullCameraShake, nullImpactFreeze);
         }
 
         private void SetupBombs()
@@ -215,9 +220,13 @@ namespace FloorBreaker.Bombs.Presentation.Debug
                 bombConfig.GetExplosionPrefab(BombType.Break),
                 vfxParent, bombConfig.ExplosionVfxScale, bombConfig.ExplosionVfxDuration);
 
+            var nullAudioBomb = new NullAudioService();
+            var nullCameraShakeBomb = new NullCameraShakeService();
+            var nullImpactFreezeBomb = new NullImpactFreezeService();
             _bombPresenter = new BombPresenter(
                 _tracker, _bombFactory, _bombAnimService, _bombVfxPool,
-                bombConfig, _queryService, _tileViews, _balance.BombFlightSpeed);
+                bombConfig, _queryService, _tileViews, _balance.BombFlightSpeed,
+                nullAudioBomb, nullCameraShakeBomb, nullImpactFreezeBomb);
         }
 
         private PlayerModel CreatePlayerModel(PlayerId id, GridPos spawn)
