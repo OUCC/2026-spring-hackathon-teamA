@@ -33,9 +33,9 @@ namespace FloorBreaker.Bombs.Domain
 
                 var state = _stage.GetTileState(pos);
 
-                // 穴（Collapsed, PermanentlyDestroyed）: 貫通でも手前で着弾
+                // 穴（Collapsed, PermanentlyDestroyed）: ボムは飛び越える（lastValid 更新なし）
                 if (state == TileState.Collapsed || state == TileState.PermanentlyDestroyed)
-                    return lastValid;
+                    continue;
 
                 // 壁衝突
                 if (state == TileState.Wall)
