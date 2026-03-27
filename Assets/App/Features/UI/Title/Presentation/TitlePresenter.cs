@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Input.Infrastructure;
+using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.UI.RuntimeUI.Documents;
 
 namespace FloorBreaker.UI.Title.Presentation
@@ -30,12 +31,20 @@ namespace FloorBreaker.UI.Title.Presentation
             // 2P 対戦
             doc.ModeButton2P?.RegisterCallback<ClickEvent>(_ =>
             {
+                MatchModeSelection.IsCpuPlayer = false;
                 audio?.StopBgm(0.5f);
                 SceneManager.LoadScene("Match");
             });
 
-            // 1P / CPU — 無効 (Coming Soon)
-            doc.ModeButton1P?.SetEnabled(false);
+            // vs CPU
+            doc.ModeButton1P?.RegisterCallback<ClickEvent>(_ =>
+            {
+                MatchModeSelection.IsCpuPlayer = true;
+                audio?.StopBgm(0.5f);
+                SceneManager.LoadScene("Match");
+            });
+
+            // 観戦モード — 無効 (Coming Soon)
             doc.ModeButtonCPU?.SetEnabled(false);
 
             // 終了

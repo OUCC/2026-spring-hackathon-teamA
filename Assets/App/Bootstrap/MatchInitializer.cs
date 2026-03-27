@@ -64,6 +64,7 @@ namespace FloorBreaker.Bootstrap
         private readonly IAudioService _audio;
         private readonly ICameraShakeService _cameraShake;
         private readonly ImpactFreezeService _impactFreeze;
+        private readonly MatchConfig _matchConfig;
 
         // Dispose 用: アクション購読の解除
         private InputActionMap _upgradeP1Map;
@@ -100,7 +101,8 @@ namespace FloorBreaker.Bootstrap
             UpgradeUIInputBridge upgradeUIInputBridge,
             IAudioService audio,
             ICameraShakeService cameraShake,
-            ImpactFreezeService impactFreeze)
+            ImpactFreezeService impactFreeze,
+            MatchConfig matchConfig)
         {
             _balance = balance;
             _random = random;
@@ -132,6 +134,7 @@ namespace FloorBreaker.Bootstrap
             _audio = audio;
             _cameraShake = cameraShake;
             _impactFreeze = impactFreeze;
+            _matchConfig = matchConfig;
         }
 
         public async UniTask StartAsync(CancellationToken ct)
@@ -249,8 +252,9 @@ namespace FloorBreaker.Bootstrap
             }
 
             // P1, P2 アダプターを初期化
-            // 2つのアダプターが見つかることを前提（シーン上に配置済み）
-            for (int i = 0; i < inputAdapters.Length && i < 2; i++)
+            // CPU モード時は P2 のアダプターを登録しない
+            int maxAdapters = _matchConfig.IsCpuPlayer ? 1 : 2;
+            for (int i = 0; i < inputAdapters.Length && i < maxAdapters; i++)
             {
                 var adapter = inputAdapters[i];
                 var id = i == 0 ? PlayerId.Player1 : PlayerId.Player2;
@@ -273,7 +277,8 @@ namespace FloorBreaker.Bootstrap
                     _upgradeP1Map["Submit"].performed += _upgradeUIInputBridge.OnSubmitP1;
                 }
 
-                if (_upgradeP2Map != null)
+                // CPU モード時は P2 の UpgradeUI 入力を接続しない
+                if (_upgradeP2Map != null && !_matchConfig.IsCpuPlayer)
                 {
                     _upgradeP2Map["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP2;
                     _upgradeP2Map["Submit"].performed += _upgradeUIInputBridge.OnSubmitP2;
@@ -312,7 +317,7 @@ namespace FloorBreaker.Bootstrap
                 _upgradeP1Map["Navigate"].performed -= _upgradeUIInputBridge.OnNavigateP1;
                 _upgradeP1Map["Submit"].performed -= _upgradeUIInputBridge.OnSubmitP1;
             }
-            if (_upgradeP2Map != null)
+            if (_upgradeP2Map != null && !_matchConfig.IsCpuPlayer)
             {
                 _upgradeP2Map["Navigate"].performed -= _upgradeUIInputBridge.OnNavigateP2;
                 _upgradeP2Map["Submit"].performed -= _upgradeUIInputBridge.OnSubmitP2;

@@ -21,6 +21,7 @@ using FloorBreaker.Input.Application;
 using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Cameras.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
+using FloorBreaker.CpuPlayer.Application;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -31,6 +32,9 @@ namespace FloorBreaker.Bootstrap
     {
         [Header("Fallback (Match 単体起動用)")]
         [SerializeField] private FloorBreaker.ScriptableObjects.Balance.BalanceConfig _fallbackBalance;
+
+        [Header("CPU Player")]
+        [SerializeField] private bool _enableCpuPlayer = true;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -55,6 +59,11 @@ namespace FloorBreaker.Bootstrap
                         c => new Shared.Infrastructure.Audio.NullAudioService(), Lifetime.Singleton);
             }
 
+            // タイトル画面から遷移した場合は MatchModeSelection を優先
+            // Match 単体起動時 (Parent == null) は Inspector の値をフォールバックに使う
+            bool cpuMode = Parent != null ? MatchModeSelection.IsCpuPlayer : _enableCpuPlayer;
+            builder.RegisterInstance(new MatchConfig(cpuMode));
+
             RegisterStage(builder);
             RegisterUpgrades(builder);
             RegisterPlayers(builder);
@@ -62,6 +71,8 @@ namespace FloorBreaker.Bootstrap
             RegisterSlimes(builder);
             RegisterMatchFlow(builder);
             RegisterInput(builder);
+            if (_enableCpuPlayer)
+                RegisterCpuPlayer(builder);
             RegisterPresentation(builder);
             RegisterEntryPoints(builder);
         }
@@ -234,6 +245,38 @@ namespace FloorBreaker.Bootstrap
             }, Lifetime.Scoped);
         }
 
+        public bool IsCpuPlayerEnabled => _enableCpuPlayer;
+
+        private static void RegisterCpuPlayer(IContainerBuilder builder)
+        {
+            builder.Register(c =>
+            {
+                var mp = c.Resolve<MatchPlayers>();
+                return new CpuPlayerBrain(
+                    mp.Player2, mp.Player1,
+                    c.Resolve<StageModel>(),
+                    c.Resolve<PlayerMoveService>(),
+                    c.Resolve<BombFlightTracker>(),
+                    c.Resolve<BombLaunchUseCase>(),
+                    mp.Cooldown2,
+                    c.Resolve<SlimeRegistry>(),
+                    mp.All);
+            }, Lifetime.Scoped);
+
+            builder.Register(c =>
+            {
+                var mp = c.Resolve<MatchPlayers>();
+                return new CpuUpgradeSelector(mp.Draft2, mp.Player2);
+            }, Lifetime.Scoped);
+
+            builder.Register(c =>
+                new CpuPlayerService(
+                    c.Resolve<CpuPlayerBrain>(),
+                    c.Resolve<CpuUpgradeSelector>(),
+                    c.Resolve<MatchClock>()),
+                Lifetime.Scoped);
+        }
+
         private static void RegisterPresentation(IContainerBuilder builder)
         {
             // シーン上の MonoBehaviour
@@ -276,7 +319,23 @@ namespace FloorBreaker.Bootstrap
         private static void RegisterEntryPoints(IContainerBuilder builder)
         {
             builder.RegisterEntryPoint<MatchInitializer>();
-            builder.RegisterEntryPoint<MatchTickRunner>();
+
+            // MatchTickRunner: CpuPlayerService は CPU モード時のみ注入
+            builder.Register(c =>
+            {
+                CpuPlayerService cpuService = null;
+                var config = c.Resolve<MatchConfig>();
+                if (config.IsCpuPlayer)
+                    cpuService = c.Resolve<CpuPlayerService>();
+
+                return new MatchTickRunner(
+                    c.Resolve<MatchPhaseScheduler>(),
+                    c.Resolve<GameplayInputBridge>(),
+                    c.Resolve<MatchPresenters>(),
+                    c.Resolve<SplitScreenCameraSetup>(),
+                    c.Resolve<ITimeProvider>(),
+                    cpuService);
+            }, Lifetime.Scoped).AsImplementedInterfaces();
         }
 
         private static PlayerBuild CreateDefaultBuild(IBalanceParameters b)
