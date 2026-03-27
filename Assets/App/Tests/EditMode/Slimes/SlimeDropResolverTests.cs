@@ -39,7 +39,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void Resolve_NormalSlime_GivesCoin()
         {
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(3, 3));
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(3, 3), 1f);
             _resolver.Resolve(slime, _player, _random);
             Assert.AreEqual(1, _player.Stats.Coins.CurrentValue);
         }
@@ -47,7 +47,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void Resolve_GoldSlime_Gives5Coins()
         {
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Gold, new GridPos(3, 3));
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Gold, new GridPos(3, 3), 1f);
             _resolver.Resolve(slime, _player, _random);
             Assert.AreEqual(5, _player.Stats.Coins.CurrentValue);
         }
@@ -55,7 +55,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void Resolve_RedSlime_AppliesUpgrade()
         {
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Red, new GridPos(3, 3));
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Red, new GridPos(3, 3), 1f);
 
             // Snapshot build values before
             int fireFlightBefore = _player.Build.FireFlightRange;
@@ -92,7 +92,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void Resolve_NullKiller_NoDrops()
         {
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(3, 3));
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(3, 3), 1f);
             _resolver.Resolve(slime, null, _random);
 
             // Player coins unchanged (not involved)
@@ -165,6 +165,14 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public int BreakDamageIncrement => 1;
             public float BreakCollapseTimeIncrement => 2f;
             public float BreakCooldownReduction => 0.5f;
+            public float InputBaseMoveInterval => 0.2f;
+            public float InputInitialRepeatDelay => 0.15f;
+            public float InputBufferTime => 0.04f;
+            public float CpuThinkInterval => 0.2f;
+            public float CpuBaseMoveInterval => 0.2f;
+            public float CpuBombReleaseDelay => 0.08f;
+            public float CpuUpgradeInitialDelay => 1.5f;
+            public float CpuUpgradePurchaseInterval => 0.6f;
         }
     }
 }

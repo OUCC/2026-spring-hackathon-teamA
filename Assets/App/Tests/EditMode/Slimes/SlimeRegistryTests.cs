@@ -20,7 +20,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void Add_IncreasesCount()
         {
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(3, 3));
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(3, 3), 1f);
             _registry.Add(slime);
             Assert.AreEqual(1, _registry.AliveCount);
         }
@@ -28,7 +28,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void Remove_DecreasesCount()
         {
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(3, 3));
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(3, 3), 1f);
             _registry.Add(slime);
             Assert.AreEqual(1, _registry.AliveCount);
 
@@ -40,7 +40,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         public void GetAt_ReturnsCorrectSlime()
         {
             var pos = new GridPos(4, 4);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Gold, pos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Gold, pos, 1f);
             _registry.Add(slime);
 
             var found = _registry.GetAt(pos);
@@ -59,7 +59,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         public void IsOccupied_True_WhenSlimePresent()
         {
             var pos = new GridPos(2, 2);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, pos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, pos, 1f);
             _registry.Add(slime);
 
             Assert.IsTrue(_registry.IsOccupied(pos));
@@ -72,9 +72,9 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             var pos1 = new GridPos(1, 1);
             var pos2 = new GridPos(2, 2);
             var pos3 = new GridPos(3, 3);
-            _registry.Add(new SlimeModel(SlimeId.Next(), SlimeType.Normal, pos1));
-            _registry.Add(new SlimeModel(SlimeId.Next(), SlimeType.Gold, pos2));
-            _registry.Add(new SlimeModel(SlimeId.Next(), SlimeType.Red, pos3));
+            _registry.Add(new SlimeModel(SlimeId.Next(), SlimeType.Normal, pos1, 1f));
+            _registry.Add(new SlimeModel(SlimeId.Next(), SlimeType.Gold, pos2, 1f));
+            _registry.Add(new SlimeModel(SlimeId.Next(), SlimeType.Red, pos3, 1f));
 
             var positions = new List<GridPos> { pos1, pos3, new GridPos(9, 9) };
             var result = _registry.GetSlimesAt(positions);
@@ -87,7 +87,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         {
             var oldPos = new GridPos(1, 1);
             var newPos = new GridPos(2, 2);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, oldPos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, oldPos, 1f);
             _registry.Add(slime);
 
             slime.MoveTo(newPos);
@@ -107,7 +107,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             _registry.Spawned.Subscribe(e => received = e);
 
             var pos = new GridPos(5, 5);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Gold, pos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Gold, pos, 1f);
             _registry.Add(slime);
 
             Assert.IsNotNull(received);
@@ -123,7 +123,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             _registry.Killed.Subscribe(e => received = e);
 
             var pos = new GridPos(3, 3);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Red, pos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Red, pos, 1f);
             _registry.Add(slime);
 
             _registry.Remove(slime.Id);
@@ -142,7 +142,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
 
             var oldPos = new GridPos(1, 1);
             var newPos = new GridPos(1, 2);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, oldPos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, oldPos, 1f);
             _registry.Add(slime);
 
             slime.MoveTo(newPos);

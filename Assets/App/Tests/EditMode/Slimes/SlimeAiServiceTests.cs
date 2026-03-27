@@ -50,7 +50,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         {
             // Place slime 3 tiles away from player (cardinal direction)
             var slimePos = new GridPos(5, 2);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, 1f);
             _registry.Add(slime);
 
             // Tick with enough time for move accumulator to trigger
@@ -162,6 +162,14 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public int BreakDamageIncrement => 1;
             public float BreakCollapseTimeIncrement => 2f;
             public float BreakCooldownReduction => 0.5f;
+            public float InputBaseMoveInterval => 0.2f;
+            public float InputInitialRepeatDelay => 0.15f;
+            public float InputBufferTime => 0.04f;
+            public float CpuThinkInterval => 0.2f;
+            public float CpuBaseMoveInterval => 0.2f;
+            public float CpuBombReleaseDelay => 0.08f;
+            public float CpuUpgradeInitialDelay => 1.5f;
+            public float CpuUpgradePurchaseInterval => 0.6f;
         }
     }
 }
