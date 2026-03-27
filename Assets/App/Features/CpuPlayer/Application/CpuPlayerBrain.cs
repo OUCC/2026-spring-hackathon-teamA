@@ -251,7 +251,8 @@ namespace FloorBreaker.CpuPlayer.Application
             {
                 var leftDir = direction.RotateCCW90();
                 var rightDir = direction.RotateCW90();
-                _bombFlightTracker.StartFlight(_cpu.Id, _cpu.CurrentPosition, leftDir, spec);
+                if (!_bombFlightTracker.StartFlight(_cpu.Id, _cpu.CurrentPosition, leftDir, spec))
+                    return;
                 _bombFlightTracker.StartDualFlight(_cpu.Id, _cpu.CurrentPosition, rightDir, spec);
             }
             else

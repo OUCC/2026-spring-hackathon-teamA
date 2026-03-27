@@ -71,7 +71,7 @@ namespace FloorBreaker.Bootstrap
             RegisterSlimes(builder);
             RegisterMatchFlow(builder);
             RegisterInput(builder);
-            if (_enableCpuPlayer)
+            if (cpuMode)
                 RegisterCpuPlayer(builder);
             RegisterPresentation(builder);
             RegisterEntryPoints(builder);
