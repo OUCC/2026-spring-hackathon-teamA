@@ -164,7 +164,7 @@ namespace FloorBreaker.Shared.Infrastructure.Audio
             _bgmFadeCoroutine = StartCoroutine(FadeOutBgm(fadeOutDuration));
         }
 
-        public void SetBgmVolume(float volume, float fadeDuration = 0.3f)
+        public void DuckBgm(float volume, float fadeDuration = 0.3f)
         {
             if (!_bgmSource.isPlaying) return;
 

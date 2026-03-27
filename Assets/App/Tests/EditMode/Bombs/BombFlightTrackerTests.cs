@@ -301,6 +301,96 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             Assert.IsFalse(_tracker.IsFlying(PlayerId.Player1));
         }
 
+        [Test]
+        public void Tick_SlimeOnPath_LandsAtSlimePosition()
+        {
+            // スライムを (4, 2) に配置（origin (2,2) から E 方向 2 マス先）
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(4, 2), 1f);
+            _slimeRegistry.Add(slime);
+
+            BombLandedEvent? received = null;
+            _tracker.BombLanded.Subscribe(evt => received = evt);
+
+            _tracker.StartFlight(
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateLongRangeBreakSpec());
+
+            // 十分 Tick してスライム位置まで飛行
+            _tracker.Tick(0.5f, _players);
+
+            Assert.IsFalse(_tracker.IsFlying(PlayerId.Player1));
+            Assert.IsNotNull(received);
+            Assert.AreEqual(new GridPos(4, 2), received.Value.LandingPos);
+        }
+
+        [Test]
+        public void Tick_SlimeOnPath_WithPenetration_PassesThrough()
+        {
+            // スライムを (4, 2) に配置
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(4, 2), 1f);
+            _slimeRegistry.Add(slime);
+
+            // 貫通スペック
+            var spec = new BombSpec(
+                BombType.Break, 10, 3, 1, 2, 4f,
+                true, 0f, 3f, 5f, flightPenetration: true);
+
+            BombLandedEvent? received = null;
+            _tracker.BombLanded.Subscribe(evt => received = evt);
+
+            _tracker.StartFlight(
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, spec);
+
+            // リリースして最小距離で着弾させる
+            _tracker.ReleaseBomb(PlayerId.Player1, _players);
+            _tracker.Tick(0.5f, _players);
+
+            Assert.IsNotNull(received);
+            // スライムを通過して min distance (3) で着弾 = (5, 2)
+            Assert.AreEqual(new GridPos(5, 2), received.Value.LandingPos);
+        }
+
+        [Test]
+        public void Tick_CollapsedTile_PassesThrough()
+        {
+            // (4, 2) を Collapsed に設定 — ボムは穴を飛び越える
+            _stage.SetTileState(new GridPos(4, 2), TileState.Collapsed);
+
+            BombLandedEvent? received = null;
+            _tracker.BombLanded.Subscribe(evt => received = evt);
+
+            _tracker.StartFlight(
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
+
+            // MaxFlightDistance=3 まで飛行
+            _tracker.Tick(0.5f, _players);
+
+            Assert.IsFalse(_tracker.IsFlying(PlayerId.Player1));
+            Assert.IsNotNull(received);
+            // Collapsed タイルを飛び越えて MaxFlightDistance=3 で着弾 = (5, 2)
+            Assert.AreEqual(new GridPos(5, 2), received.Value.LandingPos);
+        }
+
+        [Test]
+        public void Tick_CollapsingTile_PassesThrough()
+        {
+            // (4, 2) を Collapsing に設定
+            _stage.SetTileState(new GridPos(4, 2), TileState.Collapsing);
+
+            BombLandedEvent? received = null;
+            _tracker.BombLanded.Subscribe(evt => received = evt);
+
+            _tracker.StartFlight(
+                PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
+
+            // MaxFlightDistance=3 まで飛行
+            _tracker.Tick(0.5f, _players);
+
+            Assert.IsFalse(_tracker.IsFlying(PlayerId.Player1));
+            Assert.IsNotNull(received);
+            // Collapsing タイルは通過し、MaxFlightDistance=3 で着弾 = (5, 2)
+            Assert.AreEqual(new GridPos(5, 2), received.Value.LandingPos);
+        }
+
         private sealed class TestBalanceParameters : IBalanceParameters
         {
             public int InitialHp => 10;

@@ -73,12 +73,14 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         }
 
         [Test]
-        public void Resolve_CollapsedTile_LandsBeforeIt()
+        public void Resolve_CollapsedTile_PassesThrough()
         {
+            // Collapsed タイルはボムが飛び越える
             _stage.SetTileState(new GridPos(4, 5), TileState.Collapsed);
             var cmd = MakeCmd(new GridPos(2, 5), Direction8.E, 3);
             var pos = _resolver.Resolve(cmd, 3, null);
-            Assert.AreEqual(new GridPos(3, 5), pos);
+            // (4, 5) を飛び越えて (5, 5) に着弾
+            Assert.AreEqual(new GridPos(5, 5), pos);
         }
 
         [Test]

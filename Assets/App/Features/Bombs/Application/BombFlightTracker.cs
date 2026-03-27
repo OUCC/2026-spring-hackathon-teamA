@@ -193,11 +193,11 @@ namespace FloorBreaker.Bombs.Application
 
                 var tileState = _stage.GetTileState(nextPos);
 
+                // 穴（Collapsed, PermanentlyDestroyed）はボムが飛び越える
                 if (tileState == TileState.Collapsed || tileState == TileState.PermanentlyDestroyed)
                 {
-                    SetFlight(owner, state);
-                    Land(owner, state, players);
-                    return;
+                    state.CurrentTileDistance = nextTile;
+                    continue;
                 }
 
                 if (tileState == TileState.Wall)
@@ -333,11 +333,11 @@ namespace FloorBreaker.Bombs.Application
 
                 var tileState = _stage.GetTileState(nextPos);
 
+                // 穴（Collapsed, PermanentlyDestroyed）はボムが飛び越える
                 if (tileState == TileState.Collapsed || tileState == TileState.PermanentlyDestroyed)
                 {
-                    SetDualFlight(owner, state);
-                    LandDual(owner, state, players);
-                    return;
+                    state.CurrentTileDistance = nextTile;
+                    continue;
                 }
 
                 if (tileState == TileState.Wall && !state.Command.Spec.FlightPenetration)
