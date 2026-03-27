@@ -213,15 +213,8 @@ _dashCooldowns[playerId.Index] = 1f; // TODO: BalanceParameters から取得
 ### 2.5 SafeTileSearchService — 3x3 優先探索の省略
 
 **ファイル:** `Features/Stage/Domain/SafeTileSearchService.cs`
-**worklog記載:** "SafeTileSearchService は BFS のみ (3x3 優先探索は省略しシンプルに)"
 
-**違反箇所:** CLAUDE.md §13.5
-- 「3x3 優先探索と BFS フォールバックを別関数に分ける」と明記
-- 仕様書にも「周囲3x3以内の安全マスに強制移動」「3x3以内に退避先がない場合: BFS」と記載
-
-**修正案:**
-- `FindIn3x3(model, from, occupied)` を実装し、BFS の前に呼ぶ
-- BFS はフォールバックとして維持
+**状態:** **仕様変更により対象外** — BFS のみの実装を正式方針とする。CLAUDE.md §13.5 および仕様書を更新済み。3x3 優先探索は不採用とし、BFS で最寄りの安全マスを探索する設計に統一。
 
 ---
 
@@ -509,16 +502,16 @@ public sealed class StagePreviewLifetimeScope : DebugLifetimeScope
 
 | # | 内容 | 関連違反 |
 |---|------|---------|
-| 4 | MatchInitializer の分割（Presenter 初期化 / Input 初期化を分離） | §2.1, §3.6 |
+| ~~4~~ | ~~MatchInitializer の分割（Presenter 初期化 / Input 初期化を分離）~~ | ~~§2.1, §3.6~~ — **完了** (PresentationInitializer + InputInitializer に分離済み) |
 | 5 | PlayerInputAdapter の DI 管理化 (FindObjectsByType 除去) | §2.2 |
-| 6 | SafeTileSearchService に 3x3 優先探索を実装 | §2.5 |
-| 7 | ダッシュクールダウンを BalanceConfig に移動 | §2.4 |
+| ~~6~~ | ~~SafeTileSearchService に 3x3 優先探索を実装~~ | ~~§2.5~~ — **仕様変更により対象外** |
+| ~~7~~ | ~~ダッシュクールダウンを BalanceConfig に移動~~ | ~~§2.4~~ — **完了** |
 
 ### P2 — 中優先度 (余裕がある時に対応)
 
 | # | 内容 | 関連違反 |
 |---|------|---------|
-| 8 | Presenter の optional null パラメータを NullObject に統一 | §3.2 |
+| ~~8~~ | ~~Presenter の optional null パラメータを NullObject に統一~~ | ~~§3.2~~ — **完了** |
 | 9 | DebugLifetimeScope 新設 + StagePreview パイロット移行 | §7 |
 | 10 | StageShrinkAnimator のフレーム判定を Domain イベントに置換 | §3.1 |
 | 11 | MatchPresenters の mutable setter を Builder/Factory に変更 | §2.3 |
@@ -906,17 +899,17 @@ MissingReferenceException: PlayerView has been destroyed but you are still tryin
 | 1.3 | ~~CRITICAL~~ | ~~依存方向~~ | ~~ResultPresenter.cs~~ | ~~§4~~ | **修正済み** |
 | 1.4 | ~~CRITICAL~~ | ~~DI 不使用~~ | ~~TitleUIDocument.cs~~ | ~~§8~~ | **修正済み** |
 | 1.5 | CRITICAL | 神 MonoBehaviour | TitleTestSpaceController.cs | §1, §8, §20 | 未着手 |
-| 2.1 | HIGH | Presenter 手動生成 | MatchInitializer.cs | §8 | 未着手 |
+| ~~2.1~~ | ~~HIGH~~ | ~~Presenter 手動生成~~ | ~~MatchInitializer.cs~~ | ~~§8~~ | **完了** (PresentationInitializer に分離) |
 | 2.2 | HIGH | FindObjectsByType | MatchInitializer.cs | §8 | 未着手 |
 | 2.3 | HIGH | mutable ホルダー | MatchPresenters.cs | §5 精神 | 未着手 |
-| 2.4 | HIGH | ハードコード値 | GameplayInputBridge.cs | §0 | 未着手 |
-| 2.5 | HIGH | 仕様未実装 | SafeTileSearchService.cs | §13.5 | 未着手 |
+| ~~2.4~~ | ~~HIGH~~ | ~~ハードコード値~~ | ~~GameplayInputBridge.cs~~ | ~~§0~~ | **完了** (IBalanceParameters に外部化) |
+| ~~2.5~~ | ~~HIGH~~ | ~~仕様未実装~~ | ~~SafeTileSearchService.cs~~ | ~~§13.5~~ | **仕様変更により対象外** |
 | 3.1 | MEDIUM | Presentation ロジック | StageShrinkAnimator.cs | §5 | 未着手 |
-| 3.2 | MEDIUM | optional null | 複数 Presenter | §8 | 未着手 |
+| ~~3.2~~ | ~~MEDIUM~~ | ~~optional null~~ | ~~複数 Presenter~~ | ~~§8~~ | **完了** (NullObject パターンに統一、NullCameraShakeService を Shared に移動) |
 | 3.3 | MEDIUM | static カウンタ | SlimeId.cs | §4 | 未着手 |
 | ~~3.4~~ | ~~MEDIUM~~ | ~~LifetimeScope 不在~~ | ~~Title シーン~~ | ~~§8~~ | **修正済み** |
 | 3.5 | MEDIUM | LifetimeScope 不在 | Result 画面 | §8 | 未着手 |
-| 3.6 | MEDIUM | 引数過多 | MatchInitializer.cs | §1 | 未着手 |
+| ~~3.6~~ | ~~MEDIUM~~ | ~~引数過多~~ | ~~MatchInitializer.cs~~ | ~~§1~~ | **完了** (10 引数に削減、Initializer 分離) |
 | 4.1 | LOW | 状態重複 | PlayerPresenter.cs | §5 | 未着手 |
 | 4.2 | LOW | 依存方向 | BombPresenter.cs | §4 | 未着手 |
 | 4.3 | LOW | 直接 Instantiate | SlimePresenter.cs | §4 | 未着手 |
@@ -931,11 +924,11 @@ MissingReferenceException: PlayerView has been destroyed but you are still tryin
 | 10.9 | MEDIUM | クラス名より広い責務 | BombLaunchUseCase.cs | §15 | 未着手 |
 | ~~10.10~~ | ~~MEDIUM~~ | ~~安定参照を毎回引数で渡す~~ | ~~複数 Service~~ | ~~§8~~ | **修正済み** |
 | ~~10.11~~ | ~~LOW~~ | ~~古いファイル残存~~ | ~~Cameras/ICameraShakeService.cs~~ | ~~—~~ | **修正済み** |
-| 10.12 | LOW | デフォルト引数にバランス値 | SlimeModel.cs | §0 | 未着手 |
+| ~~10.12~~ | ~~LOW~~ | ~~デフォルト引数にバランス値~~ | ~~SlimeModel.cs~~ | ~~§0~~ | **完了** (デフォルト引数削除) |
 | ~~11.1~~ | ~~HIGH~~ | ~~強化効果量ハードコード~~ | ~~PlayerBuild.cs~~ | ~~§0~~ | **修正済み** |
-| 11.2 | MEDIUM | 入力定数ハードコード | GameplayInputBridge.cs | §0 | 未着手 |
-| 11.3 | MEDIUM | AI定数ハードコード | CpuPlayerBrain.cs | §0 | 未着手 |
-| 11.4 | LOW | CPU購入タイミングハードコード | CpuUpgradeSelector.cs | §0 | 未着手 |
+| ~~11.2~~ | ~~MEDIUM~~ | ~~入力定数ハードコード~~ | ~~GameplayInputBridge.cs~~ | ~~§0~~ | **完了** (IBalanceParameters に外部化) |
+| ~~11.3~~ | ~~MEDIUM~~ | ~~AI定数ハードコード~~ | ~~CpuPlayerBrain.cs~~ | ~~§0~~ | **完了** (IBalanceParameters に外部化) |
+| ~~11.4~~ | ~~LOW~~ | ~~CPU購入タイミングハードコード~~ | ~~CpuUpgradeSelector.cs~~ | ~~§0~~ | **完了** (IBalanceParameters に外部化) |
 | 11.5 | LOW | 移動閾値ハードコード | SlimeAiService.cs | §0 | 未着手 |
 | ~~12.1~~ | ~~HIGH~~ | ~~シーン遷移時 MissingReferenceException~~ | ~~MatchTickRunner / PlayerPresenter~~ | ~~—~~ | **修正済み** |
 | ~~12.2~~ | ~~MEDIUM~~ | ~~Title 音量設定 SFX フィードバック~~ | ~~TitlePresenter~~ | ~~—~~ | **修正済み** |
