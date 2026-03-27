@@ -47,7 +47,7 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [SerializeField] private float slimeTargetRatio = 0.03f;
         [SerializeField] private int slimeMinDistanceFromPlayer = 5;
         [SerializeField] private int slimeHp = 1;
-        [SerializeField] private float slimeSpeedMultiplier = 0.5f;
+        [SerializeField] private float slimeSpeedMultiplier = 1.2f;
         [SerializeField] private int slimeDetectionRange = 5;
         [SerializeField] private int slimeAttackDamage = 1;
         [SerializeField] private float slimeAttackCooldown = 1f;

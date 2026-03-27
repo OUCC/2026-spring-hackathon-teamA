@@ -55,6 +55,14 @@ namespace FloorBreaker.Slimes.Domain
                 // 隣接（4方向）: 攻撃
                 if (dist == 1 && IsCardinalAdjacent(slime.Position, nearest.CurrentPosition))
                 {
+                    // 初めて隣接した瞬間は溜め時間を設ける（即攻撃を防ぐ）
+                    if (!slime.WasAdjacentToPlayer)
+                    {
+                        slime.WasAdjacentToPlayer = true;
+                        slime.ResetAttackCooldown(_balance.SlimeAttackCooldown);
+                        continue;
+                    }
+
                     if (slime.CanAttack)
                     {
                         var occupied = BuildOccupiedSet(_players);
@@ -64,6 +72,10 @@ namespace FloorBreaker.Slimes.Domain
                         _registry.NotifyAttack(slime.Id, slime.Position, nearest.CurrentPosition);
                     }
                     continue;
+                }
+                else
+                {
+                    slime.WasAdjacentToPlayer = false;
                 }
 
                 // 移動アキュムレータ
