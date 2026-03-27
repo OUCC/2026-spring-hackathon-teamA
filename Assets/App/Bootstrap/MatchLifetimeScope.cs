@@ -339,6 +339,10 @@ namespace FloorBreaker.Bootstrap
             builder.Register<TileViewRegistry>(Lifetime.Scoped);
             builder.Register<MatchPresenters>(Lifetime.Scoped);
 
+            // 初期化サブシステム
+            builder.Register<PresentationInitializer>(Lifetime.Scoped);
+            builder.Register<InputInitializer>(Lifetime.Scoped);
+
             // AnimationService (Config は各 Factory の SerializeField から取得)
             builder.Register(c =>
                 new TileAnimationService(c.Resolve<StageViewFactory>().Config),
