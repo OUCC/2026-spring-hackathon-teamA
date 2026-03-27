@@ -63,14 +63,31 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         }
 
         [Test]
-        public void TickAll_AttacksAdjacentPlayer()
+        public void TickAll_DoesNotAttackOnFirstAdjacentTick()
         {
             // Place slime cardinally adjacent to player (5,5) => (5,4)
             var slimePos = new GridPos(5, 4);
             var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
             _registry.Add(slime);
 
+            // First adjacent tick: should NOT attack (first-strike delay)
             _ai.TickAll(0.1f);
+            Assert.AreEqual(10, _player.Stats.CurrentHp.CurrentValue);
+        }
+
+        [Test]
+        public void TickAll_AttacksAfterFirstStrikeDelay()
+        {
+            var slimePos = new GridPos(5, 4);
+            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
+            _registry.Add(slime);
+
+            // First tick: sets first-strike delay (SlimeAttackCooldown = 1s)
+            _ai.TickAll(0.1f);
+            Assert.AreEqual(10, _player.Stats.CurrentHp.CurrentValue);
+
+            // Tick enough for cooldown to expire
+            _ai.TickAll(1.1f);
 
             // Player should have taken SlimeAttackDamage (1)
             Assert.AreEqual(9, _player.Stats.CurrentHp.CurrentValue);
@@ -83,15 +100,17 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
             _registry.Add(slime);
 
-            // First tick: attacks
+            // First tick: first-strike delay
             _ai.TickAll(0.1f);
+
+            // Wait for cooldown, then attack
+            _ai.TickAll(1.1f);
             Assert.AreEqual(9, _player.Stats.CurrentHp.CurrentValue);
 
             // Clear invulnerability so second attack could land
-            // Tick invulnerability to expire it
             _player.Invulnerability.Tick(2f);
 
-            // Second tick shortly after: slime on cooldown, should not attack again
+            // Shortly after: slime on cooldown, should not attack again
             _ai.TickAll(0.1f);
             Assert.AreEqual(9, _player.Stats.CurrentHp.CurrentValue);
         }

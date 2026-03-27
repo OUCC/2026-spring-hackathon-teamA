@@ -11,6 +11,7 @@ namespace FloorBreaker.Slimes.Domain
         public bool IsAlive { get; private set; }
         public float AttackCooldownRemaining { get; private set; }
         public float MoveAccumulator { get; set; }
+        public bool WasAdjacentToPlayer { get; set; }
 
         public SlimeModel(SlimeId id, SlimeType type, GridPos position, float initialAttackCooldown)
         {

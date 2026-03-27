@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Domain.Timing;
@@ -30,11 +31,15 @@ namespace FloorBreaker.CpuPlayer.Application
         private readonly SlimeRegistry _slimeRegistry;
         private readonly IReadOnlyList<PlayerModel> _allPlayers;
 
+        private readonly Random _rng = new Random();
+
         private float _thinkTimer;
         private float _moveAccumulator;
         private float _bombReleaseTimer;
         private bool _waitingForRelease;
         private Direction8? _desiredDirection;
+        private Direction8? _wanderDirection;
+        private int _wanderStepsRemaining;
 
         public CpuPlayerBrain(
             IBalanceParameters balance,
@@ -160,6 +165,26 @@ namespace FloorBreaker.CpuPlayer.Application
                 var dir = TowardTarget(myPos, center);
                 if (dir.HasValue && IsSafeToMove(myPos, dir.Value))
                     return dir.Value;
+            }
+
+            // 5. 徘徊: ターゲットがないときランダムに歩き回る
+            if (_wanderStepsRemaining > 0 && _wanderDirection.HasValue)
+            {
+                if (IsSafeToMove(myPos, _wanderDirection.Value))
+                {
+                    _wanderStepsRemaining--;
+                    return _wanderDirection.Value;
+                }
+                _wanderStepsRemaining = 0;
+            }
+
+            var newDir = PickRandomSafeDirection(myPos);
+            if (newDir.HasValue)
+            {
+                _wanderDirection = newDir.Value;
+                _wanderStepsRemaining = _rng.Next(2, 5);
+                _wanderStepsRemaining--;
+                return newDir.Value;
             }
 
             return null;
@@ -313,6 +338,21 @@ namespace FloorBreaker.CpuPlayer.Application
             }
 
             return nearest;
+        }
+
+        private Direction8? PickRandomSafeDirection(GridPos from)
+        {
+            var dirs = ((Direction8[])Enum.GetValues(typeof(Direction8)))
+                .OrderBy(_ => _rng.Next())
+                .ToArray();
+
+            foreach (var dir in dirs)
+            {
+                if (IsSafeToMove(from, dir))
+                    return dir;
+            }
+
+            return null;
         }
 
         private bool IsSafeToMove(GridPos from, Direction8 dir)

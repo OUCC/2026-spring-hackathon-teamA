@@ -44,7 +44,7 @@ MonoBehaviour:
   slimeTargetRatio: 0.03
   slimeMinDistanceFromPlayer: 5
   slimeHp: 1
-  slimeSpeedMultiplier: 0.5
+  slimeSpeedMultiplier: 1.2
   slimeDetectionRange: 5
   slimeAttackDamage: 1
   slimeAttackCooldown: 1
