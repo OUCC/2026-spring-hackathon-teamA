@@ -7,6 +7,7 @@ using FloorBreaker.Shared.Infrastructure.Random;
 using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 
 namespace FloorBreaker.Cameras.Presentation.Debug
 {

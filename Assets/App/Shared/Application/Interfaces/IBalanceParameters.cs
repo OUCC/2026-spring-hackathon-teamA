@@ -81,5 +81,17 @@ namespace FloorBreaker.Shared.Application.Interfaces
         // --- Dash ---
         float DashCooldown { get; }
         float DashDoubleTapWindow { get; }
+
+        // --- Upgrade Effect Magnitudes ---
+        int FireFlightRangeIncrement { get; }
+        int FireEffectRangeIncrement { get; }
+        int FireDamageIncrement { get; }
+        float FireDurationIncrement { get; }
+        float FireCooldownReduction { get; }
+        int BreakFlightRangeIncrement { get; }
+        int BreakEffectRangeIncrement { get; }
+        int BreakDamageIncrement { get; }
+        float BreakCollapseTimeIncrement { get; }
+        float BreakCooldownReduction { get; }
     }
 }

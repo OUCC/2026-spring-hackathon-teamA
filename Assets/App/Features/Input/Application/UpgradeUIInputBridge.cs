@@ -5,6 +5,7 @@ using FloorBreaker.Shared.Domain.Timing;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 
 namespace FloorBreaker.Input.Application
 {

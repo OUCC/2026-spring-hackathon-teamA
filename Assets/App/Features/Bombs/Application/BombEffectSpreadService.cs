@@ -3,6 +3,7 @@ using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Slimes.Domain;
 
@@ -223,8 +224,7 @@ namespace FloorBreaker.Bombs.Application
                 int damage = wave.IsBreakBomb ? wave.BreakDamage : wave.ContactDamage;
                 bool forceRelocate = wave.IsBreakBomb;
 
-                _damageService.ApplyDamage(player, damage, forceRelocate,
-                    _stage, _safeTileSearch, occupied);
+                _damageService.ApplyDamage(player, damage, forceRelocate, occupied);
             }
         }
 

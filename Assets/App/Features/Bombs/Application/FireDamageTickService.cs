@@ -4,9 +4,10 @@ using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Slimes.Domain;
 
-namespace FloorBreaker.MatchFlow.Application
+namespace FloorBreaker.Bombs.Application
 {
     public sealed class FireDamageTickService
     {
@@ -62,8 +63,7 @@ namespace FloorBreaker.MatchFlow.Application
 
                     while (accum >= _dotInterval)
                     {
-                        _damageService.ApplyDamage(player, _dotDamage, false,
-                            stage, _safeTileSearch, occupied);
+                        _damageService.ApplyDamage(player, _dotDamage, false, occupied);
                         accum -= _dotInterval;
                     }
 

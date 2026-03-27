@@ -35,6 +35,9 @@ namespace FloorBreaker.Player.Presentation
         // Death guard
         private bool _isDead;
 
+        // Dispose guard (シーン遷移時の View 破棄後アクセス防止)
+        private bool _disposed;
+
         public PlayerPresenter(
             PlayerModel model,
             PlayerView view,
@@ -64,7 +67,7 @@ namespace FloorBreaker.Player.Presentation
 
         private void OnPositionChanged(GridPos pos)
         {
-            if (_isDead) return;
+            if (_disposed || _isDead) return;
             var worldPos = pos.ToWorldCenter().ToVector3(-1f);
 
             if (_model.ForcedMove.IsForced)
@@ -86,12 +89,13 @@ namespace FloorBreaker.Player.Presentation
 
         private void OnFacingChanged(Direction8 dir)
         {
-            if (_isDead) return;
+            if (_disposed || _isDead) return;
             _view.SetDirection(dir, _config);
         }
 
         private void OnHpChanged((int Previous, int Current) pair)
         {
+            if (_disposed) return;
             if (pair.Current < pair.Previous && !_isDead)
             {
                 _animService.PlayHitFlash(_view);
@@ -112,7 +116,7 @@ namespace FloorBreaker.Player.Presentation
         /// </summary>
         public void Tick(float deltaTime)
         {
-            if (_isDead) return;
+            if (_disposed || _isDead) return;
 
             // Walk frame toggle
             if (_isMoving)
@@ -148,6 +152,7 @@ namespace FloorBreaker.Player.Presentation
 
         public void Dispose()
         {
+            _disposed = true;
             _subscriptions.Dispose();
         }
     }

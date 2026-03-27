@@ -4,6 +4,7 @@ using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 
 namespace FloorBreaker.Slimes.Domain
 {
@@ -11,25 +12,34 @@ namespace FloorBreaker.Slimes.Domain
     {
         private readonly PlayerDamageService _damageService;
         private readonly SafeTileSearchService _safeTileSearch;
+        private readonly SlimeRegistry _registry;
+        private readonly IReadOnlyList<PlayerModel> _players;
+        private readonly StageModel _stage;
+        private readonly IBalanceParameters _balance;
 
-        public SlimeAiService(PlayerDamageService damageService, SafeTileSearchService safeTileSearch)
-        {
-            _damageService = damageService;
-            _safeTileSearch = safeTileSearch;
-        }
-
-        public void TickAll(
+        public SlimeAiService(
+            PlayerDamageService damageService,
+            SafeTileSearchService safeTileSearch,
             SlimeRegistry registry,
             IReadOnlyList<PlayerModel> players,
             StageModel stage,
-            float deltaTime,
             IBalanceParameters balance)
         {
-            float slimeSpeed = balance.BaseMovementSpeed * balance.SlimeSpeedMultiplier;
+            _damageService = damageService;
+            _safeTileSearch = safeTileSearch;
+            _registry = registry;
+            _players = players;
+            _stage = stage;
+            _balance = balance;
+        }
+
+        public void TickAll(float deltaTime)
+        {
+            float slimeSpeed = _balance.BaseMovementSpeed * _balance.SlimeSpeedMultiplier;
             float moveThreshold = 1f; // 1マス分のアキュムレータ閾値
 
             // コピーして反復（Tick 中に Remove が走る可能性は低いがガード）
-            var slimes = new List<SlimeModel>(registry.GetAll());
+            var slimes = new List<SlimeModel>(_registry.GetAll());
 
             foreach (var slime in slimes)
             {
@@ -37,7 +47,7 @@ namespace FloorBreaker.Slimes.Domain
 
                 slime.Tick(deltaTime);
 
-                var nearest = FindNearestPlayer(slime.Position, players, balance.SlimeDetectionRange);
+                var nearest = FindNearestPlayer(slime.Position, _players, _balance.SlimeDetectionRange);
                 if (nearest == null) continue;
 
                 int dist = slime.Position.ChebyshevDistance(nearest.CurrentPosition);
@@ -47,12 +57,11 @@ namespace FloorBreaker.Slimes.Domain
                 {
                     if (slime.CanAttack)
                     {
-                        var occupied = BuildOccupiedSet(players);
+                        var occupied = BuildOccupiedSet(_players);
                         _damageService.ApplyDamage(
-                            nearest, balance.SlimeAttackDamage, false,
-                            stage, _safeTileSearch, occupied);
-                        slime.ResetAttackCooldown(balance.SlimeAttackCooldown);
-                        registry.NotifyAttack(slime.Id, slime.Position, nearest.CurrentPosition);
+                            nearest, _balance.SlimeAttackDamage, false, occupied);
+                        slime.ResetAttackCooldown(_balance.SlimeAttackCooldown);
+                        _registry.NotifyAttack(slime.Id, slime.Position, nearest.CurrentPosition);
                     }
                     continue;
                 }
@@ -64,12 +73,12 @@ namespace FloorBreaker.Slimes.Domain
                 slime.MoveAccumulator -= moveThreshold;
 
                 // 貪欲法で1マス移動
-                var target = PickMoveTarget(slime.Position, nearest.CurrentPosition, stage, registry);
+                var target = PickMoveTarget(slime.Position, nearest.CurrentPosition, _stage, _registry);
                 if (target.HasValue)
                 {
                     var oldPos = slime.Position;
                     slime.MoveTo(target.Value);
-                    registry.UpdatePosition(slime, oldPos, target.Value);
+                    _registry.UpdatePosition(slime, oldPos, target.Value);
                 }
             }
         }
@@ -105,7 +114,6 @@ namespace FloorBreaker.Slimes.Domain
             int dx = toward.X - from.X;
             int dy = toward.Y - from.Y;
 
-            // 優先軸: 差が大きい方を先に試行
             GridPos? primary = null;
             GridPos? secondary = null;
 

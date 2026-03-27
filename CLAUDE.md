@@ -1088,7 +1088,7 @@ api.Execute(new ExecutionSettings(filter));
 テスト結果は以下のファイルに XML 形式で出力される:
 
 ```
-C:/Users/herring/AppData/LocalLow/DefaultCompany/SpringGame_teamA/TestResults.xml
+C:/Users/herring/AppData/LocalLow/OUCC/SpringGame_teamA/TestResults.xml
 ```
 
 このファイルを読み取り、`result="Failed"` を検索して失敗テストがないことを確認する。

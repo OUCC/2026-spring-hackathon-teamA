@@ -4,6 +4,7 @@ using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 
 namespace FloorBreaker.MatchFlow.Application
 {

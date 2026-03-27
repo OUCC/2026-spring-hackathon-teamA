@@ -1,6 +1,7 @@
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 
 namespace FloorBreaker.Slimes.Domain
 {

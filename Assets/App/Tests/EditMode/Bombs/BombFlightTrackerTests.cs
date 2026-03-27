@@ -6,6 +6,7 @@ using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
 using FloorBreaker.Slimes.Domain;
@@ -34,8 +35,8 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _p2Cooldown = new BombCooldownState();
             _slimeRegistry = new SlimeRegistry();
 
-            var damageService = new PlayerDamageService(1.5f, 1f);
             var safeTileSearch = new SafeTileSearchService();
+            var damageService = new PlayerDamageService(1.5f, 1f, _stage, safeTileSearch);
             var queryService = new StageQueryService(_stage);
             var areaResolver = new BombAreaResolver(queryService);
             var landingResolver = new BombLandingResolver(_stage);
@@ -356,6 +357,16 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             public int HpRecoveryThreshold => 5;
             public float DashCooldown => 1f;
             public float DashDoubleTapWindow => 0.3f;
+            public int FireFlightRangeIncrement => 2;
+            public int FireEffectRangeIncrement => 1;
+            public int FireDamageIncrement => 1;
+            public float FireDurationIncrement => 2f;
+            public float FireCooldownReduction => 0.3f;
+            public int BreakFlightRangeIncrement => 2;
+            public int BreakEffectRangeIncrement => 1;
+            public int BreakDamageIncrement => 1;
+            public float BreakCollapseTimeIncrement => 2f;
+            public float BreakCooldownReduction => 0.5f;
         }
     }
 }

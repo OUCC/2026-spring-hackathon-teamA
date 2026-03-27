@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Input.Infrastructure;
@@ -10,7 +9,7 @@ namespace FloorBreaker.UI.Title.Presentation
 {
     /// <summary>
     /// タイトル画面のボタンイベント、BGM、音量、キーコンフィグを管理する Presenter。
-    /// TitleUIDocument の Start 後に生成される。
+    /// TitleInitializer から生成される。
     /// </summary>
     public sealed class TitlePresenter
     {
@@ -19,7 +18,12 @@ namespace FloorBreaker.UI.Title.Presentation
         private readonly KeyRebindingService _rebindService;
         private readonly KeyRebindingPresenter _rebindPresenter;
 
-        public TitlePresenter(TitleUIDocument doc, IAudioService audio, KeyRebindingService rebindService)
+        public TitlePresenter(
+            TitleUIDocument doc,
+            IAudioService audio,
+            KeyRebindingService rebindService,
+            MatchModeConfig modeConfig,
+            ISceneTransitionService sceneTransition)
         {
             _doc = doc;
             _audio = audio;
@@ -31,17 +35,17 @@ namespace FloorBreaker.UI.Title.Presentation
             // 2P 対戦
             doc.ModeButton2P?.RegisterCallback<ClickEvent>(_ =>
             {
-                MatchModeSelection.IsCpuPlayer = false;
+                modeConfig.IsCpuPlayer = false;
                 audio?.StopBgm(0.5f);
-                SceneManager.LoadScene("Match");
+                sceneTransition.LoadMatch();
             });
 
             // vs CPU
             doc.ModeButton1P?.RegisterCallback<ClickEvent>(_ =>
             {
-                MatchModeSelection.IsCpuPlayer = true;
+                modeConfig.IsCpuPlayer = true;
                 audio?.StopBgm(0.5f);
-                SceneManager.LoadScene("Match");
+                sceneTransition.LoadMatch();
             });
 
             // 観戦モード — 無効 (Coming Soon)
@@ -94,6 +98,7 @@ namespace FloorBreaker.UI.Title.Presentation
             {
                 _audio.SetMasterVolume(evt.newValue / 100f);
                 UpdateVolumeLabel(_doc.VolumeMasterLabel, evt.newValue);
+                _audio.PlaySfx(SfxIds.UiNavigate);
             });
 
             _doc.VolumeBgm?.RegisterValueChangedCallback(evt =>
@@ -106,6 +111,7 @@ namespace FloorBreaker.UI.Title.Presentation
             {
                 _audio.SetSfxVolume(evt.newValue / 100f);
                 UpdateVolumeLabel(_doc.VolumeSfxLabel, evt.newValue);
+                _audio.PlaySfx(SfxIds.UiNavigate);
             });
         }
 

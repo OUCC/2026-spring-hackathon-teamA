@@ -4,6 +4,7 @@ using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
 
@@ -25,8 +26,8 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             _stage = new StageModel(TileCoordRange.FromSize(10));
             _timerService = new TileTimerService(_stage);
-            _damageService = new PlayerDamageService(1.5f, 1f);
             _safeTileSearch = new SafeTileSearchService();
+            _damageService = new PlayerDamageService(1.5f, 1f, _stage, _safeTileSearch);
             _queryService = new StageQueryService(_stage);
             _areaResolver = new BombAreaResolver(_queryService);
 

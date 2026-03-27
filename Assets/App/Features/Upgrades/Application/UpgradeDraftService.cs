@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using R3;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
+using FloorBreaker.Upgrades.Domain;
 using FloorBreaker.Player.Domain;
 
-namespace FloorBreaker.Upgrades.Domain
+namespace FloorBreaker.Upgrades.Application
 {
     public sealed class UpgradeDraftService : IDisposable
     {

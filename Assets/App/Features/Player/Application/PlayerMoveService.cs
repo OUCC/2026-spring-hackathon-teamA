@@ -1,7 +1,8 @@
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Stage.Domain;
+using FloorBreaker.Player.Domain;
 
-namespace FloorBreaker.Player.Domain
+namespace FloorBreaker.Player.Application
 {
     public sealed class PlayerMoveService
     {

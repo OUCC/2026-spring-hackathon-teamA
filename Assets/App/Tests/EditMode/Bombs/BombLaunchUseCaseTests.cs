@@ -5,6 +5,7 @@ using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
 
@@ -28,8 +29,8 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         {
             _stage = new StageModel(TileCoordRange.FromSize(10));
             _timerService = new TileTimerService(_stage);
-            _damageService = new PlayerDamageService(1.5f, 1f);
             _safeTileSearch = new SafeTileSearchService();
+            _damageService = new PlayerDamageService(1.5f, 1f, _stage, _safeTileSearch);
 
             var queryService = new StageQueryService(_stage);
             var areaResolver = new BombAreaResolver(queryService);
@@ -303,6 +304,16 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             public float BreakBombSpreadInterval => 0.3f;
             public float DashCooldown => 1f;
             public float DashDoubleTapWindow => 0.3f;
+            public int FireFlightRangeIncrement => 2;
+            public int FireEffectRangeIncrement => 1;
+            public int FireDamageIncrement => 1;
+            public float FireDurationIncrement => 2f;
+            public float FireCooldownReduction => 0.3f;
+            public int BreakFlightRangeIncrement => 2;
+            public int BreakEffectRangeIncrement => 1;
+            public int BreakDamageIncrement => 1;
+            public float BreakCollapseTimeIncrement => 2f;
+            public float BreakCooldownReduction => 0.5f;
         }
     }
 }
