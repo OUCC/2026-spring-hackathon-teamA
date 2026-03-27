@@ -21,7 +21,7 @@
             <!-- モード選択 -->
             <VisualElement class="title-mode-select">
                 <Button name="ModeButton_2P" class="title-btn title-btn--primary" text="2P 対戦" />
-                <Button name="ModeButton_1P" class="title-btn title-btn--disabled" text="CPU 対戦 (Coming Soon)" />
+                <Button name="ModeButton_1P" class="title-btn title-btn--primary" text="vs CPU" />
                 <Button name="ModeButton_CPU" class="title-btn title-btn--disabled" text="観戦モード  (Coming Soon)" />
             </VisualElement>
 

@@ -1,0 +1,25 @@
+{
+    "name": "App.CpuPlayer",
+    "rootNamespace": "FloorBreaker.CpuPlayer",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Player",
+        "App.Stage",
+        "App.Bombs",
+        "App.Slimes",
+        "App.Upgrades",
+        "App.MatchFlow"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

@@ -3,6 +3,7 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Input.Application;
 using FloorBreaker.Cameras.Presentation;
+using FloorBreaker.CpuPlayer.Application;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -17,19 +18,22 @@ namespace FloorBreaker.Bootstrap
         private readonly MatchPresenters _presenters;
         private readonly SplitScreenCameraSetup _cameraSetup;
         private readonly ITimeProvider _timeProvider;
+        private readonly CpuPlayerService _cpuPlayerService;
 
         public MatchTickRunner(
             MatchPhaseScheduler scheduler,
             GameplayInputBridge inputBridge,
             MatchPresenters presenters,
             SplitScreenCameraSetup cameraSetup,
-            ITimeProvider timeProvider)
+            ITimeProvider timeProvider,
+            CpuPlayerService cpuPlayerService = null)
         {
             _scheduler = scheduler;
             _inputBridge = inputBridge;
             _presenters = presenters;
             _cameraSetup = cameraSetup;
             _timeProvider = timeProvider;
+            _cpuPlayerService = cpuPlayerService;
         }
 
         public void Tick()
@@ -38,6 +42,9 @@ namespace FloorBreaker.Bootstrap
 
             // 入力のリピート移動処理
             _inputBridge.Tick(dt);
+
+            // CPU プレイヤーの思考・行動
+            _cpuPlayerService?.Tick(dt);
 
             // Domain / Application の Tick
             _scheduler.Tick(dt);
