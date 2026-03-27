@@ -915,7 +915,7 @@ MissingReferenceException: PlayerView has been destroyed but you are still tryin
 | 4.3 | LOW | 直接 Instantiate | SlimePresenter.cs | §4 | 未着手 |
 | ~~10.1~~ | ~~HIGH~~ | ~~命名不一致~~ | ~~FallBombResolver.cs / FallBomb/~~ | ~~§15~~ | **修正済み** |
 | ~~10.2~~ | ~~MEDIUM~~ | ~~namespace 不一致~~ | ~~UpgradeApplyService.cs~~ | ~~§3, §4~~ | **修正済み** |
-| 10.3 | LOW | メソッド名紛らわしい | IAudioService.cs | §15 | 未着手 |
+| ~~10.3~~ | ~~LOW~~ | ~~メソッド名紛らわしい~~ | ~~IAudioService.cs~~ | ~~§15~~ | **完了** (SetBgmVolume → DuckBgm) |
 | 10.4 | MEDIUM | Application→Infrastructure依存 | GameplayInputBridge.cs | §4 | 未着手 |
 | ~~10.5~~ | ~~HIGH~~ | ~~namespace 不一致~~ | ~~PlayerMoveService.cs, PlayerDamageService.cs~~ | ~~§3, §4~~ | **修正済み** |
 | ~~10.6~~ | ~~MEDIUM~~ | ~~Domain に Application 依存~~ | ~~UpgradeDraftService.cs~~ | ~~§4~~ | **修正済み** |
@@ -933,5 +933,5 @@ MissingReferenceException: PlayerView has been destroyed but you are still tryin
 | ~~12.1~~ | ~~HIGH~~ | ~~シーン遷移時 MissingReferenceException~~ | ~~MatchTickRunner / PlayerPresenter~~ | ~~—~~ | **修正済み** |
 | ~~12.2~~ | ~~MEDIUM~~ | ~~Title 音量設定 SFX フィードバック~~ | ~~TitlePresenter~~ | ~~—~~ | **修正済み** |
 | 12.3 | HIGH | Title テスト空間の位置ずれ・SE 残留 | TitleTestSpaceController | §1.5 | 未着手 |
-| 12.4 | HIGH | ボムがスライムをすり抜ける (不安定) | BombFlightTracker / BombLandingResolver | — | 未着手 |
-| 12.5 | MEDIUM | 崩落マスでボムが止まったり通過したりする | BombLandingResolver / StageModel.IsPassable | — | 未着手 |
+| 12.4 | HIGH | ボムがスライムをすり抜ける (不安定) | BombFlightTracker / BombLandingResolver | — | **調査済み** ロジック正常、テスト追加で確認。タイミング依存の可能性、実プレイ確認要 |
+| ~~12.5~~ | ~~MEDIUM~~ | ~~崩落マスでボムが止まったり通過したりする~~ | ~~BombLandingResolver / BombFlightTracker~~ | ~~—~~ | **修正済み** ボムは穴 (Collapsed/PermanentlyDestroyed) を飛び越えるよう修正 |

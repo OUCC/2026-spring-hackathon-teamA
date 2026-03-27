@@ -95,10 +95,10 @@ namespace FloorBreaker.Bootstrap
                         break;
                     case GamePhase.UpgradePhase:
                         _audio?.PlaySfx(SfxIds.PhaseUpgrade);
-                        _audio?.SetBgmVolume(0.3f, 0.5f);
+                        _audio?.DuckBgm(0.3f, 0.5f);
                         break;
                     case GamePhase.MatchRunning:
-                        _audio?.SetBgmVolume(1.0f, 0.5f);
+                        _audio?.DuckBgm(1.0f, 0.5f);
                         break;
                     case GamePhase.Result:
                         _audio?.PlaySfx(SfxIds.MatchResult);
