@@ -890,6 +890,25 @@ MissingReferenceException: PlayerView has been destroyed but you are still tryin
 
 ---
 
+### 12.6 一時強化 (FireShield / Levitation) が機能しない
+
+**発生条件:** 強化フェーズで「炎守りのマント」「風の羽衣」を選択した後、効果が一切発動しない。
+
+**原因 (2 件):**
+
+1. **`ClearTemporaryEffects()` の呼び出しタイミングが誤り**
+   - `TransitionToRunning()` で呼んでいたため、強化フェーズで選択した直後にクリアされていた。
+   - 仕様:「次の強化フェーズ開始時に消失する」→ `TransitionToUpgradePhase()` で呼ぶべき。
+
+2. **ステージ縮小ダメージで `LevitationActive` チェックがない**
+   - `MatchPhaseScheduler.TransitionToStageShrink()` のダメージ適用で、風の羽衣の判定がなかった。
+
+**修正:**
+- `ClearTemporaryEffects()` を `TransitionToRunning()` → `TransitionToUpgradePhase()` に移動。
+- ステージ縮小ダメージに Levitation チェック追加（有効時はダメージ 0 + 強制移動のみ）。
+
+---
+
 ## 付録: 違反サマリー表
 
 | ID | 深刻度 | カテゴリ | ファイル | CLAUDE.md 該当 | 状態 |
@@ -935,3 +954,4 @@ MissingReferenceException: PlayerView has been destroyed but you are still tryin
 | 12.3 | HIGH | Title テスト空間の位置ずれ・SE 残留 | TitleTestSpaceController | §1.5 | 未着手 |
 | 12.4 | HIGH | ボムがスライムをすり抜ける (不安定) | BombFlightTracker / BombLandingResolver | — | **調査済み** ロジック正常、テスト追加で確認。タイミング依存の可能性、実プレイ確認要 |
 | ~~12.5~~ | ~~MEDIUM~~ | ~~崩落マスでボムが止まったり通過したりする~~ | ~~BombLandingResolver / BombFlightTracker~~ | ~~—~~ | **修正済み** ボムは穴 (Collapsed/PermanentlyDestroyed) を飛び越えるよう修正 |
+| ~~12.6~~ | ~~CRITICAL~~ | ~~一時強化 (FireShield/Levitation) が機能しない~~ | ~~MatchPhaseScheduler~~ | ~~§14~~ | **修正済み** ClearTemporaryEffects を TransitionToUpgradePhase に移動 + 縮小ダメージに Levitation チェック追加 |
