@@ -8,6 +8,7 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Stage.Presentation;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Player.Presentation;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
@@ -16,6 +17,7 @@ using FloorBreaker.Slimes.Domain;
 using FloorBreaker.Slimes.Application;
 using FloorBreaker.Slimes.Presentation;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Input.Application;
 using FloorBreaker.Shared.Presentation.Common;
@@ -57,11 +59,27 @@ namespace FloorBreaker.Bootstrap
                 else
                     builder.Register<IAudioService>(
                         c => new Shared.Infrastructure.Audio.NullAudioService(), Lifetime.Singleton);
+
+                // シーン遷移サービスのフォールバック
+                builder.Register<Shared.Infrastructure.SceneTransition.UnitySceneTransitionService>(Lifetime.Singleton)
+                    .As<ISceneTransitionService>();
+
+                // MatchModeConfig のフォールバック
+                builder.Register<MatchModeConfig>(Lifetime.Singleton);
             }
 
-            // タイトル画面から遷移した場合は MatchModeSelection を優先
+            // タイトル画面から遷移した場合は親スコープの MatchModeConfig を参照
             // Match 単体起動時 (Parent == null) は Inspector の値をフォールバックに使う
-            bool cpuMode = Parent != null ? MatchModeSelection.IsCpuPlayer : _enableCpuPlayer;
+            bool cpuMode;
+            if (Parent != null)
+            {
+                var modeConfig = Parent.Container.Resolve<MatchModeConfig>();
+                cpuMode = modeConfig.IsCpuPlayer;
+            }
+            else
+            {
+                cpuMode = _enableCpuPlayer;
+            }
             builder.RegisterInstance(new MatchConfig(cpuMode));
 
             RegisterStage(builder);
@@ -116,7 +134,9 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var b = c.Resolve<IBalanceParameters>();
-                return new PlayerDamageService(b.InvulnerabilityDuration, b.ForcedMoveDuration);
+                return new PlayerDamageService(
+                    b.InvulnerabilityDuration, b.ForcedMoveDuration,
+                    c.Resolve<StageModel>(), c.Resolve<SafeTileSearchService>());
             }, Lifetime.Scoped);
 
             builder.Register(c =>
@@ -158,6 +178,7 @@ namespace FloorBreaker.Bootstrap
             builder.Register<FireBombResolver>(Lifetime.Scoped);
             builder.Register<BombLaunchUseCase>(Lifetime.Scoped);
             builder.Register<BombEffectSpreadService>(Lifetime.Scoped);
+            builder.Register<FireDamageTickService>(Lifetime.Scoped);
 
             builder.Register(c =>
             {
@@ -174,10 +195,39 @@ namespace FloorBreaker.Bootstrap
         private static void RegisterSlimes(IContainerBuilder builder)
         {
             builder.Register<SlimeRegistry>(Lifetime.Scoped);
-            builder.Register<SlimeSpawnService>(Lifetime.Scoped);
-            builder.Register<SlimeAiService>(Lifetime.Scoped);
             builder.Register<SlimeDropResolver>(Lifetime.Scoped);
-            builder.Register<SlimeTickService>(Lifetime.Scoped);
+
+            builder.Register(c =>
+            {
+                var mp = c.Resolve<MatchPlayers>();
+                return new SlimeSpawnService(
+                    c.Resolve<StageModel>(),
+                    c.Resolve<SlimeRegistry>(),
+                    mp.All,
+                    c.Resolve<IRandomProvider>(),
+                    c.Resolve<IBalanceParameters>());
+            }, Lifetime.Scoped);
+
+            builder.Register(c =>
+            {
+                var mp = c.Resolve<MatchPlayers>();
+                return new SlimeAiService(
+                    c.Resolve<PlayerDamageService>(),
+                    c.Resolve<SafeTileSearchService>(),
+                    c.Resolve<SlimeRegistry>(),
+                    mp.All,
+                    c.Resolve<StageModel>(),
+                    c.Resolve<IBalanceParameters>());
+            }, Lifetime.Scoped);
+
+            builder.Register(c =>
+                new SlimeTickService(
+                    c.Resolve<SlimeAiService>(),
+                    c.Resolve<SlimeSpawnService>(),
+                    c.Resolve<SlimeRegistry>(),
+                    c.Resolve<TileTimerService>(),
+                    c.Resolve<IBalanceParameters>().SlimeSpawnCheckInterval),
+                Lifetime.Scoped);
         }
 
         private static void RegisterMatchFlow(IContainerBuilder builder)
@@ -187,7 +237,6 @@ namespace FloorBreaker.Bootstrap
                 Lifetime.Scoped);
 
             builder.Register<MatchEndUseCase>(Lifetime.Scoped);
-            builder.Register<FireDamageTickService>(Lifetime.Scoped);
 
             builder.Register(c =>
             {
@@ -210,7 +259,6 @@ namespace FloorBreaker.Bootstrap
                     c.Resolve<UpgradePhaseUseCase>(),
                     c.Resolve<MatchEndUseCase>(),
                     c.Resolve<PlayerDamageService>(),
-                    c.Resolve<SafeTileSearchService>(),
                     mp.All,
                     c.Resolve<StageModel>(),
                     c.Resolve<SlimeRegistry>(),

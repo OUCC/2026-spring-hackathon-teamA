@@ -1,3 +1,4 @@
+using System;
 using VContainer.Unity;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
@@ -11,7 +12,7 @@ namespace FloorBreaker.Bootstrap
     /// 毎フレームの Tick を一元駆動する ITickable。
     /// Input → Domain/Application → Presenter → Camera の順で更新。
     /// </summary>
-    public sealed class MatchTickRunner : ITickable
+    public sealed class MatchTickRunner : ITickable, IDisposable
     {
         private readonly MatchPhaseScheduler _scheduler;
         private readonly GameplayInputBridge _inputBridge;
@@ -19,6 +20,7 @@ namespace FloorBreaker.Bootstrap
         private readonly SplitScreenCameraSetup _cameraSetup;
         private readonly ITimeProvider _timeProvider;
         private readonly CpuPlayerService _cpuPlayerService;
+        private bool _disposed;
 
         public MatchTickRunner(
             MatchPhaseScheduler scheduler,
@@ -38,6 +40,8 @@ namespace FloorBreaker.Bootstrap
 
         public void Tick()
         {
+            if (_disposed) return;
+
             float dt = _timeProvider.DeltaTime;
 
             // 入力のリピート移動処理
@@ -54,6 +58,11 @@ namespace FloorBreaker.Bootstrap
 
             // カメラ追従
             _cameraSetup.Tick(dt);
+        }
+
+        public void Dispose()
+        {
+            _disposed = true;
         }
     }
 }

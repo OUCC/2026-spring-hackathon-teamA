@@ -12,6 +12,7 @@ using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Stage.Presentation;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Player.Presentation;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;

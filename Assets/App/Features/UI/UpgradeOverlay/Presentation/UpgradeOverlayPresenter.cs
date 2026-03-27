@@ -6,6 +6,7 @@ using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Domain.Timing;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.UI.RuntimeUI.Controls;

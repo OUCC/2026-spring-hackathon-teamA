@@ -1,21 +1,15 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
-using FloorBreaker.Shared.Application.Interfaces;
-using FloorBreaker.Input.Infrastructure;
-using FloorBreaker.UI.Title.Presentation;
 
 namespace FloorBreaker.UI.RuntimeUI.Documents
 {
     /// <summary>
     /// Title シーンに配置する UIDocument の参照ホルダー。
-    /// Awake で要素キャッシュ、Start で TitlePresenter を生成。
+    /// Awake で VisualElement をキャッシュし、TitleInitializer から参照される。
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public sealed class TitleUIDocument : MonoBehaviour
     {
-        [SerializeField] private InputActionAsset _inputActions;
-
         // ボタン
         public Button ModeButton2P { get; private set; }
         public Button ModeButton1P { get; private set; }
@@ -47,8 +41,6 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         public Label P2AimLock { get; private set; }
         public Label P2FireBomb { get; private set; }
         public Label P2BreakBomb { get; private set; }
-
-        public InputActionAsset InputActions => _inputActions;
 
         private void Awake()
         {
@@ -84,40 +76,6 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             P2AimLock = root.Q<Label>("P2_AimLock");
             P2FireBomb = root.Q<Label>("P2_FireBomb");
             P2BreakBomb = root.Q<Label>("P2_BreakBomb");
-        }
-
-        private void Start()
-        {
-            // IAudioService を実装した MonoBehaviour を検索 (DontDestroyOnLoad 含む)
-            IAudioService audio = null;
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-            {
-                if (mb is IAudioService svc) { audio = svc; break; }
-            }
-
-            // InputActionAsset 自動検索（SerializeField 未設定時のフォールバック）
-            if (_inputActions == null)
-            {
-                var assets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
-                foreach (var asset in assets)
-                {
-                    if (asset.name == "FloorBreakerActions" || asset.FindActionMap("Gameplay_P1") != null)
-                    {
-                        _inputActions = asset;
-                        break;
-                    }
-                }
-            }
-
-            // KeyRebindingService 生成 + 保存済みバインド適用
-            KeyRebindingService rebindService = null;
-            if (_inputActions != null)
-            {
-                rebindService = new KeyRebindingService(_inputActions);
-                rebindService.LoadOverrides();
-            }
-
-            new TitlePresenter(this, audio, rebindService);
         }
     }
 }

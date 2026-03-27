@@ -8,6 +8,7 @@ using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Stage.Presentation;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Player.Presentation;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
@@ -114,7 +115,7 @@ namespace FloorBreaker.Bombs.Presentation.Debug
             _tileTimerService = new TileTimerService(_stageModel);
             _safeTileSearch = new SafeTileSearchService();
             _damageService = new PlayerDamageService(
-                _balance.InvulnerabilityDuration, _balance.ForcedMoveDuration);
+                _balance.InvulnerabilityDuration, _balance.ForcedMoveDuration, _stageModel, _safeTileSearch);
             _queryService = new StageQueryService(_stageModel);
             _slimeRegistry = new SlimeRegistry();
 
@@ -425,8 +426,7 @@ namespace FloorBreaker.Bombs.Presentation.Debug
         {
             var occupied = new HashSet<GridPos>
                 { _player1.CurrentPosition, _player2.CurrentPosition };
-            _damageService.ApplyDamage(
-                player, amount, false, _stageModel, _safeTileSearch, occupied);
+            _damageService.ApplyDamage(player, amount, false, occupied);
             UnityEngine.Debug.Log(
                 $"[BombPreview] {player.Id} にダメージ {amount} → HP {player.Stats.CurrentHp.CurrentValue}");
         }

@@ -8,6 +8,7 @@ using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Stage.Presentation;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
 using FloorBreaker.MatchFlow.Application;
@@ -96,7 +97,7 @@ namespace FloorBreaker.Player.Presentation.Debug
             _stageModel = new StageModel(bounds);
             _tileTimerService = new TileTimerService(_stageModel);
             _safeTileSearch = new SafeTileSearchService();
-            _damageService = new PlayerDamageService(InvulnerabilityDuration, ForcedMoveDuration);
+            _damageService = new PlayerDamageService(InvulnerabilityDuration, ForcedMoveDuration, _stageModel, _safeTileSearch);
 
             // 壁生成
             IRandomProvider random = new SeededRandomProvider(42);
@@ -296,14 +297,14 @@ namespace FloorBreaker.Player.Presentation.Debug
         private void DamagePlayer(PlayerModel player, int amount)
         {
             var occupied = new HashSet<GridPos> { _player1.CurrentPosition, _player2.CurrentPosition };
-            _damageService.ApplyDamage(player, amount, false, _stageModel, _safeTileSearch, occupied);
+            _damageService.ApplyDamage(player, amount, false, occupied);
             UnityEngine.Debug.Log($"[PlayerPreview] {player.Id} にダメージ {amount} → HP {player.Stats.CurrentHp.CurrentValue}");
         }
 
         private void ForceRelocate(PlayerModel player)
         {
             var occupied = new HashSet<GridPos> { _player1.CurrentPosition, _player2.CurrentPosition };
-            _damageService.ApplyDamage(player, 2, true, _stageModel, _safeTileSearch, occupied);
+            _damageService.ApplyDamage(player, 2, true, occupied);
             UnityEngine.Debug.Log($"[PlayerPreview] {player.Id} を強制移動 → {player.CurrentPosition}, HP {player.Stats.CurrentHp.CurrentValue}");
         }
 

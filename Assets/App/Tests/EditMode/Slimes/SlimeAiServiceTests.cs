@@ -4,6 +4,7 @@ using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Slimes.Domain;
 
@@ -25,9 +26,8 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             _stage = new StageModel(TileCoordRange.FromSize(10));
             _registry = new SlimeRegistry();
 
-            var damageService = new PlayerDamageService(invulnerabilityDuration: 1.5f, forcedMoveDuration: 1f);
             var safeTileSearch = new SafeTileSearchService();
-            _ai = new SlimeAiService(damageService, safeTileSearch);
+            var damageService = new PlayerDamageService(invulnerabilityDuration: 1.5f, forcedMoveDuration: 1f, _stage, safeTileSearch);
 
             var stats = new PlayerStats(10, 1f, 3f);
             var build = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
@@ -35,6 +35,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             _players = new List<PlayerModel> { _player };
 
             _balance = new TestBalanceParameters();
+            _ai = new SlimeAiService(damageService, safeTileSearch, _registry, _players, _stage, _balance);
         }
 
         [TearDown]
@@ -55,7 +56,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             // Tick with enough time for move accumulator to trigger
             // slimeSpeed = BaseMovementSpeed(1f) * SlimeSpeedMultiplier(0.5f) = 0.5f
             // moveThreshold = 1f, so need dt * 0.5 >= 1f => dt >= 2f
-            _ai.TickAll(_registry, _players, _stage, 2.1f, _balance);
+            _ai.TickAll(2.1f);
 
             // Slime should have moved closer to player (from Y=2 toward Y=5)
             Assert.AreEqual(new GridPos(5, 3), slime.Position);
@@ -69,7 +70,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
             _registry.Add(slime);
 
-            _ai.TickAll(_registry, _players, _stage, 0.1f, _balance);
+            _ai.TickAll(0.1f);
 
             // Player should have taken SlimeAttackDamage (1)
             Assert.AreEqual(9, _player.Stats.CurrentHp.CurrentValue);
@@ -83,7 +84,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             _registry.Add(slime);
 
             // First tick: attacks
-            _ai.TickAll(_registry, _players, _stage, 0.1f, _balance);
+            _ai.TickAll(0.1f);
             Assert.AreEqual(9, _player.Stats.CurrentHp.CurrentValue);
 
             // Clear invulnerability so second attack could land
@@ -91,7 +92,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             _player.Invulnerability.Tick(2f);
 
             // Second tick shortly after: slime on cooldown, should not attack again
-            _ai.TickAll(_registry, _players, _stage, 0.1f, _balance);
+            _ai.TickAll(0.1f);
             Assert.AreEqual(9, _player.Stats.CurrentHp.CurrentValue);
         }
 
@@ -151,6 +152,16 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public float BreakBombSpreadInterval => 0.3f;
             public float DashCooldown => 1f;
             public float DashDoubleTapWindow => 0.3f;
+            public int FireFlightRangeIncrement => 2;
+            public int FireEffectRangeIncrement => 1;
+            public int FireDamageIncrement => 1;
+            public float FireDurationIncrement => 2f;
+            public float FireCooldownReduction => 0.3f;
+            public int BreakFlightRangeIncrement => 2;
+            public int BreakEffectRangeIncrement => 1;
+            public int BreakDamageIncrement => 1;
+            public float BreakCollapseTimeIncrement => 2f;
+            public float BreakCooldownReduction => 0.5f;
         }
     }
 }

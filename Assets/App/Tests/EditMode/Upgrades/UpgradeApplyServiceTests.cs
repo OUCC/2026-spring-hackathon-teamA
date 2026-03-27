@@ -5,6 +5,7 @@ using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 
 namespace FloorBreaker.Tests.EditMode.Upgrades
 {
@@ -153,6 +154,16 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             public float BreakBombSpreadInterval => 0.3f;
             public float DashCooldown => 1f;
             public float DashDoubleTapWindow => 0.3f;
+            public int FireFlightRangeIncrement => 2;
+            public int FireEffectRangeIncrement => 1;
+            public int FireDamageIncrement => 1;
+            public float FireDurationIncrement => 2f;
+            public float FireCooldownReduction => 0.3f;
+            public int BreakFlightRangeIncrement => 2;
+            public int BreakEffectRangeIncrement => 1;
+            public int BreakDamageIncrement => 1;
+            public float BreakCollapseTimeIncrement => 2f;
+            public float BreakCooldownReduction => 0.5f;
         }
     }
 }

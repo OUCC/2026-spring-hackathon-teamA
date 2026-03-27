@@ -2,10 +2,10 @@ namespace FloorBreaker.MatchFlow.Application
 {
     /// <summary>
     /// タイトル画面で選択されたモードをシーン遷移をまたいで保持する。
-    /// static だが書き込みはタイトル画面のボタン押下時のみ。
+    /// ProjectLifetimeScope に Singleton 登録され、DI 経由でアクセスする。
     /// </summary>
-    public static class MatchModeSelection
+    public sealed class MatchModeConfig
     {
-        public static bool IsCpuPlayer { get; set; }
+        public bool IsCpuPlayer { get; set; }
     }
 }

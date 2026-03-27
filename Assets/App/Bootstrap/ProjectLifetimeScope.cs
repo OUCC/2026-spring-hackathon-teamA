@@ -6,6 +6,8 @@ using FloorBreaker.Shared.Infrastructure.Random;
 using FloorBreaker.Shared.Infrastructure.UnityTime;
 using FloorBreaker.ScriptableObjects.Balance;
 using FloorBreaker.Shared.Infrastructure.Audio;
+using FloorBreaker.Shared.Infrastructure.SceneTransition;
+using FloorBreaker.MatchFlow.Application;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -33,6 +35,13 @@ namespace FloorBreaker.Bootstrap
             builder.Register<IRandomProvider>(c => new SeededRandomProvider(seed), Lifetime.Singleton);
 
             builder.Register<UnityTimeProvider>(Lifetime.Singleton).As<ITimeProvider>();
+
+            // シーン遷移サービス
+            builder.Register<UnitySceneTransitionService>(Lifetime.Singleton)
+                .As<ISceneTransitionService>();
+
+            // シーン間モード選択状態
+            builder.Register<MatchModeConfig>(Lifetime.Singleton);
 
             // AudioService: 子 GameObject から取得 (DontDestroyOnLoad と一緒に生存)
             var audioService = GetComponentInChildren<AudioService>();

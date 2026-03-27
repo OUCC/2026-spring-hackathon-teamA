@@ -17,6 +17,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         private SlimeRegistry _registry;
         private SlimeSpawnService _svc;
         private List<PlayerModel> _players;
+        private IRandomProvider _random;
 
         [SetUp]
         public void SetUp()
@@ -24,7 +25,6 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             // 30x30 stage => 900 alive tiles
             _stage = new StageModel(TileCoordRange.FromSize(30));
             _registry = new SlimeRegistry();
-            _svc = new SlimeSpawnService();
 
             var stats1 = new PlayerStats(10, 1f, 3f);
             var build1 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
@@ -35,6 +35,9 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             var player2 = new PlayerModel(PlayerId.Player2, new GridPos(15, 15), stats2, build2);
 
             _players = new List<PlayerModel> { player1, player2 };
+            _random = new SeededRandomProvider(42);
+            var balance = new TestBalanceParameters();
+            _svc = new SlimeSpawnService(_stage, _registry, _players, _random, balance);
         }
 
         [TearDown]
@@ -47,11 +50,8 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void SpawnIfNeeded_SpawnsToTarget()
         {
-            var random = new SeededRandomProvider(42);
-            var balance = new TestBalanceParameters();
-
             // 900 tiles * 0.03 = 27 target, registry empty => spawn 27
-            var spawned = _svc.SpawnIfNeeded(_stage, _registry, _players, random, balance);
+            var spawned = _svc.SpawnIfNeeded();
             Assert.AreEqual(27, spawned.Count);
             Assert.AreEqual(27, _registry.AliveCount);
         }
@@ -59,10 +59,8 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void SpawnIfNeeded_RespectsMinDistance()
         {
-            var random = new SeededRandomProvider(42);
             var balance = new TestBalanceParameters();
-
-            var spawned = _svc.SpawnIfNeeded(_stage, _registry, _players, random, balance);
+            var spawned = _svc.SpawnIfNeeded();
 
             foreach (var slime in spawned)
             {
@@ -78,15 +76,12 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         [Test]
         public void SpawnIfNeeded_NoSpawnWhenAtTarget()
         {
-            var random = new SeededRandomProvider(42);
-            var balance = new TestBalanceParameters();
-
             // First spawn fills to target
-            _svc.SpawnIfNeeded(_stage, _registry, _players, random, balance);
+            _svc.SpawnIfNeeded();
             int countAfterFirst = _registry.AliveCount;
 
             // Second spawn should add nothing
-            var spawned2 = _svc.SpawnIfNeeded(_stage, _registry, _players, random, balance);
+            var spawned2 = _svc.SpawnIfNeeded();
             Assert.AreEqual(0, spawned2.Count);
             Assert.AreEqual(countAfterFirst, _registry.AliveCount);
         }
@@ -147,6 +142,16 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public float BreakBombSpreadInterval => 0.3f;
             public float DashCooldown => 1f;
             public float DashDoubleTapWindow => 0.3f;
+            public int FireFlightRangeIncrement => 2;
+            public int FireEffectRangeIncrement => 1;
+            public int FireDamageIncrement => 1;
+            public float FireDurationIncrement => 2f;
+            public float FireCooldownReduction => 0.3f;
+            public int BreakFlightRangeIncrement => 2;
+            public int BreakEffectRangeIncrement => 1;
+            public int BreakDamageIncrement => 1;
+            public float BreakCollapseTimeIncrement => 2f;
+            public float BreakCooldownReduction => 0.5f;
         }
     }
 }

@@ -65,6 +65,7 @@ namespace FloorBreaker.Bootstrap
         private readonly ICameraShakeService _cameraShake;
         private readonly ImpactFreezeService _impactFreeze;
         private readonly MatchConfig _matchConfig;
+        private readonly ISceneTransitionService _sceneTransition;
 
         // Dispose 用: アクション購読の解除
         private InputActionMap _upgradeP1Map;
@@ -102,7 +103,8 @@ namespace FloorBreaker.Bootstrap
             IAudioService audio,
             ICameraShakeService cameraShake,
             ImpactFreezeService impactFreeze,
-            MatchConfig matchConfig)
+            MatchConfig matchConfig,
+            ISceneTransitionService sceneTransition)
         {
             _balance = balance;
             _random = random;
@@ -135,6 +137,7 @@ namespace FloorBreaker.Bootstrap
             _cameraShake = cameraShake;
             _impactFreeze = impactFreeze;
             _matchConfig = matchConfig;
+            _sceneTransition = sceneTransition;
         }
 
         public async UniTask StartAsync(CancellationToken ct)
@@ -211,8 +214,7 @@ namespace FloorBreaker.Bootstrap
             _impactFreeze?.SetFlashOverlay(_matchUIDocument.ImpactFlashOverlay);
 
             // 10. 初期スライムスポーン
-            _slimeSpawnService.SpawnIfNeeded(
-                _stage, _slimeRegistry, _players.All, _random, _balance);
+            _slimeSpawnService.SpawnIfNeeded();
 
             // 11. HUD Presenter 生成
             var hudViewP1 = new PlayerHudView(_matchUIDocument.LeftHudRoot);
@@ -234,7 +236,7 @@ namespace FloorBreaker.Bootstrap
 
             // 13. Result Presenter 生成
             var resultView = new ResultView(_matchUIDocument.ResultRoot);
-            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd);
+            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _sceneTransition);
 
             // 14. Input 配線 (PlayerInput コンポーネント不要、InputActionAsset を直接使用)
             var inputAdapters = Object.FindObjectsByType<PlayerInputAdapter>(

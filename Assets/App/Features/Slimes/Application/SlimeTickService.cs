@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
 using R3;
-using FloorBreaker.Shared.Domain.Grid;
-using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
-using FloorBreaker.Player.Domain;
 using FloorBreaker.Slimes.Domain;
 
 namespace FloorBreaker.Slimes.Application
@@ -14,7 +10,7 @@ namespace FloorBreaker.Slimes.Application
         private readonly SlimeAiService _aiService;
         private readonly SlimeSpawnService _spawnService;
         private readonly SlimeRegistry _registry;
-        private readonly TileTimerService _tileTimerService;
+        private readonly float _spawnCheckInterval;
 
         private float _spawnAccumulator;
         private IDisposable _timerSubscription;
@@ -23,33 +19,29 @@ namespace FloorBreaker.Slimes.Application
             SlimeAiService aiService,
             SlimeSpawnService spawnService,
             SlimeRegistry registry,
-            TileTimerService tileTimerService)
+            TileTimerService tileTimerService,
+            float spawnCheckInterval)
         {
             _aiService = aiService;
             _spawnService = spawnService;
             _registry = registry;
-            _tileTimerService = tileTimerService;
+            _spawnCheckInterval = spawnCheckInterval;
 
             // 崩落完了時にスライム自動死亡を購読
-            _timerSubscription = _tileTimerService.TimerCompleted.Subscribe(evt => OnTimerCompleted(evt));
+            _timerSubscription = tileTimerService.TimerCompleted.Subscribe(evt => OnTimerCompleted(evt));
         }
 
-        public void Tick(
-            float deltaTime,
-            IReadOnlyList<PlayerModel> players,
-            StageModel stage,
-            IRandomProvider random,
-            IBalanceParameters balance)
+        public void Tick(float deltaTime)
         {
             // 1. AI 処理
-            _aiService.TickAll(_registry, players, stage, deltaTime, balance);
+            _aiService.TickAll(deltaTime);
 
             // 2. スポーンチェック
             _spawnAccumulator += deltaTime;
-            if (_spawnAccumulator >= balance.SlimeSpawnCheckInterval)
+            if (_spawnAccumulator >= _spawnCheckInterval)
             {
-                _spawnAccumulator -= balance.SlimeSpawnCheckInterval;
-                _spawnService.SpawnIfNeeded(stage, _registry, players, random, balance);
+                _spawnAccumulator -= _spawnCheckInterval;
+                _spawnService.SpawnIfNeeded();
             }
         }
 
@@ -62,7 +54,6 @@ namespace FloorBreaker.Slimes.Application
             {
                 slime.Kill();
                 _registry.Remove(slime.Id);
-                // 崩落死亡はドロップなし（ステージ縮小と同扱い）
             }
         }
 

@@ -7,11 +7,13 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Shared.Infrastructure.Random;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
 using FloorBreaker.Slimes.Domain;
 using FloorBreaker.Slimes.Application;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 using FloorBreaker.MatchFlow.Application;
 
 namespace FloorBreaker.Tests.EditMode.MatchFlow
@@ -50,12 +52,8 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             _p1Cooldown = new BombCooldownState();
             _p2Cooldown = new BombCooldownState();
             _slimeRegistry = new SlimeRegistry();
-            _playerDamageService = new PlayerDamageService(1.5f, 1f);
             _safeTileSearch = new SafeTileSearchService();
-
-            var slimeAi = new SlimeAiService(_playerDamageService, _safeTileSearch);
-            var slimeSpawn = new SlimeSpawnService();
-            _slimeTickService = new SlimeTickService(slimeAi, slimeSpawn, _slimeRegistry, _tileTimerService);
+            _playerDamageService = new PlayerDamageService(1.5f, 1f, _stage, _safeTileSearch);
 
             _fireDamageTickService = new FireDamageTickService(
                 _playerDamageService, _safeTileSearch, _slimeRegistry, _balance);
@@ -84,6 +82,10 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
 
             var random = new SeededRandomProvider(42);
 
+            var slimeAi = new SlimeAiService(_playerDamageService, _safeTileSearch, _slimeRegistry, _players, _stage, _balance);
+            var slimeSpawn = new SlimeSpawnService(_stage, _slimeRegistry, _players, random, _balance);
+            _slimeTickService = new SlimeTickService(slimeAi, slimeSpawn, _slimeRegistry, _tileTimerService, _balance.SlimeSpawnCheckInterval);
+
             _scheduler = new MatchPhaseScheduler(
                 _clock, _tileTimerService,
                 _p1Cooldown, _p2Cooldown,
@@ -91,7 +93,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
                 null, // BombFlightTracker is optional
                 null, // BombEffectSpreadService is optional
                 _stageShrinkService, _upgradePhaseUseCase, _matchEndUseCase,
-                _playerDamageService, _safeTileSearch,
+                _playerDamageService,
                 _players, _stage, _slimeRegistry,
                 _balance, random);
         }
@@ -239,6 +241,16 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             public int HpRecoveryThreshold => 5;
             public float DashCooldown => 1f;
             public float DashDoubleTapWindow => 0.3f;
+            public int FireFlightRangeIncrement => 2;
+            public int FireEffectRangeIncrement => 1;
+            public int FireDamageIncrement => 1;
+            public float FireDurationIncrement => 2f;
+            public float FireCooldownReduction => 0.3f;
+            public int BreakFlightRangeIncrement => 2;
+            public int BreakEffectRangeIncrement => 1;
+            public int BreakDamageIncrement => 1;
+            public float BreakCollapseTimeIncrement => 2f;
+            public float BreakCooldownReduction => 0.5f;
         }
     }
 }

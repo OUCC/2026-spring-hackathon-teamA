@@ -5,6 +5,7 @@ using FloorBreaker.Shared.Domain.Timing;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
 using FloorBreaker.Slimes.Domain;
@@ -34,7 +35,6 @@ namespace FloorBreaker.MatchFlow.Application
         private readonly UpgradePhaseUseCase _upgradePhaseUseCase;
         private readonly MatchEndUseCase _matchEndUseCase;
         private readonly PlayerDamageService _playerDamageService;
-        private readonly SafeTileSearchService _safeTileSearch;
         private readonly IReadOnlyList<PlayerModel> _players;
         private readonly StageModel _stage;
         private readonly SlimeRegistry _slimeRegistry;
@@ -60,7 +60,6 @@ namespace FloorBreaker.MatchFlow.Application
             UpgradePhaseUseCase upgradePhaseUseCase,
             MatchEndUseCase matchEndUseCase,
             PlayerDamageService playerDamageService,
-            SafeTileSearchService safeTileSearch,
             IReadOnlyList<PlayerModel> players,
             StageModel stage,
             SlimeRegistry slimeRegistry,
@@ -79,7 +78,6 @@ namespace FloorBreaker.MatchFlow.Application
             _upgradePhaseUseCase = upgradePhaseUseCase;
             _matchEndUseCase = matchEndUseCase;
             _playerDamageService = playerDamageService;
-            _safeTileSearch = safeTileSearch;
             _players = players;
             _stage = stage;
             _slimeRegistry = slimeRegistry;
@@ -125,7 +123,7 @@ namespace FloorBreaker.MatchFlow.Application
                 player.ForcedMove.Tick(deltaTime);
             }
 
-            _slimeTickService.Tick(deltaTime, _players, _stage, _random, _balance);
+            _slimeTickService.Tick(deltaTime);
             _fireDamageTickService.Tick(deltaTime, _players, _stage);
             _bombFlightTracker?.Tick(deltaTime, _players);
             _bombEffectSpreadService?.Tick(deltaTime);
@@ -155,8 +153,7 @@ namespace FloorBreaker.MatchFlow.Application
             // 外周を永久消滅
             var destroyed = _stageShrinkService.ShrinkOuterRing(_stage);
 
-            // 縮小後に通行不可マスにいるプレイヤーをダメージ + BFS 強制移動
-            // (外周リング上 + リング外の既に PermanentlyDestroyed なマスの両方を処理)
+            // 縮小後に通行不可マスにいるプレイヤーをダメージ + 強制移動
             var occupied = new HashSet<GridPos>();
             foreach (var p in _players) occupied.Add(p.CurrentPosition);
 
@@ -165,15 +162,10 @@ namespace FloorBreaker.MatchFlow.Application
                 if (!_stage.IsPassable(player.CurrentPosition)
                     || !_stage.IsInBounds(player.CurrentPosition))
                 {
-                    // 無敵でもダメージ + 強制移動 (縮小は回避不可)
-                    player.Stats.TakeDamage(_balance.BreakBombDamage);
-                    var safeTile = _safeTileSearch.FindSafeTile(_stage, player.CurrentPosition, occupied);
-                    if (safeTile.HasValue)
-                    {
-                        player.ForcedMove.Start(safeTile.Value, _balance.ForcedMoveDuration);
-                        player.CurrentPosition = safeTile.Value;
-                        occupied.Add(safeTile.Value);
-                    }
+                    _playerDamageService.ApplyDamage(
+                        player, _balance.BreakBombDamage, true, occupied,
+                        ignoreInvulnerability: true);
+                    occupied.Add(player.CurrentPosition);
                 }
             }
 

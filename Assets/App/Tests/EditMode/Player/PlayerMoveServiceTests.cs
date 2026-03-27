@@ -2,6 +2,7 @@ using NUnit.Framework;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Stage.Domain;
 
 namespace FloorBreaker.Tests.EditMode.Player

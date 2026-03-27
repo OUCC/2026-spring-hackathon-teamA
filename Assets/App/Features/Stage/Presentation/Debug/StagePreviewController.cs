@@ -7,6 +7,7 @@ using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
 
@@ -86,7 +87,7 @@ namespace FloorBreaker.Stage.Presentation.Debug
 
             // Bomb simulation セットアップ
             var safeTileSearch = new SafeTileSearchService();
-            var damageService = new PlayerDamageService(1.5f, 1f);
+            var damageService = new PlayerDamageService(1.5f, 1f, _model, safeTileSearch);
             var areaResolver = new BombAreaResolver(_queryService);
             _breakResolver = new BreakBombResolver(areaResolver);
             _fireResolver = new FireBombResolver(areaResolver);

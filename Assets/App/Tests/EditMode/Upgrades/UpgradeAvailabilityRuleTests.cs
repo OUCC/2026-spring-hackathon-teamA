@@ -5,6 +5,7 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 
 namespace FloorBreaker.Tests.EditMode.Upgrades
 {
@@ -14,15 +15,18 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         private PlayerModel _player;
         private UpgradeCatalog _catalog;
         private UpgradeAvailabilityRule _rule;
+        private UpgradeApplyService _applyService;
 
         [SetUp]
         public void SetUp()
         {
+            var balance = new TestBalanceParameters();
             var stats = new PlayerStats(10, 1f, 3f);
             var build = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
             _player = new PlayerModel(PlayerId.Player1, new GridPos(5, 5), stats, build);
             _catalog = new UpgradeCatalog();
-            _rule = new UpgradeAvailabilityRule(new TestBalanceParameters());
+            _rule = new UpgradeAvailabilityRule(balance);
+            _applyService = new UpgradeApplyService(balance);
         }
 
         [TearDown]
@@ -51,7 +55,7 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
         [Test]
         public void IsAvailable_OnceOnly_WhenAlreadyAcquired_ReturnsFalse()
         {
-            _player.Build.ApplyUpgrade(UpgradeId.FireWallPenetration);
+            _applyService.Apply(UpgradeId.FireWallPenetration, _player);
 
             var def = _catalog.GetById(UpgradeId.FireWallPenetration);
             Assert.IsFalse(_rule.IsAvailable(def, _player));
@@ -79,7 +83,7 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             // Set FireCooldown to min by repeatedly applying
             while (_player.Build.FireCooldown > _player.Build.FireCooldownMin)
             {
-                _player.Build.ApplyUpgrade(UpgradeId.FireCooldown);
+                _applyService.Apply(UpgradeId.FireCooldown, _player);
             }
 
             var def = _catalog.GetById(UpgradeId.FireCooldown);
@@ -149,6 +153,16 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             public float BreakBombSpreadInterval => 0.3f;
             public float DashCooldown => 1f;
             public float DashDoubleTapWindow => 0.3f;
+            public int FireFlightRangeIncrement => 2;
+            public int FireEffectRangeIncrement => 1;
+            public int FireDamageIncrement => 1;
+            public float FireDurationIncrement => 2f;
+            public float FireCooldownReduction => 0.3f;
+            public int BreakFlightRangeIncrement => 2;
+            public int BreakEffectRangeIncrement => 1;
+            public int BreakDamageIncrement => 1;
+            public float BreakCollapseTimeIncrement => 2f;
+            public float BreakCooldownReduction => 0.5f;
         }
     }
 }

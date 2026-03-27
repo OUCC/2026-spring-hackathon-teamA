@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Upgrades.Domain;
+using FloorBreaker.Upgrades.Application;
 
 namespace FloorBreaker.CpuPlayer.Application
 {

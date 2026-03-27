@@ -78,6 +78,16 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [SerializeField] private int hpRecoveryAmount = 3;
         [SerializeField] private int hpRecoveryThreshold = 5;
 
+        [Header("Upgrade Effect Magnitudes")]
+        [SerializeField] private int fireFlightRangeIncrement = 2;
+        [SerializeField] private int fireEffectRangeIncrement = 1;
+        [SerializeField] private int fireDamageIncrement = 1;
+        [SerializeField] private float fireDurationIncrement = 2f;
+        [SerializeField] private int breakFlightRangeIncrement = 2;
+        [SerializeField] private int breakEffectRangeIncrement = 1;
+        [SerializeField] private int breakDamageIncrement = 1;
+        [SerializeField] private float breakCollapseTimeIncrement = 2f;
+
         [Header("Dash")]
         [SerializeField] private float dashCooldown = 1f;
         [SerializeField] private float dashDoubleTapWindow = 0.3f;
@@ -147,5 +157,16 @@ namespace FloorBreaker.ScriptableObjects.Balance
 
         public float DashCooldown => dashCooldown;
         public float DashDoubleTapWindow => dashDoubleTapWindow;
+
+        public int FireFlightRangeIncrement => fireFlightRangeIncrement;
+        public int FireEffectRangeIncrement => fireEffectRangeIncrement;
+        public int FireDamageIncrement => fireDamageIncrement;
+        public float FireDurationIncrement => fireDurationIncrement;
+        public float FireCooldownReduction => fireBombCooldownReduction;
+        public int BreakFlightRangeIncrement => breakFlightRangeIncrement;
+        public int BreakEffectRangeIncrement => breakEffectRangeIncrement;
+        public int BreakDamageIncrement => breakDamageIncrement;
+        public float BreakCollapseTimeIncrement => breakCollapseTimeIncrement;
+        public float BreakCooldownReduction => breakBombCooldownReduction;
     }
 }

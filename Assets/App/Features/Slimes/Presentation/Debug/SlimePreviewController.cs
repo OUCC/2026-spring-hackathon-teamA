@@ -8,6 +8,7 @@ using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Stage.Presentation;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Player.Application;
 using FloorBreaker.Player.Presentation;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
@@ -115,7 +116,7 @@ namespace FloorBreaker.Slimes.Presentation.Debug
             _stageModel = new StageModel(bounds);
             _tileTimerService = new TileTimerService(_stageModel);
             _safeTileSearch = new SafeTileSearchService();
-            _damageService = new PlayerDamageService(InvulnerabilityDuration, ForcedMoveDuration);
+            _damageService = new PlayerDamageService(InvulnerabilityDuration, ForcedMoveDuration, _stageModel, _safeTileSearch);
 
             // 壁生成
             IRandomProvider random = new SeededRandomProvider(42);
@@ -179,10 +180,11 @@ namespace FloorBreaker.Slimes.Presentation.Debug
         private void SetupSlimes()
         {
             _slimeRegistry = new SlimeRegistry();
-            _slimeSpawnService = new SlimeSpawnService();
-            _slimeAiService = new SlimeAiService(_damageService, _safeTileSearch);
+            var players = new List<PlayerModel> { _player1, _player2 };
+            _slimeSpawnService = new SlimeSpawnService(_stageModel, _slimeRegistry, players, _random, _balance);
+            _slimeAiService = new SlimeAiService(_damageService, _safeTileSearch, _slimeRegistry, players, _stageModel, _balance);
             _slimeTickService = new SlimeTickService(
-                _slimeAiService, _slimeSpawnService, _slimeRegistry, _tileTimerService);
+                _slimeAiService, _slimeSpawnService, _slimeRegistry, _tileTimerService, _balance.SlimeSpawnCheckInterval);
 
             // BombEffectSpreadService にスライムレジストリを渡す（ボムでスライム撃破テスト用）
             _spreadService = new BombEffectSpreadService(
@@ -229,12 +231,12 @@ namespace FloorBreaker.Slimes.Presentation.Debug
             // Slime AI + spawn
             if (_autoSpawnEnabled)
             {
-                _slimeTickService.Tick(dt, players, _stageModel, _random, _balance);
+                _slimeTickService.Tick(dt);
             }
             else
             {
                 // AI のみ Tick (スポーンなし)
-                _slimeAiService.TickAll(_slimeRegistry, players, _stageModel, dt, _balance);
+                _slimeAiService.TickAll(dt);
             }
 
             // Random bomb timer
@@ -404,7 +406,7 @@ namespace FloorBreaker.Slimes.Presentation.Debug
         private void DamagePlayer(PlayerModel player, int amount)
         {
             var occupied = new HashSet<GridPos> { _player1.CurrentPosition, _player2.CurrentPosition };
-            _damageService.ApplyDamage(player, amount, false, _stageModel, _safeTileSearch, occupied);
+            _damageService.ApplyDamage(player, amount, false, occupied);
             UnityEngine.Debug.Log($"[SlimePreview] {player.Id} にダメージ {amount} → HP {player.Stats.CurrentHp.CurrentValue}");
         }
 
