@@ -40,9 +40,9 @@ namespace FloorBreaker.Bombs.Presentation
             StageQueryService stageQuery,
             Dictionary<GridPos, TileView> tileViews,
             float flightSpeed,
-            IAudioService audio = null,
-            ICameraShakeService cameraShake = null,
-            IImpactFreezeService impactFreeze = null)
+            IAudioService audio,
+            ICameraShakeService cameraShake,
+            IImpactFreezeService impactFreeze)
         {
             _tracker = tracker;
             _factory = factory;
@@ -77,7 +77,7 @@ namespace FloorBreaker.Bombs.Presentation
             _activeFlights[evt.Owner] = view;
 
             var pos = new Float2(startWorld.x, startWorld.y);
-            _audio?.PlaySfx(SfxIds.BombLaunch, pos);
+            _audio.PlaySfx(SfxIds.BombLaunch, pos);
         }
 
         private void OnBombLanded(BombLandedEvent evt)
@@ -100,9 +100,9 @@ namespace FloorBreaker.Bombs.Presentation
 
             var landAudioPos = new Float2(vfxPos.x, vfxPos.y);
             var sfxId = evt.Type == BombType.Fire ? SfxIds.BombExplodeFire : SfxIds.BombExplodeFall;
-            _audio?.PlaySfx(sfxId, landAudioPos);
-            _cameraShake?.Shake(ShakeIntensity.Medium);
-            _impactFreeze?.PlayImpact(ImpactLevel.Medium);
+            _audio.PlaySfx(sfxId, landAudioPos);
+            _cameraShake.Shake(ShakeIntensity.Medium);
+            _impactFreeze.PlayImpact(ImpactLevel.Medium);
 
             // 4. インパクトフラッシュ
             PlayImpactHighlights(evt);

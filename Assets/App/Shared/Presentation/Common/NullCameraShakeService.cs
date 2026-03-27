@@ -1,6 +1,4 @@
-using FloorBreaker.Shared.Presentation.Common;
-
-namespace FloorBreaker.Cameras.Presentation
+namespace FloorBreaker.Shared.Presentation.Common
 {
     public sealed class NullCameraShakeService : ICameraShakeService
     {

@@ -13,6 +13,7 @@ using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.ScriptableObjects.Balance;
+using FloorBreaker.Shared.Infrastructure.Audio;
 
 namespace FloorBreaker.Player.Presentation.Debug
 {
@@ -132,8 +133,9 @@ namespace FloorBreaker.Player.Presentation.Debug
             var vfxPrefab = _fireVfxPrefab != null ? _fireVfxPrefab : config.FireVfxPrefab;
             _fireVfxPool = new TileFireVfxPool(vfxPrefab, vfxParent);
 
+            var nullAudio = new NullAudioService();
             _stagePresenter = new StagePresenter(
-                _stageModel, _tileViews, _tileAnimService, _fireVfxPool, config);
+                _stageModel, _tileViews, _tileAnimService, _fireVfxPool, config, nullAudio);
         }
 
         private void SetupPlayers()
@@ -152,8 +154,11 @@ namespace FloorBreaker.Player.Presentation.Debug
             _p1View = _playerFactory.CreatePlayerView(PlayerId.Player1, p1Spawn);
             _p2View = _playerFactory.CreatePlayerView(PlayerId.Player2, p2Spawn);
 
-            _p1Presenter = new PlayerPresenter(_player1, _p1View, _playerAnimService, playerConfig);
-            _p2Presenter = new PlayerPresenter(_player2, _p2View, _playerAnimService, playerConfig);
+            var nullAudio = new NullAudioService();
+            var nullCameraShake = new NullCameraShakeService();
+            var nullImpactFreeze = new NullImpactFreezeService();
+            _p1Presenter = new PlayerPresenter(_player1, _p1View, _playerAnimService, playerConfig, nullAudio, nullCameraShake, nullImpactFreeze);
+            _p2Presenter = new PlayerPresenter(_player2, _p2View, _playerAnimService, playerConfig, nullAudio, nullCameraShake, nullImpactFreeze);
         }
 
         private PlayerModel CreatePlayerModel(PlayerId id, GridPos spawn)

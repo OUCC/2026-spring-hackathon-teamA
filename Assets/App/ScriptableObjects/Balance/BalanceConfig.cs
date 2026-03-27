@@ -78,6 +78,18 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [SerializeField] private int hpRecoveryAmount = 3;
         [SerializeField] private int hpRecoveryThreshold = 5;
 
+        [Header("Input")]
+        [SerializeField] private float inputBaseMoveInterval = 0.2f;
+        [SerializeField] private float inputInitialRepeatDelay = 0.15f;
+        [SerializeField] private float inputBufferTime = 0.04f;
+
+        [Header("CPU AI")]
+        [SerializeField] private float cpuThinkInterval = 0.2f;
+        [SerializeField] private float cpuBaseMoveInterval = 0.2f;
+        [SerializeField] private float cpuBombReleaseDelay = 0.08f;
+        [SerializeField] private float cpuUpgradeInitialDelay = 1.5f;
+        [SerializeField] private float cpuUpgradePurchaseInterval = 0.6f;
+
         [Header("Upgrade Effect Magnitudes")]
         [SerializeField] private int fireFlightRangeIncrement = 2;
         [SerializeField] private int fireEffectRangeIncrement = 1;
@@ -157,6 +169,16 @@ namespace FloorBreaker.ScriptableObjects.Balance
 
         public float DashCooldown => dashCooldown;
         public float DashDoubleTapWindow => dashDoubleTapWindow;
+
+        public float InputBaseMoveInterval => inputBaseMoveInterval;
+        public float InputInitialRepeatDelay => inputInitialRepeatDelay;
+        public float InputBufferTime => inputBufferTime;
+
+        public float CpuThinkInterval => cpuThinkInterval;
+        public float CpuBaseMoveInterval => cpuBaseMoveInterval;
+        public float CpuBombReleaseDelay => cpuBombReleaseDelay;
+        public float CpuUpgradeInitialDelay => cpuUpgradeInitialDelay;
+        public float CpuUpgradePurchaseInterval => cpuUpgradePurchaseInterval;
 
         public int FireFlightRangeIncrement => fireFlightRangeIncrement;
         public int FireEffectRangeIncrement => fireEffectRangeIncrement;

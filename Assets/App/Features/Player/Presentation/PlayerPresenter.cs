@@ -43,9 +43,9 @@ namespace FloorBreaker.Player.Presentation
             PlayerView view,
             PlayerAnimationService animService,
             PlayerSpriteConfig config,
-            IAudioService audio = null,
-            ICameraShakeService cameraShake = null,
-            IImpactFreezeService impactFreeze = null)
+            IAudioService audio,
+            ICameraShakeService cameraShake,
+            IImpactFreezeService impactFreeze)
         {
             _model = model;
             _view = view;
@@ -99,15 +99,15 @@ namespace FloorBreaker.Player.Presentation
             if (pair.Current < pair.Previous && !_isDead)
             {
                 _animService.PlayHitFlash(_view);
-                _audio?.PlaySfx(SfxIds.PlayerHit);
+                _audio.PlaySfx(SfxIds.PlayerHit);
             }
             if (pair.Current <= 0 && !_isDead)
             {
                 _isDead = true;
                 _animService.PlayDeath(_view);
-                _audio?.PlaySfx(SfxIds.PlayerDeath);
-                _cameraShake?.Shake(ShakeIntensity.Medium);
-                _impactFreeze?.PlayImpact(ImpactLevel.Heavy);
+                _audio.PlaySfx(SfxIds.PlayerDeath);
+                _cameraShake.Shake(ShakeIntensity.Medium);
+                _impactFreeze.PlayImpact(ImpactLevel.Heavy);
             }
         }
 

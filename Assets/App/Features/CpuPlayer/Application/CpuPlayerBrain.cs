@@ -19,10 +19,7 @@ namespace FloorBreaker.CpuPlayer.Application
     /// </summary>
     public sealed class CpuPlayerBrain
     {
-        private const float ThinkInterval = 0.2f;
-        private const float BaseMoveInterval = 0.2f;
-        private const float BombReleaseDelay = 0.08f;
-
+        private readonly IBalanceParameters _balance;
         private readonly PlayerModel _cpu;
         private readonly PlayerModel _opponent;
         private readonly StageModel _stage;
@@ -40,6 +37,7 @@ namespace FloorBreaker.CpuPlayer.Application
         private Direction8? _desiredDirection;
 
         public CpuPlayerBrain(
+            IBalanceParameters balance,
             PlayerModel cpu,
             PlayerModel opponent,
             StageModel stage,
@@ -50,6 +48,7 @@ namespace FloorBreaker.CpuPlayer.Application
             SlimeRegistry slimeRegistry,
             IReadOnlyList<PlayerModel> allPlayers)
         {
+            _balance = balance;
             _cpu = cpu;
             _opponent = opponent;
             _stage = stage;
@@ -82,12 +81,12 @@ namespace FloorBreaker.CpuPlayer.Application
             _thinkTimer -= deltaTime;
             if (_thinkTimer <= 0f)
             {
-                _thinkTimer = ThinkInterval;
+                _thinkTimer = _balance.CpuThinkInterval;
                 Think();
             }
 
             // 移動実行
-            float moveInterval = BaseMoveInterval / _cpu.Stats.MoveSpeed;
+            float moveInterval = _balance.CpuBaseMoveInterval / _cpu.Stats.MoveSpeed;
             _moveAccumulator += deltaTime;
             if (_moveAccumulator >= moveInterval && _desiredDirection.HasValue)
             {
@@ -264,7 +263,7 @@ namespace FloorBreaker.CpuPlayer.Application
 
             // 少し遅延してリリース (即リリースだと不自然)
             _waitingForRelease = true;
-            _bombReleaseTimer = BombReleaseDelay;
+            _bombReleaseTimer = _balance.CpuBombReleaseDelay;
         }
 
         private bool IsDangerous(GridPos pos)

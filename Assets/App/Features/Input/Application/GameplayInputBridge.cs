@@ -8,6 +8,7 @@ using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Bombs.Application;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Input.Infrastructure;
 
 namespace FloorBreaker.Input.Application
@@ -19,19 +20,7 @@ namespace FloorBreaker.Input.Application
     /// </summary>
     public sealed class GameplayInputBridge : IDisposable
     {
-        /// <summary>基本移動間隔 (秒)。実際の間隔 = BaseMoveInterval / MoveSpeed。</summary>
-        private const float BaseMoveInterval = 0.2f;
-
-        /// <summary>初回入力後の追加遅延。ホールド開始時に少し溜めてからリピート開始。</summary>
-        private const float InitialRepeatDelay = 0.15f;
-
-        /// <summary>
-        /// 初回押下時のバッファ時間 (秒)。
-        /// 十字キーの同時押しで中間方向が発生するのを吸収する。
-        /// この時間内の方向変更は「本当に入力したかった方向」として扱う。
-        /// </summary>
-        private const float InputBufferTime = 0.04f;
-
+        private readonly IBalanceParameters _balance;
         private readonly PlayerMoveService _moveService;
         private readonly BombFlightTracker _bombFlightTracker;
         private readonly BombLaunchUseCase _bombLaunchUseCase;
@@ -44,6 +33,7 @@ namespace FloorBreaker.Input.Application
         private readonly Dictionary<int, MoveRepeatState> _moveStates = new();
 
         public GameplayInputBridge(
+            IBalanceParameters balance,
             PlayerMoveService moveService,
             BombFlightTracker bombFlightTracker,
             BombLaunchUseCase bombLaunchUseCase,
@@ -51,6 +41,7 @@ namespace FloorBreaker.Input.Application
             IReadOnlyList<PlayerModel> players,
             StageModel stage)
         {
+            _balance = balance;
             _moveService = moveService;
             _bombFlightTracker = bombFlightTracker;
             _bombLaunchUseCase = bombLaunchUseCase;
@@ -134,7 +125,7 @@ namespace FloorBreaker.Input.Application
                 // 初回移動: バッファ時間経過後に実行（同時押しの中間状態を吸収）
                 if (!state.FirstMoveDone)
                 {
-                    if (state.Timer >= InputBufferTime && state.CooldownRemaining <= 0f)
+                    if (state.Timer >= _balance.InputBufferTime && state.CooldownRemaining <= 0f)
                     {
                         _moveService.TryMove(player, state.Direction, _stage);
                         state.CooldownRemaining = moveInterval;
@@ -147,7 +138,7 @@ namespace FloorBreaker.Input.Application
 
                 // リピート移動
                 float threshold = state.RepeatCount == 0
-                    ? moveInterval + InitialRepeatDelay
+                    ? moveInterval + _balance.InputInitialRepeatDelay
                     : moveInterval;
 
                 if (state.Timer >= threshold)
@@ -241,7 +232,7 @@ namespace FloorBreaker.Input.Application
             if (_moveService.TryDash(player, direction, _stage))
             {
                 // ダッシュ成功 → クールダウン開始（Tick で減算される）
-                _dashCooldowns[playerId.Index] = 1f; // TODO: BalanceParameters から取得
+                _dashCooldowns[playerId.Index] = _balance.DashCooldown;
             }
         }
 
@@ -254,11 +245,11 @@ namespace FloorBreaker.Input.Application
             return null;
         }
 
-        private static float GetMoveInterval(PlayerModel player)
+        private float GetMoveInterval(PlayerModel player)
         {
             float speed = player.Stats.MoveSpeed;
             if (speed <= 0f) speed = 0.1f;
-            return BaseMoveInterval / speed;
+            return _balance.InputBaseMoveInterval / speed;
         }
 
         public void Dispose()

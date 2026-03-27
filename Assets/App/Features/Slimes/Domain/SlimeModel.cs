@@ -12,7 +12,7 @@ namespace FloorBreaker.Slimes.Domain
         public float AttackCooldownRemaining { get; private set; }
         public float MoveAccumulator { get; set; }
 
-        public SlimeModel(SlimeId id, SlimeType type, GridPos position, float initialAttackCooldown = 1f)
+        public SlimeModel(SlimeId id, SlimeType type, GridPos position, float initialAttackCooldown)
         {
             Id = id;
             Type = type;

@@ -273,6 +273,7 @@ namespace FloorBreaker.Bootstrap
             {
                 var mp = c.Resolve<MatchPlayers>();
                 return new GameplayInputBridge(
+                    c.Resolve<IBalanceParameters>(),
                     c.Resolve<PlayerMoveService>(),
                     c.Resolve<BombFlightTracker>(),
                     c.Resolve<BombLaunchUseCase>(),
@@ -301,6 +302,7 @@ namespace FloorBreaker.Bootstrap
             {
                 var mp = c.Resolve<MatchPlayers>();
                 return new CpuPlayerBrain(
+                    c.Resolve<IBalanceParameters>(),
                     mp.Player2, mp.Player1,
                     c.Resolve<StageModel>(),
                     c.Resolve<PlayerMoveService>(),
@@ -314,7 +316,7 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var mp = c.Resolve<MatchPlayers>();
-                return new CpuUpgradeSelector(mp.Draft2, mp.Player2);
+                return new CpuUpgradeSelector(c.Resolve<IBalanceParameters>(), mp.Draft2, mp.Player2);
             }, Lifetime.Scoped);
 
             builder.Register(c =>

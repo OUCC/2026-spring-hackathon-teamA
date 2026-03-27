@@ -52,7 +52,7 @@ namespace FloorBreaker.Slimes.Domain
                 candidates.RemoveAt(posIdx);
 
                 var type = RollSlimeType(_random, _balance, totalRatio);
-                var slime = new SlimeModel(SlimeId.Next(), type, pos);
+                var slime = new SlimeModel(SlimeId.Next(), type, pos, _balance.SlimeAttackCooldown);
                 _registry.Add(slime);
                 spawned.Add(slime);
             }

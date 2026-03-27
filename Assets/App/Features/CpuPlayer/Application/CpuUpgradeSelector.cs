@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Upgrades.Domain;
 using FloorBreaker.Upgrades.Application;
@@ -11,9 +12,7 @@ namespace FloorBreaker.CpuPlayer.Application
     /// </summary>
     public sealed class CpuUpgradeSelector
     {
-        private const float InitialDelay = 1.5f;
-        private const float PurchaseInterval = 0.6f;
-
+        private readonly IBalanceParameters _balance;
         private readonly UpgradeDraftService _draft;
         private readonly PlayerModel _cpu;
 
@@ -22,8 +21,9 @@ namespace FloorBreaker.CpuPlayer.Application
         private bool _initialDelayDone;
         private bool _done;
 
-        public CpuUpgradeSelector(UpgradeDraftService draft, PlayerModel cpu)
+        public CpuUpgradeSelector(IBalanceParameters balance, UpgradeDraftService draft, PlayerModel cpu)
         {
+            _balance = balance;
             _draft = draft;
             _cpu = cpu;
         }
@@ -45,13 +45,13 @@ namespace FloorBreaker.CpuPlayer.Application
             if (!_initialDelayDone)
             {
                 _delayTimer += deltaTime;
-                if (_delayTimer < InitialDelay) return;
+                if (_delayTimer < _balance.CpuUpgradeInitialDelay) return;
                 _initialDelayDone = true;
             }
 
             // 購入間隔
             _purchaseTimer += deltaTime;
-            if (_purchaseTimer < PurchaseInterval) return;
+            if (_purchaseTimer < _balance.CpuUpgradePurchaseInterval) return;
             _purchaseTimer = 0f;
 
             // 購入可能なカードを探す

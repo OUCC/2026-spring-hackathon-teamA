@@ -19,6 +19,7 @@ using FloorBreaker.Bombs.Application;
 using FloorBreaker.Bombs.Presentation;
 using FloorBreaker.Slimes.Domain;
 using FloorBreaker.ScriptableObjects.Balance;
+using FloorBreaker.Shared.Infrastructure.Audio;
 
 namespace FloorBreaker.UI.Title.Presentation
 {
@@ -302,8 +303,9 @@ namespace FloorBreaker.UI.Title.Presentation
                     ? new TileFireVfxPool(fireVfxPrefab, vfxParent)
                     : null;
 
+                var nullAudio = new NullAudioService();
                 _stagePresenter = new StagePresenter(
-                    _stageModel, _tileViews, _tileAnimService, _fireVfxPool, tileConfig);
+                    _stageModel, _tileViews, _tileAnimService, _fireVfxPool, tileConfig, nullAudio);
 
                 // プレイヤービュー生成
                 _playerView = _playerFactory.CreatePlayerView(_playerId, _player.CurrentPosition);

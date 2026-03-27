@@ -82,6 +82,18 @@ namespace FloorBreaker.Shared.Application.Interfaces
         float DashCooldown { get; }
         float DashDoubleTapWindow { get; }
 
+        // --- Input ---
+        float InputBaseMoveInterval { get; }
+        float InputInitialRepeatDelay { get; }
+        float InputBufferTime { get; }
+
+        // --- CPU AI ---
+        float CpuThinkInterval { get; }
+        float CpuBaseMoveInterval { get; }
+        float CpuBombReleaseDelay { get; }
+        float CpuUpgradeInitialDelay { get; }
+        float CpuUpgradePurchaseInterval { get; }
+
         // --- Upgrade Effect Magnitudes ---
         int FireFlightRangeIncrement { get; }
         int FireEffectRangeIncrement { get; }

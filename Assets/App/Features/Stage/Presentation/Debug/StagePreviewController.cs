@@ -10,6 +10,7 @@ using FloorBreaker.Player.Domain;
 using FloorBreaker.Player.Application;
 using FloorBreaker.Bombs.Domain;
 using FloorBreaker.Bombs.Application;
+using FloorBreaker.Shared.Infrastructure.Audio;
 
 namespace FloorBreaker.Stage.Presentation.Debug
 {
@@ -103,9 +104,11 @@ namespace FloorBreaker.Stage.Presentation.Debug
             vfxParent.SetParent(transform, false);
             _fireVfxPool = new TileFireVfxPool(_fireVfxPrefab, vfxParent);
 
-            _presenter = new StagePresenter(_model, _views, _animService, _fireVfxPool, config);
+            var nullAudio = new NullAudioService();
+            var nullCameraShake = new NullCameraShakeService();
+            _presenter = new StagePresenter(_model, _views, _animService, _fireVfxPool, config, nullAudio);
             _shrinkAnimator = new StageShrinkAnimator(
-                _model, _views, _animService, config, _shrinkAnimDuration);
+                _model, _views, _animService, config, _shrinkAnimDuration, nullCameraShake, nullAudio);
             _presenter.SetShrinkAnimator(_shrinkAnimator);
 
             // カーソル初期化
