@@ -162,9 +162,20 @@ namespace FloorBreaker.MatchFlow.Application
                 if (!_stage.IsPassable(player.CurrentPosition)
                     || !_stage.IsInBounds(player.CurrentPosition))
                 {
-                    _playerDamageService.ApplyDamage(
-                        player, _balance.BreakBombDamage, true, occupied,
-                        ignoreInvulnerability: true);
+                    // 風の羽衣: 崩落ダメージ無効（強制移動は発生する）
+                    if (!player.Stats.LevitationActive.CurrentValue)
+                    {
+                        _playerDamageService.ApplyDamage(
+                            player, _balance.BreakBombDamage, true, occupied,
+                            ignoreInvulnerability: true);
+                    }
+                    else
+                    {
+                        // ダメージなしだが強制移動は必要
+                        _playerDamageService.ApplyDamage(
+                            player, 0, true, occupied,
+                            ignoreInvulnerability: true);
+                    }
                     occupied.Add(player.CurrentPosition);
                 }
             }
@@ -191,6 +202,11 @@ namespace FloorBreaker.MatchFlow.Application
         {
             State = SchedulerState.UpgradePhase;
             _clock.SetPhase(GamePhase.UpgradePhase);
+
+            // 一時効果（炎守りのマント・風の羽衣）を次の強化フェーズ開始時にリセット
+            foreach (var player in _players)
+                player.Stats.ClearTemporaryEffects();
+
             _upgradePhaseUseCase.Start(_players, _random);
         }
 
@@ -210,10 +226,6 @@ namespace FloorBreaker.MatchFlow.Application
             _clock.SetPhase(GamePhase.MatchRunning);
             _clock.ResetTimer();
             _clock.Resume();
-
-            // 一時効果（炎守りのマント・風の羽衣）をリセット
-            foreach (var player in _players)
-                player.Stats.ClearTemporaryEffects();
         }
 
         private void TransitionToResult(PlayerId winner)
