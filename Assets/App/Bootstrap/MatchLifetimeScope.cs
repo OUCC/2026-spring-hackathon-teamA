@@ -25,6 +25,7 @@ using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Cameras.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
 using FloorBreaker.CpuPlayer.Application;
+using FloorBreaker.ScriptableObjects.Configs;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -75,6 +76,13 @@ namespace FloorBreaker.Bootstrap
             builder.Register<StageShrinkService>(Lifetime.Scoped);
             builder.Register<SafeTileSearchService>(Lifetime.Scoped);
             builder.Register<WarpService>(Lifetime.Scoped);
+
+            // StageConfig: シーン上に配置されていればそれを使う、なければデフォルト生成
+            builder.Register(c =>
+            {
+                var existing = UnityEngine.Object.FindAnyObjectByType<StageConfig>();
+                return existing != null ? existing : ScriptableObject.CreateInstance<StageConfig>();
+            }, Lifetime.Scoped);
 
             builder.Register(c =>
             {

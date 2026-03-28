@@ -48,8 +48,8 @@ namespace FloorBreaker.Bootstrap
             InputInitializer inputInit,
             MatchClock clock,
             IAudioService audio,
-            StageConfig stageConfig = null,
-            WarpService warpService = null)
+            StageConfig stageConfig,
+            WarpService warpService)
         {
             _balance = balance;
             _random = random;
