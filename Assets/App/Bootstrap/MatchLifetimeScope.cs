@@ -92,7 +92,8 @@ namespace FloorBreaker.Bootstrap
                     c.Resolve<TileTimerService>(),
                     0.1f,           // chainDelayPerStep: 0.1秒/マス
                     b.FireBombDuration);
-            }, Lifetime.Scoped);
+            }, Lifetime.Scoped)
+                .As<ITileIgnitionHandler>();
         }
 
         private static void RegisterUpgrades(IContainerBuilder builder)

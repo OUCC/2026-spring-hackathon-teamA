@@ -18,7 +18,7 @@ namespace FloorBreaker.Bombs.Application
         private readonly SlimeRegistry _slimeRegistry;
         private readonly SlimeDropResolver _slimeDropResolver;
         private readonly IRandomProvider _random;
-        private readonly GasIgnitionService _gasIgnitionService;
+        private readonly ITileIgnitionHandler _tileIgnitionHandler;
 
         private readonly List<SpreadWave> _activeWaves = new();
 
@@ -41,7 +41,7 @@ namespace FloorBreaker.Bombs.Application
             SlimeRegistry slimeRegistry = null,
             SlimeDropResolver slimeDropResolver = null,
             IRandomProvider random = null,
-            GasIgnitionService gasIgnitionService = null)
+            ITileIgnitionHandler tileIgnitionHandler = null)
         {
             _stage = stage;
             _tileTimerService = tileTimerService;
@@ -50,7 +50,7 @@ namespace FloorBreaker.Bombs.Application
             _slimeRegistry = slimeRegistry;
             _slimeDropResolver = slimeDropResolver;
             _random = random;
-            _gasIgnitionService = gasIgnitionService;
+            _tileIgnitionHandler = tileIgnitionHandler;
         }
 
         public void EnqueueBreakBomb(
@@ -193,9 +193,8 @@ namespace FloorBreaker.Bombs.Application
                         _stage.SetTileCondition(entry.Pos, TileCondition.OnFire);
                         _tileTimerService.StartFireTimer(entry.Pos, wave.FireDuration);
 
-                        // ガスタイルに炎が着いたら連鎖引火をトリガー
-                        if (tileData.Type == TileType.Gas && _gasIgnitionService != null)
-                            _gasIgnitionService.Ignite(entry.Pos);
+                        // 炎着火をハンドラーに通知（ガス連鎖引火等）
+                        _tileIgnitionHandler?.OnTileIgnited(entry.Pos);
                     }
                 }
 

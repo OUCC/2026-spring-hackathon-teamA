@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using FloorBreaker.Shared.Domain.Grid;
+using FloorBreaker.Shared.Application.Interfaces;
 
 namespace FloorBreaker.Stage.Domain
 {
@@ -7,7 +8,7 @@ namespace FloorBreaker.Stage.Domain
     /// ガスタイルの連鎖引火を管理する。
     /// 炎ボムがガスタイルに着弾した際、BFS で隣接ガスに段階的に延焼する。
     /// </summary>
-    public sealed class GasIgnitionService
+    public sealed class GasIgnitionService : ITileIgnitionHandler
     {
         private readonly StageModel _stage;
         private readonly TileTimerService _tileTimerService;
@@ -28,6 +29,14 @@ namespace FloorBreaker.Stage.Domain
             _tileTimerService = tileTimerService;
             _chainDelayPerStep = chainDelayPerStep;
             _fireDuration = fireDuration;
+        }
+
+        /// <summary>ITileIgnitionHandler 実装。ガスタイルの場合のみ引火処理を開始する。</summary>
+        public void OnTileIgnited(GridPos pos)
+        {
+            var data = _stage.GetTileData(pos);
+            if (data.Type == TileType.Gas)
+                Ignite(pos);
         }
 
         /// <summary>
