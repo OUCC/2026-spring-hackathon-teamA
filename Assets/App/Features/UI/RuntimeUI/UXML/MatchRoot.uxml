@@ -27,6 +27,17 @@
                 <VisualElement name="UpgradePanesContainer" class="upgrade-panes" />
             </VisualElement>
 
+            <!-- ポーズオーバーレイ -->
+            <VisualElement name="PauseOverlayRoot" class="pause-overlay pause-overlay--hidden">
+                <VisualElement class="pause-backdrop" />
+                <VisualElement class="pause-panel">
+                    <Label class="pause-panel__title" text="PAUSE" />
+                    <Button name="PauseResumeBtn" class="pause-panel__btn" text="再開" />
+                    <Button name="PauseSettingsBtn" class="pause-panel__btn" text="設定" />
+                    <Button name="PauseTitleBtn" class="pause-panel__btn pause-panel__btn--danger" text="タイトルへ" />
+                </VisualElement>
+            </VisualElement>
+
             <!-- リザルト — C# が動的生成 -->
             <VisualElement name="ResultRoot" class="result-root result-root--hidden">
                 <VisualElement class="result-backdrop" />

@@ -141,7 +141,19 @@
                     </VisualElement>
                 </VisualElement>
 
+                <Button name="CreditsButton" class="title-btn title-btn--settings" text="クレジット" />
                 <Button name="SettingsCloseButton" class="title-btn" text="閉じる" />
+            </VisualElement>
+        </VisualElement>
+
+        <!-- ===== STATE 4: クレジットオーバーレイ ===== -->
+        <VisualElement name="CreditsOverlay" class="credits-overlay" style="display: none;">
+            <VisualElement class="credits-panel">
+                <Label class="credits-title" text="クレジット" />
+                <ScrollView name="CreditsScroll" class="credits-scroll">
+                    <Label name="CreditsText" class="credits-text" />
+                </ScrollView>
+                <Button name="CreditsCloseButton" class="title-btn" text="閉じる" />
             </VisualElement>
         </VisualElement>
 

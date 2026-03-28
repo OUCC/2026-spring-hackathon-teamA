@@ -3,6 +3,7 @@ using R3;
 using FloorBreaker.Shared.Domain.Timing;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Bombs.Domain;
+using FloorBreaker.UI.RuntimeUI.Controls;
 
 namespace FloorBreaker.UI.HUD.Presentation
 {
@@ -26,7 +27,8 @@ namespace FloorBreaker.UI.HUD.Presentation
             PlayerStats stats,
             PlayerBuild build,
             BombCooldownState cooldown,
-            MatchClock clock)
+            MatchClock clock,
+            UpgradeIconMap iconMap = null)
         {
             _view = view;
             _build = build;
@@ -48,7 +50,7 @@ namespace FloorBreaker.UI.HUD.Presentation
                 if (pair.Current > pair.Previous) _view.PunchCoin();
             });
             _upgradesSub = build.AcquiredUpgrades.Subscribe(
-                upgrades => _view.SetAcquiredUpgrades(upgrades));
+                upgrades => _view.SetAcquiredUpgrades(upgrades, iconMap));
         }
 
         /// <summary>

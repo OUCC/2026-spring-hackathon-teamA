@@ -5,6 +5,7 @@ using FloorBreaker.Bombs.Presentation;
 using FloorBreaker.Slimes.Presentation;
 using FloorBreaker.UI.HUD.Presentation;
 using FloorBreaker.UI.UpgradeOverlay.Presentation;
+using FloorBreaker.UI.Pause.Presentation;
 using FloorBreaker.UI.Result.Presentation;
 
 namespace FloorBreaker.Bootstrap
@@ -24,6 +25,7 @@ namespace FloorBreaker.Bootstrap
         public SlimePresenter Slime { get; set; }
         public PlayerHudPresenter[] Huds { get; set; } = Array.Empty<PlayerHudPresenter>();
         public UpgradeOverlayPresenter UpgradeOverlay { get; set; }
+        public PauseOverlayPresenter Pause { get; set; }
         public ResultPresenter Result { get; set; }
 
         public void TickPresenters(float deltaTime)
@@ -51,6 +53,7 @@ namespace FloorBreaker.Bootstrap
             foreach (var hud in Huds)
                 hud?.Dispose();
             UpgradeOverlay?.Dispose();
+            Pause?.Dispose();
             Result?.Dispose();
         }
     }

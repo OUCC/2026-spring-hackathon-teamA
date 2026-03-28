@@ -212,6 +212,9 @@
     margin: 1px;
     border-width: 1px;
     -unity-text-align: middle-center;
+    min-width: 18px;
+    min-height: 18px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .hud__upgrade-badge--fire {

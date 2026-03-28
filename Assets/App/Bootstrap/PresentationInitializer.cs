@@ -18,6 +18,7 @@ using FloorBreaker.Cameras.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
 using FloorBreaker.UI.HUD.Presentation;
 using FloorBreaker.UI.UpgradeOverlay.Presentation;
+using FloorBreaker.UI.Pause.Presentation;
 using FloorBreaker.UI.Result.Presentation;
 
 namespace FloorBreaker.Bootstrap
@@ -54,6 +55,7 @@ namespace FloorBreaker.Bootstrap
         private readonly ISceneTransitionService _sceneTransition;
         private readonly TileTimerService _tileTimerService;
         private readonly MatchModeConfig _modeConfig;
+        private readonly MatchPhaseScheduler _scheduler;
         private readonly MatchPresenters _presenters;
 
         public PresentationInitializer(
@@ -83,6 +85,7 @@ namespace FloorBreaker.Bootstrap
             ISceneTransitionService sceneTransition,
             TileTimerService tileTimerService,
             MatchModeConfig modeConfig,
+            MatchPhaseScheduler scheduler,
             MatchPresenters presenters)
         {
             _stage = stage;
@@ -111,6 +114,7 @@ namespace FloorBreaker.Bootstrap
             _sceneTransition = sceneTransition;
             _tileTimerService = tileTimerService;
             _modeConfig = modeConfig;
+            _scheduler = scheduler;
             _presenters = presenters;
         }
 
@@ -191,6 +195,7 @@ namespace FloorBreaker.Bootstrap
             _matchUIDocument.CreatePanes(humanCount);
 
             // 9. HUD Presenter 生成 (Human のみ)
+            var iconMap = _matchUIDocument.UpgradeIconMap;
             var hudRoots = _matchUIDocument.HudRoots;
             var huds = new PlayerHudPresenter[humanCount];
             for (int h = 0; h < humanCount; h++)
@@ -199,7 +204,7 @@ namespace FloorBreaker.Bootstrap
                 var hudView = new PlayerHudView(hudRoots[h]);
                 huds[h] = new PlayerHudPresenter(
                     hudView, _players.All[idx].Stats, _players.All[idx].Build,
-                    _players.Cooldowns[idx], _clock);
+                    _players.Cooldowns[idx], _clock, iconMap);
             }
             _presenters.Huds = huds;
 
@@ -212,12 +217,16 @@ namespace FloorBreaker.Bootstrap
             _presenters.UpgradeOverlay = new UpgradeOverlayPresenter(
                 overlayView, _clock, _upgradePhase, _selectionState,
                 humanStats, _matchUIDocument.UpgradeCardTemplate, _audio,
-                humanIndices.ToArray());
+                humanIndices.ToArray(), iconMap);
 
             // 11. Result Presenter 生成 (Human のみ)
             var resultView = new ResultView(
                 _matchUIDocument.ResultRoot, _matchUIDocument.ResultPanes);
             _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition, _modeConfig, humanIndices.ToArray());
+
+            // 12. PauseOverlay Presenter 生成
+            var pauseView = new PauseOverlayView(_matchUIDocument.PauseOverlayRoot);
+            _presenters.Pause = new PauseOverlayPresenter(pauseView, _clock, _scheduler, _sceneTransition);
         }
     }
 }

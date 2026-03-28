@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Bombs.Domain;
 
 namespace FloorBreaker.Input.Infrastructure
@@ -17,6 +18,7 @@ namespace FloorBreaker.Input.Infrastructure
         [SerializeField] private InputActionAsset _inputActions;
 
         private PlayerId _playerId;
+        private ITimeProvider _timeProvider;
         private Direction8 _lastDirection = Direction8.S;
         private Direction8? _heldDirection;
         private bool _isAimLocked;
@@ -40,9 +42,19 @@ namespace FloorBreaker.Input.Infrastructure
 
         public void SetDoubleTapWindow(float window) => _doubleTapWindow = window;
 
-        public void Initialize(PlayerId playerId, InputActionAsset actions = null)
+        /// <summary>
+        /// 特定のデバイスのみに制限する（ゲームパッド割り当て用）。
+        /// </summary>
+        public void RestrictToDevice(InputDevice device)
+        {
+            if (_gameplayMap != null && device != null)
+                _gameplayMap.devices = new InputDevice[] { device };
+        }
+
+        public void Initialize(PlayerId playerId, ITimeProvider timeProvider, InputActionAsset actions = null)
         {
             _playerId = playerId;
+            _timeProvider = timeProvider;
             if (actions != null) _inputActions = actions;
             BindActions();
         }
@@ -56,8 +68,7 @@ namespace FloorBreaker.Input.Infrastructure
         {
             if (_inputActions == null) return;
 
-            // P1 → Gameplay_P1, P2 → Gameplay_P2
-            string mapName = _playerId == PlayerId.Player1 ? "Gameplay_P1" : "Gameplay_P2";
+            string mapName = $"Gameplay_P{_playerId.Index + 1}";
             _gameplayMap = _inputActions.FindActionMap(mapName);
             if (_gameplayMap == null) return;
 
@@ -104,7 +115,7 @@ namespace FloorBreaker.Input.Infrastructure
             if (dir.HasValue)
             {
                 // ダブルタップ検出
-                float now = Time.unscaledTime;
+                float now = _timeProvider.UnscaledTime;
                 if (_lastTapDirection.HasValue
                     && _lastTapDirection.Value == dir.Value
                     && now - _lastTapTime <= _doubleTapWindow)

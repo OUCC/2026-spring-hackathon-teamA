@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEngine.UIElements;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Upgrades.Domain;
@@ -12,6 +13,7 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
     {
         private readonly VisualElement _root;
         private readonly VisualElement _band;
+        private readonly VisualElement _icon;
         private readonly Label _nameLabel;
         private readonly Label _descLabel;
         private readonly Label _costLabel;
@@ -24,13 +26,14 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
             // テンプレートの TemplateContainer 内のルートを取得
             var card = _root.Q(className: "card") ?? _root;
             _band = card.Q("CategoryBand");
+            _icon = card.Q("CardIcon");
             _nameLabel = card.Q<Label>("CardName");
             _descLabel = card.Q<Label>("CardDesc");
             _costLabel = card.Q<Label>("CardCost");
             _root = card;
         }
 
-        public void SetData(UpgradeDefinition def)
+        public void SetData(UpgradeDefinition def, UpgradeIconMap iconMap = null)
         {
             _nameLabel.text = def.DisplayName;
             _descLabel.text = GetDescription(def.Id);
@@ -41,6 +44,19 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
             _band.RemoveFromClassList("card__band--break");
             _band.RemoveFromClassList("card__band--general");
             _band.AddToClassList(GetBandClass(def.Id));
+
+            // アイコン
+            if (_icon != null)
+            {
+                _icon.RemoveFromClassList("card__icon--fire");
+                _icon.RemoveFromClassList("card__icon--break");
+                _icon.RemoveFromClassList("card__icon--general");
+
+                var tex = iconMap?.Get(def.Id);
+                if (tex != null)
+                    _icon.style.backgroundImage = new StyleBackground(tex);
+                _icon.AddToClassList(GetIconTintClass(def.Id));
+            }
 
             // レアリティ装飾
             _root.RemoveFromClassList("card--common");
@@ -67,6 +83,16 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
         private static string GetBandClass(UpgradeId id)
         {
             return UpgradeIdDisplayHelper.GetBandClass(id);
+        }
+
+        private static string GetIconTintClass(UpgradeId id)
+        {
+            return UpgradeIdDisplayHelper.GetCategory(id) switch
+            {
+                UpgradeIdDisplayHelper.UpgradeCategory.Fire => "card__icon--fire",
+                UpgradeIdDisplayHelper.UpgradeCategory.Break => "card__icon--break",
+                _ => "card__icon--general",
+            };
         }
 
         private static string GetRarityClass(UpgradeRarity rarity)

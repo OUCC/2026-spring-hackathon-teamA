@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using FloorBreaker.UI.RuntimeUI.Controls;
 
 namespace FloorBreaker.UI.RuntimeUI.Documents
 {
@@ -14,13 +15,16 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         [SerializeField] private VisualTreeAsset _playerHudTemplate;
         [SerializeField] private VisualTreeAsset _upgradePaneTemplate;
         [SerializeField] private VisualTreeAsset _resultPaneTemplate;
+        [SerializeField] private UpgradeIconMap _upgradeIconMap;
 
         public VisualTreeAsset UpgradeCardTemplate => _upgradeCardTemplate;
+        public UpgradeIconMap UpgradeIconMap => _upgradeIconMap;
 
         // 静的要素
         public VisualElement UpgradeOverlayRoot { get; private set; }
         public VisualElement ResultRoot { get; private set; }
         public VisualElement ImpactFlashOverlay { get; private set; }
+        public VisualElement PauseOverlayRoot { get; private set; }
 
         // 動的生成されるペイン配列 (CreatePanes 後に有効)
         public VisualElement[] HudRoots { get; private set; }
@@ -42,6 +46,7 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             ResultRoot = _root.Q("ResultRoot");
             _resultPanesContainer = _root.Q("ResultPanesContainer");
             ImpactFlashOverlay = _root.Q("ImpactFlashOverlay");
+            PauseOverlayRoot = _root.Q("PauseOverlayRoot");
         }
 
         /// <summary>

@@ -58,6 +58,12 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         public Label VolumeBgmLabel { get; private set; }
         public Label VolumeSfxLabel { get; private set; }
 
+        // --- クレジット ---
+        public VisualElement CreditsOverlay { get; private set; }
+        public Button CreditsButton { get; private set; }
+        public Button CreditsCloseButton { get; private set; }
+        public Label CreditsText { get; private set; }
+
         // --- キーコンフィグ ---
         public Button KeyConfigButton { get; private set; }
         public Button KeyConfigResetButton { get; private set; }
@@ -127,6 +133,12 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             VolumeMasterLabel = root.Q<Label>("VolumeLabel_Master");
             VolumeBgmLabel = root.Q<Label>("VolumeLabel_Bgm");
             VolumeSfxLabel = root.Q<Label>("VolumeLabel_Sfx");
+
+            // クレジット
+            CreditsOverlay = root.Q("CreditsOverlay");
+            CreditsButton = root.Q<Button>("CreditsButton");
+            CreditsCloseButton = root.Q<Button>("CreditsCloseButton");
+            CreditsText = root.Q<Label>("CreditsText");
 
             // キーコンフィグ
             KeyConfigButton = root.Q<Button>("KeyConfigButton");

@@ -323,7 +323,8 @@ namespace FloorBreaker.Bootstrap
                     brains.Add(new CpuPlayerBrain(
                         balance, cpuPlayer, opponent,
                         stage, moveService, flightTracker, launchUseCase,
-                        mp.Cooldowns[i], slimeRegistry, mp.All));
+                        mp.Cooldowns[i], slimeRegistry, mp.All,
+                        c.Resolve<IRandomProvider>()));
 
                     selectors.Add(new CpuUpgradeSelector(balance, mp.Drafts[i], cpuPlayer));
                 }

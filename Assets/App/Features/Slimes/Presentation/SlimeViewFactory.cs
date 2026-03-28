@@ -25,6 +25,8 @@ namespace FloorBreaker.Slimes.Presentation
             go.transform.localScale = new Vector3(scale, scale, 1f);
 
             var renderer = go.AddComponent<SpriteRenderer>();
+            if (_config.BaseMaterial != null)
+                renderer.material = new Material(_config.BaseMaterial);
             var view = go.AddComponent<SlimeView>();
             view.Initialize(id, type, renderer, _config);
 

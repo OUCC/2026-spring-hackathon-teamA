@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "FloorBreakerActions",
     "maps": [
         {
@@ -357,67 +358,797 @@
             "name": "UpgradeUI_P1",
             "id": "a1b2c3d4-2222-4000-8000-000000000001",
             "actions": [
-                { "name": "Navigate", "type": "Value", "id": "a1b2c3d4-2222-4000-8000-000000000010", "expectedControlType": "Vector2", "processors": "", "interactions": "", "initialStateCheck": true },
-                { "name": "Submit", "type": "Button", "id": "a1b2c3d4-2222-4000-8000-000000000011", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
-                { "name": "Skip", "type": "Button", "id": "a1b2c3d4-2222-4000-8000-000000000012", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
-                { "name": "Reroll", "type": "Button", "id": "a1b2c3d4-2222-4000-8000-000000000013", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false }
+                {
+                    "name": "Navigate",
+                    "type": "Value",
+                    "id": "a1b2c3d4-2222-4000-8000-000000000010",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Submit",
+                    "type": "Button",
+                    "id": "a1b2c3d4-2222-4000-8000-000000000011",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Skip",
+                    "type": "Button",
+                    "id": "a1b2c3d4-2222-4000-8000-000000000012",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Reroll",
+                    "type": "Button",
+                    "id": "a1b2c3d4-2222-4000-8000-000000000013",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
             ],
             "bindings": [
-                { "name": "", "id": "b3000001-0000-4000-8000-000000000001", "path": "<Gamepad>/leftStick", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Navigate", "isComposite": false, "isPartOfComposite": false },
-                { "name": "WASD", "id": "b3000001-0000-4000-8000-000000000002", "path": "2DVector(mode=1)", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": true, "isPartOfComposite": false },
-                { "name": "up", "id": "b3000001-0000-4000-8000-000000000003", "path": "<Keyboard>/w", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": false, "isPartOfComposite": true },
-                { "name": "down", "id": "b3000001-0000-4000-8000-000000000004", "path": "<Keyboard>/s", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": false, "isPartOfComposite": true },
-                { "name": "left", "id": "b3000001-0000-4000-8000-000000000005", "path": "<Keyboard>/a", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": false, "isPartOfComposite": true },
-                { "name": "right", "id": "b3000001-0000-4000-8000-000000000006", "path": "<Keyboard>/d", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": false, "isPartOfComposite": true },
-                { "name": "", "id": "b3000001-0000-4000-8000-000000000010", "path": "<Gamepad>/buttonSouth", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Submit", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b3000001-0000-4000-8000-000000000011", "path": "<Keyboard>/space", "interactions": "", "processors": "", "groups": "", "action": "Submit", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b3000001-0000-4000-8000-000000000020", "path": "<Gamepad>/buttonEast", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Skip", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b3000001-0000-4000-8000-000000000021", "path": "<Keyboard>/l", "interactions": "", "processors": "", "groups": "", "action": "Skip", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b3000001-0000-4000-8000-000000000030", "path": "<Gamepad>/buttonNorth", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Reroll", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b3000001-0000-4000-8000-000000000031", "path": "<Keyboard>/p", "interactions": "", "processors": "", "groups": "", "action": "Reroll", "isComposite": false, "isPartOfComposite": false }
+                {
+                    "name": "",
+                    "id": "b3000001-0000-4000-8000-000000000001",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "WASD",
+                    "id": "b3000001-0000-4000-8000-000000000002",
+                    "path": "2DVector(mode=1)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "b3000001-0000-4000-8000-000000000003",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "b3000001-0000-4000-8000-000000000004",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "b3000001-0000-4000-8000-000000000005",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "b3000001-0000-4000-8000-000000000006",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "b3000001-0000-4000-8000-000000000010",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b3000001-0000-4000-8000-000000000011",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b3000001-0000-4000-8000-000000000020",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b3000001-0000-4000-8000-000000000021",
+                    "path": "<Keyboard>/l",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b3000001-0000-4000-8000-000000000030",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Reroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b3000001-0000-4000-8000-000000000031",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
             ]
         },
         {
             "name": "UpgradeUI_P2",
             "id": "a1b2c3d4-3333-4000-8000-000000000001",
             "actions": [
-                { "name": "Navigate", "type": "Value", "id": "a1b2c3d4-3333-4000-8000-000000000010", "expectedControlType": "Vector2", "processors": "", "interactions": "", "initialStateCheck": true },
-                { "name": "Submit", "type": "Button", "id": "a1b2c3d4-3333-4000-8000-000000000011", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
-                { "name": "Skip", "type": "Button", "id": "a1b2c3d4-3333-4000-8000-000000000012", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
-                { "name": "Reroll", "type": "Button", "id": "a1b2c3d4-3333-4000-8000-000000000013", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false }
+                {
+                    "name": "Navigate",
+                    "type": "Value",
+                    "id": "a1b2c3d4-3333-4000-8000-000000000010",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Submit",
+                    "type": "Button",
+                    "id": "a1b2c3d4-3333-4000-8000-000000000011",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Skip",
+                    "type": "Button",
+                    "id": "a1b2c3d4-3333-4000-8000-000000000012",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Reroll",
+                    "type": "Button",
+                    "id": "a1b2c3d4-3333-4000-8000-000000000013",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
             ],
             "bindings": [
-                { "name": "", "id": "b4000001-0000-4000-8000-000000000001", "path": "<Gamepad>/leftStick", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Navigate", "isComposite": false, "isPartOfComposite": false },
-                { "name": "Arrows", "id": "b4000001-0000-4000-8000-000000000002", "path": "2DVector(mode=1)", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": true, "isPartOfComposite": false },
-                { "name": "up", "id": "b4000001-0000-4000-8000-000000000003", "path": "<Keyboard>/upArrow", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": false, "isPartOfComposite": true },
-                { "name": "down", "id": "b4000001-0000-4000-8000-000000000004", "path": "<Keyboard>/downArrow", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": false, "isPartOfComposite": true },
-                { "name": "left", "id": "b4000001-0000-4000-8000-000000000005", "path": "<Keyboard>/leftArrow", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": false, "isPartOfComposite": true },
-                { "name": "right", "id": "b4000001-0000-4000-8000-000000000006", "path": "<Keyboard>/rightArrow", "interactions": "", "processors": "", "groups": "", "action": "Navigate", "isComposite": false, "isPartOfComposite": true },
-                { "name": "", "id": "b4000001-0000-4000-8000-000000000010", "path": "<Gamepad>/buttonSouth", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Submit", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b4000001-0000-4000-8000-000000000011", "path": "<Keyboard>/numpad0", "interactions": "", "processors": "", "groups": "", "action": "Submit", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b4000001-0000-4000-8000-000000000020", "path": "<Gamepad>/buttonEast", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Skip", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b4000001-0000-4000-8000-000000000021", "path": "<Keyboard>/numpad2", "interactions": "", "processors": "", "groups": "", "action": "Skip", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b4000001-0000-4000-8000-000000000030", "path": "<Gamepad>/buttonNorth", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Reroll", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b4000001-0000-4000-8000-000000000031", "path": "<Keyboard>/numpad6", "interactions": "", "processors": "", "groups": "", "action": "Reroll", "isComposite": false, "isPartOfComposite": false }
+                {
+                    "name": "",
+                    "id": "b4000001-0000-4000-8000-000000000001",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "Arrows",
+                    "id": "b4000001-0000-4000-8000-000000000002",
+                    "path": "2DVector(mode=1)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "b4000001-0000-4000-8000-000000000003",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "b4000001-0000-4000-8000-000000000004",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "b4000001-0000-4000-8000-000000000005",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "b4000001-0000-4000-8000-000000000006",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "b4000001-0000-4000-8000-000000000010",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4000001-0000-4000-8000-000000000011",
+                    "path": "<Keyboard>/numpad0",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4000001-0000-4000-8000-000000000020",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4000001-0000-4000-8000-000000000021",
+                    "path": "<Keyboard>/numpad2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4000001-0000-4000-8000-000000000030",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Reroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4000001-0000-4000-8000-000000000031",
+                    "path": "<Keyboard>/numpad6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
             ]
         },
         {
             "name": "System",
             "id": "a1b2c3d4-4444-4000-8000-000000000001",
             "actions": [
-                { "name": "Pause", "type": "Button", "id": "a1b2c3d4-4444-4000-8000-000000000010", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
-                { "name": "Confirm", "type": "Button", "id": "a1b2c3d4-4444-4000-8000-000000000011", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
-                { "name": "Cancel", "type": "Button", "id": "a1b2c3d4-4444-4000-8000-000000000012", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false }
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "a1b2c3d4-4444-4000-8000-000000000010",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Confirm",
+                    "type": "Button",
+                    "id": "a1b2c3d4-4444-4000-8000-000000000011",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cancel",
+                    "type": "Button",
+                    "id": "a1b2c3d4-4444-4000-8000-000000000012",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
             ],
             "bindings": [
-                { "name": "", "id": "b5000001-0000-4000-8000-000000000001", "path": "<Gamepad>/start", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Pause", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b5000001-0000-4000-8000-000000000002", "path": "<Keyboard>/escape", "interactions": "", "processors": "", "groups": "", "action": "Pause", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b5000001-0000-4000-8000-000000000010", "path": "<Gamepad>/buttonSouth", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Confirm", "isComposite": false, "isPartOfComposite": false },
-                { "name": "", "id": "b5000001-0000-4000-8000-000000000020", "path": "<Gamepad>/buttonEast", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Cancel", "isComposite": false, "isPartOfComposite": false }
+                {
+                    "name": "",
+                    "id": "b5000001-0000-4000-8000-000000000001",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b5000001-0000-4000-8000-000000000002",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b5000001-0000-4000-8000-000000000010",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Confirm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b5000001-0000-4000-8000-000000000020",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Gameplay_P3",
+            "id": "10e70156-81cb-40de-b1aa-d6d2b4b5a473",
+            "actions": [
+                {
+                    "name": "Move",
+                    "type": "Value",
+                    "id": "fb0d20f4-f608-433d-bd44-7483d375c808",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "BreakBombHold",
+                    "type": "Button",
+                    "id": "e2cec13b-e8b2-446e-9a8c-16e50a51125c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "FireBombHold",
+                    "type": "Button",
+                    "id": "c3cad441-1bfd-4346-be65-33757c0fc32c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "AimLock",
+                    "type": "Button",
+                    "id": "4bd60b05-2fc1-4b70-a917-76e00360bc36",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8b7dfd32-5e08-4db0-b8ea-d7efb6627111",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1450db3d-ca7d-48ef-8f86-30fde2370a5e",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "BreakBombHold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cc52ae5f-3228-43ba-89d1-85bfdc19b17b",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FireBombHold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "61ff57c0-7156-4f6b-9d13-f342ff46d4d3",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AimLock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Gameplay_P4",
+            "id": "890ac3f2-2c00-4168-92f7-206376d25059",
+            "actions": [
+                {
+                    "name": "Move",
+                    "type": "Value",
+                    "id": "7f174ddd-f520-427a-90f7-530cf7843e5e",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "BreakBombHold",
+                    "type": "Button",
+                    "id": "31f68468-d371-44cd-b77d-734677ca4094",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "FireBombHold",
+                    "type": "Button",
+                    "id": "5fcbdbe4-1fe8-4c75-8940-15590186e111",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "AimLock",
+                    "type": "Button",
+                    "id": "2c62d19f-da94-4973-b17e-abbe1d8a4afa",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "295720fc-6e27-4581-baac-3eb781dcee80",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b46bab68-d936-4f58-b692-b267377b6dfd",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "BreakBombHold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c85220c4-0965-42a1-a9c4-62a2a3321367",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FireBombHold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a5b9a9b8-1c28-4a1c-85dd-7e632aef2ec8",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AimLock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "UpgradeUI_P3",
+            "id": "2fdb5373-1dca-484c-8478-856fd3a086b8",
+            "actions": [
+                {
+                    "name": "Navigate",
+                    "type": "Value",
+                    "id": "a787a689-6200-4ebc-887f-91833d570d81",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Submit",
+                    "type": "Button",
+                    "id": "99549b8f-7c16-4e52-ae3d-a4ed7000c0b5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Skip",
+                    "type": "Button",
+                    "id": "7c48c078-42b2-4fbb-ac72-8918840155a9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Reroll",
+                    "type": "Button",
+                    "id": "7f3676a2-b88d-4db3-8e01-e4016464564a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d782befd-d6f8-4dfa-a08b-2c482bace15c",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1c6c59e8-7e7d-4448-bc94-e44f1fbc9a37",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2ffd651a-2036-47ce-a82f-74962d6cb88e",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cebb85aa-1e66-4060-b98a-d6ff605abfe7",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "UpgradeUI_P4",
+            "id": "861948cf-bda3-4628-860c-2daf7a0fc9a8",
+            "actions": [
+                {
+                    "name": "Navigate",
+                    "type": "Value",
+                    "id": "99a22787-db63-49aa-a238-1baef441fabd",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Submit",
+                    "type": "Button",
+                    "id": "fc7f3235-1516-404a-be98-b3962850fbdf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Skip",
+                    "type": "Button",
+                    "id": "b688da47-0b3f-45a0-8256-d3c43e9e789e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Reroll",
+                    "type": "Button",
+                    "id": "106a4abd-d82d-488e-9c46-a1d115e2fa34",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "16666049-d812-40a3-9201-00d495f5b6b0",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e62a70d4-d816-49d0-a126-419eb248bb5d",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ee40a3e5-3564-4d2b-a3c7-6b63c32d5d29",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d66c9dc4-2018-433b-b38b-4669f1622adc",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
             ]
         }
     ],
     "controlSchemes": [
-        { "name": "Gamepad", "bindingGroup": "Gamepad", "devices": [{ "devicePath": "<Gamepad>", "isOptional": false, "isOR": false }] }
+        {
+            "name": "Gamepad",
+            "bindingGroup": "Gamepad",
+            "devices": [
+                {
+                    "devicePath": "<Gamepad>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
     ]
 }

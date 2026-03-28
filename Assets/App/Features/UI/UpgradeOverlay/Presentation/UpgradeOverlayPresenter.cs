@@ -22,6 +22,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         private readonly UpgradePhaseUseCase _upgradePhase;
         private readonly UpgradeSelectionState _selectionState;
         private readonly VisualTreeAsset _cardTemplate;
+        private readonly UpgradeIconMap _iconMap;
         private readonly IReadOnlyList<PlayerStats> _playerStats;
         private readonly IAudioService _audio;
         private readonly int[] _humanIndices;
@@ -42,12 +43,14 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             IReadOnlyList<PlayerStats> playerStats,
             VisualTreeAsset cardTemplate,
             IAudioService audio = null,
-            int[] humanIndices = null)
+            int[] humanIndices = null,
+            UpgradeIconMap iconMap = null)
         {
             _view = view;
             _upgradePhase = upgradePhase;
             _selectionState = selectionState;
             _cardTemplate = cardTemplate;
+            _iconMap = iconMap;
             _playerStats = playerStats;
             _audio = audio;
             _humanIndices = humanIndices;
@@ -150,7 +153,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             {
                 var def = choices[i];
                 var card = new UpgradeCardElement(_cardTemplate);
-                card.SetData(def);
+                card.SetData(def, _iconMap);
 
                 bool purchased = _selectionState.IsPurchased(player, i);
                 card.SetLocked(!purchased && stats.Coins.CurrentValue < def.Cost);

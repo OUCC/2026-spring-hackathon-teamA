@@ -103,6 +103,18 @@ namespace FloorBreaker.UI.Title.Presentation
                 UpdateControlsDisplay();
             }
 
+            // ── Credits ──
+            doc.CreditsButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                ShowCreditsOverlay();
+            });
+            doc.CreditsCloseButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                HideCreditsOverlay();
+            });
+
             // ── StartInSetupMode (リザルト「設定に戻る」から遷移) ──
             if (modeConfig.StartInSetupMode)
             {
@@ -137,6 +149,120 @@ namespace FloorBreaker.UI.Title.Presentation
         private void HideSettingsOverlay()
         {
             _doc.SettingsOverlay.style.display = DisplayStyle.None;
+        }
+
+        private void ShowCreditsOverlay()
+        {
+            if (_doc.CreditsText != null)
+                _doc.CreditsText.text = GetCreditsText();
+            _doc.CreditsOverlay.style.display = DisplayStyle.Flex;
+        }
+
+        private void HideCreditsOverlay()
+        {
+            _doc.CreditsOverlay.style.display = DisplayStyle.None;
+        }
+
+        private static string GetCreditsText()
+        {
+            return
+@"FLOOR BREAKER
+
+━━━━━━━━━━━━━━━━━━━━
+  Game Engine
+━━━━━━━━━━━━━━━━━━━━
+
+Unity 6.3
+(c) Unity Technologies
+
+
+━━━━━━━━━━━━━━━━━━━━
+  Third-Party Assets
+━━━━━━━━━━━━━━━━━━━━
+
+Feel v5.9.1
+(c) More Mountains
+https://feel.moremountains.com/
+
+DOTween Pro
+(c) 2014-2018 Daniele Giardini - Demigiant
+http://dotween.demigiant.com
+
+Epic Toon FX
+(c) Archanor VFX
+
+All In 1 Sprite Shader
+(c) Seaside Game Studios
+
+Medieval Fantasy SFX Bundle
+(c) Leohpaz
+
+Action RPG Music FREE
+(c) Vertex Studio
+
+
+━━━━━━━━━━━━━━━━━━━━
+  Icons
+━━━━━━━━━━━━━━━━━━━━
+
+Upgrade icons by Lorc and Delapouite
+Available on https://game-icons.net
+
+Licensed under Creative Commons Attribution 3.0
+https://creativecommons.org/licenses/by/3.0/
+
+
+━━━━━━━━━━━━━━━━━━━━
+  Open Source Libraries
+━━━━━━━━━━━━━━━━━━━━
+
+The following open source libraries are used
+under the MIT License.
+
+VContainer v1.17.0
+Copyright (c) 2020 hadashiA
+https://github.com/hadashiA/VContainer
+
+UniTask v2.5.10
+Copyright (c) 2019 Yoshifumi Kawai / Cysharp, Inc.
+https://github.com/Cysharp/UniTask
+
+R3
+Copyright (c) 2024 Cysharp, Inc.
+https://github.com/Cysharp/R3
+
+NuGetForUnity
+Copyright (c) 2018 Patrick McCarthy
+https://github.com/GlitchEnzo/NuGetForUnity
+
+── MIT License ──
+
+Permission is hereby granted, free of charge, to
+any person obtaining a copy of this software and
+associated documentation files (the ""Software""),
+to deal in the Software without restriction,
+including without limitation the rights to use,
+copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is
+furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission
+notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT
+WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+";
         }
 
         // ═══════════════════════════════════════════

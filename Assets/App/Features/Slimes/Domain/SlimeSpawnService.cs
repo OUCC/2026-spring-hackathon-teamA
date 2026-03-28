@@ -14,6 +14,7 @@ namespace FloorBreaker.Slimes.Domain
         private readonly IReadOnlyList<PlayerModel> _players;
         private readonly IRandomProvider _random;
         private readonly IBalanceParameters _balance;
+        private int _nextIdCounter;
 
         public SlimeSpawnService(
             StageModel stage,
@@ -52,7 +53,7 @@ namespace FloorBreaker.Slimes.Domain
                 candidates.RemoveAt(posIdx);
 
                 var type = RollSlimeType(_random, _balance, totalRatio);
-                var slime = new SlimeModel(SlimeId.Next(), type, pos, _balance.SlimeAttackCooldown);
+                var slime = new SlimeModel(new SlimeId(++_nextIdCounter), type, pos, _balance.SlimeAttackCooldown);
                 _registry.Add(slime);
                 spawned.Add(slime);
             }

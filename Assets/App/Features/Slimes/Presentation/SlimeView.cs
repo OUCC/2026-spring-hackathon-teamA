@@ -23,8 +23,23 @@ namespace FloorBreaker.Slimes.Presentation
             _slimeId = id;
             _slimeType = type;
             _renderer = renderer;
-            _renderer.color = config.GetTypeTint(type);
             _renderer.sortingOrder = config.BaseSortingOrder;
+
+            // HSV シフトでスプライト色を変更（乗算だとシアン基色で金/赤が崩れるため）
+            var mat = _renderer.material;
+            float hsvShift = config.GetHsvShift(type);
+            if (mat != null && mat.HasProperty("_HsvShift"))
+            {
+                mat.EnableKeyword("HSV_ON");
+                mat.SetFloat("_HsvShift", hsvShift);
+                mat.SetFloat("_HsvSaturation", config.GetHsvSaturation(type));
+                mat.SetFloat("_HsvBright", config.GetHsvBright(type));
+            }
+            else
+            {
+                // フォールバック: AllIn1SpriteShader が無い場合は従来の乗算 tint
+                _renderer.color = config.GetTypeTint(type);
+            }
 
             var sprite = config.GetSprite(Direction8.S);
             if (sprite != null)

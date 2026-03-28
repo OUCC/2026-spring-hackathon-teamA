@@ -73,14 +73,17 @@ namespace FloorBreaker.UI.HUD.Presentation
                 _coinLabel.RemoveFromClassList("hud__coin-value--punch")).StartingIn(50);
         }
 
-        public void SetAcquiredUpgrades(IReadOnlyList<UpgradeId> upgrades)
+        public void SetAcquiredUpgrades(IReadOnlyList<UpgradeId> upgrades, UpgradeIconMap iconMap = null)
         {
             _acquiredRow.Clear();
             foreach (var id in upgrades)
             {
-                var badge = new Label(UpgradeIdDisplayHelper.GetShortLabel(id));
+                var badge = new VisualElement();
                 badge.AddToClassList("hud__upgrade-badge");
                 badge.AddToClassList(UpgradeIdDisplayHelper.GetBadgeClass(id));
+                var tex = iconMap?.Get(id);
+                if (tex != null)
+                    badge.style.backgroundImage = new StyleBackground(tex);
                 _acquiredRow.Add(badge);
             }
         }
