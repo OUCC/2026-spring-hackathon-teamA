@@ -28,6 +28,7 @@ namespace FloorBreaker.Stage.Domain
     {
         public TileTimerType Type;
         public float Remaining;
+        public float InitialDuration; // 比率計算用の初期値
         public float ChainDuration; // collapse → recovery の自動チェーン用
     }
 
@@ -50,6 +51,7 @@ namespace FloorBreaker.Stage.Domain
             {
                 Type = TileTimerType.Collapse,
                 Remaining = collapseDuration,
+                InitialDuration = collapseDuration,
                 ChainDuration = recoveryDuration,
             };
         }
@@ -60,6 +62,7 @@ namespace FloorBreaker.Stage.Domain
             {
                 Type = TileTimerType.Fire,
                 Remaining = duration,
+                InitialDuration = duration,
                 ChainDuration = 0f,
             };
         }
@@ -70,6 +73,42 @@ namespace FloorBreaker.Stage.Domain
         }
 
         public bool HasActiveTimer(GridPos pos) => _activeTimers.ContainsKey(pos);
+
+        /// <summary>
+        /// 炎タイルの残り時間比率を返す（1.0 = 開始直後、0.0 = 消火直前）。
+        /// 炎タイマーが存在しない場合は -1 を返す。
+        /// </summary>
+        public float GetFireRemainingRatio(GridPos pos)
+        {
+            if (!_activeTimers.TryGetValue(pos, out var entry)) return -1f;
+            if (entry.Type != TileTimerType.Fire) return -1f;
+            if (entry.InitialDuration <= 0f) return 0f;
+            return entry.Remaining / entry.InitialDuration;
+        }
+
+        /// <summary>
+        /// 崩落復帰タイルの残り時間比率を返す（1.0 = 復帰まで遠い、0.0 = 復帰直前）。
+        /// 復帰タイマーが存在しない場合は -1 を返す。
+        /// </summary>
+        public float GetRecoveryRemainingRatio(GridPos pos)
+        {
+            if (!_activeTimers.TryGetValue(pos, out var entry)) return -1f;
+            if (entry.Type != TileTimerType.Recovery) return -1f;
+            if (entry.InitialDuration <= 0f) return 0f;
+            return entry.Remaining / entry.InitialDuration;
+        }
+
+        /// <summary>
+        /// 指定タイプのアクティブタイマーを持つ全座標を列挙する。
+        /// </summary>
+        public IEnumerable<GridPos> GetActivePositions(TileTimerType type)
+        {
+            foreach (var kvp in _activeTimers)
+            {
+                if (kvp.Value.Type == type)
+                    yield return kvp.Key;
+            }
+        }
 
         public void Tick(float deltaTime)
         {
@@ -108,6 +147,7 @@ namespace FloorBreaker.Stage.Domain
                             {
                                 Type = TileTimerType.Recovery,
                                 Remaining = entry.ChainDuration,
+                                InitialDuration = entry.ChainDuration,
                                 ChainDuration = 0f,
                             };
                         }

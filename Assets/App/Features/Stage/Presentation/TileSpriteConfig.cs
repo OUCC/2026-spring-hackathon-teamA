@@ -18,6 +18,7 @@ namespace FloorBreaker.Stage.Presentation
         [SerializeField] private Color _wallColor = new Color(0.42f, 0.36f, 0.29f, 1f);        // #6B5B4A
         [SerializeField] private Color _burningTint = new Color(1f, 0.53f, 0.27f, 1f);         // #FF8844
         [SerializeField] private Color _burningPulseBright = new Color(1f, 0.75f, 0.3f, 1f);   // #FFBF4D
+        [SerializeField] private Color _burningFadeColor = new Color(1f, 0.9f, 0.3f, 0.6f);   // 消火間際の黄色（薄い）
         [SerializeField] private Color _collapsingTint = new Color(0.67f, 0.60f, 0.47f, 1f);   // #AA9977
         [SerializeField] private Color _collapsedColor = new Color(0.10f, 0.08f, 0.13f, 1f);   // #1A1420
         [SerializeField] private Color _destroyedColor = new Color(0f, 0f, 0f, 0f);
@@ -45,6 +46,7 @@ namespace FloorBreaker.Stage.Presentation
         public Color WallColor => _wallColor;
         public Color BurningTint => _burningTint;
         public Color BurningPulseBright => _burningPulseBright;
+        public Color BurningFadeColor => _burningFadeColor;
         public Color CollapsingTint => _collapsingTint;
         public Color CollapsedColor => _collapsedColor;
         public Color DestroyedColor => _destroyedColor;

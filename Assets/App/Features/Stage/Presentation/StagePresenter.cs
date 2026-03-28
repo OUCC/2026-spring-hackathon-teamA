@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using R3;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
@@ -18,6 +19,7 @@ namespace FloorBreaker.Stage.Presentation
         private readonly IDisposable _subscription;
 
         private StageShrinkAnimator _shrinkAnimator;
+        private TileTimerService _tileTimerService;
 
         public StagePresenter(
             StageModel model,
@@ -39,6 +41,51 @@ namespace FloorBreaker.Stage.Presentation
         public void SetShrinkAnimator(StageShrinkAnimator shrinkAnimator)
         {
             _shrinkAnimator = shrinkAnimator;
+        }
+
+        public void SetTileTimerService(TileTimerService tileTimerService)
+        {
+            _tileTimerService = tileTimerService;
+        }
+
+        /// <summary>
+        /// 毎フレーム呼び出し: 炎タイルの VFX スケールを残り時間に応じて減衰させる。
+        /// </summary>
+        public void TickFireDecay()
+        {
+            if (_tileTimerService == null) return;
+
+            foreach (var pos in _tileTimerService.GetActivePositions(TileTimerType.Fire))
+            {
+                float ratio = _tileTimerService.GetFireRemainingRatio(pos);
+                if (ratio < 0f) continue;
+
+                // VFX スケール: 1.0 → 0.3 に減衰
+                float vfxScale = Mathf.Lerp(0.3f, 1.0f, ratio);
+                _fireVfxPool.SetScale(pos, vfxScale);
+            }
+        }
+
+        /// <summary>
+        /// 毎フレーム呼び出し: 崩落復帰が近いタイルにグロー効果を適用する。
+        /// </summary>
+        public void TickRecoveryPreview()
+        {
+            if (_tileTimerService == null) return;
+
+            foreach (var pos in _tileTimerService.GetActivePositions(TileTimerType.Recovery))
+            {
+                float ratio = _tileTimerService.GetRecoveryRemainingRatio(pos);
+                if (ratio < 0f || ratio > 0.4f) continue; // 復帰40%以内（約2秒前）のみ
+
+                if (!_views.TryGetValue(pos, out var view)) continue;
+
+                // 復帰が近づくにつれて色を明るくする
+                float brightness = Mathf.Lerp(1.0f, 0.3f, ratio / 0.4f);
+                var baseColor = _config.CollapsedColor;
+                var glowColor = Color.Lerp(baseColor, _config.NormalColor, brightness * 0.5f);
+                view.Renderer.color = glowColor;
+            }
         }
 
         private void HandleTileChanged(TileChangedEvent evt)

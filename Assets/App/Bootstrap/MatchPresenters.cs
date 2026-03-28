@@ -18,6 +18,7 @@ namespace FloorBreaker.Bootstrap
     {
         public StagePresenter Stage { get; set; }
         public StageShrinkAnimator ShrinkAnimator { get; set; }
+        public ShrinkWarningPresenter ShrinkWarning { get; set; }
         public PlayerPresenter PlayerP1 { get; set; }
         public PlayerPresenter PlayerP2 { get; set; }
         public BombPresenter Bomb { get; set; }
@@ -35,12 +36,16 @@ namespace FloorBreaker.Bootstrap
             HudP1?.UpdatePerFrame();
             HudP2?.UpdatePerFrame();
             UpgradeOverlay?.UpdateCountdown();
+            Stage?.TickFireDecay();
+            Stage?.TickRecoveryPreview();
+            ShrinkWarning?.Tick();
         }
 
         public void Dispose()
         {
             Stage?.Dispose();
             ShrinkAnimator?.Dispose();
+            ShrinkWarning?.Dispose();
             PlayerP1?.Dispose();
             PlayerP2?.Dispose();
             Bomb?.Dispose();
