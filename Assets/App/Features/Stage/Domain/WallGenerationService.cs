@@ -26,11 +26,10 @@ namespace FloorBreaker.Stage.Domain
 
         public HashSet<GridPos> Generate(
             TileCoordRange bounds,
-            GridPos p1Spawn,
-            GridPos p2Spawn,
+            IReadOnlyList<GridPos> spawnPositions,
             IRandomProvider random)
         {
-            var exclusion = BuildExclusionSet(bounds, p1Spawn, p2Spawn);
+            var exclusion = BuildExclusionSet(bounds, spawnPositions);
             int targetCount = (int)(bounds.TileCount * _targetPercent);
 
             // Seed pass
@@ -71,11 +70,11 @@ namespace FloorBreaker.Stage.Domain
             return walls;
         }
 
-        private HashSet<GridPos> BuildExclusionSet(TileCoordRange bounds, GridPos p1, GridPos p2)
+        private HashSet<GridPos> BuildExclusionSet(TileCoordRange bounds, IReadOnlyList<GridPos> spawnPositions)
         {
             var exclusion = new HashSet<GridPos>();
-            AddProtectionZone(exclusion, bounds, p1);
-            AddProtectionZone(exclusion, bounds, p2);
+            foreach (var spawn in spawnPositions)
+                AddProtectionZone(exclusion, bounds, spawn);
             return exclusion;
         }
 

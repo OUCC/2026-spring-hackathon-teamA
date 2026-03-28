@@ -7,5 +7,6 @@ namespace FloorBreaker.MatchFlow.Application
     public sealed class MatchModeConfig
     {
         public bool IsCpuPlayer { get; set; }
+        public int PlayerCount { get; set; } = 2;
     }
 }

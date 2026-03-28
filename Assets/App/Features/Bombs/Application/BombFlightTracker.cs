@@ -57,8 +57,7 @@ namespace FloorBreaker.Bombs.Application
     public sealed class BombFlightTracker : IDisposable
     {
         private readonly BombLaunchUseCase _launchUseCase;
-        private readonly BombCooldownState _p1Cooldown;
-        private readonly BombCooldownState _p2Cooldown;
+        private readonly IReadOnlyList<BombCooldownState> _cooldowns;
         private readonly StageModel _stage;
         private readonly SlimeRegistry _slimeRegistry;
         private readonly float _flightSpeed;
@@ -69,45 +68,43 @@ namespace FloorBreaker.Bombs.Application
         public Observable<BombFlightStartedEvent> FlightStarted => _flightStarted;
         public Observable<BombLandedEvent> BombLanded => _bombLanded;
 
-        private BombFlightState _p1Flight;
-        private BombFlightState _p2Flight;
-
-        // DualShot 用の2発目スロット
-        private BombFlightState _p1DualFlight;
-        private BombFlightState _p2DualFlight;
+        private readonly BombFlightState[] _flights;
+        private readonly BombFlightState[] _dualFlights;
 
         public BombFlightTracker(
             BombLaunchUseCase launchUseCase,
-            BombCooldownState p1Cooldown,
-            BombCooldownState p2Cooldown,
+            IReadOnlyList<BombCooldownState> cooldowns,
             StageModel stage,
             SlimeRegistry slimeRegistry,
             IBalanceParameters balance)
         {
             _launchUseCase = launchUseCase;
-            _p1Cooldown = p1Cooldown;
-            _p2Cooldown = p2Cooldown;
+            _cooldowns = cooldowns;
             _stage = stage;
             _slimeRegistry = slimeRegistry;
             _flightSpeed = balance.BombFlightSpeed;
+
+            int count = cooldowns.Count;
+            _flights = new BombFlightState[count];
+            _dualFlights = new BombFlightState[count];
         }
 
         public bool IsFlying(PlayerId player)
         {
-            return GetFlight(player).IsFlying;
+            return _flights[player.Index].IsFlying;
         }
 
         /// <summary>DualShot の2発目を開始する。クールダウン / IsFlying チェックなし。</summary>
         public bool StartDualFlight(PlayerId owner, GridPos origin, Direction8 direction, BombSpec spec)
         {
             var cmd = new BombFlightCommand(origin, direction, spec, owner);
-            SetDualFlight(owner, new BombFlightState
+            _dualFlights[owner.Index] = new BombFlightState
             {
                 IsFlying = true,
                 Command = cmd,
                 DistanceAccumulator = 0f,
                 CurrentTileDistance = 0,
-            });
+            };
             _flightStarted.OnNext(new BombFlightStartedEvent(owner, origin, direction, spec));
             return true;
         }
@@ -115,23 +112,23 @@ namespace FloorBreaker.Bombs.Application
         public bool StartFlight(PlayerId owner, GridPos origin, Direction8 direction, BombSpec spec)
         {
             if (IsFlying(owner)) return false;
-            if (!GetCooldown(owner).CanFire(spec.Type)) return false;
+            if (!_cooldowns[owner.Index].CanFire(spec.Type)) return false;
 
             var cmd = new BombFlightCommand(origin, direction, spec, owner);
-            SetFlight(owner, new BombFlightState
+            _flights[owner.Index] = new BombFlightState
             {
                 IsFlying = true,
                 Command = cmd,
                 DistanceAccumulator = 0f,
                 CurrentTileDistance = 0,
-            });
+            };
             _flightStarted.OnNext(new BombFlightStartedEvent(owner, origin, direction, spec));
             return true;
         }
 
         public void ReleaseBomb(PlayerId owner, IReadOnlyList<PlayerModel> players)
         {
-            var state = GetFlight(owner);
+            var state = _flights[owner.Index];
             if (state.IsFlying)
             {
                 if (state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
@@ -141,12 +138,12 @@ namespace FloorBreaker.Bombs.Application
                 else
                 {
                     state.IsReleased = true;
-                    SetFlight(owner, state);
+                    _flights[owner.Index] = state;
                 }
             }
 
             // DualShot 2発目もリリース
-            var dual = GetDualFlight(owner);
+            var dual = _dualFlights[owner.Index];
             if (dual.IsFlying)
             {
                 if (dual.CurrentTileDistance >= dual.Command.Spec.MinFlightDistance)
@@ -156,23 +153,24 @@ namespace FloorBreaker.Bombs.Application
                 else
                 {
                     dual.IsReleased = true;
-                    SetDualFlight(owner, dual);
+                    _dualFlights[owner.Index] = dual;
                 }
             }
         }
 
         public void Tick(float deltaTime, IReadOnlyList<PlayerModel> players)
         {
-            TickPlayer(PlayerId.Player1, deltaTime, players);
-            TickPlayer(PlayerId.Player2, deltaTime, players);
-            // DualShot 2発目
-            TickDualPlayer(PlayerId.Player1, deltaTime, players);
-            TickDualPlayer(PlayerId.Player2, deltaTime, players);
+            for (int i = 0; i < _flights.Length; i++)
+            {
+                var id = PlayerId.FromIndex(i);
+                TickPlayer(id, deltaTime, players);
+                TickDualPlayer(id, deltaTime, players);
+            }
         }
 
         private void TickPlayer(PlayerId owner, float deltaTime, IReadOnlyList<PlayerModel> players)
         {
-            var state = GetFlight(owner);
+            var state = _flights[owner.Index];
             if (!state.IsFlying) return;
 
             state.DistanceAccumulator += deltaTime * _flightSpeed;
@@ -186,7 +184,7 @@ namespace FloorBreaker.Bombs.Application
 
                 if (!_stage.IsInBounds(nextPos))
                 {
-                    SetFlight(owner, state);
+                    _flights[owner.Index] = state;
                     Land(owner, state, players);
                     return;
                 }
@@ -205,7 +203,7 @@ namespace FloorBreaker.Bombs.Application
                     if (!state.Command.Spec.FlightPenetration)
                     {
                         state.CurrentTileDistance = nextTile;
-                        SetFlight(owner, state);
+                        _flights[owner.Index] = state;
                         Land(owner, state, players);
                         return;
                     }
@@ -217,7 +215,7 @@ namespace FloorBreaker.Bombs.Application
                     if (!state.Command.Spec.FlightPenetration)
                     {
                         state.CurrentTileDistance = nextTile;
-                        SetFlight(owner, state);
+                        _flights[owner.Index] = state;
                         Land(owner, state, players);
                         return;
                     }
@@ -230,7 +228,7 @@ namespace FloorBreaker.Bombs.Application
                 if (state.IsReleased
                     && state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
                 {
-                    SetFlight(owner, state);
+                    _flights[owner.Index] = state;
                     Land(owner, state, players);
                     return;
                 }
@@ -240,7 +238,7 @@ namespace FloorBreaker.Bombs.Application
             if (state.IsReleased
                 && state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
             {
-                SetFlight(owner, state);
+                _flights[owner.Index] = state;
                 Land(owner, state, players);
                 return;
             }
@@ -248,24 +246,24 @@ namespace FloorBreaker.Bombs.Application
             // 最大飛行距離に到達 → 着弾
             if (state.CurrentTileDistance >= state.Command.Spec.MaxFlightDistance)
             {
-                SetFlight(owner, state);
+                _flights[owner.Index] = state;
                 Land(owner, state, players);
                 return;
             }
 
-            SetFlight(owner, state);
+            _flights[owner.Index] = state;
         }
 
         private void Land(PlayerId owner, BombFlightState state, IReadOnlyList<PlayerModel> players)
         {
-            SetFlight(owner, default); // IsFlying = false
+            _flights[owner.Index] = default; // IsFlying = false
 
             var offset = state.Command.Direction.ToOffset();
             var landingPos = state.CurrentTileDistance > 0
                 ? state.Command.Origin + offset * state.CurrentTileDistance
                 : state.Command.Origin;
 
-            GetCooldown(owner).StartCooldown(
+            _cooldowns[owner.Index].StartCooldown(
                 state.Command.Spec.Type, state.Command.Spec.Cooldown);
 
             _launchUseCase.ExecuteLanding(state.Command, landingPos, players, null);
@@ -285,34 +283,10 @@ namespace FloorBreaker.Bombs.Application
             return _slimeRegistry != null && _slimeRegistry.IsOccupied(pos);
         }
 
-        private ref BombFlightState GetFlight(PlayerId player)
-        {
-            if (player == PlayerId.Player1) return ref _p1Flight;
-            return ref _p2Flight;
-        }
-
-        private void SetFlight(PlayerId player, BombFlightState state)
-        {
-            if (player == PlayerId.Player1) _p1Flight = state;
-            else _p2Flight = state;
-        }
-
-        private ref BombFlightState GetDualFlight(PlayerId player)
-        {
-            if (player == PlayerId.Player1) return ref _p1DualFlight;
-            return ref _p2DualFlight;
-        }
-
-        private void SetDualFlight(PlayerId player, BombFlightState state)
-        {
-            if (player == PlayerId.Player1) _p1DualFlight = state;
-            else _p2DualFlight = state;
-        }
-
         /// <summary>DualShot 2発目用 Tick。メインの TickPlayer と同じロジック。</summary>
         private void TickDualPlayer(PlayerId owner, float deltaTime, IReadOnlyList<PlayerModel> players)
         {
-            var state = GetDualFlight(owner);
+            var state = _dualFlights[owner.Index];
             if (!state.IsFlying) return;
 
             state.DistanceAccumulator += deltaTime * _flightSpeed;
@@ -326,7 +300,7 @@ namespace FloorBreaker.Bombs.Application
 
                 if (!_stage.IsInBounds(nextPos))
                 {
-                    SetDualFlight(owner, state);
+                    _dualFlights[owner.Index] = state;
                     LandDual(owner, state, players);
                     return;
                 }
@@ -343,7 +317,7 @@ namespace FloorBreaker.Bombs.Application
                 if (tileState == TileState.Wall && !state.Command.Spec.FlightPenetration)
                 {
                     state.CurrentTileDistance = nextTile;
-                    SetDualFlight(owner, state);
+                    _dualFlights[owner.Index] = state;
                     LandDual(owner, state, players);
                     return;
                 }
@@ -351,7 +325,7 @@ namespace FloorBreaker.Bombs.Application
                 if (CheckEntityAt(nextPos, players) && !state.Command.Spec.FlightPenetration)
                 {
                     state.CurrentTileDistance = nextTile;
-                    SetDualFlight(owner, state);
+                    _dualFlights[owner.Index] = state;
                     LandDual(owner, state, players);
                     return;
                 }
@@ -361,7 +335,7 @@ namespace FloorBreaker.Bombs.Application
                 if (state.IsReleased
                     && state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
                 {
-                    SetDualFlight(owner, state);
+                    _dualFlights[owner.Index] = state;
                     LandDual(owner, state, players);
                     return;
                 }
@@ -370,24 +344,24 @@ namespace FloorBreaker.Bombs.Application
             if (state.IsReleased
                 && state.CurrentTileDistance >= state.Command.Spec.MinFlightDistance)
             {
-                SetDualFlight(owner, state);
+                _dualFlights[owner.Index] = state;
                 LandDual(owner, state, players);
                 return;
             }
 
             if (state.CurrentTileDistance >= state.Command.Spec.MaxFlightDistance)
             {
-                SetDualFlight(owner, state);
+                _dualFlights[owner.Index] = state;
                 LandDual(owner, state, players);
                 return;
             }
 
-            SetDualFlight(owner, state);
+            _dualFlights[owner.Index] = state;
         }
 
         private void LandDual(PlayerId owner, BombFlightState state, IReadOnlyList<PlayerModel> players)
         {
-            SetDualFlight(owner, default);
+            _dualFlights[owner.Index] = default;
 
             var offset = state.Command.Direction.ToOffset();
             var landingPos = state.CurrentTileDistance > 0
@@ -400,11 +374,6 @@ namespace FloorBreaker.Bombs.Application
             _bombLanded.OnNext(new BombLandedEvent(
                 owner, landingPos, state.Command.Spec.Type,
                 state.Command.Spec.EffectRange, state.Command.Spec.WallPenetration));
-        }
-
-        private BombCooldownState GetCooldown(PlayerId player)
-        {
-            return player == PlayerId.Player1 ? _p1Cooldown : _p2Cooldown;
         }
 
         public void Dispose()

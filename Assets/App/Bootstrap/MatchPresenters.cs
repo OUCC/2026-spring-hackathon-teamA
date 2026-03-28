@@ -19,22 +19,20 @@ namespace FloorBreaker.Bootstrap
         public StagePresenter Stage { get; set; }
         public StageShrinkAnimator ShrinkAnimator { get; set; }
         public ShrinkWarningPresenter ShrinkWarning { get; set; }
-        public PlayerPresenter PlayerP1 { get; set; }
-        public PlayerPresenter PlayerP2 { get; set; }
+        public PlayerPresenter[] Players { get; set; } = Array.Empty<PlayerPresenter>();
         public BombPresenter Bomb { get; set; }
         public SlimePresenter Slime { get; set; }
-        public PlayerHudPresenter HudP1 { get; set; }
-        public PlayerHudPresenter HudP2 { get; set; }
+        public PlayerHudPresenter[] Huds { get; set; } = Array.Empty<PlayerHudPresenter>();
         public UpgradeOverlayPresenter UpgradeOverlay { get; set; }
         public ResultPresenter Result { get; set; }
 
         public void TickPresenters(float deltaTime)
         {
-            PlayerP1?.Tick(deltaTime);
-            PlayerP2?.Tick(deltaTime);
+            foreach (var player in Players)
+                player?.Tick(deltaTime);
             Bomb?.Tick(deltaTime);
-            HudP1?.UpdatePerFrame();
-            HudP2?.UpdatePerFrame();
+            foreach (var hud in Huds)
+                hud?.UpdatePerFrame();
             UpgradeOverlay?.UpdateCountdown();
             Stage?.TickFireDecay();
             Stage?.TickRecoveryPreview();
@@ -46,12 +44,12 @@ namespace FloorBreaker.Bootstrap
             Stage?.Dispose();
             ShrinkAnimator?.Dispose();
             ShrinkWarning?.Dispose();
-            PlayerP1?.Dispose();
-            PlayerP2?.Dispose();
+            foreach (var player in Players)
+                player?.Dispose();
             Bomb?.Dispose();
             Slime?.Dispose();
-            HudP1?.Dispose();
-            HudP2?.Dispose();
+            foreach (var hud in Huds)
+                hud?.Dispose();
             UpgradeOverlay?.Dispose();
             Result?.Dispose();
         }

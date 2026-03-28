@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Domain.Timing;
@@ -19,83 +20,50 @@ namespace FloorBreaker.Input.Application
         /// <summary>カード行のインデックス上限。0,1,2=カード、3=リロール。</summary>
         private const int RerollIndex = 3;
 
-        private readonly UpgradeDraftService _draftP1;
-        private readonly UpgradeDraftService _draftP2;
-        private readonly PlayerModel _player1;
-        private readonly PlayerModel _player2;
+        private readonly IReadOnlyList<UpgradeDraftService> _drafts;
+        private readonly IReadOnlyList<PlayerModel> _players;
         private readonly MatchClock _clock;
         private readonly IRandomProvider _random;
         private readonly UpgradeSelectionState _selectionState;
 
-
         public UpgradeUIInputBridge(
-            UpgradeDraftService draftP1,
-            UpgradeDraftService draftP2,
-            PlayerModel player1,
-            PlayerModel player2,
+            IReadOnlyList<UpgradeDraftService> drafts,
+            IReadOnlyList<PlayerModel> players,
             MatchClock clock,
             IRandomProvider random,
             UpgradeSelectionState selectionState)
         {
-            _draftP1 = draftP1;
-            _draftP2 = draftP2;
-            _player1 = player1;
-            _player2 = player2;
+            _drafts = drafts;
+            _players = players;
             _clock = clock;
             _random = random;
             _selectionState = selectionState;
         }
 
-        // --- P1 ---
+        // --- 汎用コールバック（InputInitializer から PlayerId をキャプチャして呼び出す） ---
 
-        public void OnNavigateP1(InputAction.CallbackContext ctx)
+        public void OnNavigate(PlayerId player, InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase()) return;
-            Navigate(PlayerId.Player1, ctx.ReadValue<UnityEngine.Vector2>());
+            Navigate(player, ctx.ReadValue<UnityEngine.Vector2>());
         }
 
-        public void OnSubmitP1(InputAction.CallbackContext ctx)
+        public void OnSubmit(PlayerId player, InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
-            Submit(PlayerId.Player1, _draftP1, _player1);
+            Submit(player, _drafts[player.Index], _players[player.Index]);
         }
 
-        public void OnSkipP1(InputAction.CallbackContext ctx)
+        public void OnSkip(PlayerId player, InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
-            _draftP1.Skip();
+            _drafts[player.Index].Skip();
         }
 
-        public void OnRerollP1(InputAction.CallbackContext ctx)
+        public void OnReroll(PlayerId player, InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
-            _draftP1.Reroll(_player1, _random);
-        }
-
-        // --- P2 ---
-
-        public void OnNavigateP2(InputAction.CallbackContext ctx)
-        {
-            if (!IsUpgradePhase()) return;
-            Navigate(PlayerId.Player2, ctx.ReadValue<UnityEngine.Vector2>());
-        }
-
-        public void OnSubmitP2(InputAction.CallbackContext ctx)
-        {
-            if (!IsUpgradePhase() || !ctx.performed) return;
-            Submit(PlayerId.Player2, _draftP2, _player2);
-        }
-
-        public void OnSkipP2(InputAction.CallbackContext ctx)
-        {
-            if (!IsUpgradePhase() || !ctx.performed) return;
-            _draftP2.Skip();
-        }
-
-        public void OnRerollP2(InputAction.CallbackContext ctx)
-        {
-            if (!IsUpgradePhase() || !ctx.performed) return;
-            _draftP2.Reroll(_player2, _random);
+            _drafts[player.Index].Reroll(_players[player.Index], _random);
         }
 
         // --- 共通 ---
@@ -135,15 +103,11 @@ namespace FloorBreaker.Input.Application
 
                 if (index == RerollIndex)
                 {
-                    // リロール — 購入済みインデックスを先にクリア
-                    // (Reroll が新カードをセット → R3 が PopulateCards を発火するため、
-                    //  先にクリアしないと古い購入済み状態で描画されてしまう)
                     _selectionState.ClearPurchased(player);
                     draft.Reroll(playerModel, _random);
                 }
                 else
                 {
-                    // カード購入
                     if (_selectionState.IsPurchased(player, index)) return;
                     if (draft.SelectChoice(index, playerModel))
                     {
@@ -153,7 +117,6 @@ namespace FloorBreaker.Input.Application
             }
             else
             {
-                // 完了行
                 draft.Skip();
             }
         }

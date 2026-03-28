@@ -20,6 +20,7 @@ namespace FloorBreaker.UI.Result.Presentation
             ResultView view,
             MatchClock clock,
             MatchEndUseCase matchEnd,
+            int playerCount,
             ISceneTransitionService sceneTransition)
         {
             _phaseSub = clock.CurrentPhase.Subscribe(phase =>
@@ -33,7 +34,7 @@ namespace FloorBreaker.UI.Result.Presentation
             _winnerSub = matchEnd.Winner.Subscribe(winner =>
             {
                 if (!winner.HasValue) return;
-                view.SetResult(winner.Value == PlayerId.Player1);
+                view.SetResult(winner, playerCount);
             });
 
             view.RematchButton.clicked += () => sceneTransition.LoadMatchAsync().Forget();
