@@ -1,9 +1,11 @@
+using System;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Domain.Timing;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.Stage.Presentation;
+using FloorBreaker.Player.Domain;
 using FloorBreaker.Player.Presentation;
 using FloorBreaker.Bombs.Application;
 using FloorBreaker.Bombs.Presentation;
@@ -115,8 +117,6 @@ namespace FloorBreaker.Bootstrap
         public void Initialize()
         {
             var bounds = _stage.GetCurrentBounds();
-            var p1Spawn = _players.Player1.CurrentPosition;
-            var p2Spawn = _players.Player2.CurrentPosition;
 
             // 1. TileView 生成
             var tileViews = _stageViewFactory.CreateTileViews(_stage, bounds);
@@ -145,18 +145,17 @@ namespace FloorBreaker.Bootstrap
             _presenters.ShrinkWarning = new ShrinkWarningPresenter(
                 _clock, _stage.Bounds, tileViews, _tileAnimService, stageConfig);
 
-            // 5. PlayerView + PlayerPresenter 生成
+            // 5. PlayerView + PlayerPresenter 生成 (N-player loop)
             var playerConfig = _playerViewFactory.Config;
-
-            var p1View = _playerViewFactory.CreatePlayerView(
-                PlayerId.Player1, p1Spawn);
-            _presenters.PlayerP1 = new PlayerPresenter(
-                _players.Player1, p1View, _playerAnimService, playerConfig, _audio, _cameraShake, _impactFreeze);
-
-            var p2View = _playerViewFactory.CreatePlayerView(
-                PlayerId.Player2, p2Spawn);
-            _presenters.PlayerP2 = new PlayerPresenter(
-                _players.Player2, p2View, _playerAnimService, playerConfig, _audio, _cameraShake, _impactFreeze);
+            var playerPresenters = new PlayerPresenter[_players.PlayerCount];
+            for (int i = 0; i < _players.PlayerCount; i++)
+            {
+                var player = _players.All[i];
+                var view = _playerViewFactory.CreatePlayerView(player.Id, player.CurrentPosition);
+                playerPresenters[i] = new PlayerPresenter(
+                    player, view, _playerAnimService, playerConfig, _audio, _cameraShake, _impactFreeze);
+            }
+            _presenters.Players = playerPresenters;
 
             // 6. BombExplosionVfxPool + BombPresenter 生成
             var bombConfig = _bombViewFactory.Config;
@@ -179,27 +178,31 @@ namespace FloorBreaker.Bootstrap
             // 8. ImpactFreezeService にフラッシュオーバーレイを設定
             _impactFreeze?.SetFlashOverlay(_matchUIDocument.ImpactFlashOverlay);
 
-            // 9. HUD Presenter 生成
-            var hudViewP1 = new PlayerHudView(_matchUIDocument.LeftHudRoot);
-            _presenters.HudP1 = new PlayerHudPresenter(
-                hudViewP1, _players.Player1.Stats, _players.Player1.Build,
-                _players.Cooldown1, _clock);
-
-            var hudViewP2 = new PlayerHudView(_matchUIDocument.RightHudRoot);
-            _presenters.HudP2 = new PlayerHudPresenter(
-                hudViewP2, _players.Player2.Stats, _players.Player2.Build,
-                _players.Cooldown2, _clock);
+            // 9. HUD Presenter 生成 (N-player loop, max 2 visible panes from UXML)
+            var hudRoots = new[] { _matchUIDocument.LeftHudRoot, _matchUIDocument.RightHudRoot };
+            int hudCount = Math.Min(_players.PlayerCount, hudRoots.Length);
+            var huds = new PlayerHudPresenter[hudCount];
+            for (int i = 0; i < hudCount; i++)
+            {
+                var hudView = new PlayerHudView(hudRoots[i]);
+                huds[i] = new PlayerHudPresenter(
+                    hudView, _players.All[i].Stats, _players.All[i].Build,
+                    _players.Cooldowns[i], _clock);
+            }
+            _presenters.Huds = huds;
 
             // 10. UpgradeOverlay Presenter 生成
             var overlayView = new UpgradeOverlayView(_matchUIDocument.UpgradeOverlayRoot);
+            var allStats = new PlayerStats[_players.PlayerCount];
+            for (int i = 0; i < _players.PlayerCount; i++)
+                allStats[i] = _players.All[i].Stats;
             _presenters.UpgradeOverlay = new UpgradeOverlayPresenter(
                 overlayView, _clock, _upgradePhase, _selectionState,
-                _players.Player1.Stats, _players.Player2.Stats,
-                _matchUIDocument.UpgradeCardTemplate, _audio);
+                allStats, _matchUIDocument.UpgradeCardTemplate, _audio);
 
             // 11. Result Presenter 生成
             var resultView = new ResultView(_matchUIDocument.ResultRoot);
-            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _sceneTransition);
+            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition);
         }
     }
 }

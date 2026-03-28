@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Infrastructure.Random;
@@ -17,7 +18,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
         {
             var svc = new WallGenerationService(0.08f, 0.4f, 0.20f, 2);
             var rng = new SeededRandomProvider(42);
-            var walls = svc.Generate(Bounds30, P1Spawn, P2Spawn, rng);
+            var walls = svc.Generate(Bounds30, new List<GridPos> { P1Spawn, P2Spawn }, rng);
 
             float ratio = (float)walls.Count / Bounds30.TileCount;
             Assert.GreaterOrEqual(ratio, 0.10f, $"Wall ratio too low: {ratio:P1}");
@@ -29,7 +30,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
         {
             var svc = new WallGenerationService(0.08f, 0.4f, 0.20f, 2);
             var rng = new SeededRandomProvider(42);
-            var walls = svc.Generate(Bounds30, P1Spawn, P2Spawn, rng);
+            var walls = svc.Generate(Bounds30, new List<GridPos> { P1Spawn, P2Spawn }, rng);
 
             // 5x5 around each spawn should be clear
             for (int dx = -2; dx <= 2; dx++)
@@ -48,8 +49,8 @@ namespace FloorBreaker.Tests.EditMode.Stage
         public void SameSeed_ProducesSameResult()
         {
             var svc = new WallGenerationService(0.08f, 0.4f, 0.20f, 2);
-            var walls1 = svc.Generate(Bounds30, P1Spawn, P2Spawn, new SeededRandomProvider(99));
-            var walls2 = svc.Generate(Bounds30, P1Spawn, P2Spawn, new SeededRandomProvider(99));
+            var walls1 = svc.Generate(Bounds30, new List<GridPos> { P1Spawn, P2Spawn }, new SeededRandomProvider(99));
+            var walls2 = svc.Generate(Bounds30, new List<GridPos> { P1Spawn, P2Spawn }, new SeededRandomProvider(99));
 
             Assert.AreEqual(walls1.Count, walls2.Count);
             Assert.IsTrue(walls1.SetEquals(walls2));
@@ -60,7 +61,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
         {
             var svc = new WallGenerationService(0f, 0f, 0f, 2);
             var rng = new SeededRandomProvider(42);
-            var walls = svc.Generate(Bounds30, P1Spawn, P2Spawn, rng);
+            var walls = svc.Generate(Bounds30, new List<GridPos> { P1Spawn, P2Spawn }, rng);
 
             Assert.AreEqual(0, walls.Count);
         }

@@ -67,9 +67,9 @@ namespace FloorBreaker.Bootstrap
 
             // 1. 壁生成 (Domain)
             var bounds = _stage.GetCurrentBounds();
-            var p1Spawn = _players.Player1.CurrentPosition;
-            var p2Spawn = _players.Player2.CurrentPosition;
-            var walls = _wallGen.Generate(bounds, p1Spawn, p2Spawn, _random);
+            var spawnPositions = new System.Collections.Generic.List<FloorBreaker.Shared.Domain.Grid.GridPos>();
+            foreach (var p in _players.All) spawnPositions.Add(p.CurrentPosition);
+            var walls = _wallGen.Generate(bounds, spawnPositions, _random);
             foreach (var pos in walls)
                 _stage.SetTileState(pos, TileState.Wall);
 
@@ -77,7 +77,7 @@ namespace FloorBreaker.Bootstrap
             _presentationInit.Initialize();
 
             // 3. カメラセットアップ
-            _cameraSetup.Initialize(_players.Player1, _players.Player2, _stage.Bounds);
+            _cameraSetup.Initialize(_players.All, _stage.Bounds);
 
             // 4. 初期スライムスポーン
             _slimeSpawnService.SpawnIfNeeded();

@@ -1,3 +1,4 @@
+using FloorBreaker.Shared.Domain.Primitives;
 using UnityEngine.UIElements;
 
 namespace FloorBreaker.UI.Result.Presentation
@@ -5,12 +6,12 @@ namespace FloorBreaker.UI.Result.Presentation
     /// <summary>
     /// リザルト画面の VisualElement ラッパー。
     /// 左右独立ペイン構造。両ペインにボタンあり。
+    /// For now: pane[0]=Left, pane[1]=Right. Max 2 visible panes from UXML.
     /// </summary>
     public sealed class ResultView
     {
         private readonly VisualElement _resultRoot;
-        private readonly Label _leftResultLabel;
-        private readonly Label _rightResultLabel;
+        private readonly Label[] _resultLabels;
 
         public Button RematchButton { get; }
         public Button TitleButton { get; }
@@ -20,8 +21,11 @@ namespace FloorBreaker.UI.Result.Presentation
         public ResultView(VisualElement resultRoot)
         {
             _resultRoot = resultRoot;
-            _leftResultLabel = resultRoot.Q<Label>("LeftResultLabel");
-            _rightResultLabel = resultRoot.Q<Label>("RightResultLabel");
+            _resultLabels = new[]
+            {
+                resultRoot.Q<Label>("LeftResultLabel"),
+                resultRoot.Q<Label>("RightResultLabel")
+            };
             RematchButton = resultRoot.Q<Button>("RematchButton");
             TitleButton = resultRoot.Q<Button>("TitleButton");
             RematchButton2 = resultRoot.Q<Button>("RematchButton2");
@@ -38,10 +42,31 @@ namespace FloorBreaker.UI.Result.Presentation
 
         public void Hide() => _resultRoot.AddToClassList("result-root--hidden");
 
+        /// <summary>
+        /// Set result display. Shows "WIN!" on the winner's pane, "LOSE" on others.
+        /// </summary>
+        public void SetResult(PlayerId? winner, int playerCount)
+        {
+            int visiblePanes = System.Math.Min(playerCount, _resultLabels.Length);
+            for (int i = 0; i < visiblePanes; i++)
+            {
+                if (!winner.HasValue)
+                {
+                    _resultLabels[i].text = "DRAW";
+                }
+                else
+                {
+                    _resultLabels[i].text = winner.Value.Index == i ? "WIN!" : "LOSE";
+                }
+            }
+        }
+
+        /// <summary>Legacy overload for backward compatibility.</summary>
         public void SetResult(bool p1Won)
         {
-            _leftResultLabel.text = p1Won ? "WIN!" : "LOSE";
-            _rightResultLabel.text = p1Won ? "LOSE" : "WIN!";
+            _resultLabels[0].text = p1Won ? "WIN!" : "LOSE";
+            if (_resultLabels.Length > 1)
+                _resultLabels[1].text = p1Won ? "LOSE" : "WIN!";
         }
     }
 }

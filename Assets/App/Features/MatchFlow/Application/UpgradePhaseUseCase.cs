@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using R3;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Application.Interfaces;
@@ -11,8 +12,7 @@ namespace FloorBreaker.MatchFlow.Application
 {
     public sealed class UpgradePhaseUseCase : IDisposable
     {
-        private readonly UpgradeDraftService _draftP1;
-        private readonly UpgradeDraftService _draftP2;
+        private readonly IReadOnlyList<UpgradeDraftService> _drafts;
         private readonly UpgradeSelectionState _selectionState;
         private readonly float _timeout;
 
@@ -21,19 +21,16 @@ namespace FloorBreaker.MatchFlow.Application
 
         private readonly ReactiveProperty<float> _remainingTime = new(0f);
 
-        public UpgradeDraftService DraftP1 => _draftP1;
-        public UpgradeDraftService DraftP2 => _draftP2;
+        public IReadOnlyList<UpgradeDraftService> Drafts => _drafts;
         public bool IsActive => _isActive;
         public ReadOnlyReactiveProperty<float> RemainingTime => _remainingTime;
 
         public UpgradePhaseUseCase(
-            UpgradeDraftService draftP1,
-            UpgradeDraftService draftP2,
+            IReadOnlyList<UpgradeDraftService> drafts,
             UpgradeSelectionState selectionState,
             IBalanceParameters balance)
         {
-            _draftP1 = draftP1;
-            _draftP2 = draftP2;
+            _drafts = drafts;
             _selectionState = selectionState;
             _timeout = balance.UpgradeSelectionTimeout;
         }
@@ -65,34 +62,30 @@ namespace FloorBreaker.MatchFlow.Application
             if (_elapsed >= _timeout)
             {
                 // タイムアウト: 未完了プレイヤーを自動スキップ
-                if (_draftP1.State.CurrentValue == DraftState.Choosing)
-                    _draftP1.TimeOut();
-                if (_draftP2.State.CurrentValue == DraftState.Choosing)
-                    _draftP2.TimeOut();
+                foreach (var draft in _drafts)
+                {
+                    if (draft.State.CurrentValue == DraftState.Choosing)
+                        draft.TimeOut();
+                }
             }
 
-            // 両者完了チェック
+            // 全員完了チェック
             if (IsComplete)
                 _isActive = false;
         }
 
         public bool IsComplete =>
-            _draftP1.State.CurrentValue != DraftState.Choosing
-            && _draftP2.State.CurrentValue != DraftState.Choosing;
+            _drafts.All(d => d.State.CurrentValue != DraftState.Choosing);
 
         public void Reset()
         {
             _isActive = false;
             _elapsed = 0f;
             _remainingTime.Value = 0f;
-            _draftP1.Reset();
-            _draftP2.Reset();
+            foreach (var draft in _drafts) draft.Reset();
         }
 
-        public UpgradeDraftService GetDraft(PlayerId id)
-        {
-            return id == PlayerId.Player1 ? _draftP1 : _draftP2;
-        }
+        public UpgradeDraftService GetDraft(PlayerId id) => _drafts[id.Index];
 
         public void Dispose()
         {

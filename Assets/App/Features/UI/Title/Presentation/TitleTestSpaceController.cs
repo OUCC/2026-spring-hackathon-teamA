@@ -203,7 +203,7 @@ namespace FloorBreaker.UI.Title.Presentation
                     _playerId == PlayerId.Player1 ? 42 : 99);
                 var wallGen = new WallGenerationService(0.05f, 0.3f, 0.10f, 2);
                 var spawn = new GridPos(_gridSize / 2, _gridSize / 2);
-                var walls = wallGen.Generate(bounds, spawn, spawn, random);
+                var walls = wallGen.Generate(bounds, new List<GridPos> { spawn }, random);
                 foreach (var pos in walls)
                     _stageModel.SetTileState(pos, TileState.Wall);
 
@@ -239,7 +239,7 @@ namespace FloorBreaker.UI.Title.Presentation
                 var p1cd = _playerId == PlayerId.Player1 ? _cooldown : dummyCooldown;
                 var p2cd = _playerId == PlayerId.Player2 ? _cooldown : dummyCooldown;
                 _tracker = new BombFlightTracker(
-                    _launchUseCase, p1cd, p2cd, _stageModel, _slimeRegistry, _balance);
+                    _launchUseCase, new List<BombCooldownState> { p1cd, p2cd }, _stageModel, _slimeRegistry, _balance);
             }
 
             private void SetupInput()

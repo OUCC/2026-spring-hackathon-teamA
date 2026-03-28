@@ -22,22 +22,23 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         private readonly UpgradePhaseUseCase _upgradePhase;
         private readonly UpgradeSelectionState _selectionState;
         private readonly VisualTreeAsset _cardTemplate;
-        private readonly PlayerStats _p1Stats;
-        private readonly PlayerStats _p2Stats;
+        private readonly IReadOnlyList<PlayerStats> _playerStats;
         private readonly IAudioService _audio;
 
-        private readonly List<UpgradeCardElement> _leftCardElements = new();
-        private readonly List<UpgradeCardElement> _rightCardElements = new();
+        /// <summary>Card elements per player pane index.</summary>
+        private readonly List<UpgradeCardElement>[] _cardElements;
         private readonly List<IDisposable> _subscriptions = new();
         private int _lastPulseSecond = -1;
+
+        /// <summary>Number of visible panes (min of player count and UXML pane count).</summary>
+        private readonly int _visiblePaneCount;
 
         public UpgradeOverlayPresenter(
             UpgradeOverlayView view,
             MatchClock clock,
             UpgradePhaseUseCase upgradePhase,
             UpgradeSelectionState selectionState,
-            PlayerStats p1Stats,
-            PlayerStats p2Stats,
+            IReadOnlyList<PlayerStats> playerStats,
             VisualTreeAsset cardTemplate,
             IAudioService audio = null)
         {
@@ -45,10 +46,17 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             _upgradePhase = upgradePhase;
             _selectionState = selectionState;
             _cardTemplate = cardTemplate;
-            _p1Stats = p1Stats;
-            _p2Stats = p2Stats;
+            _playerStats = playerStats;
             _audio = audio;
 
+            _visiblePaneCount = Math.Min(playerStats.Count, view.PaneCount);
+
+            // Initialize card element lists per pane
+            _cardElements = new List<UpgradeCardElement>[_visiblePaneCount];
+            for (int i = 0; i < _visiblePaneCount; i++)
+                _cardElements[i] = new List<UpgradeCardElement>();
+
+            // Phase visibility
             _subscriptions.Add(clock.CurrentPhase.Subscribe(phase =>
             {
                 if (phase == GamePhase.UpgradePhase)
@@ -57,57 +65,45 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
                     _view.Hide();
             }));
 
-            _subscriptions.Add(upgradePhase.DraftP1.CurrentChoices.Subscribe(
-                choices => PopulateCards(_view.LeftCards, choices, _leftCardElements, p1Stats, PlayerId.Player1)));
-
-            _subscriptions.Add(upgradePhase.DraftP2.CurrentChoices.Subscribe(
-                choices => PopulateCards(_view.RightCards, choices, _rightCardElements, p2Stats, PlayerId.Player2)));
-
-            _subscriptions.Add(upgradePhase.DraftP1.State.Subscribe(state =>
+            // Per-player subscriptions
+            for (int i = 0; i < _visiblePaneCount; i++)
             {
-                _view.SetLeftStatus(GetStatusText(state));
-                _view.SetLeftDone(state != DraftState.Choosing);
-                SetCardsDone(_leftCardElements, state != DraftState.Choosing);
-                if (state == DraftState.Skipped) _audio?.PlaySfx(SfxIds.UpgradeDone);
-            }));
+                int paneIndex = i; // capture for closures
+                var playerId = PlayerId.FromIndex(i);
+                var draft = upgradePhase.GetDraft(playerId);
+                var stats = playerStats[i];
 
-            _subscriptions.Add(upgradePhase.DraftP2.State.Subscribe(state =>
-            {
-                _view.SetRightStatus(GetStatusText(state));
-                _view.SetRightDone(state != DraftState.Choosing);
-                SetCardsDone(_rightCardElements, state != DraftState.Choosing);
-                if (state == DraftState.Skipped) _audio?.PlaySfx(SfxIds.UpgradeDone);
-            }));
+                // Card choices
+                _subscriptions.Add(draft.CurrentChoices.Subscribe(
+                    choices => PopulateCards(_view.GetCards(paneIndex), choices, _cardElements[paneIndex], stats, playerId)));
 
-            // カード行 + リロールの選択ハイライト + ナビゲーション SE
-            _subscriptions.Add(selectionState.P1Index.Subscribe(_ =>
-            {
-                RefreshHighlight(PlayerId.Player1, _leftCardElements);
-                _audio?.PlaySfx(SfxIds.UiNavigate);
-            }));
-            _subscriptions.Add(selectionState.P2Index.Subscribe(_ =>
-            {
-                RefreshHighlight(PlayerId.Player2, _rightCardElements);
-                _audio?.PlaySfx(SfxIds.UiNavigate);
-            }));
+                // Draft state
+                _subscriptions.Add(draft.State.Subscribe(state =>
+                {
+                    _view.SetStatus(paneIndex, GetStatusText(state));
+                    _view.SetDone(paneIndex, state != DraftState.Choosing);
+                    SetCardsDone(_cardElements[paneIndex], state != DraftState.Choosing);
+                    if (state == DraftState.Skipped) _audio?.PlaySfx(SfxIds.UpgradeDone);
+                }));
 
-            // 購入通知 → カードの見た目を更新 + SE
-            _subscriptions.Add(selectionState.P1PurchaseCount.Subscribe(count =>
-            {
-                RefreshCardStates(_leftCardElements, PlayerId.Player1, p1Stats);
-                if (count > 0) _audio?.PlaySfx(SfxIds.UpgradeSelect);
-            }));
-            _subscriptions.Add(selectionState.P2PurchaseCount.Subscribe(count =>
-            {
-                RefreshCardStates(_rightCardElements, PlayerId.Player2, p2Stats);
-                if (count > 0) _audio?.PlaySfx(SfxIds.UpgradeSelect);
-            }));
+                // Card index + reroll highlight + navigation SE
+                _subscriptions.Add(selectionState.GetIndexObservable(playerId).Subscribe(_ =>
+                {
+                    RefreshHighlight(playerId, paneIndex, _cardElements[paneIndex]);
+                    _audio?.PlaySfx(SfxIds.UiNavigate);
+                }));
 
-            // 行切替: カード行 (row=0) ↔ 完了行 (row=1)
-            _subscriptions.Add(selectionState.P1Row.Subscribe(
-                _ => RefreshHighlight(PlayerId.Player1, _leftCardElements)));
-            _subscriptions.Add(selectionState.P2Row.Subscribe(
-                _ => RefreshHighlight(PlayerId.Player2, _rightCardElements)));
+                // Purchase notification
+                _subscriptions.Add(selectionState.GetPurchaseCountObservable(playerId).Subscribe(count =>
+                {
+                    RefreshCardStates(_cardElements[paneIndex], playerId, stats);
+                    if (count > 0) _audio?.PlaySfx(SfxIds.UpgradeSelect);
+                }));
+
+                // Row switch: card row (row=0) <-> done row (row=1)
+                _subscriptions.Add(selectionState.GetRowObservable(playerId).Subscribe(
+                    _ => RefreshHighlight(playerId, paneIndex, _cardElements[paneIndex])));
+            }
         }
 
         public void UpdateCountdown()
@@ -167,7 +163,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
                 cards[i].SetSelected(isCardRow && i == selectedIndex);
         }
 
-        private void RefreshHighlight(PlayerId player, List<UpgradeCardElement> cards)
+        private void RefreshHighlight(PlayerId player, int paneIndex, List<UpgradeCardElement> cards)
         {
             int row = _selectionState.GetRow(player);
             int idx = _selectionState.GetIndex(player);
@@ -178,24 +174,14 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             // カードハイライト
             UpdateSelection(cards, onCard ? idx : -1, true);
 
-            // リロールハイライト
-            if (player == PlayerId.Player1)
-            {
-                _view.SetLeftRerollHighlight(onReroll);
-                _view.SetLeftDoneHighlight(row == 1);
-            }
-            else
-            {
-                _view.SetRightRerollHighlight(onReroll);
-                _view.SetRightDoneHighlight(row == 1);
-            }
+            // リロール・完了ハイライト
+            _view.SetRerollHighlight(paneIndex, onReroll);
+            _view.SetDoneHighlight(paneIndex, row == 1);
         }
 
         private void RefreshCardStates(List<UpgradeCardElement> cards, PlayerId player, PlayerStats stats)
         {
-            var choices = player == PlayerId.Player1
-                ? _upgradePhase.DraftP1.CurrentChoices.CurrentValue
-                : _upgradePhase.DraftP2.CurrentChoices.CurrentValue;
+            var choices = _upgradePhase.GetDraft(player).CurrentChoices.CurrentValue;
 
             for (int i = 0; i < cards.Count && i < choices.Count; i++)
             {

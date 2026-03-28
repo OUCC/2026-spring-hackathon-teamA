@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Stage.Domain;
@@ -6,42 +7,56 @@ using FloorBreaker.Stage.Domain;
 namespace FloorBreaker.Cameras.Presentation
 {
     /// <summary>
-    /// 分割画面の 2 台カメラを生成・管理する MonoBehaviour。
-    /// Initialize で PlayerModel と StageBounds を受け取り CameraFollower を接続する。
+    /// N 分割画面のカメラを生成・管理する MonoBehaviour。
+    /// Initialize で PlayerModel リストと StageBounds を受け取り CameraFollower を接続する。
     /// </summary>
     public sealed class SplitScreenCameraSetup : MonoBehaviour, IDisposable
     {
         private const float OrthographicSize = 5f;
         private const float CameraZ = -10f;
 
-        private Camera _cameraP1;
-        private Camera _cameraP2;
-        private CameraFollower _followerP1;
-        private CameraFollower _followerP2;
-
-        public Camera CameraP1 => _cameraP1;
-        public Camera CameraP2 => _cameraP2;
+        private Camera[] _cameras;
+        private CameraFollower[] _followers;
 
         /// <summary>
         /// 画面シェイク用オフセット。DOTweenCameraShakeService から書き込まれる。
         /// </summary>
-        public Vector3 ShakeOffsetP1 { get; set; }
-        public Vector3 ShakeOffsetP2 { get; set; }
+        public Vector3[] ShakeOffsets { get; private set; }
 
-        public void Initialize(PlayerModel p1, PlayerModel p2, StageBounds bounds)
+        public Camera[] Cameras => _cameras;
+        public int CameraCount => _cameras?.Length ?? 0;
+
+        /// <summary>Viewport レイアウトテーブル。</summary>
+        private static readonly Rect[][] ViewportTable =
         {
-            _cameraP1 = CreateCamera("Camera_P1", new Rect(0f, 0f, 0.5f, 1f));
-            _cameraP1.gameObject.AddComponent<AudioListener>();
-            _cameraP2 = CreateCamera("Camera_P2", new Rect(0.5f, 0f, 0.5f, 1f));
+            // 1P: フルスクリーン
+            new[] { new Rect(0f, 0f, 1f, 1f) },
+            // 2P: 左右分割
+            new[] { new Rect(0f, 0f, 0.5f, 1f), new Rect(0.5f, 0f, 0.5f, 1f) },
+            // 3P: 上に2つ + 下に1つ（中央寄せ）
+            new[] { new Rect(0f, 0.5f, 0.5f, 0.5f), new Rect(0.5f, 0.5f, 0.5f, 0.5f), new Rect(0.25f, 0f, 0.5f, 0.5f) },
+            // 4P: 4象限
+            new[] { new Rect(0f, 0.5f, 0.5f, 0.5f), new Rect(0.5f, 0.5f, 0.5f, 0.5f), new Rect(0f, 0f, 0.5f, 0.5f), new Rect(0.5f, 0f, 0.5f, 0.5f) },
+        };
 
-            float viewportAspect = CalculateViewportAspect();
+        public void Initialize(IReadOnlyList<PlayerModel> players, StageBounds bounds)
+        {
+            int count = players.Count;
+            var rects = ViewportTable[count - 1];
 
-            _followerP1 = new CameraFollower(p1, bounds, OrthographicSize, viewportAspect);
-            _followerP2 = new CameraFollower(p2, bounds, OrthographicSize, viewportAspect);
+            _cameras = new Camera[count];
+            _followers = new CameraFollower[count];
+            ShakeOffsets = new Vector3[count];
 
-            // 初期位置を即座に反映
-            _cameraP1.transform.position = _followerP1.CurrentPosition;
-            _cameraP2.transform.position = _followerP2.CurrentPosition;
+            for (int i = 0; i < count; i++)
+            {
+                _cameras[i] = CreateCamera($"Camera_P{i + 1}", rects[i]);
+                if (i == 0) _cameras[i].gameObject.AddComponent<AudioListener>();
+
+                float viewportAspect = CalculateViewportAspect(rects[i]);
+                _followers[i] = new CameraFollower(players[i], bounds, OrthographicSize, viewportAspect);
+                _cameras[i].transform.position = _followers[i].CurrentPosition;
+            }
         }
 
         /// <summary>
@@ -52,27 +67,30 @@ namespace FloorBreaker.Cameras.Presentation
             PlayerModel p1, PlayerModel p2,
             StageBounds bounds)
         {
-            _cameraP1 = camP1;
-            _cameraP2 = camP2;
+            _cameras = new[] { camP1, camP2 };
+            _followers = new CameraFollower[2];
+            ShakeOffsets = new Vector3[2];
 
-            ConfigureCamera(_cameraP1, new Rect(0f, 0f, 0.5f, 1f));
-            ConfigureCamera(_cameraP2, new Rect(0.5f, 0f, 0.5f, 1f));
+            var rects = ViewportTable[1]; // 2P
+            ConfigureCamera(camP1, rects[0]);
+            ConfigureCamera(camP2, rects[1]);
 
-            float viewportAspect = CalculateViewportAspect();
+            float viewportAspect = CalculateViewportAspect(rects[0]);
+            _followers[0] = new CameraFollower(p1, bounds, OrthographicSize, viewportAspect);
+            _followers[1] = new CameraFollower(p2, bounds, OrthographicSize, viewportAspect);
 
-            _followerP1 = new CameraFollower(p1, bounds, OrthographicSize, viewportAspect);
-            _followerP2 = new CameraFollower(p2, bounds, OrthographicSize, viewportAspect);
-
-            _cameraP1.transform.position = _followerP1.CurrentPosition;
-            _cameraP2.transform.position = _followerP2.CurrentPosition;
+            camP1.transform.position = _followers[0].CurrentPosition;
+            camP2.transform.position = _followers[1].CurrentPosition;
         }
 
         public void Tick(float deltaTime)
         {
-            if (_followerP1 != null)
-                _cameraP1.transform.position = _followerP1.Tick(deltaTime) + ShakeOffsetP1;
-            if (_followerP2 != null)
-                _cameraP2.transform.position = _followerP2.Tick(deltaTime) + ShakeOffsetP2;
+            if (_followers == null) return;
+            for (int i = 0; i < _followers.Length; i++)
+            {
+                if (_followers[i] != null)
+                    _cameras[i].transform.position = _followers[i].Tick(deltaTime) + ShakeOffsets[i];
+            }
         }
 
         private Camera CreateCamera(string cameraName, Rect viewportRect)
@@ -99,18 +117,17 @@ namespace FloorBreaker.Cameras.Presentation
             cam.transform.position = pos;
         }
 
-        private static float CalculateViewportAspect()
+        private static float CalculateViewportAspect(Rect viewportRect)
         {
-            // 各カメラはビューポート幅 0.5 なので、実際の pixel 幅は画面の半分
-            float screenWidth = Screen.width * 0.5f;
-            float screenHeight = Screen.height;
+            float screenWidth = Screen.width * viewportRect.width;
+            float screenHeight = Screen.height * viewportRect.height;
             return screenHeight > 0 ? screenWidth / screenHeight : 1f;
         }
 
         public void Dispose()
         {
-            _followerP1?.Dispose();
-            _followerP2?.Dispose();
+            if (_followers == null) return;
+            foreach (var f in _followers) f?.Dispose();
         }
 
         private void OnDestroy()

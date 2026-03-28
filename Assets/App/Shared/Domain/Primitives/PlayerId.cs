@@ -6,14 +6,18 @@ namespace FloorBreaker.Shared.Domain.Primitives
     {
         public static readonly PlayerId Player1 = new(0);
         public static readonly PlayerId Player2 = new(1);
+        public static readonly PlayerId Player3 = new(2);
+        public static readonly PlayerId Player4 = new(3);
+
+        public const int MaxPlayers = 4;
 
         private readonly byte _value;
 
-        private PlayerId(byte value) => _value = value;
+        internal PlayerId(byte value) => _value = value;
+
+        public static PlayerId FromIndex(int index) => new((byte)index);
 
         public int Index => _value;
-
-        public PlayerId Opponent => _value == 0 ? Player2 : Player1;
 
         public bool Equals(PlayerId other) => _value == other._value;
         public override bool Equals(object obj) => obj is PlayerId other && Equals(other);

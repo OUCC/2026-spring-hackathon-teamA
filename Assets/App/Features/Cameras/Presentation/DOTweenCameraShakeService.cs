@@ -6,15 +6,14 @@ namespace FloorBreaker.Cameras.Presentation
 {
     /// <summary>
     /// DOTween ベースのカメラシェイク実装。
-    /// SplitScreenCameraSetup の ShakeOffset を揺らすことで、
+    /// SplitScreenCameraSetup の ShakeOffsets を揺らすことで、
     /// CameraFollower の位置更新と競合しない。
+    /// N カメラ対応。
     /// </summary>
     public sealed class DOTweenCameraShakeService : ICameraShakeService
     {
         private readonly SplitScreenCameraSetup _cameraSetup;
-
-        private Tween _tweenP1;
-        private Tween _tweenP2;
+        private Tween[] _tweens;
 
         public DOTweenCameraShakeService(SplitScreenCameraSetup cameraSetup)
         {
@@ -23,29 +22,32 @@ namespace FloorBreaker.Cameras.Presentation
 
         public void Shake(ShakeIntensity intensity)
         {
+            var offsets = _cameraSetup.ShakeOffsets;
+            if (offsets == null || offsets.Length == 0) return;
+
             var (duration, strength, vibrato) = GetPreset(intensity);
 
             // 既存シェイクをキルしてオフセットをリセット
-            _tweenP1?.Kill();
-            _tweenP2?.Kill();
-            _cameraSetup.ShakeOffsetP1 = Vector3.zero;
-            _cameraSetup.ShakeOffsetP2 = Vector3.zero;
+            if (_tweens != null)
+            {
+                for (int i = 0; i < _tweens.Length; i++)
+                    _tweens[i]?.Kill();
+            }
 
-            // P1 カメラ
-            _tweenP1 = DOTween.Shake(
-                () => _cameraSetup.ShakeOffsetP1,
-                v => _cameraSetup.ShakeOffsetP1 = v,
-                duration, strength, vibrato,
-                90f, false, true, ShakeRandomnessMode.Harmonic)
-                .OnComplete(() => _cameraSetup.ShakeOffsetP1 = Vector3.zero);
+            _tweens = new Tween[offsets.Length];
 
-            // P2 カメラ
-            _tweenP2 = DOTween.Shake(
-                () => _cameraSetup.ShakeOffsetP2,
-                v => _cameraSetup.ShakeOffsetP2 = v,
-                duration, strength, vibrato,
-                90f, false, true, ShakeRandomnessMode.Harmonic)
-                .OnComplete(() => _cameraSetup.ShakeOffsetP2 = Vector3.zero);
+            for (int i = 0; i < offsets.Length; i++)
+            {
+                offsets[i] = Vector3.zero;
+                int idx = i; // capture for closure
+
+                _tweens[i] = DOTween.Shake(
+                    () => _cameraSetup.ShakeOffsets[idx],
+                    v => _cameraSetup.ShakeOffsets[idx] = v,
+                    duration, strength, vibrato,
+                    90f, false, true, ShakeRandomnessMode.Harmonic)
+                    .OnComplete(() => _cameraSetup.ShakeOffsets[idx] = Vector3.zero);
+            }
         }
 
         private static (float duration, float strength, int vibrato) GetPreset(ShakeIntensity intensity)

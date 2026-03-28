@@ -40,14 +40,13 @@ namespace FloorBreaker.Bootstrap
         private int _selectedTab;
         private Vector2 _scrollPos;
         private Rect _windowRect;
-        private int _upgradeIndexP1;
-        private int _upgradeIndexP2;
+        private int[] _upgradeIndices;
         private bool _initialized;
 
         // --- Cached ---
         private string[] _upgradeNames;
         private UpgradeId[] _upgradeValues;
-        private readonly string[] _tabLabels = { "Overview", "P1", "P2", "Cheats", "Time" };
+        private string[] _tabLabels;
         private int _initialStageSize;
 
         [Inject]
@@ -78,6 +77,15 @@ namespace FloorBreaker.Bootstrap
                 .ToArray();
             _upgradeNames = _upgradeValues.Select(id => id.ToString()).ToArray();
 
+            // Build tab labels: "Overview", "P1", "P2", ..., "Cheats", "Time"
+            var tabs = new List<string> { "Overview" };
+            for (int i = 0; i < _players.PlayerCount; i++)
+                tabs.Add($"P{i + 1}");
+            tabs.Add("Cheats");
+            tabs.Add("Time");
+            _tabLabels = tabs.ToArray();
+
+            _upgradeIndices = new int[_players.PlayerCount];
             _initialStageSize = balance.StageSize;
             _windowRect = new Rect(Screen.width - 370, 10, 360, Screen.height - 20);
             _initialized = true;
@@ -113,13 +121,24 @@ namespace FloorBreaker.Bootstrap
             _selectedTab = GUILayout.Toolbar(_selectedTab, _tabLabels);
             _scrollPos = GUILayout.BeginScrollView(_scrollPos);
 
-            switch (_selectedTab)
+            int playerCount = _players.PlayerCount;
+
+            if (_selectedTab == 0)
             {
-                case 0: DrawOverview(); break;
-                case 1: DrawPlayerDetail(_players.Player1, _players.Cooldown1, ref _upgradeIndexP1); break;
-                case 2: DrawPlayerDetail(_players.Player2, _players.Cooldown2, ref _upgradeIndexP2); break;
-                case 3: DrawCheats(); break;
-                case 4: DrawTimeControl(); break;
+                DrawOverview();
+            }
+            else if (_selectedTab >= 1 && _selectedTab <= playerCount)
+            {
+                int playerIndex = _selectedTab - 1;
+                DrawPlayerDetail(_players.All[playerIndex], _players.Cooldowns[playerIndex], ref _upgradeIndices[playerIndex]);
+            }
+            else if (_selectedTab == playerCount + 1)
+            {
+                DrawCheats();
+            }
+            else if (_selectedTab == playerCount + 2)
+            {
+                DrawTimeControl();
             }
 
             GUILayout.EndScrollView();
@@ -149,26 +168,40 @@ namespace FloorBreaker.Bootstrap
             Label($"Alive: {_slimeRegistry.AliveCount}  Target: {target}");
 
             Section("PLAYERS");
-            var p1 = _players.Player1;
-            var p2 = _players.Player2;
+            // Header row
             GUILayout.BeginHorizontal();
             GUILayout.Label("", GUILayout.Width(80));
-            GUILayout.Label("P1", BoldLabel(), GUILayout.Width(100));
-            GUILayout.Label("P2", BoldLabel(), GUILayout.Width(100));
+            for (int i = 0; i < _players.PlayerCount; i++)
+                GUILayout.Label($"P{i + 1}", BoldLabel(), GUILayout.Width(100));
             GUILayout.EndHorizontal();
 
-            CompareRow("HP", $"{p1.Stats.CurrentHp.CurrentValue}/{p1.Stats.MaxHp}", $"{p2.Stats.CurrentHp.CurrentValue}/{p2.Stats.MaxHp}");
-            CompareRow("Coins", $"{p1.Stats.Coins.CurrentValue}", $"{p2.Stats.Coins.CurrentValue}");
-            CompareRow("Pos", $"({p1.CurrentPosition.X},{p1.CurrentPosition.Y})", $"({p2.CurrentPosition.X},{p2.CurrentPosition.Y})");
-            CompareRow("Speed", $"{p1.Stats.MoveSpeed:F1}", $"{p2.Stats.MoveSpeed:F1}");
+            // Build value arrays for comparison rows
+            var players = _players.All;
+            var hpValues = new string[players.Count];
+            var coinValues = new string[players.Count];
+            var posValues = new string[players.Count];
+            var speedValues = new string[players.Count];
+            var upgradeCountValues = new string[players.Count];
 
-            var u1 = p1.Build.AcquiredUpgrades.CurrentValue;
-            var u2 = p2.Build.AcquiredUpgrades.CurrentValue;
-            CompareRow("Upgrades", $"{u1.Count}", $"{u2.Count}");
+            for (int i = 0; i < players.Count; i++)
+            {
+                var p = players[i];
+                hpValues[i] = $"{p.Stats.CurrentHp.CurrentValue}/{p.Stats.MaxHp}";
+                coinValues[i] = $"{p.Stats.Coins.CurrentValue}";
+                posValues[i] = $"({p.CurrentPosition.X},{p.CurrentPosition.Y})";
+                speedValues[i] = $"{p.Stats.MoveSpeed:F1}";
+                upgradeCountValues[i] = $"{p.Build.AcquiredUpgrades.CurrentValue.Count}";
+            }
+
+            CompareRowN("HP", hpValues);
+            CompareRowN("Coins", coinValues);
+            CompareRowN("Pos", posValues);
+            CompareRowN("Speed", speedValues);
+            CompareRowN("Upgrades", upgradeCountValues);
         }
 
         // ================================================================
-        // Tab 1/2: Player Detail
+        // Player Detail Tab
         // ================================================================
 
         private void DrawPlayerDetail(PlayerModel player, BombCooldownState cooldown, ref int upgradeIndex)
@@ -247,32 +280,39 @@ namespace FloorBreaker.Bootstrap
             GUILayout.EndHorizontal();
             if (GUILayout.Button("Apply Selected"))
             {
-                var id = _upgradeValues[upgradeIndex];
-                Debug.Log($"[BalanceDebug] Applying {id} to P{player.Id.Index + 1}");
-                _upgradeApply.Apply(id, player);
+                var upgradeId = _upgradeValues[upgradeIndex];
+                Debug.Log($"[BalanceDebug] Applying {upgradeId} to P{player.Id.Index + 1}");
+                _upgradeApply.Apply(upgradeId, player);
             }
         }
 
         // ================================================================
-        // Tab 3: Cheats
+        // Cheats Tab
         // ================================================================
 
         private void DrawCheats()
         {
             Section("QUICK UPGRADES");
-            GUILayout.BeginHorizontal();
-            if (Btn("All Fire (P1)")) ApplyAllCategory(_players.Player1, "Fire");
-            if (Btn("All Fire (P2)")) ApplyAllCategory(_players.Player2, "Fire");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            if (Btn("All Break (P1)")) ApplyAllCategory(_players.Player1, "Break");
-            if (Btn("All Break (P2)")) ApplyAllCategory(_players.Player2, "Break");
-            GUILayout.EndHorizontal();
+            for (int i = 0; i < _players.PlayerCount; i++)
+            {
+                GUILayout.BeginHorizontal();
+                if (Btn($"All Fire (P{i + 1})")) ApplyAllCategory(_players.All[i], "Fire");
+                if (Btn($"All Break (P{i + 1})")) ApplyAllCategory(_players.All[i], "Break");
+                GUILayout.EndHorizontal();
+            }
 
             Section("ECONOMY");
             GUILayout.BeginHorizontal();
-            if (Btn("+10 coins both")) { _players.Player1.Stats.AddCoins(10); _players.Player2.Stats.AddCoins(10); }
-            if (Btn("+50 coins both")) { _players.Player1.Stats.AddCoins(50); _players.Player2.Stats.AddCoins(50); }
+            if (Btn("+10 coins all"))
+            {
+                for (int i = 0; i < _players.PlayerCount; i++)
+                    _players.All[i].Stats.AddCoins(10);
+            }
+            if (Btn("+50 coins all"))
+            {
+                for (int i = 0; i < _players.PlayerCount; i++)
+                    _players.All[i].Stats.AddCoins(50);
+            }
             GUILayout.EndHorizontal();
 
             Section("SLIMES");
@@ -289,12 +329,15 @@ namespace FloorBreaker.Bootstrap
             GUILayout.EndHorizontal();
 
             Section("DAMAGE TEST");
-            GUILayout.BeginHorizontal();
-            if (Btn("P1 -3")) _players.Player1.Stats.TakeDamage(3);
-            if (Btn("P2 -3")) _players.Player2.Stats.TakeDamage(3);
-            if (Btn("P1 -5")) _players.Player1.Stats.TakeDamage(5);
-            if (Btn("P2 -5")) _players.Player2.Stats.TakeDamage(5);
-            GUILayout.EndHorizontal();
+            for (int i = 0; i < _players.PlayerCount; i++)
+            {
+                GUILayout.BeginHorizontal();
+                var playerLabel = $"P{i + 1}";
+                var player = _players.All[i];
+                if (Btn($"{playerLabel} -3")) player.Stats.TakeDamage(3);
+                if (Btn($"{playerLabel} -5")) player.Stats.TakeDamage(5);
+                GUILayout.EndHorizontal();
+            }
 
             Section("PRESETS");
             GUILayout.BeginHorizontal();
@@ -312,7 +355,7 @@ namespace FloorBreaker.Bootstrap
         }
 
         // ================================================================
-        // Tab 4: Time Control
+        // Time Control Tab
         // ================================================================
 
         private void DrawTimeControl()
@@ -368,8 +411,8 @@ namespace FloorBreaker.Bootstrap
 
         private void EndUpgradePhase()
         {
-            _players.Draft1.Skip();
-            _players.Draft2.Skip();
+            for (int i = 0; i < _players.PlayerCount; i++)
+                _players.Drafts[i].Skip();
         }
 
         private void KillAllSlimes()
@@ -417,27 +460,27 @@ namespace FloorBreaker.Bootstrap
         private void PresetLateGame()
         {
             ShrinkTo(20);
-            _players.Player1.Stats.AddCoins(30);
-            _players.Player2.Stats.AddCoins(30);
+            for (int i = 0; i < _players.PlayerCount; i++)
+                _players.All[i].Stats.AddCoins(30);
             _slimeSpawnService.SpawnIfNeeded();
         }
 
         private void PresetMaxBuild()
         {
-            ApplyCommonUpgradesNTimes(_players.Player1, 3);
-            ApplyCommonUpgradesNTimes(_players.Player2, 3);
+            for (int i = 0; i < _players.PlayerCount; i++)
+                ApplyCommonUpgradesNTimes(_players.All[i], 3);
         }
 
         private void PresetLowHp()
         {
-            SetHpTo(_players.Player1, 2);
-            SetHpTo(_players.Player2, 2);
+            for (int i = 0; i < _players.PlayerCount; i++)
+                SetHpTo(_players.All[i], 2);
         }
 
         private void PresetEconomy()
         {
-            _players.Player1.Stats.AddCoins(100);
-            _players.Player2.Stats.AddCoins(100);
+            for (int i = 0; i < _players.PlayerCount; i++)
+                _players.All[i].Stats.AddCoins(100);
             SkipToNextPhase();
         }
 
@@ -476,12 +519,12 @@ namespace FloorBreaker.Bootstrap
             return GUILayout.Button(text, GUILayout.ExpandWidth(false));
         }
 
-        private static void CompareRow(string label, string v1, string v2)
+        private static void CompareRowN(string label, string[] values)
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label(label, GUILayout.Width(80));
-            GUILayout.Label(v1, GUILayout.Width(100));
-            GUILayout.Label(v2, GUILayout.Width(100));
+            foreach (var v in values)
+                GUILayout.Label(v, GUILayout.Width(100));
             GUILayout.EndHorizontal();
         }
 

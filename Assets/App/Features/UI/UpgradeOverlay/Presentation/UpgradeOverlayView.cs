@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.UIElements;
 
 namespace FloorBreaker.UI.UpgradeOverlay.Presentation
@@ -5,45 +6,70 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
     /// <summary>
     /// 強化オーバーレイの VisualElement ラッパー。
     /// 各プレイヤーペインが自己完結型。
+    /// For now: pane[0]=Left, pane[1]=Right. Max 2 visible panes from UXML.
     /// </summary>
     public sealed class UpgradeOverlayView
     {
         private readonly VisualElement _overlayRoot;
-        private readonly Label _leftCountdown;
-        private readonly Label _rightCountdown;
-        private readonly VisualElement _leftCards;
-        private readonly VisualElement _rightCards;
-        private readonly Label _leftStatus;
-        private readonly Label _rightStatus;
-        private readonly VisualElement _leftPane;
-        private readonly VisualElement _rightPane;
-        private readonly VisualElement _leftActions;
-        private readonly VisualElement _rightActions;
+        private readonly Label[] _countdowns;
+        private readonly VisualElement[] _cards;
+        private readonly Label[] _statuses;
+        private readonly VisualElement[] _panes;
+        private readonly VisualElement[] _actions;
+        private readonly Button[] _rerollBtns;
+        private readonly Button[] _skipBtns;
 
-        public VisualElement LeftCards => _leftCards;
-        public VisualElement RightCards => _rightCards;
-        public Button LeftRerollBtn { get; }
-        public Button RightRerollBtn { get; }
-        public Button LeftSkipBtn { get; }
-        public Button RightSkipBtn { get; }
+        /// <summary>Number of panes available in the UXML (currently 2).</summary>
+        public int PaneCount => _panes.Length;
+
+        // Backward-compatible properties
+        public VisualElement LeftCards => _cards[0];
+        public VisualElement RightCards => _cards.Length > 1 ? _cards[1] : null;
+        public Button LeftRerollBtn => _rerollBtns[0];
+        public Button RightRerollBtn => _rerollBtns.Length > 1 ? _rerollBtns[1] : null;
+        public Button LeftSkipBtn => _skipBtns[0];
+        public Button RightSkipBtn => _skipBtns.Length > 1 ? _skipBtns[1] : null;
 
         public UpgradeOverlayView(VisualElement overlayRoot)
         {
             _overlayRoot = overlayRoot;
-            _leftPane = overlayRoot.Q("LeftUpgradePane");
-            _rightPane = overlayRoot.Q("RightUpgradePane");
-            _leftCountdown = overlayRoot.Q<Label>("LeftCountdown");
-            _rightCountdown = overlayRoot.Q<Label>("RightCountdown");
-            _leftCards = overlayRoot.Q("LeftCards");
-            _rightCards = overlayRoot.Q("RightCards");
-            _leftStatus = overlayRoot.Q<Label>("LeftStatus");
-            _rightStatus = overlayRoot.Q<Label>("RightStatus");
-            _leftActions = overlayRoot.Q("LeftActions");
-            _rightActions = overlayRoot.Q("RightActions");
-            LeftRerollBtn = overlayRoot.Q<Button>("LeftRerollBtn");
-            RightRerollBtn = overlayRoot.Q<Button>("RightRerollBtn");
-            LeftSkipBtn = overlayRoot.Q<Button>("LeftSkipBtn");
-            RightSkipBtn = overlayRoot.Q<Button>("RightSkipBtn");
+
+            // Left = index 0, Right = index 1
+            _panes = new[]
+            {
+                overlayRoot.Q("LeftUpgradePane"),
+                overlayRoot.Q("RightUpgradePane")
+            };
+            _countdowns = new[]
+            {
+                overlayRoot.Q<Label>("LeftCountdown"),
+                overlayRoot.Q<Label>("RightCountdown")
+            };
+            _cards = new[]
+            {
+                overlayRoot.Q("LeftCards"),
+                overlayRoot.Q("RightCards")
+            };
+            _statuses = new[]
+            {
+                overlayRoot.Q<Label>("LeftStatus"),
+                overlayRoot.Q<Label>("RightStatus")
+            };
+            _actions = new[]
+            {
+                overlayRoot.Q("LeftActions"),
+                overlayRoot.Q("RightActions")
+            };
+            _rerollBtns = new[]
+            {
+                overlayRoot.Q<Button>("LeftRerollBtn"),
+                overlayRoot.Q<Button>("RightRerollBtn")
+            };
+            _skipBtns = new[]
+            {
+                overlayRoot.Q<Button>("LeftSkipBtn"),
+                overlayRoot.Q<Button>("RightSkipBtn")
+            };
         }
 
         public void Show()
@@ -65,37 +91,51 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         public void SetCountdown(int seconds)
         {
             string text = seconds.ToString();
-            _leftCountdown.text = text;
-            _rightCountdown.text = text;
+            foreach (var cd in _countdowns)
+                cd.text = text;
         }
 
         /// <summary>カウントダウンをパルスさせる (3-2-1 演出)。</summary>
         public void PulseCountdown()
         {
-            _leftCountdown.AddToClassList("upgrade-pane__countdown--pulse");
-            _rightCountdown.AddToClassList("upgrade-pane__countdown--pulse");
-            _leftCountdown.schedule.Execute(() =>
-                _leftCountdown.RemoveFromClassList("upgrade-pane__countdown--pulse")).StartingIn(50);
-            _rightCountdown.schedule.Execute(() =>
-                _rightCountdown.RemoveFromClassList("upgrade-pane__countdown--pulse")).StartingIn(50);
+            foreach (var cd in _countdowns)
+            {
+                cd.AddToClassList("upgrade-pane__countdown--pulse");
+                cd.schedule.Execute(() =>
+                    cd.RemoveFromClassList("upgrade-pane__countdown--pulse")).StartingIn(50);
+            }
         }
 
-        public void SetLeftStatus(string text) => _leftStatus.text = text;
-        public void SetRightStatus(string text) => _rightStatus.text = text;
+        // --- Indexed accessors ---
 
-        public void SetLeftDone(bool done) => _leftPane.EnableInClassList("upgrade-pane--done", done);
-        public void SetRightDone(bool done) => _rightPane.EnableInClassList("upgrade-pane--done", done);
+        public VisualElement GetCards(int index) => _cards[index];
 
-        /// <summary>リロールボタンのハイライト。</summary>
-        public void SetLeftRerollHighlight(bool on)
-            => LeftRerollBtn?.EnableInClassList("upgrade-pane__reroll-btn--selected", on);
-        public void SetRightRerollHighlight(bool on)
-            => RightRerollBtn?.EnableInClassList("upgrade-pane__reroll-btn--selected", on);
+        public void SetStatus(int index, string text) => _statuses[index].text = text;
 
-        /// <summary>完了ボタンのハイライト。</summary>
-        public void SetLeftDoneHighlight(bool on)
-            => LeftSkipBtn?.EnableInClassList("upgrade-pane__done-btn--selected", on);
-        public void SetRightDoneHighlight(bool on)
-            => RightSkipBtn?.EnableInClassList("upgrade-pane__done-btn--selected", on);
+        public void SetDone(int index, bool done) => _panes[index].EnableInClassList("upgrade-pane--done", done);
+
+        public void SetRerollHighlight(int index, bool on)
+            => _rerollBtns[index]?.EnableInClassList("upgrade-pane__reroll-btn--selected", on);
+
+        public void SetDoneHighlight(int index, bool on)
+            => _skipBtns[index]?.EnableInClassList("upgrade-pane__done-btn--selected", on);
+
+        public Button GetRerollBtn(int index) => _rerollBtns[index];
+
+        public Button GetSkipBtn(int index) => _skipBtns[index];
+
+        // --- Legacy Left/Right methods (backward compat) ---
+
+        public void SetLeftStatus(string text) => SetStatus(0, text);
+        public void SetRightStatus(string text) => SetStatus(1, text);
+
+        public void SetLeftDone(bool done) => SetDone(0, done);
+        public void SetRightDone(bool done) => SetDone(1, done);
+
+        public void SetLeftRerollHighlight(bool on) => SetRerollHighlight(0, on);
+        public void SetRightRerollHighlight(bool on) => SetRerollHighlight(1, on);
+
+        public void SetLeftDoneHighlight(bool on) => SetDoneHighlight(0, on);
+        public void SetRightDoneHighlight(bool on) => SetDoneHighlight(1, on);
     }
 }

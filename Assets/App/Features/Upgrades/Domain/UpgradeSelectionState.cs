@@ -12,87 +12,70 @@ namespace FloorBreaker.Upgrades.Domain
     /// </summary>
     public sealed class UpgradeSelectionState : IDisposable
     {
-        private readonly ReactiveProperty<int> _p1Index = new(0);
-        private readonly ReactiveProperty<int> _p2Index = new(0);
-        private readonly ReactiveProperty<int> _p1Row = new(0);
-        private readonly ReactiveProperty<int> _p2Row = new(0);
+        private readonly ReactiveProperty<int>[] _indices;
+        private readonly ReactiveProperty<int>[] _rows;
+        private readonly HashSet<int>[] _purchased;
+        private readonly ReactiveProperty<int>[] _purchaseCounts;
+        private readonly int _playerCount;
 
-        // 購入済みカードインデックス
-        private readonly HashSet<int> _p1Purchased = new();
-        private readonly HashSet<int> _p2Purchased = new();
-
-        // 購入発生を通知 (値は購入回数カウンター)
-        private readonly ReactiveProperty<int> _p1PurchaseCount = new(0);
-        private readonly ReactiveProperty<int> _p2PurchaseCount = new(0);
-        public ReadOnlyReactiveProperty<int> P1PurchaseCount => _p1PurchaseCount;
-        public ReadOnlyReactiveProperty<int> P2PurchaseCount => _p2PurchaseCount;
-
-        public ReadOnlyReactiveProperty<int> P1Index => _p1Index;
-        public ReadOnlyReactiveProperty<int> P2Index => _p2Index;
-        public ReadOnlyReactiveProperty<int> P1Row => _p1Row;
-        public ReadOnlyReactiveProperty<int> P2Row => _p2Row;
-
-        public void SetIndex(PlayerId player, int index)
+        public UpgradeSelectionState(int playerCount)
         {
-            if (player == PlayerId.Player1) _p1Index.Value = index;
-            else _p2Index.Value = index;
+            _playerCount = playerCount;
+            _indices = new ReactiveProperty<int>[playerCount];
+            _rows = new ReactiveProperty<int>[playerCount];
+            _purchased = new HashSet<int>[playerCount];
+            _purchaseCounts = new ReactiveProperty<int>[playerCount];
+
+            for (int i = 0; i < playerCount; i++)
+            {
+                _indices[i] = new ReactiveProperty<int>(0);
+                _rows[i] = new ReactiveProperty<int>(0);
+                _purchased[i] = new HashSet<int>();
+                _purchaseCounts[i] = new ReactiveProperty<int>(0);
+            }
         }
 
-        public int GetIndex(PlayerId player)
-            => player == PlayerId.Player1 ? _p1Index.Value : _p2Index.Value;
+        public ReadOnlyReactiveProperty<int> GetIndexObservable(PlayerId player) => _indices[player.Index];
+        public ReadOnlyReactiveProperty<int> GetRowObservable(PlayerId player) => _rows[player.Index];
+        public ReadOnlyReactiveProperty<int> GetPurchaseCountObservable(PlayerId player) => _purchaseCounts[player.Index];
 
-        public void SetRow(PlayerId player, int row)
-        {
-            if (player == PlayerId.Player1) _p1Row.Value = row;
-            else _p2Row.Value = row;
-        }
+        public void SetIndex(PlayerId player, int index) => _indices[player.Index].Value = index;
+        public int GetIndex(PlayerId player) => _indices[player.Index].Value;
 
-        public int GetRow(PlayerId player)
-            => player == PlayerId.Player1 ? _p1Row.Value : _p2Row.Value;
+        public void SetRow(PlayerId player, int row) => _rows[player.Index].Value = row;
+        public int GetRow(PlayerId player) => _rows[player.Index].Value;
 
         public void MarkPurchased(PlayerId player, int index)
         {
-            if (player == PlayerId.Player1)
-            {
-                _p1Purchased.Add(index);
-                _p1PurchaseCount.Value++;
-            }
-            else
-            {
-                _p2Purchased.Add(index);
-                _p2PurchaseCount.Value++;
-            }
+            _purchased[player.Index].Add(index);
+            _purchaseCounts[player.Index].Value++;
         }
 
         public bool IsPurchased(PlayerId player, int index)
-            => player == PlayerId.Player1 ? _p1Purchased.Contains(index) : _p2Purchased.Contains(index);
+            => _purchased[player.Index].Contains(index);
 
         public void ClearPurchased(PlayerId player)
-        {
-            if (player == PlayerId.Player1) _p1Purchased.Clear();
-            else _p2Purchased.Clear();
-        }
+            => _purchased[player.Index].Clear();
 
         public void Reset()
         {
-            _p1Index.Value = 0;
-            _p2Index.Value = 0;
-            _p1Row.Value = 0;
-            _p2Row.Value = 0;
-            _p1Purchased.Clear();
-            _p2Purchased.Clear();
-            _p1PurchaseCount.Value = 0;
-            _p2PurchaseCount.Value = 0;
+            for (int i = 0; i < _playerCount; i++)
+            {
+                _indices[i].Value = 0;
+                _rows[i].Value = 0;
+                _purchased[i].Clear();
+                _purchaseCounts[i].Value = 0;
+            }
         }
 
         public void Dispose()
         {
-            _p1Index.Dispose();
-            _p2Index.Dispose();
-            _p1Row.Dispose();
-            _p2Row.Dispose();
-            _p1PurchaseCount.Dispose();
-            _p2PurchaseCount.Dispose();
+            for (int i = 0; i < _playerCount; i++)
+            {
+                _indices[i].Dispose();
+                _rows[i].Dispose();
+                _purchaseCounts[i].Dispose();
+            }
         }
     }
 }

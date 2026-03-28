@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using FloorBreaker.Shared.Domain.Primitives;
@@ -19,35 +20,31 @@ namespace FloorBreaker.Bootstrap
         private readonly UpgradeUIInputBridge _upgradeUIInputBridge;
         private readonly MatchClock _clock;
         private readonly MatchConfig _matchConfig;
+        private readonly MatchPlayers _players;
 
         private InputMapSwitcher _inputMapSwitcher;
-        private InputActionMap _upgradeP1Map;
-        private InputActionMap _upgradeP2Map;
+        private readonly List<(InputActionMap map, PlayerId id)> _upgradeMaps = new();
 
         public InputInitializer(
             GameplayInputBridge gameplayInputBridge,
             UpgradeUIInputBridge upgradeUIInputBridge,
             MatchClock clock,
-            MatchConfig matchConfig)
+            MatchConfig matchConfig,
+            MatchPlayers players)
         {
             _gameplayInputBridge = gameplayInputBridge;
             _upgradeUIInputBridge = upgradeUIInputBridge;
             _clock = clock;
             _matchConfig = matchConfig;
+            _players = players;
         }
 
-        /// <summary>
-        /// Input 配線を実行する。
-        /// PlayerInputAdapter の検出、初期化、InputMapSwitcher 生成、
-        /// UpgradeUI アクションマップとの接続を行う。
-        /// </summary>
         public void Initialize()
         {
             // 1. PlayerInputAdapter 検出
             var inputAdapters = UnityEngine.Object.FindObjectsByType<PlayerInputAdapter>(
                 FindObjectsSortMode.None);
 
-            // アダプターから InputActionAsset を取得
             InputActionAsset inputActions = null;
             foreach (var adapter in inputAdapters)
             {
@@ -58,13 +55,16 @@ namespace FloorBreaker.Bootstrap
                 }
             }
 
-            // 2. P1, P2 アダプターを初期化
-            // CPU モード時は P2 のアダプターを登録しない
-            int maxAdapters = _matchConfig.IsCpuPlayer ? 1 : 2;
-            for (int i = 0; i < inputAdapters.Length && i < maxAdapters; i++)
+            // 2. アダプターを初期化（CPU モード時は最後のプレイヤーを除外）
+            int humanCount = _matchConfig.IsCpuPlayer
+                ? _players.PlayerCount - 1
+                : _players.PlayerCount;
+            int maxAdapters = Math.Min(inputAdapters.Length, humanCount);
+
+            for (int i = 0; i < maxAdapters; i++)
             {
                 var adapter = inputAdapters[i];
-                var id = i == 0 ? PlayerId.Player1 : PlayerId.Player2;
+                var id = PlayerId.FromIndex(i);
                 adapter.Initialize(id, inputActions);
                 _gameplayInputBridge.RegisterAdapter(adapter);
             }
@@ -72,40 +72,33 @@ namespace FloorBreaker.Bootstrap
             // 3. InputMapSwitcher 生成
             if (inputActions != null)
             {
-                _inputMapSwitcher = new InputMapSwitcher(inputActions, _clock);
+                _inputMapSwitcher = new InputMapSwitcher(inputActions, _clock, _players.PlayerCount);
 
-                // 4. UpgradeUI アクションマップとの接続
-                _upgradeP1Map = inputActions.FindActionMap("UpgradeUI_P1");
-                _upgradeP2Map = inputActions.FindActionMap("UpgradeUI_P2");
-
-                if (_upgradeP1Map != null)
+                // 4. UpgradeUI アクションマップとの接続（N 人分）
+                for (int i = 0; i < humanCount; i++)
                 {
-                    _upgradeP1Map["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP1;
-                    _upgradeP1Map["Submit"].performed += _upgradeUIInputBridge.OnSubmitP1;
-                }
+                    var id = PlayerId.FromIndex(i);
+                    var map = inputActions.FindActionMap($"UpgradeUI_P{i + 1}");
+                    if (map == null) continue;
 
-                // CPU モード時は P2 の UpgradeUI 入力を接続しない
-                if (_upgradeP2Map != null && !_matchConfig.IsCpuPlayer)
-                {
-                    _upgradeP2Map["Navigate"].performed += _upgradeUIInputBridge.OnNavigateP2;
-                    _upgradeP2Map["Submit"].performed += _upgradeUIInputBridge.OnSubmitP2;
+                    // クロージャで PlayerId をキャプチャ
+                    var capturedId = id;
+                    map["Navigate"].performed += ctx => _upgradeUIInputBridge.OnNavigate(capturedId, ctx);
+                    map["Submit"].performed += ctx => _upgradeUIInputBridge.OnSubmit(capturedId, ctx);
+                    _upgradeMaps.Add((map, id));
                 }
             }
         }
 
         public void Dispose()
         {
-            // UpgradeUI アクションマップのコールバック解除
-            if (_upgradeP1Map != null)
+            // UpgradeUI のコールバックは Lambda キャプチャなので -= で個別解除できない。
+            // マップ自体を Disable して参照を切る。
+            foreach (var (map, _) in _upgradeMaps)
             {
-                _upgradeP1Map["Navigate"].performed -= _upgradeUIInputBridge.OnNavigateP1;
-                _upgradeP1Map["Submit"].performed -= _upgradeUIInputBridge.OnSubmitP1;
+                map?.Disable();
             }
-            if (_upgradeP2Map != null && !_matchConfig.IsCpuPlayer)
-            {
-                _upgradeP2Map["Navigate"].performed -= _upgradeUIInputBridge.OnNavigateP2;
-                _upgradeP2Map["Submit"].performed -= _upgradeUIInputBridge.OnSubmitP2;
-            }
+            _upgradeMaps.Clear();
 
             _inputMapSwitcher?.Dispose();
         }

@@ -68,7 +68,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
 
             _draftP1 = new UpgradeDraftService(rollRule, applyService, _balance);
             _draftP2 = new UpgradeDraftService(rollRule, applyService, _balance);
-            _upgradePhaseUseCase = new UpgradePhaseUseCase(_draftP1, _draftP2, new UpgradeSelectionState(), _balance);
+            _upgradePhaseUseCase = new UpgradePhaseUseCase(new List<UpgradeDraftService> { _draftP1, _draftP2 }, new UpgradeSelectionState(2), _balance);
 
             var stats1 = new PlayerStats(10, 1f, 3f);
             var build1 = new PlayerBuild(3, 1, 1, 2f, 3.5f, false, 0.5f, 3, 1, 2, 4f, 3f, 1f);
@@ -88,7 +88,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
 
             _scheduler = new MatchPhaseScheduler(
                 _clock, _tileTimerService,
-                _p1Cooldown, _p2Cooldown,
+                new List<BombCooldownState> { _p1Cooldown, _p2Cooldown },
                 _slimeTickService, _fireDamageTickService,
                 null, // BombFlightTracker is optional
                 null, // BombEffectSpreadService is optional

@@ -25,8 +25,7 @@ namespace FloorBreaker.MatchFlow.Application
     {
         private readonly MatchClock _clock;
         private readonly TileTimerService _tileTimerService;
-        private readonly BombCooldownState _p1Cooldown;
-        private readonly BombCooldownState _p2Cooldown;
+        private readonly IReadOnlyList<BombCooldownState> _cooldowns;
         private readonly SlimeTickService _slimeTickService;
         private readonly FireDamageTickService _fireDamageTickService;
         private readonly BombFlightTracker _bombFlightTracker;
@@ -50,8 +49,7 @@ namespace FloorBreaker.MatchFlow.Application
         public MatchPhaseScheduler(
             MatchClock clock,
             TileTimerService tileTimerService,
-            BombCooldownState p1Cooldown,
-            BombCooldownState p2Cooldown,
+            IReadOnlyList<BombCooldownState> cooldowns,
             SlimeTickService slimeTickService,
             FireDamageTickService fireDamageTickService,
             BombFlightTracker bombFlightTracker,
@@ -68,8 +66,7 @@ namespace FloorBreaker.MatchFlow.Application
         {
             _clock = clock;
             _tileTimerService = tileTimerService;
-            _p1Cooldown = p1Cooldown;
-            _p2Cooldown = p2Cooldown;
+            _cooldowns = cooldowns;
             _slimeTickService = slimeTickService;
             _fireDamageTickService = fireDamageTickService;
             _bombFlightTracker = bombFlightTracker;
@@ -114,8 +111,7 @@ namespace FloorBreaker.MatchFlow.Application
             // 全サービスに Tick 配布
             _clock.Tick(deltaTime);
             _tileTimerService.Tick(deltaTime);
-            _p1Cooldown.Tick(deltaTime);
-            _p2Cooldown.Tick(deltaTime);
+            foreach (var cd in _cooldowns) cd.Tick(deltaTime);
 
             foreach (var player in _players)
             {

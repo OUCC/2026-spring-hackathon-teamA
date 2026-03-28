@@ -51,7 +51,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
                 _stage, balance, spreadService);
 
             _tracker = new BombFlightTracker(
-                launchUseCase, _p1Cooldown, _p2Cooldown,
+                launchUseCase, new List<BombCooldownState> { _p1Cooldown, _p2Cooldown },
                 _stage, _slimeRegistry, balance);
 
             var stats1 = new PlayerStats(10, 1f, 3f);

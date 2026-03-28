@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -81,7 +82,12 @@ namespace FloorBreaker.Bootstrap
             builder.Register<UpgradeAvailabilityRule>(Lifetime.Scoped);
             builder.Register<UpgradeRollRule>(Lifetime.Scoped);
             builder.Register<UpgradeApplyService>(Lifetime.Scoped);
-            builder.Register<UpgradeSelectionState>(Lifetime.Scoped);
+
+            builder.Register(c =>
+            {
+                var modeConfig = c.Resolve<MatchModeConfig>();
+                return new UpgradeSelectionState(modeConfig.PlayerCount);
+            }, Lifetime.Scoped);
         }
 
         private static void RegisterPlayers(IContainerBuilder builder)
@@ -99,31 +105,31 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var b = c.Resolve<IBalanceParameters>();
+                var modeConfig = c.Resolve<MatchModeConfig>();
+                int playerCount = modeConfig.PlayerCount;
                 int size = b.StageSize;
 
-                var stats1 = new PlayerStats(b.InitialHp, b.BaseMovementSpeed, b.MaxMovementSpeed);
-                var stats2 = new PlayerStats(b.InitialHp, b.BaseMovementSpeed, b.MaxMovementSpeed);
+                var spawnPositions = GetSpawnPositions(playerCount, size, b.SpawnProtectionRadius);
 
-                var build1 = CreateDefaultBuild(b);
-                var build2 = CreateDefaultBuild(b);
-
-                var p1Spawn = new GridPos(b.SpawnProtectionRadius, b.SpawnProtectionRadius);
-                var p2Spawn = new GridPos(
-                    size - 1 - b.SpawnProtectionRadius,
-                    size - 1 - b.SpawnProtectionRadius);
-
-                var p1 = new PlayerModel(PlayerId.Player1, p1Spawn, stats1, build1);
-                var p2 = new PlayerModel(PlayerId.Player2, p2Spawn, stats2, build2);
-
-                var cd1 = new BombCooldownState();
-                var cd2 = new BombCooldownState();
+                var players = new List<PlayerModel>(playerCount);
+                var cooldowns = new List<BombCooldownState>(playerCount);
+                var drafts = new List<UpgradeDraftService>(playerCount);
 
                 var rollRule = c.Resolve<UpgradeRollRule>();
                 var applyService = c.Resolve<UpgradeApplyService>();
-                var draft1 = new UpgradeDraftService(rollRule, applyService, b);
-                var draft2 = new UpgradeDraftService(rollRule, applyService, b);
 
-                return new MatchPlayers(p1, p2, cd1, cd2, draft1, draft2);
+                for (int i = 0; i < playerCount; i++)
+                {
+                    var id = PlayerId.FromIndex(i);
+                    var stats = new PlayerStats(b.InitialHp, b.BaseMovementSpeed, b.MaxMovementSpeed);
+                    var build = CreateDefaultBuild(b);
+
+                    players.Add(new PlayerModel(id, spawnPositions[i], stats, build));
+                    cooldowns.Add(new BombCooldownState());
+                    drafts.Add(new UpgradeDraftService(rollRule, applyService, b));
+                }
+
+                return new MatchPlayers(players, cooldowns, drafts);
             }, Lifetime.Scoped);
         }
 
@@ -142,7 +148,7 @@ namespace FloorBreaker.Bootstrap
                 var mp = c.Resolve<MatchPlayers>();
                 return new BombFlightTracker(
                     c.Resolve<BombLaunchUseCase>(),
-                    mp.Cooldown1, mp.Cooldown2,
+                    mp.Cooldowns,
                     c.Resolve<StageModel>(),
                     c.Resolve<SlimeRegistry>(),
                     c.Resolve<IBalanceParameters>());
@@ -198,7 +204,10 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var mp = c.Resolve<MatchPlayers>();
-                return new UpgradePhaseUseCase(mp.Draft1, mp.Draft2, c.Resolve<UpgradeSelectionState>(), c.Resolve<IBalanceParameters>());
+                return new UpgradePhaseUseCase(
+                    mp.Drafts,
+                    c.Resolve<UpgradeSelectionState>(),
+                    c.Resolve<IBalanceParameters>());
             }, Lifetime.Scoped);
 
             builder.Register(c =>
@@ -207,7 +216,7 @@ namespace FloorBreaker.Bootstrap
                 return new MatchPhaseScheduler(
                     c.Resolve<MatchClock>(),
                     c.Resolve<TileTimerService>(),
-                    mp.Cooldown1, mp.Cooldown2,
+                    mp.Cooldowns,
                     c.Resolve<SlimeTickService>(),
                     c.Resolve<FireDamageTickService>(),
                     c.Resolve<BombFlightTracker>(),
@@ -243,8 +252,7 @@ namespace FloorBreaker.Bootstrap
             {
                 var mp = c.Resolve<MatchPlayers>();
                 return new UpgradeUIInputBridge(
-                    mp.Draft1, mp.Draft2,
-                    mp.Player1, mp.Player2,
+                    mp.Drafts, mp.All,
                     c.Resolve<MatchClock>(),
                     c.Resolve<IRandomProvider>(),
                     c.Resolve<UpgradeSelectionState>());
@@ -256,14 +264,18 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var mp = c.Resolve<MatchPlayers>();
+                // CPU は最後のプレイヤースロット
+                int cpuIndex = mp.PlayerCount - 1;
+                var cpuPlayer = mp.All[cpuIndex];
+                var humanPlayer = mp.All[0];
                 return new CpuPlayerBrain(
                     c.Resolve<IBalanceParameters>(),
-                    mp.Player2, mp.Player1,
+                    cpuPlayer, humanPlayer,
                     c.Resolve<StageModel>(),
                     c.Resolve<PlayerMoveService>(),
                     c.Resolve<BombFlightTracker>(),
                     c.Resolve<BombLaunchUseCase>(),
-                    mp.Cooldown2,
+                    mp.Cooldowns[cpuIndex],
                     c.Resolve<SlimeRegistry>(),
                     mp.All);
             }, Lifetime.Scoped);
@@ -271,7 +283,11 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var mp = c.Resolve<MatchPlayers>();
-                return new CpuUpgradeSelector(c.Resolve<IBalanceParameters>(), mp.Draft2, mp.Player2);
+                int cpuIndex = mp.PlayerCount - 1;
+                return new CpuUpgradeSelector(
+                    c.Resolve<IBalanceParameters>(),
+                    mp.Drafts[cpuIndex],
+                    mp.All[cpuIndex]);
             }, Lifetime.Scoped);
 
             builder.Register(c =>
@@ -345,6 +361,26 @@ namespace FloorBreaker.Bootstrap
                     c.Resolve<ITimeProvider>(),
                     cpuService);
             }, Lifetime.Scoped).AsImplementedInterfaces();
+        }
+
+        /// <summary>
+        /// N 人分のスポーン位置を四隅から計算する。
+        /// 2人: 対角（左下・右上）、3人: 左下・右上・左上、4人: 四隅すべて
+        /// </summary>
+        internal static GridPos[] GetSpawnPositions(int playerCount, int stageSize, int margin)
+        {
+            var corners = new[]
+            {
+                new GridPos(margin, margin),                                     // 左下
+                new GridPos(stageSize - 1 - margin, stageSize - 1 - margin),     // 右上
+                new GridPos(margin, stageSize - 1 - margin),                     // 左上
+                new GridPos(stageSize - 1 - margin, margin),                     // 右下
+            };
+
+            var result = new GridPos[playerCount];
+            for (int i = 0; i < playerCount && i < corners.Length; i++)
+                result[i] = corners[i];
+            return result;
         }
 
         private static PlayerBuild CreateDefaultBuild(IBalanceParameters b)

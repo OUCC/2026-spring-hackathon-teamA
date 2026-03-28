@@ -18,8 +18,7 @@ namespace FloorBreaker.Cameras.Presentation
         private readonly SplitScreenCameraSetup _cameraSetup;
         private VisualElement _flashOverlay;
 
-        private Tween _zoomTweenP1;
-        private Tween _zoomTweenP2;
+        private Tween[] _zoomTweens;
 
         public ImpactFreezeService(SplitScreenCameraSetup cameraSetup)
         {
@@ -53,45 +52,32 @@ namespace FloorBreaker.Cameras.Presentation
 
         private void PlayZoomPunch()
         {
-            var camP1 = _cameraSetup?.CameraP1;
-            var camP2 = _cameraSetup?.CameraP2;
+            var cameras = _cameraSetup?.Cameras;
+            if (cameras == null) return;
 
-            if (camP1 != null)
+            if (_zoomTweens == null || _zoomTweens.Length != cameras.Length)
+                _zoomTweens = new Tween[cameras.Length];
+
+            for (int i = 0; i < cameras.Length; i++)
             {
-                _zoomTweenP1?.Kill();
-                camP1.orthographicSize = BaseOrthoSize;
-                _zoomTweenP1 = DOTween.To(
-                    () => camP1.orthographicSize,
-                    v => camP1.orthographicSize = v,
+                var cam = cameras[i];
+                if (cam == null) continue;
+
+                _zoomTweens[i]?.Kill();
+                cam.orthographicSize = BaseOrthoSize;
+                var capturedCam = cam;
+                var capturedIndex = i;
+                _zoomTweens[i] = DOTween.To(
+                    () => capturedCam.orthographicSize,
+                    v => capturedCam.orthographicSize = v,
                     BaseOrthoSize - ZoomPunchAmount,
                     ZoomPunchDuration * 0.4f)
                     .SetEase(Ease.OutQuad)
                     .OnComplete(() =>
                     {
                         DOTween.To(
-                            () => camP1.orthographicSize,
-                            v => camP1.orthographicSize = v,
-                            BaseOrthoSize,
-                            ZoomPunchDuration * 0.6f)
-                            .SetEase(Ease.InQuad);
-                    });
-            }
-
-            if (camP2 != null)
-            {
-                _zoomTweenP2?.Kill();
-                camP2.orthographicSize = BaseOrthoSize;
-                _zoomTweenP2 = DOTween.To(
-                    () => camP2.orthographicSize,
-                    v => camP2.orthographicSize = v,
-                    BaseOrthoSize - ZoomPunchAmount,
-                    ZoomPunchDuration * 0.4f)
-                    .SetEase(Ease.OutQuad)
-                    .OnComplete(() =>
-                    {
-                        DOTween.To(
-                            () => camP2.orthographicSize,
-                            v => camP2.orthographicSize = v,
+                            () => capturedCam.orthographicSize,
+                            v => capturedCam.orthographicSize = v,
                             BaseOrthoSize,
                             ZoomPunchDuration * 0.6f)
                             .SetEase(Ease.InQuad);
