@@ -4,9 +4,23 @@
 
 ```mermaid
 flowchart TB
-    subgraph BS["Bootstrap / VContainer"]
+    subgraph BOOT["Boot シーン (常時ロード)"]
         PLS[ProjectLifetimeScope]
+        BINIT[BootInitializer]
+        AUDIO[AudioService]
+    end
+
+    subgraph TITLE["Title シーン (Additive)"]
+        TLS[TitleLifetimeScope]
+    end
+
+    subgraph MATCH["Match シーン (Additive)"]
         MLS[MatchLifetimeScope]
+    end
+
+    subgraph DEBUG["DebugOverlay シーン (Additive, デバッグ時のみ)"]
+        DOI[DebugOverlayInjector]
+        BDO[BalanceDebugOverlay]
     end
 
     subgraph SH["Shared"]
@@ -30,9 +44,12 @@ flowchart TB
 
     SOB["BalanceConfig / ScriptableObject"]
 
-    BS --> FT
-    BS --> SH
-    BS --> SOB
+    PLS -->|EnqueueParent| TLS
+    PLS -->|EnqueueParent| MLS
+    DOI -->|Container.InjectGameObject| MLS
+    BOOT --> FT
+    BOOT --> SH
+    BOOT --> SOB
     FT --> SH
     SOB --> SH_A
     SOB --> SH_D
@@ -43,8 +60,8 @@ flowchart TB
 | レイヤー | クラス |
 |---|---|
 | Domain | GridPos, Direction8, CardinalDirection4, TileCoordRange, PlayerId, Float2, UpgradeId, GamePhase, MatchClock |
-| Application | IBalanceParameters, ITimeProvider, IRandomProvider, IAudioService |
-| Infrastructure | UnityTimeProvider, SeededRandomProvider |
+| Application | IBalanceParameters, ITimeProvider, IRandomProvider, IAudioService, ISceneTransitionService |
+| Infrastructure | UnityTimeProvider, SeededRandomProvider, UnitySceneTransitionService |
 | Presentation | Float2Extensions |
 
 ## アセンブリ依存グラフ
@@ -353,15 +370,17 @@ classDiagram
 
 ```mermaid
 sequenceDiagram
-    participant MFO as MatchFlowOrchestrator
+    participant BI as BootInitializer
+    participant MI as MatchInitializer
     participant MPS as MatchPhaseScheduler
     participant SS as StageShrinkService
     participant UP as UpgradePhaseUseCase
     participant MC as MatchClock
 
-    MFO->>MFO: 壁生成 + StageModel 初期化
-    MFO->>MFO: Player x2 スポーン
-    MFO->>MPS: 開始
+    BI->>BI: LoadMatchAsync (Additive + EnqueueParent)
+    MI->>MI: 壁生成 + StageModel 初期化
+    MI->>MI: Player x2 スポーン + Presentation 初期化
+    MI->>MPS: 開始
 
     loop 20秒ごと
         MPS->>MC: SetPhase(StageShrink)
@@ -435,4 +454,6 @@ flowchart LR
 | 15 | Bootstrap | MatchPlayers | MatchInitializer, MatchTickRunner | ProjectLifetimeScope, MatchLifetimeScope, MatchPresenters 8クラス | **完了** |
 | 16 | オーディオ基盤 | SfxIds | — | AudioService, AudioCatalog, NullAudioService 4クラス | **完了** |
 | 16.5 | タイトル UI + BGM | — | TitlePresenter | TitleUIDocument, TitleRoot UXML/USS, BGM 再生 | **完了** |
-| 17-18 | 統合/ポリッシュ | — | — | テスト, FX | 未着手 |
+| 17 | Boot シーン + Additive ロード | BootConfig | BootInitializer | UnitySceneTransitionService (Additive+EnqueueParent), Boot.unity, DebugOverlay.unity | **完了** |
+| 17.5 | バランスデバッグオーバーレイ | — | — | BalanceDebugOverlay (IMGUI 5タブ), DebugOverlayInjector | **完了** |
+| 18-19 | 統合/ポリッシュ | — | — | テスト, FX | 未着手 |
