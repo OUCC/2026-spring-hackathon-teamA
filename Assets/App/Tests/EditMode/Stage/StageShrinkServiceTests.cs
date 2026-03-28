@@ -39,7 +39,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
             var destroyed = svc.ShrinkOuterRing(model);
 
             foreach (var pos in destroyed)
-                Assert.AreEqual(TileState.PermanentlyDestroyed, model.GetTileState(pos));
+                Assert.AreEqual(TileCondition.PermanentlyDestroyed, model.GetTileCondition(pos));
         }
 
         [Test]

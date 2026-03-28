@@ -93,7 +93,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _useCase.ExecuteLanding(cmd, landingPos, _players, null);
 
             // 距離0 (中央) は即座に適用
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(5, 5)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(5, 5)));
         }
 
         [Test]
@@ -106,15 +106,15 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _useCase.ExecuteLanding(cmd, landingPos, _players, null);
 
             // 距離1 はまだ適用されていない
-            Assert.AreEqual(TileState.Normal, _stage.GetTileState(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.Intact, _stage.GetTileCondition(new GridPos(5, 6)));
 
             // Tick で広がり
             _spreadService.Tick(0.3f);
 
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(5, 6)));
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(6, 5)));
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(5, 4)));
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(4, 5)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(6, 5)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(5, 4)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(4, 5)));
         }
 
         [Test]
@@ -158,7 +158,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void ExecuteLanding_BreakBomb_DestroysWalls()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.Wall);
+            _stage.SetTileData(new GridPos(6, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var spec = _useCase.CreateBreakBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
 
@@ -166,7 +166,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _spreadService.Tick(0.3f);
 
             // 壁は破壊された後 Collapsing に変わる
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(6, 5)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(6, 5)));
         }
 
         [Test]
@@ -177,7 +177,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
 
-            Assert.AreEqual(TileState.OnFire, _stage.GetTileState(new GridPos(5, 5)));
+            Assert.AreEqual(TileCondition.OnFire, _stage.GetTileCondition(new GridPos(5, 5)));
         }
 
         [Test]
@@ -189,11 +189,11 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _useCase.ExecuteLanding(cmd, new GridPos(5, 5), _players, null);
 
             // 距離1 はまだ
-            Assert.AreEqual(TileState.Normal, _stage.GetTileState(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.Intact, _stage.GetTileCondition(new GridPos(5, 6)));
 
             _spreadService.Tick(0.15f);
 
-            Assert.AreEqual(TileState.OnFire, _stage.GetTileState(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.OnFire, _stage.GetTileCondition(new GridPos(5, 6)));
         }
 
         [Test]
@@ -224,7 +224,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void ExecuteLanding_FireBomb_DestroysWalls()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.Wall);
+            _stage.SetTileData(new GridPos(6, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var spec = _useCase.CreateFireBombSpec(_player1.Build);
             var cmd = new BombFlightCommand(new GridPos(2, 5), Direction8.E, spec, PlayerId.Player1);
 
@@ -232,7 +232,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _spreadService.Tick(0.15f);
 
             // 壁は破壊された後 OnFire に変わる
-            Assert.AreEqual(TileState.OnFire, _stage.GetTileState(new GridPos(6, 5)));
+            Assert.AreEqual(TileCondition.OnFire, _stage.GetTileCondition(new GridPos(6, 5)));
         }
 
         [Test]

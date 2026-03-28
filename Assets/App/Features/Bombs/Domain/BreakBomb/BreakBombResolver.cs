@@ -45,20 +45,20 @@ namespace FloorBreaker.Bombs.Domain
 
             foreach (var pos in allTiles)
             {
-                var state = stage.GetTileState(pos);
-                switch (state)
+                var data = stage.GetTileData(pos);
+
+                // PermanentlyDestroyed / Bedrock はスキップ
+                if (data.Condition == TileCondition.PermanentlyDestroyed) continue;
+                if (data.Type == TileType.Bedrock) continue;
+
+                if (data.Type == TileType.Wall)
                 {
-                    case TileState.Wall:
-                        wallsDestroyed.Add(pos);
-                        affectedTiles.Add(pos);
-                        break;
-                    case TileState.Normal:
-                    case TileState.OnFire:
-                    case TileState.Collapsing:
-                    case TileState.Collapsed:
-                        affectedTiles.Add(pos);
-                        break;
-                    // PermanentlyDestroyed はスキップ
+                    wallsDestroyed.Add(pos);
+                    affectedTiles.Add(pos);
+                }
+                else
+                {
+                    affectedTiles.Add(pos);
                 }
             }
 

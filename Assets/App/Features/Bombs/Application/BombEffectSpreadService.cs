@@ -18,6 +18,7 @@ namespace FloorBreaker.Bombs.Application
         private readonly SlimeRegistry _slimeRegistry;
         private readonly SlimeDropResolver _slimeDropResolver;
         private readonly IRandomProvider _random;
+        private readonly ITileIgnitionHandler _tileIgnitionHandler;
 
         private readonly List<SpreadWave> _activeWaves = new();
 
@@ -39,7 +40,8 @@ namespace FloorBreaker.Bombs.Application
             SafeTileSearchService safeTileSearch,
             SlimeRegistry slimeRegistry = null,
             SlimeDropResolver slimeDropResolver = null,
-            IRandomProvider random = null)
+            IRandomProvider random = null,
+            ITileIgnitionHandler tileIgnitionHandler = null)
         {
             _stage = stage;
             _tileTimerService = tileTimerService;
@@ -48,6 +50,7 @@ namespace FloorBreaker.Bombs.Application
             _slimeRegistry = slimeRegistry;
             _slimeDropResolver = slimeDropResolver;
             _random = random;
+            _tileIgnitionHandler = tileIgnitionHandler;
         }
 
         public void EnqueueBreakBomb(
@@ -160,26 +163,39 @@ namespace FloorBreaker.Bombs.Application
                 }
 
                 // 永久消滅タイルには適用しない (ブレークボム用 — 炎は上で遮断済み)
-                if (_stage.GetTileState(entry.Pos) == TileState.PermanentlyDestroyed)
+                var tileData = _stage.GetTileData(entry.Pos);
+                if (tileData.Condition == TileCondition.PermanentlyDestroyed)
                 {
                     wave.Entries[i] = entry.WithApplied();
                     continue;
                 }
 
-                // 壁破壊
+                // 壁破壊: Type を Normal に戻す
                 if (entry.IsWall)
-                    _stage.SetTileState(entry.Pos, TileState.Normal);
+                    _stage.SetTileData(entry.Pos, new TileData
+                    {
+                        Type = TileType.Normal,
+                        Condition = TileCondition.Intact,
+                        WarpPairId = -1,
+                    });
 
                 // タイル状態変更 + タイマー
                 if (wave.IsBreakBomb)
                 {
-                    _stage.SetTileState(entry.Pos, TileState.Collapsing);
+                    _stage.SetTileCondition(entry.Pos, TileCondition.Collapsing);
                     _tileTimerService.StartCollapseTimer(entry.Pos, wave.CollapseTime, wave.RecoveryTime);
                 }
                 else
                 {
-                    _stage.SetTileState(entry.Pos, TileState.OnFire);
-                    _tileTimerService.StartFireTimer(entry.Pos, wave.FireDuration);
+                    // EternalFire は炎ボムで上書きしない
+                    if (tileData.Condition != TileCondition.EternalFire)
+                    {
+                        _stage.SetTileCondition(entry.Pos, TileCondition.OnFire);
+                        _tileTimerService.StartFireTimer(entry.Pos, wave.FireDuration);
+
+                        // 炎着火をハンドラーに通知（ガス連鎖引火等）
+                        _tileIgnitionHandler?.OnTileIgnited(entry.Pos);
+                    }
                 }
 
                 // ダメージ (そのタイルにいるプレイヤー)

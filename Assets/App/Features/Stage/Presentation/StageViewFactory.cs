@@ -33,8 +33,8 @@ namespace FloorBreaker.Stage.Presentation
 
                 tileView.Initialize(pos, renderer);
 
-                var state = model.GetTileState(pos);
-                tileView.ApplyState(state, _config);
+                var data = model.GetTileData(pos);
+                tileView.ApplyState(data, _config);
 
                 views[pos] = tileView;
             }

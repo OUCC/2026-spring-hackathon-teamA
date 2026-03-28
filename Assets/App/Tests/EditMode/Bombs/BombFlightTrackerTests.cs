@@ -141,7 +141,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void Tick_WallCollision_AutoLands()
         {
             // Place a wall 2 tiles east of origin
-            _stage.SetTileState(new GridPos(4, 2), TileState.Wall);
+            _stage.SetTileData(new GridPos(4, 2), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
 
             _tracker.StartFlight(
                 PlayerId.Player1, new GridPos(2, 2), Direction8.E, CreateBreakSpec());
@@ -353,7 +353,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void Tick_CollapsedTile_PassesThrough()
         {
             // (4, 2) を Collapsed に設定 — ボムは穴を飛び越える
-            _stage.SetTileState(new GridPos(4, 2), TileState.Collapsed);
+            _stage.SetTileCondition(new GridPos(4, 2), TileCondition.Collapsed);
 
             BombLandedEvent? received = null;
             _tracker.BombLanded.Subscribe(evt => received = evt);
@@ -374,7 +374,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void Tick_CollapsingTile_PassesThrough()
         {
             // (4, 2) を Collapsing に設定
-            _stage.SetTileState(new GridPos(4, 2), TileState.Collapsing);
+            _stage.SetTileCondition(new GridPos(4, 2), TileCondition.Collapsing);
 
             BombLandedEvent? received = null;
             _tracker.BombLanded.Subscribe(evt => received = evt);

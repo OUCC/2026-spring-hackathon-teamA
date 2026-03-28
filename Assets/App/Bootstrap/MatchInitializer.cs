@@ -6,6 +6,7 @@ using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Shared.Domain.Timing;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
+using FloorBreaker.ScriptableObjects.Configs;
 using FloorBreaker.Slimes.Domain;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Cameras.Presentation;
@@ -29,6 +30,8 @@ namespace FloorBreaker.Bootstrap
         private readonly InputInitializer _inputInit;
         private readonly MatchClock _clock;
         private readonly IAudioService _audio;
+        private readonly StageConfig _stageConfig;
+        private readonly WarpService _warpService;
 
         // Dispose 用: フェーズ SE 購読の解除
         private System.IDisposable _phaseSub;
@@ -44,7 +47,9 @@ namespace FloorBreaker.Bootstrap
             PresentationInitializer presentationInit,
             InputInitializer inputInit,
             MatchClock clock,
-            IAudioService audio)
+            IAudioService audio,
+            StageConfig stageConfig,
+            WarpService warpService)
         {
             _balance = balance;
             _random = random;
@@ -57,6 +62,8 @@ namespace FloorBreaker.Bootstrap
             _inputInit = inputInit;
             _clock = clock;
             _audio = audio;
+            _stageConfig = stageConfig;
+            _warpService = warpService;
         }
 
         public async UniTask StartAsync(CancellationToken ct)
@@ -71,7 +78,31 @@ namespace FloorBreaker.Bootstrap
             foreach (var p in _players.All) spawnPositions.Add(p.CurrentPosition);
             var walls = _wallGen.Generate(bounds, spawnPositions, _random);
             foreach (var pos in walls)
-                _stage.SetTileState(pos, TileState.Wall);
+                _stage.SetTileData(pos, new TileData
+                {
+                    Type = TileType.Wall,
+                    Condition = TileCondition.Intact,
+                    WarpPairId = -1,
+                });
+
+            // 1b. プリセットタイル配置 (StageConfig)
+            if (_stageConfig?.PresetTiles != null)
+            {
+                foreach (var preset in _stageConfig.PresetTiles)
+                {
+                    var presetPos = new FloorBreaker.Shared.Domain.Grid.GridPos(preset.x, preset.y);
+                    if (!_stage.IsInBounds(presetPos)) continue;
+                    _stage.SetTileData(presetPos, new TileData
+                    {
+                        Type = preset.type,
+                        Condition = preset.condition,
+                        WarpPairId = preset.warpPairId,
+                    });
+                }
+            }
+
+            // 1c. WarpService レジストリ構築
+            _warpService?.BuildRegistry(bounds);
 
             // 2. Presentation 初期化 (TileView → Presenter → HUD → Overlay → Result)
             _presentationInit.Initialize();

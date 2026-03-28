@@ -47,9 +47,9 @@ namespace FloorBreaker.Bombs.Application
             foreach (var player in players)
             {
                 int key = player.Id.Index;
-                var tileState = stage.GetTileState(player.CurrentPosition);
+                var tileCond = stage.GetTileCondition(player.CurrentPosition);
 
-                if (tileState == TileState.OnFire)
+                if (TileData.IsBurning(tileCond))
                 {
                     // 炎守りのマント: 炎 DoT 免疫
                     if (player.Stats.FireShieldActive.CurrentValue)
@@ -85,9 +85,9 @@ namespace FloorBreaker.Bombs.Application
             {
                 if (!slime.IsAlive) continue;
 
-                var tileState = stage.GetTileState(slime.Position);
+                var slimeCond = stage.GetTileCondition(slime.Position);
 
-                if (tileState == TileState.OnFire)
+                if (TileData.IsBurning(slimeCond))
                 {
                     _slimeFireAccum.TryGetValue(slime.Id, out float accum);
                     accum += deltaTime;

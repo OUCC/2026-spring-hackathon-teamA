@@ -94,7 +94,7 @@ namespace FloorBreaker.Stage.Presentation
 
             // 縮小アニメーション中の PermanentlyDestroyed はスキップ
             // (StageShrinkAnimator がウェーブ演出を担当)
-            if (evt.NewState == TileState.PermanentlyDestroyed
+            if (evt.NewCondition == TileCondition.PermanentlyDestroyed
                 && _shrinkAnimator != null
                 && _shrinkAnimator.IsShrinkAnimating)
             {
@@ -102,57 +102,71 @@ namespace FloorBreaker.Stage.Presentation
             }
 
             // 旧状態のクリーンアップ
-            CleanupOldState(evt.Pos, evt.OldState, view);
+            CleanupOldState(evt.Pos, evt.OldCondition, view);
 
             // 新状態の適用
-            ApplyNewState(evt.Pos, evt.NewState, view);
+            ApplyNewState(evt, view);
         }
 
-        private void CleanupOldState(GridPos pos, TileState oldState, TileView view)
+        private void CleanupOldState(GridPos pos, TileCondition oldCondition, TileView view)
         {
-            switch (oldState)
+            switch (oldCondition)
             {
-                case TileState.OnFire:
+                case TileCondition.OnFire:
+                case TileCondition.EternalFire:
                     _animService.StopFirePulse(view);
                     _fireVfxPool.DespawnAt(pos);
                     break;
 
-                case TileState.Collapsing:
-                case TileState.Collapsed:
+                case TileCondition.Collapsing:
+                case TileCondition.Collapsed:
                     _animService.KillAnimation(pos);
                     break;
             }
         }
 
-        private void ApplyNewState(GridPos pos, TileState newState, TileView view)
+        private void ApplyNewState(TileChangedEvent evt, TileView view)
         {
-            switch (newState)
+            var pos = evt.Pos;
+
+            switch (evt.NewCondition)
             {
-                case TileState.Normal:
-                    _animService.PlayRecovery(view);
+                case TileCondition.Intact:
+                    // 復帰 or タイプ変更: タイプに応じたスプライトへ
+                    if (TileData.IsHoleCondition(evt.OldCondition) || TileData.IsBurning(evt.OldCondition))
+                    {
+                        _animService.PlayRecovery(view, evt.NewType);
+                    }
+                    else
+                    {
+                        view.ApplyState(evt.NewData, _config);
+                    }
                     break;
 
-                case TileState.Wall:
-                    view.ApplyState(TileState.Wall, _config);
-                    break;
-
-                case TileState.OnFire:
-                    view.ApplyState(TileState.OnFire, _config);
+                case TileCondition.OnFire:
+                    view.ApplyState(evt.NewData, _config);
                     _animService.PlayFirePulse(view);
                     _fireVfxPool.SpawnAt(pos, view.BasePosition);
                     _audio.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
-                case TileState.Collapsing:
+                case TileCondition.EternalFire:
+                    view.ApplyState(evt.NewData, _config);
+                    _animService.PlayFirePulse(view);
+                    _fireVfxPool.SpawnAt(pos, view.BasePosition);
+                    _audio.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
+                    break;
+
+                case TileCondition.Collapsing:
                     _animService.PlayCollapse(view, permanent: false);
                     _audio.PlaySfx(SfxIds.TileCollapse, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
-                case TileState.Collapsed:
-                    view.ApplyState(TileState.Collapsed, _config);
+                case TileCondition.Collapsed:
+                    view.ApplyState(evt.NewData, _config);
                     break;
 
-                case TileState.PermanentlyDestroyed:
+                case TileCondition.PermanentlyDestroyed:
                     _animService.PlayPermanentDestroy(view);
                     _audio.PlaySfx(SfxIds.TileDestroy, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;

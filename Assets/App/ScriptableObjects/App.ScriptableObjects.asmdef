@@ -3,7 +3,8 @@
     "rootNamespace": "FloorBreaker.ScriptableObjects",
     "references": [
         "App.Shared.Domain",
-        "App.Shared.Application"
+        "App.Shared.Application",
+        "App.Stage"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

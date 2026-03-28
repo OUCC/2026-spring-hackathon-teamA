@@ -19,54 +19,54 @@ namespace FloorBreaker.Tests.EditMode.Stage
         {
             var model = CreateModel();
             foreach (var pos in TileCoordRange.FromSize(10).GetAllPositions())
-                Assert.AreEqual(TileState.Normal, model.GetTileState(pos));
+                Assert.AreEqual(TileCondition.Intact, model.GetTileCondition(pos));
         }
 
         [Test]
-        public void SetTileState_ChangesState()
+        public void SetTileData_Wall_ChangesType()
         {
             var model = CreateModel();
             var pos = new GridPos(3, 4);
-            model.SetTileState(pos, TileState.Wall);
-            Assert.AreEqual(TileState.Wall, model.GetTileState(pos));
+            model.SetTileData(pos, new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
+            Assert.AreEqual(TileType.Wall, model.GetTileType(pos));
         }
 
         [Test]
-        public void SetTileState_FiresObservable()
+        public void SetTileCondition_FiresObservable()
         {
             var model = CreateModel();
             var pos = new GridPos(5, 5);
             var events = new List<TileChangedEvent>();
             model.TileChanged.Subscribe(e => events.Add(e));
 
-            model.SetTileState(pos, TileState.OnFire);
+            model.SetTileCondition(pos, TileCondition.OnFire);
 
             Assert.AreEqual(1, events.Count);
             Assert.AreEqual(pos, events[0].Pos);
-            Assert.AreEqual(TileState.Normal, events[0].OldState);
-            Assert.AreEqual(TileState.OnFire, events[0].NewState);
+            Assert.AreEqual(TileCondition.Intact, events[0].OldCondition);
+            Assert.AreEqual(TileCondition.OnFire, events[0].NewCondition);
         }
 
         [Test]
-        public void SetTileState_SameState_DoesNotFireObservable()
+        public void SetTileCondition_SameCondition_DoesNotFireObservable()
         {
             var model = CreateModel();
             var pos = new GridPos(5, 5);
             var events = new List<TileChangedEvent>();
             model.TileChanged.Subscribe(e => events.Add(e));
 
-            model.SetTileState(pos, TileState.Normal); // already Normal
+            model.SetTileCondition(pos, TileCondition.Intact); // already Intact
             Assert.AreEqual(0, events.Count);
         }
 
         [Test]
-        public void IsPassable_NormalAndOnFire_ArePassable()
+        public void IsPassable_IntactAndOnFire_ArePassable()
         {
             var model = CreateModel();
             var pos = new GridPos(3, 3);
             Assert.IsTrue(model.IsPassable(pos));
 
-            model.SetTileState(pos, TileState.OnFire);
+            model.SetTileCondition(pos, TileCondition.OnFire);
             Assert.IsTrue(model.IsPassable(pos));
         }
 
@@ -76,10 +76,10 @@ namespace FloorBreaker.Tests.EditMode.Stage
             var model = CreateModel();
             var pos = new GridPos(3, 3);
 
-            model.SetTileState(pos, TileState.Wall);
+            model.SetTileData(pos, new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             Assert.IsFalse(model.IsPassable(pos));
 
-            model.SetTileState(pos, TileState.Collapsed);
+            model.SetTileCondition(pos, TileCondition.Collapsed);
             Assert.IsFalse(model.IsPassable(pos));
         }
 
@@ -87,8 +87,8 @@ namespace FloorBreaker.Tests.EditMode.Stage
         public void OutOfBounds_ReturnsPermanentlyDestroyed()
         {
             var model = CreateModel();
-            Assert.AreEqual(TileState.PermanentlyDestroyed, model.GetTileState(new GridPos(-1, 0)));
-            Assert.AreEqual(TileState.PermanentlyDestroyed, model.GetTileState(new GridPos(10, 5)));
+            Assert.AreEqual(TileCondition.PermanentlyDestroyed, model.GetTileCondition(new GridPos(-1, 0)));
+            Assert.AreEqual(TileCondition.PermanentlyDestroyed, model.GetTileCondition(new GridPos(10, 5)));
         }
 
         [Test]
@@ -97,8 +97,8 @@ namespace FloorBreaker.Tests.EditMode.Stage
             var model = CreateModel(5); // 25 tiles
             Assert.AreEqual(25, model.GetAliveTileCount());
 
-            model.SetTileState(new GridPos(0, 0), TileState.PermanentlyDestroyed);
-            model.SetTileState(new GridPos(1, 1), TileState.PermanentlyDestroyed);
+            model.SetTileCondition(new GridPos(0, 0), TileCondition.PermanentlyDestroyed);
+            model.SetTileCondition(new GridPos(1, 1), TileCondition.PermanentlyDestroyed);
             Assert.AreEqual(23, model.GetAliveTileCount());
         }
     }

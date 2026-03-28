@@ -31,14 +31,14 @@ namespace FloorBreaker.Bombs.Domain
                 if (!_stage.IsInBounds(pos))
                     return lastValid;
 
-                var state = _stage.GetTileState(pos);
+                var data = _stage.GetTileData(pos);
 
                 // 穴（Collapsed, PermanentlyDestroyed）: ボムは飛び越える（lastValid 更新なし）
-                if (state == TileState.Collapsed || state == TileState.PermanentlyDestroyed)
+                if (TileData.IsHoleCondition(data.Condition))
                     continue;
 
-                // 壁衝突
-                if (state == TileState.Wall)
+                // 壁衝突 (Wall, Bedrock)
+                if (TileData.IsImpassableType(data.Type))
                 {
                     if (penetrating)
                     {

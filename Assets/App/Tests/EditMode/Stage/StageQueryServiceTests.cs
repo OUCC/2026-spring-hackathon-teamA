@@ -29,7 +29,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
         public void GetTilesInCross_WallStopsArm_WhenNotPenetrating()
         {
             var model = new StageModel(TileCoordRange.FromSize(10));
-            model.SetTileState(new GridPos(6, 5), TileState.Wall);
+            model.SetTileData(new GridPos(6, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var svc = new StageQueryService(model);
 
             var tiles = svc.GetTilesInCross(new GridPos(5, 5), 3, false);
@@ -43,7 +43,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
         public void GetTilesInCross_WallPenetration_ContinuesThroughWall()
         {
             var model = new StageModel(TileCoordRange.FromSize(10));
-            model.SetTileState(new GridPos(6, 5), TileState.Wall);
+            model.SetTileData(new GridPos(6, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var svc = new StageQueryService(model);
 
             var tiles = svc.GetTilesInCross(new GridPos(5, 5), 3, true);
@@ -56,7 +56,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
         public void RaycastGrid_StopsAtWall()
         {
             var model = new StageModel(TileCoordRange.FromSize(10));
-            model.SetTileState(new GridPos(7, 5), TileState.Wall);
+            model.SetTileData(new GridPos(7, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var svc = new StageQueryService(model);
 
             var result = svc.RaycastGrid(new GridPos(5, 5), Direction8.E, 5);
@@ -64,7 +64,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
             Assert.IsNotNull(result);
             Assert.AreEqual(new GridPos(7, 5), result.Value.HitPos);
             Assert.AreEqual(2, result.Value.Distance);
-            Assert.AreEqual(TileState.Wall, result.Value.HitTileState);
+            Assert.AreEqual(TileType.Wall, result.Value.HitTileData.Type);
         }
 
         [Test]

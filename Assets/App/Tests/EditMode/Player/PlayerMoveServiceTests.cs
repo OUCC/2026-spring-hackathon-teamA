@@ -48,7 +48,7 @@ namespace FloorBreaker.Tests.EditMode.Player
         [Test]
         public void TryMove_IntoWall_Fails()
         {
-            _stage.SetTileState(new GridPos(5, 6), TileState.Wall);
+            _stage.SetTileData(new GridPos(5, 6), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             Assert.IsFalse(_svc.TryMove(_player, Direction8.N, _stage));
             Assert.AreEqual(new GridPos(5, 5), _player.CurrentPosition);
         }
@@ -81,7 +81,7 @@ namespace FloorBreaker.Tests.EditMode.Player
         [Test]
         public void TryMove_UpdatesFacingEvenOnFailure()
         {
-            _stage.SetTileState(new GridPos(5, 6), TileState.Wall);
+            _stage.SetTileData(new GridPos(5, 6), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             _svc.TryMove(_player, Direction8.N, _stage);
             Assert.AreEqual(Direction8.N, _player.CurrentFacing);
         }

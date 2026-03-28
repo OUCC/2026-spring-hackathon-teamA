@@ -49,7 +49,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         [Test]
         public void Player_OnFireTile_Takes1DamageAfter1Second()
         {
-            _stage.SetTileState(new GridPos(5, 5), TileState.OnFire);
+            _stage.SetTileCondition(new GridPos(5, 5), TileCondition.OnFire);
 
             // Tick for 1 second (dotInterval = 1f)
             _service.Tick(1.0f, _players, _stage);
@@ -60,7 +60,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         [Test]
         public void Player_LeavesFireTile_ResetsAccumulator()
         {
-            _stage.SetTileState(new GridPos(5, 5), TileState.OnFire);
+            _stage.SetTileCondition(new GridPos(5, 5), TileCondition.OnFire);
 
             // Tick 0.5s on fire tile (accumulates but not enough for damage)
             _service.Tick(0.5f, _players, _stage);

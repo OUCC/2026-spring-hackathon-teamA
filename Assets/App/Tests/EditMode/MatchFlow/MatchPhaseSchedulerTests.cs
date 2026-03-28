@@ -92,6 +92,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
                 _slimeTickService, _fireDamageTickService,
                 null, // BombFlightTracker is optional
                 null, // BombEffectSpreadService is optional
+                null, // GasIgnitionService is optional
                 _stageShrinkService, _upgradePhaseUseCase, _matchEndUseCase,
                 _playerDamageService,
                 _players, _stage, _slimeRegistry,

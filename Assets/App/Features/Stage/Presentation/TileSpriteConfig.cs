@@ -23,6 +23,12 @@ namespace FloorBreaker.Stage.Presentation
         [SerializeField] private Color _collapsedColor = new Color(0.10f, 0.08f, 0.13f, 1f);   // #1A1420
         [SerializeField] private Color _destroyedColor = new Color(0f, 0f, 0f, 0f);
 
+        [Header("New Tile Type Colors (placeholder)")]
+        [SerializeField] private Color _bedrockColor = new Color(0.15f, 0.12f, 0.1f, 1f);
+        [SerializeField] private Color _gasColor = new Color(0.4f, 0.8f, 0.4f, 0.7f);
+        [SerializeField] private Color _warpColor = new Color(0.6f, 0.3f, 0.8f, 1f);
+        [SerializeField] private Color _eternalFireTint = new Color(0.267f, 0.533f, 1f, 1f);  // #4488FF
+
         [Header("VFX Prefabs")]
         [SerializeField] private GameObject _fireVfxPrefab;
         [SerializeField] private GameObject _collapseDebrisPrefab;
@@ -50,6 +56,10 @@ namespace FloorBreaker.Stage.Presentation
         public Color CollapsingTint => _collapsingTint;
         public Color CollapsedColor => _collapsedColor;
         public Color DestroyedColor => _destroyedColor;
+        public Color BedrockColor => _bedrockColor;
+        public Color GasColor => _gasColor;
+        public Color WarpColor => _warpColor;
+        public Color EternalFireTint => _eternalFireTint;
 
         // VFX
         public GameObject FireVfxPrefab => _fireVfxPrefab;

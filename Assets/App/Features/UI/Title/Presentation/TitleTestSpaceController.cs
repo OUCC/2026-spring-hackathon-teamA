@@ -205,7 +205,12 @@ namespace FloorBreaker.UI.Title.Presentation
                 var spawn = new GridPos(_gridSize / 2, _gridSize / 2);
                 var walls = wallGen.Generate(bounds, new List<GridPos> { spawn }, random);
                 foreach (var pos in walls)
-                    _stageModel.SetTileState(pos, TileState.Wall);
+                    _stageModel.SetTileData(pos, new TileData
+                    {
+                        Type = TileType.Wall,
+                        Condition = TileCondition.Intact,
+                        WarpPairId = -1,
+                    });
 
                 // プレイヤー
                 var stats = new PlayerStats(_balance.InitialHp, _balance.BaseMovementSpeed, _balance.MaxMovementSpeed);

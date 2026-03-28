@@ -5,13 +5,26 @@ namespace FloorBreaker.Stage.Domain
 {
     public sealed class StageShrinkService
     {
+        private readonly WarpService _warpService;
+
+        public StageShrinkService(WarpService warpService = null)
+        {
+            _warpService = warpService;
+        }
+
         public IReadOnlyList<GridPos> ShrinkOuterRing(StageModel model)
         {
             var ring = model.Bounds.GetOuterRing();
 
             foreach (var pos in ring)
             {
-                model.SetTileState(pos, TileState.PermanentlyDestroyed);
+                if (model.GetTileType(pos) == TileType.Bedrock) continue;
+
+                // ワープタイルの PD 時にペア先を Normal に変換
+                if (model.GetTileType(pos) == TileType.Warp)
+                    _warpService?.HandleTilePermanentlyDestroyed(pos);
+
+                model.SetTileCondition(pos, TileCondition.PermanentlyDestroyed);
             }
 
             model.Bounds.Shrink();
