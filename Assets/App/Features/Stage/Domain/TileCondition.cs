@@ -1,12 +1,12 @@
 namespace FloorBreaker.Stage.Domain
 {
-    public enum TileState : byte
+    public enum TileCondition : byte
     {
-        Normal,
+        Intact,
         OnFire,
+        EternalFire,
         Collapsing,
         Collapsed,
         PermanentlyDestroyed,
-        Wall,
     }
 }

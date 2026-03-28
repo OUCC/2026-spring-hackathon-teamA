@@ -42,7 +42,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_WallAt2_LandsAtWall()
         {
-            _stage.SetTileState(new GridPos(4, 5), TileState.Wall);
+            _stage.SetTileData(new GridPos(4, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var cmd = MakeCmd(new GridPos(2, 5), Direction8.E, 3);
             var pos = _resolver.Resolve(cmd, 3, null);
             Assert.AreEqual(new GridPos(4, 5), pos);
@@ -76,7 +76,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void Resolve_CollapsedTile_PassesThrough()
         {
             // Collapsed タイルはボムが飛び越える
-            _stage.SetTileState(new GridPos(4, 5), TileState.Collapsed);
+            _stage.SetTileCondition(new GridPos(4, 5), TileCondition.Collapsed);
             var cmd = MakeCmd(new GridPos(2, 5), Direction8.E, 3);
             var pos = _resolver.Resolve(cmd, 3, null);
             // (4, 5) を飛び越えて (5, 5) に着弾
@@ -94,7 +94,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_WallBeforeEntity_StopsAtWall()
         {
-            _stage.SetTileState(new GridPos(3, 5), TileState.Wall);
+            _stage.SetTileData(new GridPos(3, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var cmd = MakeCmd(new GridPos(2, 5), Direction8.E, 3);
             var pos = _resolver.Resolve(cmd, 3, p => p.Equals(new GridPos(4, 5)));
             Assert.AreEqual(new GridPos(3, 5), pos);

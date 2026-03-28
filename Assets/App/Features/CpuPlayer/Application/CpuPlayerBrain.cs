@@ -230,8 +230,9 @@ namespace FloorBreaker.CpuPlayer.Application
                     var checkPos = from + offset * d;
                     if (!_stage.IsInBounds(checkPos)) break;
 
-                    var tileState = _stage.GetTileState(checkPos);
-                    if (tileState == TileState.Wall || tileState == TileState.PermanentlyDestroyed)
+                    var tileData = _stage.GetTileData(checkPos);
+                    if (TileData.IsImpassableType(tileData.Type)
+                        || tileData.Condition == TileCondition.PermanentlyDestroyed)
                         break;
 
                     if (isSlimeTarget)
@@ -293,10 +294,10 @@ namespace FloorBreaker.CpuPlayer.Application
 
         private bool IsDangerous(GridPos pos)
         {
-            var state = _stage.GetTileState(pos);
-            return state == TileState.OnFire
-                || state == TileState.Collapsing
-                || state == TileState.PermanentlyDestroyed;
+            var cond = _stage.GetTileCondition(pos);
+            return TileData.IsBurning(cond)
+                || cond == TileCondition.Collapsing
+                || cond == TileCondition.PermanentlyDestroyed;
         }
 
         private Direction8? FindSafeDirection(GridPos from)

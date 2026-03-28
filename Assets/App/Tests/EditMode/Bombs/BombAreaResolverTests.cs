@@ -43,7 +43,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_WallPenetration_ContinuesThroughWall()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.Wall);
+            _stage.SetTileData(new GridPos(6, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var tiles = _resolver.Resolve(new GridPos(5, 5), 3, true);
 
             Assert.Contains(new GridPos(6, 5), (System.Collections.ICollection)tiles);
@@ -53,7 +53,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_NoPenetration_StopsAtWall()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.Wall);
+            _stage.SetTileData(new GridPos(6, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var tiles = _resolver.Resolve(new GridPos(5, 5), 3, false);
 
             Assert.Contains(new GridPos(6, 5), (System.Collections.ICollection)tiles);

@@ -48,7 +48,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_WithWall_IncludesWallInDestroyed()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.Wall);
+            _stage.SetTileData(new GridPos(6, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var result = _resolver.Resolve(new GridPos(5, 5), MakeBreakSpec(), _stage);
 
             Assert.Contains(new GridPos(6, 5), (System.Collections.ICollection)result.WallsDestroyed);
@@ -58,7 +58,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_WallPenetration_IncludesTilesBeyondWall()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.Wall);
+            _stage.SetTileData(new GridPos(6, 5), new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
             var spec = MakeBreakSpec(range: 2);
             var result = _resolver.Resolve(new GridPos(5, 5), spec, _stage);
 
@@ -69,7 +69,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_IncludesCollapsedTiles()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.Collapsed);
+            _stage.SetTileCondition(new GridPos(6, 5), TileCondition.Collapsed);
             var result = _resolver.Resolve(new GridPos(5, 5), MakeBreakSpec(), _stage);
 
             Assert.IsTrue(result.AffectedTiles.Contains(new GridPos(6, 5)));
@@ -78,7 +78,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_SkipsPermanentlyDestroyedTiles()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.PermanentlyDestroyed);
+            _stage.SetTileCondition(new GridPos(6, 5), TileCondition.PermanentlyDestroyed);
             var result = _resolver.Resolve(new GridPos(5, 5), MakeBreakSpec(), _stage);
 
             Assert.IsFalse(result.AffectedTiles.Contains(new GridPos(6, 5)));
@@ -87,7 +87,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_IncludesCollapsingTiles()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.Collapsing);
+            _stage.SetTileCondition(new GridPos(6, 5), TileCondition.Collapsing);
             var result = _resolver.Resolve(new GridPos(5, 5), MakeBreakSpec(), _stage);
 
             Assert.IsTrue(result.AffectedTiles.Contains(new GridPos(6, 5)));
@@ -96,7 +96,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         [Test]
         public void Resolve_IncludesOnFireTiles()
         {
-            _stage.SetTileState(new GridPos(6, 5), TileState.OnFire);
+            _stage.SetTileCondition(new GridPos(6, 5), TileCondition.OnFire);
             var result = _resolver.Resolve(new GridPos(5, 5), MakeBreakSpec(), _stage);
 
             Assert.Contains(new GridPos(6, 5), (System.Collections.ICollection)result.AffectedTiles);

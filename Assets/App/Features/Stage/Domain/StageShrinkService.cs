@@ -11,7 +11,8 @@ namespace FloorBreaker.Stage.Domain
 
             foreach (var pos in ring)
             {
-                model.SetTileState(pos, TileState.PermanentlyDestroyed);
+                if (model.GetTileType(pos) == TileType.Bedrock) continue;
+                model.SetTileCondition(pos, TileCondition.PermanentlyDestroyed);
             }
 
             model.Bounds.Shrink();

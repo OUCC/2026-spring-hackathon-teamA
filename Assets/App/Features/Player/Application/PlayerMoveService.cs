@@ -61,8 +61,8 @@ namespace FloorBreaker.Player.Application
             // 風の羽衣: 崩落タイルを歩ける
             if (player.Stats.LevitationActive.CurrentValue)
             {
-                var state = stage.GetTileState(target);
-                return state == TileState.Collapsing || state == TileState.Collapsed;
+                var cond = stage.GetTileCondition(target);
+                return cond == TileCondition.Collapsing || cond == TileCondition.Collapsed;
             }
 
             return false;
@@ -73,8 +73,9 @@ namespace FloorBreaker.Player.Application
         /// </summary>
         private static bool IsSolidBlock(GridPos pos, StageModel stage)
         {
-            var state = stage.GetTileState(pos);
-            return state == TileState.Wall || state == TileState.PermanentlyDestroyed;
+            var data = stage.GetTileData(pos);
+            return TileData.IsImpassableType(data.Type)
+                || data.Condition == TileCondition.PermanentlyDestroyed;
         }
     }
 }

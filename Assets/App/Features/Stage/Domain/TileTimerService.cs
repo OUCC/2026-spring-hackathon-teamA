@@ -138,7 +138,7 @@ namespace FloorBreaker.Stage.Domain
                 switch (entry.Type)
                 {
                     case TileTimerType.Collapse:
-                        _model.SetTileState(pos, TileState.Collapsed);
+                        _model.SetTileCondition(pos, TileCondition.Collapsed);
                         _timerCompleted.OnNext(new TileTimerCompletedEvent(pos, TileTimerType.Collapse));
                         // 自動で復帰タイマーを開始
                         if (entry.ChainDuration > 0f)
@@ -154,12 +154,12 @@ namespace FloorBreaker.Stage.Domain
                         break;
 
                     case TileTimerType.Recovery:
-                        _model.SetTileState(pos, TileState.Normal);
+                        _model.SetTileCondition(pos, TileCondition.Intact);
                         _timerCompleted.OnNext(new TileTimerCompletedEvent(pos, TileTimerType.Recovery));
                         break;
 
                     case TileTimerType.Fire:
-                        _model.SetTileState(pos, TileState.Normal);
+                        _model.SetTileCondition(pos, TileCondition.Intact);
                         _timerCompleted.OnNext(new TileTimerCompletedEvent(pos, TileTimerType.Fire));
                         break;
                 }

@@ -71,7 +71,12 @@ namespace FloorBreaker.Bootstrap
             foreach (var p in _players.All) spawnPositions.Add(p.CurrentPosition);
             var walls = _wallGen.Generate(bounds, spawnPositions, _random);
             foreach (var pos in walls)
-                _stage.SetTileState(pos, TileState.Wall);
+                _stage.SetTileData(pos, new TileData
+                {
+                    Type = TileType.Wall,
+                    Condition = TileCondition.Intact,
+                    WarpPairId = -1,
+                });
 
             // 2. Presentation 初期化 (TileView → Presenter → HUD → Overlay → Result)
             _presentationInit.Initialize();

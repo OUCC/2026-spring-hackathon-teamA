@@ -189,16 +189,16 @@ namespace FloorBreaker.Bombs.Application
                     return;
                 }
 
-                var tileState = _stage.GetTileState(nextPos);
+                var tileData = _stage.GetTileData(nextPos);
 
                 // 穴（Collapsed, PermanentlyDestroyed）はボムが飛び越える
-                if (tileState == TileState.Collapsed || tileState == TileState.PermanentlyDestroyed)
+                if (TileData.IsHoleCondition(tileData.Condition))
                 {
                     state.CurrentTileDistance = nextTile;
                     continue;
                 }
 
-                if (tileState == TileState.Wall)
+                if (TileData.IsImpassableType(tileData.Type))
                 {
                     if (!state.Command.Spec.FlightPenetration)
                     {
@@ -305,16 +305,16 @@ namespace FloorBreaker.Bombs.Application
                     return;
                 }
 
-                var tileState = _stage.GetTileState(nextPos);
+                var tileData = _stage.GetTileData(nextPos);
 
                 // 穴（Collapsed, PermanentlyDestroyed）はボムが飛び越える
-                if (tileState == TileState.Collapsed || tileState == TileState.PermanentlyDestroyed)
+                if (TileData.IsHoleCondition(tileData.Condition))
                 {
                     state.CurrentTileDistance = nextTile;
                     continue;
                 }
 
-                if (tileState == TileState.Wall && !state.Command.Spec.FlightPenetration)
+                if (TileData.IsImpassableType(tileData.Type) && !state.Command.Spec.FlightPenetration)
                 {
                     state.CurrentTileDistance = nextTile;
                     _dualFlights[owner.Index] = state;

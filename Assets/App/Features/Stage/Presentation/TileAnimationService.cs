@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using FloorBreaker.Shared.Domain.Grid;
+using FloorBreaker.Stage.Domain;
 
 namespace FloorBreaker.Stage.Presentation
 {
@@ -64,7 +65,7 @@ namespace FloorBreaker.Stage.Presentation
             _activeTweens[view.Pos] = seq;
         }
 
-        public void PlayRecovery(TileView view)
+        public void PlayRecovery(TileView view, TileType tileType = TileType.Normal)
         {
             KillAnimation(view.Pos);
 
@@ -72,11 +73,20 @@ namespace FloorBreaker.Stage.Presentation
             renderer.enabled = true;
             renderer.sprite = _config.NormalSprite;
 
+            // タイプに応じた目標色を決定
+            Color targetColor;
+            switch (tileType)
+            {
+                case TileType.Gas:   targetColor = _config.GasColor;  break;
+                case TileType.Warp:  targetColor = _config.WarpColor; break;
+                default:             targetColor = _config.NormalColor; break;
+            }
+
             // 小さい状態から開始
             view.transform.localScale = new Vector3(0.3f, 0.1f, 1f);
             renderer.color = new Color(
-                _config.NormalColor.r, _config.NormalColor.g,
-                _config.NormalColor.b, 0.2f);
+                targetColor.r, targetColor.g,
+                targetColor.b, 0.2f);
 
             var seq = DOTween.Sequence();
 
@@ -94,13 +104,14 @@ namespace FloorBreaker.Stage.Presentation
             seq.Join(DOTween.ToAlpha(
                 () => renderer.color,
                 c => renderer.color = c,
-                _config.NormalColor.a,
+                targetColor.a,
                 _config.RecoveryAnimDuration).SetEase(Ease.OutQuad));
 
+            var finalData = new TileData { Type = tileType, Condition = TileCondition.Intact, WarpPairId = -1 };
             seq.OnComplete(() =>
             {
                 _activeTweens.Remove(view.Pos);
-                view.ApplyState(Domain.TileState.Normal, _config);
+                view.ApplyState(finalData, _config);
             });
 
             seq.SetLink(view.gameObject);

@@ -160,25 +160,31 @@ namespace FloorBreaker.Bombs.Application
                 }
 
                 // 永久消滅タイルには適用しない (ブレークボム用 — 炎は上で遮断済み)
-                if (_stage.GetTileState(entry.Pos) == TileState.PermanentlyDestroyed)
+                var tileData = _stage.GetTileData(entry.Pos);
+                if (tileData.Condition == TileCondition.PermanentlyDestroyed)
                 {
                     wave.Entries[i] = entry.WithApplied();
                     continue;
                 }
 
-                // 壁破壊
+                // 壁破壊: Type を Normal に戻す
                 if (entry.IsWall)
-                    _stage.SetTileState(entry.Pos, TileState.Normal);
+                    _stage.SetTileData(entry.Pos, new TileData
+                    {
+                        Type = TileType.Normal,
+                        Condition = TileCondition.Intact,
+                        WarpPairId = -1,
+                    });
 
                 // タイル状態変更 + タイマー
                 if (wave.IsBreakBomb)
                 {
-                    _stage.SetTileState(entry.Pos, TileState.Collapsing);
+                    _stage.SetTileCondition(entry.Pos, TileCondition.Collapsing);
                     _tileTimerService.StartCollapseTimer(entry.Pos, wave.CollapseTime, wave.RecoveryTime);
                 }
                 else
                 {
-                    _stage.SetTileState(entry.Pos, TileState.OnFire);
+                    _stage.SetTileCondition(entry.Pos, TileCondition.OnFire);
                     _tileTimerService.StartFireTimer(entry.Pos, wave.FireDuration);
                 }
 

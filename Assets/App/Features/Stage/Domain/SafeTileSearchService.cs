@@ -28,8 +28,8 @@ namespace FloorBreaker.Stage.Domain
                     if (!model.IsInBounds(neighbor)) continue;
                     if (visited.Contains(neighbor)) continue;
 
-                    var state = model.GetTileState(neighbor);
-                    if (state == TileState.PermanentlyDestroyed) continue;
+                    var cond = model.GetTileCondition(neighbor);
+                    if (cond == TileCondition.PermanentlyDestroyed) continue;
 
                     visited.Add(neighbor);
                     queue.Enqueue(neighbor);

@@ -30,57 +30,57 @@ namespace FloorBreaker.Tests.EditMode.Stage
         public void CollapseTimer_SetsTileToCollapsed()
         {
             var pos = new GridPos(5, 5);
-            _model.SetTileState(pos, TileState.Collapsing);
+            _model.SetTileCondition(pos, TileCondition.Collapsing);
             _svc.StartCollapseTimer(pos, 3f, 5f);
 
             _svc.Tick(2.9f);
-            Assert.AreEqual(TileState.Collapsing, _model.GetTileState(pos));
+            Assert.AreEqual(TileCondition.Collapsing, _model.GetTileCondition(pos));
 
             _svc.Tick(0.2f); // total 3.1
-            Assert.AreEqual(TileState.Collapsed, _model.GetTileState(pos));
+            Assert.AreEqual(TileCondition.Collapsed, _model.GetTileCondition(pos));
         }
 
         [Test]
         public void CollapseTimer_AutoChainsToRecovery()
         {
             var pos = new GridPos(5, 5);
-            _model.SetTileState(pos, TileState.Collapsing);
+            _model.SetTileCondition(pos, TileCondition.Collapsing);
             _svc.StartCollapseTimer(pos, 3f, 5f);
 
             _svc.Tick(3.1f); // collapse done
-            Assert.AreEqual(TileState.Collapsed, _model.GetTileState(pos));
+            Assert.AreEqual(TileCondition.Collapsed, _model.GetTileCondition(pos));
             Assert.IsTrue(_svc.HasActiveTimer(pos)); // recovery started
 
             _svc.Tick(5.1f); // recovery done
-            Assert.AreEqual(TileState.Normal, _model.GetTileState(pos));
+            Assert.AreEqual(TileCondition.Intact, _model.GetTileCondition(pos));
             Assert.IsFalse(_svc.HasActiveTimer(pos));
         }
 
         [Test]
-        public void FireTimer_SetsTileToNormal()
+        public void FireTimer_SetsTileToIntact()
         {
             var pos = new GridPos(3, 3);
-            _model.SetTileState(pos, TileState.OnFire);
+            _model.SetTileCondition(pos, TileCondition.OnFire);
             _svc.StartFireTimer(pos, 3.5f);
 
             _svc.Tick(3.4f);
-            Assert.AreEqual(TileState.OnFire, _model.GetTileState(pos));
+            Assert.AreEqual(TileCondition.OnFire, _model.GetTileCondition(pos));
 
             _svc.Tick(0.2f);
-            Assert.AreEqual(TileState.Normal, _model.GetTileState(pos));
+            Assert.AreEqual(TileCondition.Intact, _model.GetTileCondition(pos));
         }
 
         [Test]
         public void CancelTimer_PreventsCompletion()
         {
             var pos = new GridPos(5, 5);
-            _model.SetTileState(pos, TileState.OnFire);
+            _model.SetTileCondition(pos, TileCondition.OnFire);
             _svc.StartFireTimer(pos, 3f);
 
             _svc.CancelTimer(pos);
             _svc.Tick(5f);
 
-            Assert.AreEqual(TileState.OnFire, _model.GetTileState(pos));
+            Assert.AreEqual(TileCondition.OnFire, _model.GetTileCondition(pos));
         }
 
         [Test]
@@ -90,7 +90,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
             _svc.TimerCompleted.Subscribe(e => events.Add(e));
 
             var pos = new GridPos(5, 5);
-            _model.SetTileState(pos, TileState.Collapsing);
+            _model.SetTileCondition(pos, TileCondition.Collapsing);
             _svc.StartCollapseTimer(pos, 1f, 2f);
 
             _svc.Tick(1.1f);

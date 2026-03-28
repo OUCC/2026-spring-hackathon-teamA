@@ -52,7 +52,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             _service.EnqueueBreakBomb(result, center, new List<PlayerModel>(), null, 0.3f);
 
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(center));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(center));
         }
 
         [Test]
@@ -65,9 +65,9 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             _service.EnqueueBreakBomb(result, center, new List<PlayerModel>(), null, 0.3f);
 
-            // 距離 1 のタイルはまだ Normal
-            Assert.AreEqual(TileState.Normal, _stage.GetTileState(new GridPos(5, 6)));
-            Assert.AreEqual(TileState.Normal, _stage.GetTileState(new GridPos(6, 5)));
+            // 距離 1 のタイルはまだ Intact
+            Assert.AreEqual(TileCondition.Intact, _stage.GetTileCondition(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.Intact, _stage.GetTileCondition(new GridPos(6, 5)));
         }
 
         [Test]
@@ -81,10 +81,10 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _service.EnqueueBreakBomb(result, center, new List<PlayerModel>(), null, 0.3f);
             _service.Tick(0.3f);
 
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(5, 6)));
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(6, 5)));
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(5, 4)));
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(4, 5)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(6, 5)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(5, 4)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(4, 5)));
         }
 
         [Test]
@@ -98,12 +98,12 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _service.EnqueueFireBomb(result, center, new List<PlayerModel>(), null, 0.15f);
 
             // 中央は即座
-            Assert.AreEqual(TileState.OnFire, _stage.GetTileState(center));
+            Assert.AreEqual(TileCondition.OnFire, _stage.GetTileCondition(center));
             // 距離 1 はまだ
-            Assert.AreEqual(TileState.Normal, _stage.GetTileState(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.Intact, _stage.GetTileCondition(new GridPos(5, 6)));
 
             _service.Tick(0.15f);
-            Assert.AreEqual(TileState.OnFire, _stage.GetTileState(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.OnFire, _stage.GetTileCondition(new GridPos(5, 6)));
         }
 
         [Test]
@@ -119,13 +119,13 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             // 距離 2 のタイル
             var dist2Pos = new GridPos(5, 7);
-            Assert.AreEqual(TileState.Normal, _stage.GetTileState(dist2Pos));
+            Assert.AreEqual(TileCondition.Intact, _stage.GetTileCondition(dist2Pos));
 
             _service.Tick(0.3f); // 距離1まで適用
-            Assert.AreEqual(TileState.Normal, _stage.GetTileState(dist2Pos));
+            Assert.AreEqual(TileCondition.Intact, _stage.GetTileCondition(dist2Pos));
 
             _service.Tick(0.3f); // 距離2まで適用
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(dist2Pos));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(dist2Pos));
         }
 
         [Test]
@@ -156,14 +156,14 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             // 0.15s 後: 炎は距離 1 に到達
             _service.Tick(0.15f);
-            Assert.AreEqual(TileState.OnFire, _stage.GetTileState(new GridPos(5, 6)));
+            Assert.AreEqual(TileCondition.OnFire, _stage.GetTileCondition(new GridPos(5, 6)));
 
             // 全炎クリア
-            _stage.SetTileState(center, TileState.Normal);
-            _stage.SetTileState(new GridPos(5, 6), TileState.Normal);
-            _stage.SetTileState(new GridPos(6, 5), TileState.Normal);
-            _stage.SetTileState(new GridPos(5, 4), TileState.Normal);
-            _stage.SetTileState(new GridPos(4, 5), TileState.Normal);
+            _stage.SetTileCondition(center, TileCondition.Intact);
+            _stage.SetTileCondition(new GridPos(5, 6), TileCondition.Intact);
+            _stage.SetTileCondition(new GridPos(6, 5), TileCondition.Intact);
+            _stage.SetTileCondition(new GridPos(5, 4), TileCondition.Intact);
+            _stage.SetTileCondition(new GridPos(4, 5), TileCondition.Intact);
 
             // ブレークボム (0.3s)
             var breakResolver = new BreakBombResolver(_areaResolver);
@@ -173,11 +173,11 @@ namespace FloorBreaker.Tests.EditMode.Bombs
 
             // 0.15s 後: ブレークはまだ距離 1 に未到達
             _service.Tick(0.15f);
-            Assert.AreEqual(TileState.Normal, _stage.GetTileState(new GridPos(6, 5)));
+            Assert.AreEqual(TileCondition.Intact, _stage.GetTileCondition(new GridPos(6, 5)));
 
             // さらに 0.15s (合計 0.3s): ブレークも到達
             _service.Tick(0.15f);
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(new GridPos(6, 5)));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(new GridPos(6, 5)));
         }
         /// <summary>
         /// ブレークボム A の後に B が同じタイルに重なる場合、
@@ -202,7 +202,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             // A の距離1 を適用 (t=0.3)
             _service.Tick(0.3f);
             _timerService.Tick(0.3f);
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(overlap));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(overlap));
 
             // 1秒経過 (t=1.3) — A のタイマー残り = 3.0 - 1.0 = 2.0
             _service.Tick(1.0f);
@@ -215,7 +215,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             // B の距離1 を適用 (t=1.6) — overlap に StartCollapseTimer 上書き
             _service.Tick(0.3f);
             _timerService.Tick(0.3f);
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(overlap));
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(overlap));
 
             // A のタイマーだけなら t=0.3+3.0=3.3 で Collapsed になるはず
             // B の上書きなら t=1.6+3.0=4.6 まで Collapsing が続くはず
@@ -225,9 +225,8 @@ namespace FloorBreaker.Tests.EditMode.Bombs
             _timerService.Tick(1.7f);
 
             // B の上書きが効いていれば、まだ Collapsing のはず
-            Assert.AreEqual(TileState.Collapsing, _stage.GetTileState(overlap),
+            Assert.AreEqual(TileCondition.Collapsing, _stage.GetTileCondition(overlap),
                 "タイマー上書きが効いていれば B の 3 秒が経過するまで Collapsing が続く");
         }
     }
 }
-

@@ -13,7 +13,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
         {
             var model = new StageModel(TileCoordRange.FromSize(10));
             var from = new GridPos(5, 5);
-            model.SetTileState(from, TileState.Collapsing);
+            model.SetTileCondition(from, TileCondition.Collapsing);
 
             var svc = new SafeTileSearchService();
             var result = svc.FindSafeTile(model, from, new HashSet<GridPos>());
@@ -27,11 +27,11 @@ namespace FloorBreaker.Tests.EditMode.Stage
         {
             var model = new StageModel(TileCoordRange.FromSize(10));
             var from = new GridPos(5, 5);
-            model.SetTileState(from, TileState.Collapsing);
+            model.SetTileCondition(from, TileCondition.Collapsing);
 
             // 周囲4方向を壁にする
             foreach (var n in from.Neighbors4())
-                model.SetTileState(n, TileState.Wall);
+                model.SetTileData(n, new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
 
             var svc = new SafeTileSearchService();
             var result = svc.FindSafeTile(model, from, new HashSet<GridPos>());
@@ -48,7 +48,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
             var model = new StageModel(TileCoordRange.FromSize(3));
             // 全タイルを壁にする
             foreach (var pos in TileCoordRange.FromSize(3).GetAllPositions())
-                model.SetTileState(pos, TileState.Wall);
+                model.SetTileData(pos, new TileData { Type = TileType.Wall, Condition = TileCondition.Intact, WarpPairId = -1 });
 
             var svc = new SafeTileSearchService();
             var result = svc.FindSafeTile(model, new GridPos(1, 1), new HashSet<GridPos>());
@@ -61,7 +61,7 @@ namespace FloorBreaker.Tests.EditMode.Stage
         {
             var model = new StageModel(TileCoordRange.FromSize(5));
             var from = new GridPos(2, 2);
-            model.SetTileState(from, TileState.Collapsing);
+            model.SetTileCondition(from, TileCondition.Collapsing);
 
             // 全隣接を occupied にする
             var occupied = new HashSet<GridPos>(from.Neighbors4());

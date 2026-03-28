@@ -45,7 +45,7 @@ namespace FloorBreaker.Stage.Presentation
 
         private void HandleTileChanged(TileChangedEvent evt)
         {
-            if (evt.NewState != TileState.PermanentlyDestroyed) return;
+            if (evt.NewCondition != TileCondition.PermanentlyDestroyed) return;
 
             int currentFrame = Time.frameCount;
 
