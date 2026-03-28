@@ -61,6 +61,16 @@ namespace FloorBreaker.Stage.Presentation
             _active[pos] = go;
         }
 
+        /// <summary>
+        /// アクティブな炎 VFX のスケールを更新する（残り時間に応じた減衰表現）。
+        /// </summary>
+        public void SetScale(GridPos pos, float scale)
+        {
+            if (!_active.TryGetValue(pos, out var go)) return;
+            float s = scale * VfxScale.x;
+            go.transform.localScale = new Vector3(s, s, s);
+        }
+
         public void DespawnAt(GridPos pos)
         {
             if (!_active.TryGetValue(pos, out var go)) return;

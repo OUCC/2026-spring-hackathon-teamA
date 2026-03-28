@@ -50,6 +50,7 @@ namespace FloorBreaker.Bootstrap
         private readonly ICameraShakeService _cameraShake;
         private readonly ImpactFreezeService _impactFreeze;
         private readonly ISceneTransitionService _sceneTransition;
+        private readonly TileTimerService _tileTimerService;
         private readonly MatchPresenters _presenters;
 
         public PresentationInitializer(
@@ -77,6 +78,7 @@ namespace FloorBreaker.Bootstrap
             ICameraShakeService cameraShake,
             ImpactFreezeService impactFreeze,
             ISceneTransitionService sceneTransition,
+            TileTimerService tileTimerService,
             MatchPresenters presenters)
         {
             _stage = stage;
@@ -103,6 +105,7 @@ namespace FloorBreaker.Bootstrap
             _cameraShake = cameraShake;
             _impactFreeze = impactFreeze;
             _sceneTransition = sceneTransition;
+            _tileTimerService = tileTimerService;
             _presenters = presenters;
         }
 
@@ -128,6 +131,7 @@ namespace FloorBreaker.Bootstrap
             // 3. StagePresenter 生成
             var stagePresenter = new StagePresenter(
                 _stage, tileViews, _tileAnimService, fireVfxPool, stageConfig, _audio);
+            stagePresenter.SetTileTimerService(_tileTimerService);
             _presenters.Stage = stagePresenter;
 
             // 4. StageShrinkAnimator 生成
@@ -136,6 +140,10 @@ namespace FloorBreaker.Bootstrap
                 _balance.StageShrinkAnimDuration, _cameraShake, _audio);
             stagePresenter.SetShrinkAnimator(shrinkAnimator);
             _presenters.ShrinkAnimator = shrinkAnimator;
+
+            // 4b. ShrinkWarningPresenter 生成
+            _presenters.ShrinkWarning = new ShrinkWarningPresenter(
+                _clock, _stage.Bounds, tileViews, _tileAnimService, stageConfig);
 
             // 5. PlayerView + PlayerPresenter 生成
             var playerConfig = _playerViewFactory.Config;
