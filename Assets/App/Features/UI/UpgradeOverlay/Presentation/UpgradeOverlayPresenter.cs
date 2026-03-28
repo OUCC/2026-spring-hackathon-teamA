@@ -159,6 +159,12 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
                 container.Add(card.Root);
                 cardElements.Add(card);
             }
+
+            // カード生成後に初期ハイライトを適用（index 0 = 左カード）
+            if (cardElements.Count > 0)
+            {
+                UpdateSelection(cardElements, 0, true);
+            }
         }
 
         private static void UpdateSelection(List<UpgradeCardElement> cards, int selectedIndex, bool isCardRow)
