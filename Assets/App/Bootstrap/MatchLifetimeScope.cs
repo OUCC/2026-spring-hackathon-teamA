@@ -98,6 +98,7 @@ namespace FloorBreaker.Bootstrap
                     0.1f,           // chainDelayPerStep: 0.1秒/マス
                     b.FireBombDuration);
             }, Lifetime.Scoped)
+                .AsSelf()
                 .As<ITileIgnitionHandler>();
         }
 
