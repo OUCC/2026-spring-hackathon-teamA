@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="UnityEngine.UIElements"
+      xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
+
+    <VisualElement class="result-pane">
+        <Label name="ResultLabel" class="result-pane__result" text="" />
+        <VisualElement class="result-pane__buttons">
+            <Button name="RematchButton" class="result-btn" text="もう一度" />
+            <Button name="SetupButton" class="result-btn result-btn--secondary" text="設定に戻る" />
+            <Button name="TitleButton" class="result-btn result-btn--secondary" text="タイトルへ" />
+        </VisualElement>
+    </VisualElement>
+
+</UXML>

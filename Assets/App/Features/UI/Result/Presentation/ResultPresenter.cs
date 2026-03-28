@@ -9,7 +9,7 @@ using FloorBreaker.MatchFlow.Application;
 namespace FloorBreaker.UI.Result.Presentation
 {
     /// <summary>
-    /// リザルト画面を駆動する Presenter。
+    /// リザルト画面を駆動する Presenter。N-player 対応。
     /// </summary>
     public sealed class ResultPresenter : IDisposable
     {
@@ -21,7 +21,8 @@ namespace FloorBreaker.UI.Result.Presentation
             MatchClock clock,
             MatchEndUseCase matchEnd,
             int playerCount,
-            ISceneTransitionService sceneTransition)
+            ISceneTransitionService sceneTransition,
+            MatchModeConfig modeConfig)
         {
             _phaseSub = clock.CurrentPhase.Subscribe(phase =>
             {
@@ -37,10 +38,16 @@ namespace FloorBreaker.UI.Result.Presentation
                 view.SetResult(winner, playerCount);
             });
 
-            view.RematchButton.clicked += () => sceneTransition.LoadMatchAsync().Forget();
-            view.TitleButton.clicked += () => sceneTransition.LoadTitleAsync().Forget();
-            view.RematchButton2.clicked += () => sceneTransition.LoadMatchAsync().Forget();
-            view.TitleButton2.clicked += () => sceneTransition.LoadTitleAsync().Forget();
+            for (int i = 0; i < view.PaneCount; i++)
+            {
+                view.GetRematchButton(i).clicked += () => sceneTransition.LoadMatchAsync().Forget();
+                view.GetTitleButton(i).clicked += () => sceneTransition.LoadTitleAsync().Forget();
+                view.GetSetupButton(i).clicked += () =>
+                {
+                    modeConfig.StartInSetupMode = true;
+                    sceneTransition.LoadTitleAsync().Forget();
+                };
+            }
         }
 
         public void Dispose()

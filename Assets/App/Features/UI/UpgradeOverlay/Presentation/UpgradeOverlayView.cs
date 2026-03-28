@@ -1,75 +1,45 @@
-using System;
 using UnityEngine.UIElements;
 
 namespace FloorBreaker.UI.UpgradeOverlay.Presentation
 {
     /// <summary>
     /// 強化オーバーレイの VisualElement ラッパー。
-    /// 各プレイヤーペインが自己完結型。
-    /// For now: pane[0]=Left, pane[1]=Right. Max 2 visible panes from UXML.
+    /// N-player 対応: 動的生成されたペイン配列を受け取る。
     /// </summary>
     public sealed class UpgradeOverlayView
     {
         private readonly VisualElement _overlayRoot;
+        private readonly VisualElement[] _panes;
         private readonly Label[] _countdowns;
         private readonly VisualElement[] _cards;
         private readonly Label[] _statuses;
-        private readonly VisualElement[] _panes;
         private readonly VisualElement[] _actions;
         private readonly Button[] _rerollBtns;
         private readonly Button[] _skipBtns;
 
-        /// <summary>Number of panes available in the UXML (currently 2).</summary>
         public int PaneCount => _panes.Length;
 
-        // Backward-compatible properties
-        public VisualElement LeftCards => _cards[0];
-        public VisualElement RightCards => _cards.Length > 1 ? _cards[1] : null;
-        public Button LeftRerollBtn => _rerollBtns[0];
-        public Button RightRerollBtn => _rerollBtns.Length > 1 ? _rerollBtns[1] : null;
-        public Button LeftSkipBtn => _skipBtns[0];
-        public Button RightSkipBtn => _skipBtns.Length > 1 ? _skipBtns[1] : null;
-
-        public UpgradeOverlayView(VisualElement overlayRoot)
+        public UpgradeOverlayView(VisualElement overlayRoot, VisualElement[] panes)
         {
             _overlayRoot = overlayRoot;
+            _panes = panes;
+            int n = panes.Length;
+            _countdowns = new Label[n];
+            _cards = new VisualElement[n];
+            _statuses = new Label[n];
+            _actions = new VisualElement[n];
+            _rerollBtns = new Button[n];
+            _skipBtns = new Button[n];
 
-            // Left = index 0, Right = index 1
-            _panes = new[]
+            for (int i = 0; i < n; i++)
             {
-                overlayRoot.Q("LeftUpgradePane"),
-                overlayRoot.Q("RightUpgradePane")
-            };
-            _countdowns = new[]
-            {
-                overlayRoot.Q<Label>("LeftCountdown"),
-                overlayRoot.Q<Label>("RightCountdown")
-            };
-            _cards = new[]
-            {
-                overlayRoot.Q("LeftCards"),
-                overlayRoot.Q("RightCards")
-            };
-            _statuses = new[]
-            {
-                overlayRoot.Q<Label>("LeftStatus"),
-                overlayRoot.Q<Label>("RightStatus")
-            };
-            _actions = new[]
-            {
-                overlayRoot.Q("LeftActions"),
-                overlayRoot.Q("RightActions")
-            };
-            _rerollBtns = new[]
-            {
-                overlayRoot.Q<Button>("LeftRerollBtn"),
-                overlayRoot.Q<Button>("RightRerollBtn")
-            };
-            _skipBtns = new[]
-            {
-                overlayRoot.Q<Button>("LeftSkipBtn"),
-                overlayRoot.Q<Button>("RightSkipBtn")
-            };
+                _countdowns[i] = panes[i].Q<Label>("Countdown");
+                _cards[i] = panes[i].Q("Cards");
+                _statuses[i] = panes[i].Q<Label>("Status");
+                _actions[i] = panes[i].Q("Actions");
+                _rerollBtns[i] = panes[i].Q<Button>("RerollBtn");
+                _skipBtns[i] = panes[i].Q<Button>("SkipBtn");
+            }
         }
 
         public void Show()
@@ -92,14 +62,14 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         {
             string text = seconds.ToString();
             foreach (var cd in _countdowns)
-                cd.text = text;
+                if (cd != null) cd.text = text;
         }
 
-        /// <summary>カウントダウンをパルスさせる (3-2-1 演出)。</summary>
         public void PulseCountdown()
         {
             foreach (var cd in _countdowns)
             {
+                if (cd == null) continue;
                 cd.AddToClassList("upgrade-pane__countdown--pulse");
                 cd.schedule.Execute(() =>
                     cd.RemoveFromClassList("upgrade-pane__countdown--pulse")).StartingIn(50);
@@ -109,9 +79,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         // --- Indexed accessors ---
 
         public VisualElement GetCards(int index) => _cards[index];
-
         public void SetStatus(int index, string text) => _statuses[index].text = text;
-
         public void SetDone(int index, bool done) => _panes[index].EnableInClassList("upgrade-pane--done", done);
 
         public void SetRerollHighlight(int index, bool on)
@@ -121,21 +89,6 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             => _skipBtns[index]?.EnableInClassList("upgrade-pane__done-btn--selected", on);
 
         public Button GetRerollBtn(int index) => _rerollBtns[index];
-
         public Button GetSkipBtn(int index) => _skipBtns[index];
-
-        // --- Legacy Left/Right methods (backward compat) ---
-
-        public void SetLeftStatus(string text) => SetStatus(0, text);
-        public void SetRightStatus(string text) => SetStatus(1, text);
-
-        public void SetLeftDone(bool done) => SetDone(0, done);
-        public void SetRightDone(bool done) => SetDone(1, done);
-
-        public void SetLeftRerollHighlight(bool on) => SetRerollHighlight(0, on);
-        public void SetRightRerollHighlight(bool on) => SetRerollHighlight(1, on);
-
-        public void SetLeftDoneHighlight(bool on) => SetDoneHighlight(0, on);
-        public void SetRightDoneHighlight(bool on) => SetDoneHighlight(1, on);
     }
 }

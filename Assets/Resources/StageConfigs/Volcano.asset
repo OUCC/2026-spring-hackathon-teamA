@@ -1,0 +1,152 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67428d377bac16b47838141348a24974, type: 3}
+  m_Name: Volcano
+  m_EditorClassIdentifier: App.ScriptableObjects::FloorBreaker.ScriptableObjects.Configs.StageConfig
+  displayName: "\u30F4\u30A9\u30EB\u30B1\u30FC\u30CE"
+  description: "\u6C38\u4E45\u708E\u306E\u74B0\u3068\u30EF\u30FC\u30D7\u3067\u6DF7\u6C8C\u3068\u3057\u305F\u6226\u5834\u3002"
+  thumbnail: {fileID: -3959723422591512075, guid: 8f3d8fa743dc2994b8c6c4ba0049f2d2, type: 3}
+  width: 30
+  height: 30
+  wallSeedPercent: 0.06
+  wallGrowthChance: 0.4
+  wallTargetPercent: 0.15
+  spawnProtectionRadius: 2
+  gasVeinCount: 0
+  gasVeinMinLength: 3
+  gasVeinMaxLength: 8
+  presetTiles:
+  - x: 13
+    y: 13
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 13
+    y: 14
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 13
+    y: 15
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 13
+    y: 16
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 13
+    y: 17
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 14
+    y: 13
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 14
+    y: 14
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 14
+    y: 15
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 14
+    y: 16
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 14
+    y: 17
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 15
+    y: 13
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 15
+    y: 14
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 15
+    y: 15
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 15
+    y: 16
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 15
+    y: 17
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 16
+    y: 13
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 16
+    y: 14
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 16
+    y: 15
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 16
+    y: 16
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 16
+    y: 17
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 17
+    y: 13
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 17
+    y: 14
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 17
+    y: 15
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 17
+    y: 16
+    type: 0
+    condition: 2
+    warpPairId: 0
+  - x: 17
+    y: 17
+    type: 0
+    condition: 2
+    warpPairId: 0

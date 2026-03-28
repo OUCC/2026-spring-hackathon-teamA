@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67428d377bac16b47838141348a24974, type: 3}
+  m_Name: Arena
+  m_EditorClassIdentifier: App.ScriptableObjects::FloorBreaker.ScriptableObjects.Configs.StageConfig
+  displayName: "\u30A2\u30EA\u30FC\u30CA"
+  description: "\u30B3\u30F3\u30D1\u30AF\u30C8\u306A\u6226\u5834\u3002\u58C1\u304C\u5C11\u306A\u304F\u63A5\u8FD1\u6226\u5411\u304D\u3002"
+  thumbnail: {fileID: 61365224720766220, guid: 3e9eead41b7253741ab0cf00c8bcb68c, type: 3}
+  width: 25
+  height: 25
+  wallSeedPercent: 0.04
+  wallGrowthChance: 0.3
+  wallTargetPercent: 0.1
+  spawnProtectionRadius: 2
+  gasVeinCount: 0
+  gasVeinMinLength: 3
+  gasVeinMaxLength: 8
+  presetTiles: []

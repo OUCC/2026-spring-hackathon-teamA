@@ -53,6 +53,7 @@ namespace FloorBreaker.Bootstrap
         private readonly ImpactFreezeService _impactFreeze;
         private readonly ISceneTransitionService _sceneTransition;
         private readonly TileTimerService _tileTimerService;
+        private readonly MatchModeConfig _modeConfig;
         private readonly MatchPresenters _presenters;
 
         public PresentationInitializer(
@@ -81,6 +82,7 @@ namespace FloorBreaker.Bootstrap
             ImpactFreezeService impactFreeze,
             ISceneTransitionService sceneTransition,
             TileTimerService tileTimerService,
+            MatchModeConfig modeConfig,
             MatchPresenters presenters)
         {
             _stage = stage;
@@ -108,6 +110,7 @@ namespace FloorBreaker.Bootstrap
             _impactFreeze = impactFreeze;
             _sceneTransition = sceneTransition;
             _tileTimerService = tileTimerService;
+            _modeConfig = modeConfig;
             _presenters = presenters;
         }
 
@@ -178,11 +181,13 @@ namespace FloorBreaker.Bootstrap
             // 8. ImpactFreezeService にフラッシュオーバーレイを設定
             _impactFreeze?.SetFlashOverlay(_matchUIDocument.ImpactFlashOverlay);
 
-            // 9. HUD Presenter 生成 (N-player loop, max 2 visible panes from UXML)
-            var hudRoots = new[] { _matchUIDocument.LeftHudRoot, _matchUIDocument.RightHudRoot };
-            int hudCount = Math.Min(_players.PlayerCount, hudRoots.Length);
-            var huds = new PlayerHudPresenter[hudCount];
-            for (int i = 0; i < hudCount; i++)
+            // 8b. N-player ペイン動的生成
+            _matchUIDocument.CreatePanes(_players.PlayerCount);
+
+            // 9. HUD Presenter 生成 (N-player)
+            var hudRoots = _matchUIDocument.HudRoots;
+            var huds = new PlayerHudPresenter[_players.PlayerCount];
+            for (int i = 0; i < _players.PlayerCount; i++)
             {
                 var hudView = new PlayerHudView(hudRoots[i]);
                 huds[i] = new PlayerHudPresenter(
@@ -191,8 +196,9 @@ namespace FloorBreaker.Bootstrap
             }
             _presenters.Huds = huds;
 
-            // 10. UpgradeOverlay Presenter 生成
-            var overlayView = new UpgradeOverlayView(_matchUIDocument.UpgradeOverlayRoot);
+            // 10. UpgradeOverlay Presenter 生成 (N-player)
+            var overlayView = new UpgradeOverlayView(
+                _matchUIDocument.UpgradeOverlayRoot, _matchUIDocument.UpgradePanes);
             var allStats = new PlayerStats[_players.PlayerCount];
             for (int i = 0; i < _players.PlayerCount; i++)
                 allStats[i] = _players.All[i].Stats;
@@ -200,9 +206,10 @@ namespace FloorBreaker.Bootstrap
                 overlayView, _clock, _upgradePhase, _selectionState,
                 allStats, _matchUIDocument.UpgradeCardTemplate, _audio);
 
-            // 11. Result Presenter 生成
-            var resultView = new ResultView(_matchUIDocument.ResultRoot);
-            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition);
+            // 11. Result Presenter 生成 (N-player)
+            var resultView = new ResultView(
+                _matchUIDocument.ResultRoot, _matchUIDocument.ResultPanes);
+            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition, _modeConfig);
         }
     }
 }

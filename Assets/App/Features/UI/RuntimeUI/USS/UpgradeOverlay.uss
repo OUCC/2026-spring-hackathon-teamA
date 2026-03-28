@@ -147,18 +147,11 @@
     min-height: 28px;
 }
 
-/* --- P1/P2 アクセント --- */
-.upgrade-pane--p1 {
-    border-right-width: 0;
-}
-
-.upgrade-pane--p1 > .upgrade-pane__title {
-    color: var(--color-p1);
-}
-
-.upgrade-pane--p2 > .upgrade-pane__title {
-    color: var(--color-p2);
-}
+/* --- P1-P4 アクセント --- */
+.upgrade-pane--p1 > .upgrade-pane__title { color: var(--color-p1); }
+.upgrade-pane--p2 > .upgrade-pane__title { color: var(--color-p2); }
+.upgrade-pane--p3 > .upgrade-pane__title { color: var(--color-p3); }
+.upgrade-pane--p4 > .upgrade-pane__title { color: var(--color-p4); }
 
 /* --- ペイン完了状態 --- */
 .upgrade-pane--done {

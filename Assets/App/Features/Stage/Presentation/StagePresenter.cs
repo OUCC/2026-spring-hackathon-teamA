@@ -36,6 +36,23 @@ namespace FloorBreaker.Stage.Presentation
             _audio = audio;
 
             _subscription = model.TileChanged.Subscribe(HandleTileChanged);
+
+            // 初期状態で既に EternalFire/OnFire のタイルに VFX をスポーンする
+            // (プリセットタイル配置は Presentation 初期化前に行われるため)
+            foreach (var (pos, view) in views)
+            {
+                var data = model.GetTileData(pos);
+                if (data.Condition == TileCondition.EternalFire)
+                {
+                    animService.PlayFirePulse(view);
+                    fireVfxPool.SpawnAt(pos, view.BasePosition, config.EternalFireTint);
+                }
+                else if (data.Condition == TileCondition.OnFire)
+                {
+                    animService.PlayFirePulse(view);
+                    fireVfxPool.SpawnAt(pos, view.BasePosition);
+                }
+            }
         }
 
         public void SetShrinkAnimator(StageShrinkAnimator shrinkAnimator)
@@ -153,7 +170,7 @@ namespace FloorBreaker.Stage.Presentation
                 case TileCondition.EternalFire:
                     view.ApplyState(evt.NewData, _config);
                     _animService.PlayFirePulse(view);
-                    _fireVfxPool.SpawnAt(pos, view.BasePosition);
+                    _fireVfxPool.SpawnAt(pos, view.BasePosition, _config.EternalFireTint);
                     _audio.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
