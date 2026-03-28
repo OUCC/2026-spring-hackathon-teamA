@@ -272,17 +272,21 @@ namespace FloorBreaker.Bootstrap
                 Label(string.Join(", ", acquired));
             }
 
-            // --- Apply Upgrade ---
-            Section("APPLY UPGRADE");
-            GUILayout.BeginHorizontal();
-            upgradeIndex = GUILayout.SelectionGrid(
-                upgradeIndex, _upgradeNames, 3, GUILayout.MaxWidth(340));
-            GUILayout.EndHorizontal();
-            if (GUILayout.Button("Apply Selected"))
+            // --- Apply Upgrade (ワンクリック) ---
+            Section("APPLY UPGRADE (click to apply)");
+            for (int row = 0; row < _upgradeValues.Length; row += 3)
             {
-                var upgradeId = _upgradeValues[upgradeIndex];
-                Debug.Log($"[BalanceDebug] Applying {upgradeId} to P{player.Id.Index + 1}");
-                _upgradeApply.Apply(upgradeId, player);
+                GUILayout.BeginHorizontal();
+                for (int col = 0; col < 3 && row + col < _upgradeValues.Length; col++)
+                {
+                    int idx = row + col;
+                    if (GUILayout.Button(_upgradeNames[idx], GUILayout.MaxWidth(110)))
+                    {
+                        Debug.Log($"[BalanceDebug] Applying {_upgradeValues[idx]} to P{player.Id.Index + 1}");
+                        _upgradeApply.Apply(_upgradeValues[idx], player);
+                    }
+                }
+                GUILayout.EndHorizontal();
             }
         }
 
@@ -295,9 +299,27 @@ namespace FloorBreaker.Bootstrap
             Section("QUICK UPGRADES");
             for (int i = 0; i < _players.PlayerCount; i++)
             {
+                var p = _players.All[i];
+                Label($"── P{i + 1} ──");
                 GUILayout.BeginHorizontal();
-                if (Btn($"All Fire (P{i + 1})")) ApplyAllCategory(_players.All[i], "Fire");
-                if (Btn($"All Break (P{i + 1})")) ApplyAllCategory(_players.All[i], "Break");
+                if (Btn("All Fire")) ApplyAllCategory(p, "Fire");
+                if (Btn("All Break")) ApplyAllCategory(p, "Break");
+                if (Btn("All Abilities"))
+                {
+                    _upgradeApply.Apply(UpgradeId.Dash, p);
+                    _upgradeApply.Apply(UpgradeId.DualShot, p);
+                    _upgradeApply.Apply(UpgradeId.FireShield, p);
+                    _upgradeApply.Apply(UpgradeId.Levitation, p);
+                }
+                if (Btn("Max All"))
+                {
+                    ApplyAllCategory(p, "Fire");
+                    ApplyAllCategory(p, "Break");
+                    _upgradeApply.Apply(UpgradeId.Dash, p);
+                    _upgradeApply.Apply(UpgradeId.DualShot, p);
+                    _upgradeApply.Apply(UpgradeId.FireShield, p);
+                    _upgradeApply.Apply(UpgradeId.Levitation, p);
+                }
                 GUILayout.EndHorizontal();
             }
 

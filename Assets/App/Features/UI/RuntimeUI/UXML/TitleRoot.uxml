@@ -70,13 +70,17 @@
                     <VisualElement name="StageList" class="setup-stage__list">
                         <!-- C# で StageConfig SO からカードを動的生成 -->
                     </VisualElement>
-                    <!-- 右: 選択中ステージのプレビュー -->
+                    <!-- 中央: 選択中ステージのプレビュー -->
                     <VisualElement name="StagePreview" class="stage-preview">
                         <VisualElement name="StagePreviewThumb" class="stage-preview__thumb" />
                         <Label name="StagePreviewName" class="stage-preview__name" text="" />
                         <Label name="StagePreviewSize" class="stage-preview__size" text="" />
                         <Label name="StagePreviewDesc" class="stage-preview__desc" text="" />
                         <VisualElement name="StagePreviewGimmicks" class="stage-preview__gimmicks" />
+                    </VisualElement>
+                    <!-- 右: ギミック詳細 + ループプレビュー -->
+                    <VisualElement name="GimmickDetails" class="gimmick-details">
+                        <!-- C# で動的生成 -->
                     </VisualElement>
                 </VisualElement>
             </VisualElement>

@@ -128,6 +128,14 @@ namespace FloorBreaker.MatchFlow.Application
             _bombEffectSpreadService?.Tick(deltaTime);
             _gasIgnitionService?.Tick(deltaTime);
 
+            // ボム爆発後の安全位置検証: 崩落タイルに取り残されたプレイヤーを退避
+            {
+                var occupied = new HashSet<GridPos>();
+                foreach (var p in _players) occupied.Add(p.CurrentPosition);
+                foreach (var player in _players)
+                    _playerDamageService.RelocateIfUnsafe(player, occupied);
+            }
+
             // HP 0 チェック
             var winner = _matchEndUseCase.CheckEnd(_players);
             if (winner.HasValue)

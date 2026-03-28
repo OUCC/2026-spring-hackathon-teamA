@@ -24,6 +24,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         private readonly VisualTreeAsset _cardTemplate;
         private readonly IReadOnlyList<PlayerStats> _playerStats;
         private readonly IAudioService _audio;
+        private readonly int[] _humanIndices;
 
         /// <summary>Card elements per player pane index.</summary>
         private readonly List<UpgradeCardElement>[] _cardElements;
@@ -40,7 +41,8 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             UpgradeSelectionState selectionState,
             IReadOnlyList<PlayerStats> playerStats,
             VisualTreeAsset cardTemplate,
-            IAudioService audio = null)
+            IAudioService audio = null,
+            int[] humanIndices = null)
         {
             _view = view;
             _upgradePhase = upgradePhase;
@@ -48,6 +50,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             _cardTemplate = cardTemplate;
             _playerStats = playerStats;
             _audio = audio;
+            _humanIndices = humanIndices;
 
             _visiblePaneCount = Math.Min(playerStats.Count, view.PaneCount);
 
@@ -65,11 +68,12 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
                     _view.Hide();
             }));
 
-            // Per-player subscriptions
+            // Per-player subscriptions (pane → player mapping via humanIndices)
             for (int i = 0; i < _visiblePaneCount; i++)
             {
                 int paneIndex = i; // capture for closures
-                var playerId = PlayerId.FromIndex(i);
+                int playerIndex = _humanIndices != null ? _humanIndices[i] : i;
+                var playerId = PlayerId.FromIndex(playerIndex);
                 var draft = upgradePhase.GetDraft(playerId);
                 var stats = playerStats[i];
 

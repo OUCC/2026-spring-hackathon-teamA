@@ -1,5 +1,34 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-29: ギミックプレビュー + バグ修正 + Human専用カメラ (PR #59)
+
+### ステージ選択UI改善
+- ギミック詳細パネル追加（右カラム、ループアニメ付き5x5ミニグリッド）
+  - ガス: 連鎖延焼アニメ / 岩盤: 静的表示 / ワープ: テレポートアニメ / 永久炎: パルス明滅
+- ステージサイズ反映修正: StageConfig の Width/Height から StageModel を生成
+- WallGenerationService も StageConfig のパラメータを使用
+
+### バグ修正
+- **ボム自爆**: BombFlightTracker.CheckEntityAt が発射者自身に衝突判定 → excludeOwner で除外
+- **ステージ縮小で場外**: SafeTileSearchService に BFS 失敗時のフォールバック（中央最寄り探索）追加
+- **崩落マス閉じ込め**: MatchPhaseScheduler.TickRunning 末尾で全プレイヤー位置検証、RelocateIfUnsafe 追加
+- **Levitation 退避スキップ**: RelocateIfUnsafe で空中浮遊プレイヤーを除外
+- **HUD 分割線ずれ**: .hud-root に flex-basis:0 + flex-shrink:1 + overflow:hidden で等幅固定
+
+### Human専用カメラ/HUD
+- CPU プレイヤーにはカメラ/HUD/強化UI/リザルトUIを生成しない
+- 1P+3CPU → 全画面、2P Human+2CPU → 左右分割
+- UpgradeOverlayPresenter / ResultPresenter に humanIndices マッピング追加
+
+### デバッグオーバーレイUX改善
+- 強化適用: SelectionGrid + Apply Selected → ワンクリックボタン方式に変更
+- Cheats タブ: All Abilities / Max All ボタン追加
+
+### HUD 強化表示改善
+- 色丸ドットを短縮テキスト付きバッジに変更（炎距/壊範/浮遊 等）
+- UpgradeIdDisplayHelper に GetShortLabel / GetBadgeClass 追加
+- upgrades-row に max-height + overflow:hidden でレイアウト安定化
+
 ## 2026-03-28: 4P対応 + ステージギミック + 演出改善 + タイトルリデザイン開始
 
 ### Phase C: 演出改善 (PR #54)

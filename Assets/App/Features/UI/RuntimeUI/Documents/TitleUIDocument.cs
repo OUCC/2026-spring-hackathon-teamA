@@ -41,6 +41,7 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         public Label StagePreviewSize { get; private set; }
         public Label StagePreviewDesc { get; private set; }
         public VisualElement StagePreviewGimmicks { get; private set; }
+        public VisualElement GimmickDetails { get; private set; }
 
         // --- SetupState: アクション ---
         public Button SetupStartButton { get; private set; }
@@ -110,6 +111,7 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             StagePreviewSize = root.Q<Label>("StagePreviewSize");
             StagePreviewDesc = root.Q<Label>("StagePreviewDesc");
             StagePreviewGimmicks = root.Q("StagePreviewGimmicks");
+            GimmickDetails = root.Q("GimmickDetails");
 
             // SetupState: アクション
             SetupStartButton = root.Q<Button>("SetupStartButton");

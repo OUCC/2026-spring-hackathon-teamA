@@ -196,32 +196,40 @@
     background-color: var(--color-break);
 }
 
-/* --- 取得済み強化アイコン列 --- */
+/* --- 取得済み強化バッジ列 --- */
 .hud__upgrades-row {
     flex-direction: row;
     align-items: center;
     flex-wrap: wrap;
+    max-height: 36px;
+    overflow: hidden;
 }
 
-.hud__upgrade-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 6px;
+.hud__upgrade-badge {
+    font-size: 9px;
+    border-radius: 3px;
+    padding: 1px 4px;
     margin: 1px;
     border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.15);
+    -unity-text-align: middle-center;
 }
 
-.hud__upgrade-dot--fire {
-    background-color: var(--color-fire);
+.hud__upgrade-badge--fire {
+    background-color: rgba(240, 128, 48, 0.3);
+    border-color: var(--color-fire);
+    color: var(--color-fire);
 }
 
-.hud__upgrade-dot--break {
-    background-color: var(--color-break);
+.hud__upgrade-badge--break {
+    background-color: rgba(48, 128, 192, 0.3);
+    border-color: var(--color-break);
+    color: var(--color-break);
 }
 
-.hud__upgrade-dot--general {
-    background-color: var(--color-general);
+.hud__upgrade-badge--general {
+    background-color: rgba(64, 160, 80, 0.3);
+    border-color: var(--color-general);
+    color: var(--color-general);
 }
 
 /* ==========================
