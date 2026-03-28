@@ -36,7 +36,8 @@ namespace FloorBreaker.UI.Title.Presentation
             // 2P 対戦
             doc.ModeButton2P?.RegisterCallback<ClickEvent>(_ =>
             {
-                modeConfig.IsCpuPlayer = false;
+                modeConfig.IsCpuSlot = new[] { false, false, false, false };
+                modeConfig.PlayerCount = 2;
                 audio?.StopBgm(0.5f);
                 sceneTransition.LoadMatchAsync().Forget();
             });
@@ -44,7 +45,8 @@ namespace FloorBreaker.UI.Title.Presentation
             // vs CPU
             doc.ModeButton1P?.RegisterCallback<ClickEvent>(_ =>
             {
-                modeConfig.IsCpuPlayer = true;
+                modeConfig.IsCpuSlot = new[] { false, true, false, false };
+                modeConfig.PlayerCount = 2;
                 audio?.StopBgm(0.5f);
                 sceneTransition.LoadMatchAsync().Forget();
             });
