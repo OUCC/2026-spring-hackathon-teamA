@@ -4,7 +4,7 @@ using FloorBreaker.Shared.Application.Interfaces;
 namespace FloorBreaker.Shared.Infrastructure.Audio
 {
     /// <summary>
-    /// 何もしない IAudioService 実装。AudioService が利用できない場合のフォールバック。
+    /// 何もしない IAudioService 実装。SE/BGM 不要なコンテキストで使用する。
     /// </summary>
     public sealed class NullAudioService : IAudioService
     {

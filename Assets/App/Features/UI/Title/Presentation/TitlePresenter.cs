@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 using FloorBreaker.Shared.Application.Interfaces;
@@ -37,7 +38,7 @@ namespace FloorBreaker.UI.Title.Presentation
             {
                 modeConfig.IsCpuPlayer = false;
                 audio?.StopBgm(0.5f);
-                sceneTransition.LoadMatch();
+                sceneTransition.LoadMatchAsync().Forget();
             });
 
             // vs CPU
@@ -45,7 +46,7 @@ namespace FloorBreaker.UI.Title.Presentation
             {
                 modeConfig.IsCpuPlayer = true;
                 audio?.StopBgm(0.5f);
-                sceneTransition.LoadMatch();
+                sceneTransition.LoadMatchAsync().Forget();
             });
 
             // 観戦モード — 無効 (Coming Soon)

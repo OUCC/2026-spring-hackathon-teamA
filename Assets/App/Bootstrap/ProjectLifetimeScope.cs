@@ -13,19 +13,15 @@ namespace FloorBreaker.Bootstrap
 {
     /// <summary>
     /// アプリケーションレベルの DI ルート。
-    /// Title シーンに配置し、DontDestroyOnLoad でシーンをまたいで生存する。
+    /// Boot シーンに配置し、シーンをまたいで生存する（Boot は常時ロード）。
     /// AudioService は子 GameObject として配置する。
     /// </summary>
     public sealed class ProjectLifetimeScope : LifetimeScope
     {
         [SerializeField] private BalanceConfig _balanceConfig;
-        [SerializeField] private int _randomSeed = 0;
-
-        protected override void Awake()
-        {
-            DontDestroyOnLoad(gameObject);
-            base.Awake();
-        }
+        [SerializeField] private int _randomSeed;
+        [Header("Debug")]
+        [SerializeField] private bool _debugMode;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -36,19 +32,23 @@ namespace FloorBreaker.Bootstrap
 
             builder.Register<UnityTimeProvider>(Lifetime.Singleton).As<ITimeProvider>();
 
-            // シーン遷移サービス
-            builder.Register<UnitySceneTransitionService>(Lifetime.Singleton)
-                .As<ISceneTransitionService>();
+            // シーン遷移サービス (ルートスコープを渡して EnqueueParent に使用)
+            builder.Register<ISceneTransitionService>(
+                _ => new UnitySceneTransitionService(this), Lifetime.Singleton);
 
             // シーン間モード選択状態
             builder.Register<MatchModeConfig>(Lifetime.Singleton);
 
-            // AudioService: 子 GameObject から取得 (DontDestroyOnLoad と一緒に生存)
+            // AudioService: 子 GameObject から取得 (Boot シーンと一緒に生存)
             var audioService = GetComponentInChildren<AudioService>();
             if (audioService != null)
             {
                 builder.RegisterInstance<IAudioService>(audioService);
             }
+
+            // Boot EntryPoint
+            builder.RegisterInstance(new BootConfig(_debugMode));
+            builder.RegisterEntryPoint<BootInitializer>();
         }
     }
 }

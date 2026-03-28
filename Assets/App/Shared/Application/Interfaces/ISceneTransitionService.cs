@@ -1,3 +1,5 @@
+using Cysharp.Threading.Tasks;
+
 namespace FloorBreaker.Shared.Application.Interfaces
 {
     /// <summary>
@@ -6,7 +8,7 @@ namespace FloorBreaker.Shared.Application.Interfaces
     /// </summary>
     public interface ISceneTransitionService
     {
-        void LoadMatch();
-        void LoadTitle();
+        UniTask LoadMatchAsync();
+        UniTask LoadTitleAsync();
     }
 }

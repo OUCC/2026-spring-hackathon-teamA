@@ -17,7 +17,8 @@
         "App.Upgrades",
         "App.MatchFlow",
         "App.Input",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

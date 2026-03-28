@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using R3;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Shared.Domain.Primitives;
@@ -35,10 +36,10 @@ namespace FloorBreaker.UI.Result.Presentation
                 view.SetResult(winner.Value == PlayerId.Player1);
             });
 
-            view.RematchButton.clicked += () => sceneTransition.LoadMatch();
-            view.TitleButton.clicked += () => sceneTransition.LoadTitle();
-            view.RematchButton2.clicked += () => sceneTransition.LoadMatch();
-            view.TitleButton2.clicked += () => sceneTransition.LoadTitle();
+            view.RematchButton.clicked += () => sceneTransition.LoadMatchAsync().Forget();
+            view.TitleButton.clicked += () => sceneTransition.LoadTitleAsync().Forget();
+            view.RematchButton2.clicked += () => sceneTransition.LoadMatchAsync().Forget();
+            view.TitleButton2.clicked += () => sceneTransition.LoadTitleAsync().Forget();
         }
 
         public void Dispose()

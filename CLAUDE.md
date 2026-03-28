@@ -139,10 +139,13 @@
 Assets/App/
   Bootstrap/
     ProjectLifetimeScope.cs
+    BootInitializer.cs
     MatchLifetimeScope.cs
     TitleLifetimeScope.cs
-    ResultLifetimeScope.cs
     Installers/
+    Debug/
+      BalanceDebugOverlay.cs
+      DebugOverlayInjector.cs
 
   Shared/
     Domain/
@@ -233,9 +236,10 @@ Assets/App/
         Presentation/
 
   Scenes/
+    Boot.unity
     Title.unity
     Match.unity
-    Result.unity
+    DebugOverlay.unity
 
   ScriptableObjects/
     Balance/
@@ -437,7 +441,10 @@ Assets/App/
 
 ### Scope 方針
 
-#### ProjectLifetimeScope
+#### ProjectLifetimeScope (Boot.unity に配置)
+
+Boot シーンは常時ロードされ、アンロードしない。
+Title / Match はアディティブロードされ、EnqueueParent で子スコープになる。
 
 置いてよいもの:
 
@@ -448,6 +455,8 @@ Assets/App/
 - 共通設定
 - アセットローダ
 - Audio 設定などのアプリ横断サービス
+- シーン遷移サービス
+- BootInitializer
 
 #### MatchLifetimeScope
 

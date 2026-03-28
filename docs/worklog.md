@@ -1,5 +1,40 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-28: Boot シーンパターン導入 + バランスデバッグオーバーレイ
+
+### 完了タスク
+- **Boot.unity 新設**: ProjectLifetimeScope + AudioService をアプリのエントリーポイントとして分離
+- **BootInitializer 新設**: `_debugMode` フラグで Title / Match+DebugOverlay を切替
+- **UnitySceneTransitionService 全面書き換え**: `LoadScene(Single)` → `EnqueueParent` + `LoadSceneAsync(Additive)` + `UnloadSceneAsync`
+- **ISceneTransitionService async 化**: `void LoadMatch()` → `UniTask LoadMatchAsync()`
+- **TitlePresenter / ResultPresenter**: 遷移呼び出しを `.Forget()` に変更
+- **ProjectLifetimeScope**: `DontDestroyOnLoad` 削除 (Boot シーンが常時ロードされるため不要)
+- **Title.unity**: ProjectLifetimeScope を削除 (Boot に移動)
+- **BalanceDebugOverlay 新設**: IMGUI 5タブ構成 (Overview/P1/P2/Cheats/Time) + F1-F10 ショートカット
+- **DebugOverlay.unity 新設**: BalanceDebugOverlay + DebugOverlayInjector のみ配置
+- **DebugOverlayInjector 新設**: `LifetimeScope.Find<MatchLifetimeScope>()` + `Container.InjectGameObject()` で同一 Scoped インスタンスを注入
+- **フォールバック全削除**: MatchLifetimeScope / TitleLifetimeScope の `Parent==null` ブロック、`_fallbackBalance` フィールド
+- **Service Locator 除去**: `Parent.Container.Resolve<MatchModeConfig>()` → ファクトリ関数内の正規解決
+- **CpuPlayer 常時登録**: 条件分岐を廃止 (resolve は MatchTickRunner でゲート)
+- **旧デバッグシーン 6個 + コントローラー 6個 削除**
+- **EditorBuildSettings 更新**: Boot[0], Title[1], Match[2], DebugOverlay[3]
+- コンパイルエラー 0 件、EditMode テスト 249 件全件グリーン
+
+### 設計判断
+- **Boot シーンパターン**: VContainer 推奨の EnqueueParent + Additive ロード。ProjectLifetimeScope が特定シーンに結合する問題を根本解決
+- **DontDestroyOnLoad 廃止**: Boot シーンが常時ロードされるため不要。シーン管理が明示的に
+- **デバッグオーバーレイの DI**: `autoInjectGameObjects` は同一シーンの LifetimeScope でのみ動作。別シーンから注入するには `Container.InjectGameObject()` (VContainer 公式 API) を使用。Scoped インスタンスを共有するために必須
+- **Match.unity はデバッグコード一切なし**: DebugOverlay.unity を分離し、デバッグ時のみアディティブロード
+- **フォールバック不要**: Boot シーンが ProjectLifetimeScope を提供するため、各シーンの `Parent==null` チェックは不要
+
+### VContainer の重要な仕様
+- **Scoped lifetime**: 子スコープで解決すると常に新インスタンスが生成される（親のインスタンスは返らない）
+- **CreateChild()**: Scoped インスタンスの共有には使えない
+- **autoInjectGameObjects**: 同一 LifetimeScope のコンテナで直接注入。Scoped 共有可能
+- **LifetimeScope.Find<T>()**: クロスシーンでの LifetimeScope 発見用公式 API
+
+---
+
 ## 2026-03-26: タイトル UI + BGM
 
 ### 完了タスク

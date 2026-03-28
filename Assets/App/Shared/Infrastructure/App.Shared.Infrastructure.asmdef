@@ -5,7 +5,8 @@
         "App.Shared.Domain",
         "App.Shared.Application",
         "R3.Unity",
-        "UniTask"
+        "UniTask",
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
