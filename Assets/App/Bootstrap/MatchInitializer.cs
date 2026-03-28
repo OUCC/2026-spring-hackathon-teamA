@@ -85,7 +85,13 @@ namespace FloorBreaker.Bootstrap
                     WarpPairId = -1,
                 });
 
-            // 1b. プリセットタイル配置 (StageConfig)
+            // 1b. ガス管ランダム生成 (StageConfig.GasVeinCount > 0 の場合)
+            if (_stageConfig != null && _stageConfig.GasVeinCount > 0)
+            {
+                GenerateGasVeins(bounds);
+            }
+
+            // 1c. プリセットタイル配置 (StageConfig)
             if (_stageConfig?.PresetTiles != null)
             {
                 foreach (var preset in _stageConfig.PresetTiles)
@@ -101,7 +107,7 @@ namespace FloorBreaker.Bootstrap
                 }
             }
 
-            // 1c. WarpService レジストリ構築
+            // 1d. WarpService レジストリ構築
             _warpService?.BuildRegistry(bounds);
 
             // 2. Presentation 初期化 (TileView → Presenter → HUD → Overlay → Result)
@@ -138,6 +144,88 @@ namespace FloorBreaker.Bootstrap
             });
 
             await UniTask.CompletedTask;
+        }
+
+        /// <summary>
+        /// ガス管をランダムウォークで生成する。各 vein は seed 地点から
+        /// ランダムな4方向に伸びる細い連結線。
+        /// </summary>
+        private void GenerateGasVeins(FloorBreaker.Shared.Domain.Grid.TileCoordRange bounds)
+        {
+            int veinCount = _stageConfig.GasVeinCount;
+            int minLen = _stageConfig.GasVeinMinLength;
+            int maxLen = _stageConfig.GasVeinMaxLength;
+            int protect = _balance.SpawnProtectionRadius;
+
+            var spawnPositions = new System.Collections.Generic.List<FloorBreaker.Shared.Domain.Grid.GridPos>();
+            foreach (var p in _players.All) spawnPositions.Add(p.CurrentPosition);
+
+            // 4方向
+            var dirs = new (int dx, int dy)[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
+
+            for (int v = 0; v < veinCount; v++)
+            {
+                // ランダム seed 位置
+                int attempts = 0;
+                int sx, sy;
+                do
+                {
+                    sx = _random.Range(bounds.MinX + 3, bounds.MaxX - 2);
+                    sy = _random.Range(bounds.MinY + 3, bounds.MaxY - 2);
+                    attempts++;
+                } while (attempts < 50 && IsNearSpawn(sx, sy, spawnPositions, protect));
+
+                if (attempts >= 50) continue;
+
+                // ランダムウォークで vein を伸ばす
+                int length = _random.Range(minLen, maxLen + 1);
+                int cx = sx, cy = sy;
+                var dir = dirs[_random.Range(0, 4)];
+
+                for (int step = 0; step < length; step++)
+                {
+                    var pos = new FloorBreaker.Shared.Domain.Grid.GridPos(cx, cy);
+                    if (!_stage.IsInBounds(pos)) break;
+
+                    var existing = _stage.GetTileData(pos);
+                    // 壁・岩盤・既にガスの場合はスキップ
+                    if (existing.Type == TileType.Wall || existing.Type == TileType.Bedrock)
+                        break;
+                    if (existing.Type != TileType.Gas && existing.Condition == TileCondition.Intact)
+                    {
+                        _stage.SetTileData(pos, new TileData
+                        {
+                            Type = TileType.Gas,
+                            Condition = TileCondition.Intact,
+                            WarpPairId = -1,
+                        });
+                    }
+
+                    // 次のステップ: 70% で同方向、30% で直角に曲がる
+                    if (_random.Range(0, 100) < 30)
+                    {
+                        // 直角方向に変更
+                        if (dir.dx != 0)
+                            dir = _random.Range(0, 2) == 0 ? (0, 1) : (0, -1);
+                        else
+                            dir = _random.Range(0, 2) == 0 ? (1, 0) : (-1, 0);
+                    }
+
+                    cx += dir.dx;
+                    cy += dir.dy;
+                }
+            }
+        }
+
+        private static bool IsNearSpawn(int x, int y,
+            System.Collections.Generic.List<FloorBreaker.Shared.Domain.Grid.GridPos> spawns, int radius)
+        {
+            foreach (var s in spawns)
+            {
+                if (System.Math.Abs(x - s.X) <= radius && System.Math.Abs(y - s.Y) <= radius)
+                    return true;
+            }
+            return false;
         }
 
         public void Dispose()

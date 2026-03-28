@@ -9,6 +9,8 @@
     --color-text-dim: #A09888;
     --color-p1: #4A90D9;
     --color-p2: #D94A4A;
+    --color-p3: #40A050;
+    --color-p4: #C060D0;
     --color-coin: #F0C040;
     --color-disabled: #606060;
 
@@ -28,7 +30,11 @@
     background-color: rgba(10, 8, 18, 0.65);
 }
 
-.title-content {
+/* ==============================================
+   STATE 1: タイトル
+   ============================================== */
+
+.title-state {
     position: absolute;
     left: 0;
     top: 0;
@@ -57,13 +63,13 @@
     margin-bottom: 32px;
 }
 
-/* --- モード選択 --- */
-.title-mode-select {
+.title-menu {
     flex-direction: column;
     align-items: center;
-    margin-bottom: 16px;
+    margin-top: 16px;
 }
 
+/* --- 共通ボタン --- */
 .title-btn {
     font-size: 22px;
     color: var(--color-text);
@@ -95,16 +101,17 @@
     background-color: rgba(240, 192, 64, 0.15);
 }
 
-.title-btn--disabled {
-    color: var(--color-disabled);
-    border-color: rgba(96, 96, 96, 0.3);
-    opacity: 0.5;
+.title-btn--settings {
+    font-size: 18px;
+    padding: 8px 32px;
+    min-width: 200px;
+    color: var(--color-text-dim);
+    border-color: rgba(160, 152, 136, 0.2);
 }
 
-.title-btn--disabled:hover {
-    scale: 1 1;
-    border-color: rgba(96, 96, 96, 0.3);
-    background-color: var(--color-bg-panel);
+.title-btn--settings:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
 }
 
 .title-btn--quit {
@@ -120,27 +127,330 @@
     border-color: var(--color-text-dim);
 }
 
-/* --- 設定ボタン行 --- */
-.title-settings-row {
+/* ==============================================
+   STATE 2: マッチセットアップ
+   ============================================== */
+
+.setup-state {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 32px 60px 24px 60px;
+}
+
+.setup-title {
+    font-size: 36px;
+    color: var(--color-coin);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 20px;
+}
+
+/* --- プレイヤースロット --- */
+
+.setup-slots {
     flex-direction: row;
     justify-content: center;
+    margin-bottom: 24px;
+}
+
+.setup-slot {
+    background-color: var(--color-bg-panel);
+    border-width: 2px;
+    border-color: rgba(240, 232, 216, 0.2);
+    border-radius: 8px;
+    padding: 16px 24px;
+    margin: 0 12px;
+    min-width: 180px;
+    min-height: 100px;
+    align-items: center;
+    justify-content: center;
+    transition-duration: 0.15s;
+}
+
+.setup-slot--active {
+    border-color: var(--color-coin);
+}
+
+.setup-slot--empty {
+    opacity: 0.6;
+    border-color: rgba(240, 232, 216, 0.1);
+}
+
+.setup-slot--empty:hover {
+    opacity: 0.8;
+    border-color: rgba(240, 232, 216, 0.3);
+}
+
+.setup-slot__label {
+    font-size: 20px;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+.setup-slot__label--p1 { color: var(--color-p1); }
+.setup-slot__label--p2 { color: var(--color-p2); }
+.setup-slot__label--p3 { color: var(--color-p3); }
+.setup-slot__label--p4 { color: var(--color-p4); }
+
+.setup-slot__type {
+    font-size: 14px;
+    color: var(--color-text-dim);
+}
+
+.setup-slot__toggle {
+    font-size: 14px;
+    color: var(--color-text);
+    background-color: rgba(40, 35, 60, 0.8);
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.3);
+    border-radius: 4px;
+    padding: 4px 16px;
+    transition-duration: 0.1s;
+}
+
+.setup-slot__toggle:hover {
+    border-color: var(--color-coin);
+    background-color: rgba(50, 45, 70, 0.9);
+}
+
+.setup-slot__content {
+    flex-direction: column;
+    align-items: center;
+}
+
+.setup-slot__add-btn {
+    font-size: 36px;
+    color: var(--color-text-dim);
+    background-color: transparent;
+    border-width: 0;
+    padding: 0;
+    transition-duration: 0.1s;
+}
+
+.setup-slot__add-btn:hover {
+    color: var(--color-coin);
+    scale: 1.15 1.15;
+}
+
+.setup-slot__remove {
+    font-size: 12px;
+    color: var(--color-text-dim);
+    background-color: transparent;
+    border-width: 0;
+    margin-top: 6px;
+    padding: 2px 8px;
+}
+
+.setup-slot__remove:hover {
+    color: #E04040;
+}
+
+/* --- ステージ選択 --- */
+
+.setup-stage {
+    background-color: rgba(20, 15, 30, 0.6);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.1);
+    padding: 16px 24px;
+    margin-bottom: 16px;
+    flex-grow: 1;
+}
+
+.setup-stage__header {
+    font-size: 16px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
     margin-bottom: 12px;
 }
 
-.title-btn--settings {
-    font-size: 18px;
-    padding: 8px 32px;
+.setup-stage__body {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.setup-stage__list {
+    flex-direction: column;
     min-width: 200px;
-    color: var(--color-text-dim);
-    border-color: rgba(160, 152, 136, 0.2);
+    max-width: 200px;
+    margin-right: 20px;
 }
 
-.title-btn--settings:hover {
+/* ステージリスト項目 */
+.stage-card {
+    background-color: var(--color-bg-panel);
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.15);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 3px;
+    flex-direction: row;
+    align-items: center;
+    transition-duration: 0.1s;
+}
+
+.stage-card:hover {
     border-color: var(--color-text);
-    color: var(--color-text);
+    background-color: rgba(40, 35, 60, 0.9);
 }
 
-/* --- 音量調整 --- */
+.stage-card--selected {
+    border-color: var(--color-coin);
+    background-color: rgba(240, 192, 64, 0.1);
+}
+
+.stage-card__thumbnail {
+    width: 32px;
+    height: 32px;
+    border-radius: 3px;
+    margin-right: 8px;
+    background-color: rgba(40, 35, 60, 0.6);
+}
+
+.stage-card__name {
+    font-size: 13px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+}
+
+.stage-card__size {
+    display: none;
+}
+
+/* ステージプレビュー (右パネル) */
+.stage-preview {
+    flex-grow: 1;
+    background-color: rgba(15, 12, 25, 0.6);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.1);
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+}
+
+.stage-preview__thumb {
+    width: 360px;
+    height: 360px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    background-color: rgba(40, 35, 60, 0.6);
+}
+
+.stage-preview__name {
+    font-size: 26px;
+    color: var(--color-coin);
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.stage-preview__size {
+    font-size: 14px;
+    color: var(--color-text-dim);
+    margin-bottom: 8px;
+}
+
+.stage-preview__desc {
+    font-size: 14px;
+    color: var(--color-text);
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+    white-space: normal;
+    max-width: 600px;
+}
+
+.stage-preview__gimmicks {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.gimmick-badge {
+    font-size: 11px;
+    color: var(--color-text);
+    background-color: rgba(40, 35, 60, 0.8);
+    border-width: 1px;
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin: 2px 4px;
+}
+
+.gimmick-badge--gas {
+    border-color: rgba(85, 50, 130, 0.6);
+    color: #8040A0;
+}
+
+.gimmick-badge--warp {
+    border-color: rgba(50, 140, 140, 0.6);
+    color: #33B0B0;
+}
+
+.gimmick-badge--eternal-fire {
+    border-color: rgba(68, 136, 255, 0.6);
+    color: #4488FF;
+}
+
+.gimmick-badge--bedrock {
+    border-color: rgba(100, 90, 110, 0.6);
+    color: #807090;
+}
+
+/* --- アクションボタン --- */
+
+.setup-actions {
+    flex-direction: row;
+    justify-content: center;
+    align-self: center;
+    margin-top: 12px;
+}
+
+.setup-actions > .title-btn {
+    margin: 0 12px;
+}
+
+/* ==============================================
+   STATE 3: 設定オーバーレイ
+   ============================================== */
+
+.settings-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-panel {
+    background-color: rgba(20, 15, 30, 0.95);
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: rgba(240, 232, 216, 0.2);
+    padding: 24px 32px;
+    min-width: 500px;
+    max-width: 700px;
+    max-height: 85%;
+    align-items: center;
+}
+
+.settings-title {
+    font-size: 28px;
+    color: var(--color-coin);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 20px;
+}
+
+/* --- 音量調整 (設定内に移動) --- */
 .title-volume {
     background-color: rgba(20, 15, 30, 0.6);
     border-radius: 8px;
@@ -184,14 +494,14 @@
     -unity-text-align: middle-right;
 }
 
-/* --- 操作説明 --- */
+/* --- 操作説明 (設定内に移動) --- */
 .title-controls {
     background-color: rgba(20, 15, 30, 0.6);
     border-radius: 8px;
     border-width: 1px;
     border-color: rgba(240, 232, 216, 0.1);
     padding: 12px 24px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     max-width: 600px;
 }
 

@@ -5,32 +5,39 @@ namespace FloorBreaker.UI.Result.Presentation
 {
     /// <summary>
     /// リザルト画面の VisualElement ラッパー。
-    /// 左右独立ペイン構造。両ペインにボタンあり。
-    /// For now: pane[0]=Left, pane[1]=Right. Max 2 visible panes from UXML.
+    /// N-player 対応: 動的生成されたペイン配列を受け取る。
     /// </summary>
     public sealed class ResultView
     {
         private readonly VisualElement _resultRoot;
         private readonly Label[] _resultLabels;
+        private readonly Button[] _rematchButtons;
+        private readonly Button[] _setupButtons;
+        private readonly Button[] _titleButtons;
 
-        public Button RematchButton { get; }
-        public Button TitleButton { get; }
-        public Button RematchButton2 { get; }
-        public Button TitleButton2 { get; }
+        public int PaneCount => _resultLabels.Length;
 
-        public ResultView(VisualElement resultRoot)
+        public ResultView(VisualElement resultRoot, VisualElement[] panes)
         {
             _resultRoot = resultRoot;
-            _resultLabels = new[]
+            int n = panes.Length;
+            _resultLabels = new Label[n];
+            _rematchButtons = new Button[n];
+            _setupButtons = new Button[n];
+            _titleButtons = new Button[n];
+
+            for (int i = 0; i < n; i++)
             {
-                resultRoot.Q<Label>("LeftResultLabel"),
-                resultRoot.Q<Label>("RightResultLabel")
-            };
-            RematchButton = resultRoot.Q<Button>("RematchButton");
-            TitleButton = resultRoot.Q<Button>("TitleButton");
-            RematchButton2 = resultRoot.Q<Button>("RematchButton2");
-            TitleButton2 = resultRoot.Q<Button>("TitleButton2");
+                _resultLabels[i] = panes[i].Q<Label>("ResultLabel");
+                _rematchButtons[i] = panes[i].Q<Button>("RematchButton");
+                _setupButtons[i] = panes[i].Q<Button>("SetupButton");
+                _titleButtons[i] = panes[i].Q<Button>("TitleButton");
+            }
         }
+
+        public Button GetRematchButton(int i) => _rematchButtons[i];
+        public Button GetSetupButton(int i) => _setupButtons[i];
+        public Button GetTitleButton(int i) => _titleButtons[i];
 
         public void Show()
         {
@@ -42,13 +49,9 @@ namespace FloorBreaker.UI.Result.Presentation
 
         public void Hide() => _resultRoot.AddToClassList("result-root--hidden");
 
-        /// <summary>
-        /// Set result display. Shows "WIN!" on the winner's pane, "LOSE" on others.
-        /// </summary>
         public void SetResult(PlayerId? winner, int playerCount)
         {
-            int visiblePanes = System.Math.Min(playerCount, _resultLabels.Length);
-            for (int i = 0; i < visiblePanes; i++)
+            for (int i = 0; i < _resultLabels.Length; i++)
             {
                 if (!winner.HasValue)
                 {
@@ -59,14 +62,6 @@ namespace FloorBreaker.UI.Result.Presentation
                     _resultLabels[i].text = winner.Value.Index == i ? "WIN!" : "LOSE";
                 }
             }
-        }
-
-        /// <summary>Legacy overload for backward compatibility.</summary>
-        public void SetResult(bool p1Won)
-        {
-            _resultLabels[0].text = p1Won ? "WIN!" : "LOSE";
-            if (_resultLabels.Length > 1)
-                _resultLabels[1].text = p1Won ? "LOSE" : "WIN!";
         }
     }
 }

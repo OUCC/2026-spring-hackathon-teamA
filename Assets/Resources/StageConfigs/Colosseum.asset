@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67428d377bac16b47838141348a24974, type: 3}
+  m_Name: Colosseum
+  m_EditorClassIdentifier: App.ScriptableObjects::FloorBreaker.ScriptableObjects.Configs.StageConfig
+  displayName: "\u30B3\u30ED\u30C3\u30BB\u30AA"
+  description: "\u5E83\u5927\u306A\u6226\u5834\u3002\u5927\u4EBA\u6570\u6226\u306B\u6700\u9069\u3002"
+  thumbnail: {fileID: -5938359367189062566, guid: 5ae0ec49b2a2b594ab5d52b2f6fe36ee, type: 3}
+  width: 50
+  height: 50
+  wallSeedPercent: 0.06
+  wallGrowthChance: 0.35
+  wallTargetPercent: 0.18
+  spawnProtectionRadius: 3
+  gasVeinCount: 6
+  gasVeinMinLength: 3
+  gasVeinMaxLength: 7
+  presetTiles: []

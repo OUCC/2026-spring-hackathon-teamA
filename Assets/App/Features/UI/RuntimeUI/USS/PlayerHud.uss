@@ -225,24 +225,14 @@
 }
 
 /* ==========================
-   P1/P2 アクセント
+   P1-P4 アクセント
    ========================== */
-.hud-root--p1 > .hud > .hud__top-bar {
-    border-bottom-color: var(--color-p1);
-    border-bottom-width: 2px;
-}
+.hud-root--p1 > .hud > .hud__top-bar { border-bottom-color: var(--color-p1); border-bottom-width: 2px; }
+.hud-root--p2 > .hud > .hud__top-bar { border-bottom-color: var(--color-p2); border-bottom-width: 2px; }
+.hud-root--p3 > .hud > .hud__top-bar { border-bottom-color: var(--color-p3); border-bottom-width: 2px; }
+.hud-root--p4 > .hud > .hud__top-bar { border-bottom-color: var(--color-p4); border-bottom-width: 2px; }
 
-.hud-root--p2 > .hud > .hud__top-bar {
-    border-bottom-color: var(--color-p2);
-    border-bottom-width: 2px;
-}
-
-.hud-root--p1 > .hud > .hud__bottom-bar {
-    border-top-color: var(--color-p1);
-    border-top-width: 2px;
-}
-
-.hud-root--p2 > .hud > .hud__bottom-bar {
-    border-top-color: var(--color-p2);
-    border-top-width: 2px;
-}
+.hud-root--p1 > .hud > .hud__bottom-bar { border-top-color: var(--color-p1); border-top-width: 2px; }
+.hud-root--p2 > .hud > .hud__bottom-bar { border-top-color: var(--color-p2); border-top-width: 2px; }
+.hud-root--p3 > .hud > .hud__bottom-bar { border-top-color: var(--color-p3); border-top-width: 2px; }
+.hud-root--p4 > .hud > .hud__bottom-bar { border-top-color: var(--color-p4); border-top-width: 2px; }

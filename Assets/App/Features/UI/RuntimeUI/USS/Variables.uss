@@ -11,6 +11,8 @@
 
     --color-p1: #4A90D9;
     --color-p2: #D94A4A;
+    --color-p3: #40A050;
+    --color-p4: #C060D0;
 
     --color-fire: #F08030;
     --color-break: #3080C0;

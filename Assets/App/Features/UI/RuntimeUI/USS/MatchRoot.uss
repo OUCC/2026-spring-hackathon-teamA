@@ -19,7 +19,7 @@
     picking-mode: ignore;
 }
 
-/* --- MatchLayer: プレイヤー HUD を横に並べる --- */
+/* --- MatchLayer: デフォルト横並び --- */
 .match-layer {
     flex-direction: row;
 }
@@ -34,6 +34,45 @@
 .match-divider {
     width: 2px;
     background-color: rgba(240, 232, 216, 0.2);
+}
+
+/* --- N-Player レイアウトクラス --- */
+
+/* 2P: 左右分割 (デフォルト row) */
+.layout-2p {
+    flex-direction: row;
+}
+
+/* 3P: 上段 row + 下段 row のネスト構造（CreatePanes が生成） */
+.layout-3p {
+    flex-direction: column;
+}
+
+.layout-3p-row {
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.layout-3p-row > .hud-root,
+.layout-3p-row > .upgrade-pane,
+.layout-3p-row > .result-pane {
+    flex-grow: 0;
+    width: 50%;
+}
+
+/* 4P: 2x2 グリッド */
+.layout-4p {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.layout-4p > .hud-root,
+.layout-4p > .upgrade-pane,
+.layout-4p > .result-pane {
+    width: 50%;
+    height: 50%;
+    flex-grow: 0;
 }
 
 /* 非表示状態 */

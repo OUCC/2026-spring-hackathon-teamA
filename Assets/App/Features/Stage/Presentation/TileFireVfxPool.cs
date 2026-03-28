@@ -31,7 +31,7 @@ namespace FloorBreaker.Stage.Presentation
             }
         }
 
-        public void SpawnAt(GridPos pos, Vector3 worldPos)
+        public void SpawnAt(GridPos pos, Vector3 worldPos, Color? tint = null)
         {
             if (_prefab == null) return;
             if (_active.ContainsKey(pos)) return;
@@ -50,10 +50,15 @@ namespace FloorBreaker.Stage.Presentation
             go.transform.localScale = VfxScale;
             go.SetActive(true);
 
-            // パーティクルリセット
+            // パーティクルリセット + 色変更
             var ps = go.GetComponentInChildren<ParticleSystem>();
             if (ps != null)
             {
+                if (tint.HasValue)
+                {
+                    var main = ps.main;
+                    main.startColor = tint.Value;
+                }
                 ps.Clear();
                 ps.Play();
             }

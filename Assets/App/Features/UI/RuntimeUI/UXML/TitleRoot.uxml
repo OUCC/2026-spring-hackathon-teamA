@@ -11,78 +11,143 @@
         <!-- 背景 -->
         <VisualElement class="title-bg" />
 
-        <!-- メインコンテンツ -->
-        <VisualElement class="title-content">
-
-            <!-- ロゴ -->
+        <!-- ===== STATE 1: タイトル ===== -->
+        <VisualElement name="TitleState" class="title-state">
             <Label name="TitleLogo" class="title-logo" text="FLOOR BREAKER" />
             <Label class="title-subtitle" text="床破壊対戦ゲーム" />
-
-            <!-- モード選択 -->
-            <VisualElement class="title-mode-select">
-                <Button name="ModeButton_2P" class="title-btn title-btn--primary" text="2P 対戦" />
-                <Button name="ModeButton_1P" class="title-btn title-btn--primary" text="vs CPU" />
-                <Button name="ModeButton_CPU" class="title-btn title-btn--disabled" text="観戦モード  (Coming Soon)" />
+            <VisualElement class="title-menu">
+                <Button name="StartButton" class="title-btn title-btn--primary" text="はじめる" />
+                <Button name="SettingsButton" class="title-btn title-btn--settings" text="設定" />
+                <Button name="QuitButton" class="title-btn title-btn--quit" text="終了" />
             </VisualElement>
-
-            <!-- 設定ボタン行 -->
-            <VisualElement class="title-settings-row">
-                <Button name="KeyConfigButton" class="title-btn title-btn--settings" text="キーコンフィグ" />
-            </VisualElement>
-
-            <!-- 音量調整 -->
-            <VisualElement class="title-volume">
-                <Label class="title-volume__header" text="音量" />
-                <VisualElement class="title-volume__row">
-                    <Label class="title-volume__label" text="マスター" />
-                    <Slider name="VolumeSlider_Master" class="title-volume__slider" low-value="0" high-value="100" value="50" />
-                    <Label name="VolumeLabel_Master" class="title-volume__value" text="50%" />
-                </VisualElement>
-                <VisualElement class="title-volume__row">
-                    <Label class="title-volume__label" text="BGM" />
-                    <Slider name="VolumeSlider_Bgm" class="title-volume__slider" low-value="0" high-value="100" value="50" />
-                    <Label name="VolumeLabel_Bgm" class="title-volume__value" text="50%" />
-                </VisualElement>
-                <VisualElement class="title-volume__row">
-                    <Label class="title-volume__label" text="SE" />
-                    <Slider name="VolumeSlider_Sfx" class="title-volume__slider" low-value="0" high-value="100" value="50" />
-                    <Label name="VolumeLabel_Sfx" class="title-volume__value" text="50%" />
-                </VisualElement>
-            </VisualElement>
-
-            <!-- 操作説明 -->
-            <VisualElement class="title-controls">
-                <Label class="title-controls__header" text="操作説明" />
-                <VisualElement class="title-controls__grid">
-                    <VisualElement class="title-controls__column">
-                        <Label class="title-controls__label" text="── Player 1 ──" />
-                        <Label name="P1_Move" class="title-controls__item" text="移動:  W A S D" />
-                        <Label name="P1_AimLock" class="title-controls__item" text="照準:  Space (押しながら)" />
-                        <Label name="P1_FireBomb" class="title-controls__item" text="炎ボム:  P (ホールド)" />
-                        <Label name="P1_BreakBomb" class="title-controls__item" text="ブレークボム:  L (ホールド)" />
-                    </VisualElement>
-                    <VisualElement class="title-controls__column">
-                        <Label class="title-controls__label" text="── Player 2 ──" />
-                        <Label name="P2_Move" class="title-controls__item" text="移動:  ↑ ← ↓ →" />
-                        <Label name="P2_AimLock" class="title-controls__item" text="照準:  Numpad 0 (押しながら)" />
-                        <Label name="P2_FireBomb" class="title-controls__item" text="炎ボム:  Numpad 6 (ホールド)" />
-                        <Label name="P2_BreakBomb" class="title-controls__item" text="ブレークボム:  Numpad 2 (ホールド)" />
-                    </VisualElement>
-                </VisualElement>
-            </VisualElement>
-
-            <!-- 終了 -->
-            <Button name="QuitButton" class="title-btn title-btn--quit" text="終了" />
         </VisualElement>
 
-        <!-- キーコンフィグオーバーレイ (初期非表示) -->
+        <!-- ===== STATE 2: マッチセットアップ ===== -->
+        <VisualElement name="SetupState" class="setup-state" style="display: none;">
+
+            <Label class="setup-title" text="マッチセットアップ" />
+
+            <!-- プレイヤースロット -->
+            <VisualElement class="setup-slots">
+                <!-- P1: 常に Human -->
+                <VisualElement name="Slot_P1" class="setup-slot setup-slot--active">
+                    <Label class="setup-slot__label setup-slot__label--p1" text="P1" />
+                    <Label class="setup-slot__type" text="Human" />
+                </VisualElement>
+
+                <!-- P2: Human/CPU トグル -->
+                <VisualElement name="Slot_P2" class="setup-slot setup-slot--active">
+                    <Label class="setup-slot__label setup-slot__label--p2" text="P2" />
+                    <Button name="SlotToggle_P2" class="setup-slot__toggle" text="Human" />
+                </VisualElement>
+
+                <!-- P3: 追加可能スロット -->
+                <VisualElement name="Slot_P3" class="setup-slot setup-slot--empty">
+                    <Button name="SlotAdd_P3" class="setup-slot__add-btn" text="+" />
+                    <VisualElement name="SlotContent_P3" class="setup-slot__content" style="display: none;">
+                        <Label class="setup-slot__label setup-slot__label--p3" text="P3" />
+                        <Button name="SlotToggle_P3" class="setup-slot__toggle" text="CPU" />
+                        <Button name="SlotRemove_P3" class="setup-slot__remove" text="&#x2715;" />
+                    </VisualElement>
+                </VisualElement>
+
+                <!-- P4: 追加可能スロット -->
+                <VisualElement name="Slot_P4" class="setup-slot setup-slot--empty">
+                    <Button name="SlotAdd_P4" class="setup-slot__add-btn" text="+" />
+                    <VisualElement name="SlotContent_P4" class="setup-slot__content" style="display: none;">
+                        <Label class="setup-slot__label setup-slot__label--p4" text="P4" />
+                        <Button name="SlotToggle_P4" class="setup-slot__toggle" text="CPU" />
+                        <Button name="SlotRemove_P4" class="setup-slot__remove" text="&#x2715;" />
+                    </VisualElement>
+                </VisualElement>
+            </VisualElement>
+
+            <!-- ステージ選択: 左リスト + 右プレビュー -->
+            <VisualElement class="setup-stage">
+                <Label class="setup-stage__header" text="ステージ" />
+                <VisualElement class="setup-stage__body">
+                    <!-- 左: ステージリスト -->
+                    <VisualElement name="StageList" class="setup-stage__list">
+                        <!-- C# で StageConfig SO からカードを動的生成 -->
+                    </VisualElement>
+                    <!-- 右: 選択中ステージのプレビュー -->
+                    <VisualElement name="StagePreview" class="stage-preview">
+                        <VisualElement name="StagePreviewThumb" class="stage-preview__thumb" />
+                        <Label name="StagePreviewName" class="stage-preview__name" text="" />
+                        <Label name="StagePreviewSize" class="stage-preview__size" text="" />
+                        <Label name="StagePreviewDesc" class="stage-preview__desc" text="" />
+                        <VisualElement name="StagePreviewGimmicks" class="stage-preview__gimmicks" />
+                    </VisualElement>
+                </VisualElement>
+            </VisualElement>
+
+            <!-- アクションボタン -->
+            <VisualElement class="setup-actions">
+                <Button name="SetupStartButton" class="title-btn title-btn--primary" text="START" />
+                <Button name="SetupBackButton" class="title-btn title-btn--quit" text="戻る" />
+            </VisualElement>
+        </VisualElement>
+
+        <!-- ===== STATE 3: 設定オーバーレイ ===== -->
+        <VisualElement name="SettingsOverlay" class="settings-overlay" style="display: none;">
+            <VisualElement class="settings-panel">
+                <Label class="settings-title" text="設定" />
+
+                <!-- 音量調整 -->
+                <VisualElement class="title-volume">
+                    <Label class="title-volume__header" text="音量" />
+                    <VisualElement class="title-volume__row">
+                        <Label class="title-volume__label" text="マスター" />
+                        <Slider name="VolumeSlider_Master" class="title-volume__slider" low-value="0" high-value="100" value="50" />
+                        <Label name="VolumeLabel_Master" class="title-volume__value" text="50%" />
+                    </VisualElement>
+                    <VisualElement class="title-volume__row">
+                        <Label class="title-volume__label" text="BGM" />
+                        <Slider name="VolumeSlider_Bgm" class="title-volume__slider" low-value="0" high-value="100" value="50" />
+                        <Label name="VolumeLabel_Bgm" class="title-volume__value" text="50%" />
+                    </VisualElement>
+                    <VisualElement class="title-volume__row">
+                        <Label class="title-volume__label" text="SE" />
+                        <Slider name="VolumeSlider_Sfx" class="title-volume__slider" low-value="0" high-value="100" value="50" />
+                        <Label name="VolumeLabel_Sfx" class="title-volume__value" text="50%" />
+                    </VisualElement>
+                </VisualElement>
+
+                <!-- キーコンフィグボタン -->
+                <Button name="KeyConfigButton" class="title-btn title-btn--settings" text="キーコンフィグ" />
+
+                <!-- 操作説明 -->
+                <VisualElement class="title-controls">
+                    <Label class="title-controls__header" text="操作説明" />
+                    <VisualElement class="title-controls__grid">
+                        <VisualElement class="title-controls__column">
+                            <Label class="title-controls__label" text="── Player 1 ──" />
+                            <Label name="P1_Move" class="title-controls__item" text="移動:  W A S D" />
+                            <Label name="P1_AimLock" class="title-controls__item" text="照準:  Space (押しながら)" />
+                            <Label name="P1_FireBomb" class="title-controls__item" text="炎ボム:  P (ホールド)" />
+                            <Label name="P1_BreakBomb" class="title-controls__item" text="ブレークボム:  L (ホールド)" />
+                        </VisualElement>
+                        <VisualElement class="title-controls__column">
+                            <Label class="title-controls__label" text="── Player 2 ──" />
+                            <Label name="P2_Move" class="title-controls__item" text="移動:  ↑ ← ↓ →" />
+                            <Label name="P2_AimLock" class="title-controls__item" text="照準:  Numpad 0 (押しながら)" />
+                            <Label name="P2_FireBomb" class="title-controls__item" text="炎ボム:  Numpad 6 (ホールド)" />
+                            <Label name="P2_BreakBomb" class="title-controls__item" text="ブレークボム:  Numpad 2 (ホールド)" />
+                        </VisualElement>
+                    </VisualElement>
+                </VisualElement>
+
+                <Button name="SettingsCloseButton" class="title-btn" text="閉じる" />
+            </VisualElement>
+        </VisualElement>
+
+        <!-- ===== キーコンフィグオーバーレイ (既存、最前面) ===== -->
         <VisualElement name="KeyConfigOverlay" class="keyconfig-overlay" style="display: none;">
             <VisualElement class="keyconfig-panel">
                 <Label class="keyconfig-title" text="キーコンフィグ" />
                 <VisualElement class="keyconfig-players">
                     <VisualElement name="KeyConfigP1" class="keyconfig-column keyconfig-column--p1">
                         <Label class="keyconfig-player-label keyconfig-player-label--p1" text="── Player 1 ──" />
-                        <!-- C# でバインド行を動的生成 -->
                     </VisualElement>
                     <VisualElement name="KeyConfigP2" class="keyconfig-column keyconfig-column--p2">
                         <Label class="keyconfig-player-label keyconfig-player-label--p2" text="── Player 2 ──" />

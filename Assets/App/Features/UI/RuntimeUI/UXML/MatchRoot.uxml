@@ -12,83 +12,25 @@
 
     <VisualElement name="MatchRoot" class="match-root">
 
-        <!-- MatchLayer: プレイヤー HUD 群 -->
-        <VisualElement name="MatchLayer" class="match-layer">
-            <Template src="PlayerHud.uxml" name="PlayerHudTemplate" />
-
-            <VisualElement name="LeftHudRoot" class="hud-root hud-root--p1">
-                <Instance template="PlayerHudTemplate" name="LeftHud" />
-            </VisualElement>
-
-            <VisualElement class="match-divider" />
-
-            <VisualElement name="RightHudRoot" class="hud-root hud-root--p2">
-                <Instance template="PlayerHudTemplate" name="RightHud" />
-            </VisualElement>
-        </VisualElement>
+        <!-- MatchLayer: HUD ペイン — C# が CreatePanes で動的生成 -->
+        <VisualElement name="MatchLayer" class="match-layer" />
 
         <!-- OverlayLayer -->
         <VisualElement name="OverlayLayer" class="overlay-layer">
 
-            <!-- インパクトフラッシュ (ヒットストップ演出用) -->
+            <!-- インパクトフラッシュ -->
             <VisualElement name="ImpactFlashOverlay" class="impact-flash" />
 
-            <!-- 強化オーバーレイ: 左右独立ペイン -->
+            <!-- 強化オーバーレイ — C# が動的生成 -->
             <VisualElement name="UpgradeOverlayRoot" class="upgrade-overlay upgrade-overlay--hidden">
                 <VisualElement class="upgrade-backdrop" />
-                <VisualElement class="upgrade-panes">
-                    <VisualElement name="LeftUpgradePane" class="upgrade-pane upgrade-pane--p1">
-                        <Label class="upgrade-pane__title" text="強化フェーズ" />
-                        <Label name="LeftCountdown" class="upgrade-pane__countdown" text="10" />
-                        <VisualElement class="upgrade-pane__card-row">
-                            <VisualElement name="LeftCards" class="upgrade-pane__cards" />
-                            <Button name="LeftRerollBtn" class="upgrade-pane__reroll-btn" text="リロール&#10;(1コイン)" />
-                        </VisualElement>
-                        <VisualElement name="LeftActions" class="upgrade-pane__actions">
-                            <Button name="LeftSkipBtn" class="upgrade-pane__done-btn" text="完了" />
-                        </VisualElement>
-                        <Label name="LeftStatus" class="upgrade-pane__status" />
-                    </VisualElement>
-
-                    <VisualElement class="match-divider" />
-
-                    <VisualElement name="RightUpgradePane" class="upgrade-pane upgrade-pane--p2">
-                        <Label class="upgrade-pane__title" text="強化フェーズ" />
-                        <Label name="RightCountdown" class="upgrade-pane__countdown" text="10" />
-                        <VisualElement class="upgrade-pane__card-row">
-                            <VisualElement name="RightCards" class="upgrade-pane__cards" />
-                            <Button name="RightRerollBtn" class="upgrade-pane__reroll-btn" text="リロール&#10;(1コイン)" />
-                        </VisualElement>
-                        <VisualElement name="RightActions" class="upgrade-pane__actions">
-                            <Button name="RightSkipBtn" class="upgrade-pane__done-btn" text="完了" />
-                        </VisualElement>
-                        <Label name="RightStatus" class="upgrade-pane__status" />
-                    </VisualElement>
-                </VisualElement>
+                <VisualElement name="UpgradePanesContainer" class="upgrade-panes" />
             </VisualElement>
 
-            <!-- リザルト: 左右独立ペイン -->
+            <!-- リザルト — C# が動的生成 -->
             <VisualElement name="ResultRoot" class="result-root result-root--hidden">
                 <VisualElement class="result-backdrop" />
-                <VisualElement class="result-panes">
-                    <VisualElement name="LeftResultPane" class="result-pane result-pane--p1">
-                        <Label name="LeftResultLabel" class="result-pane__result" text="" />
-                        <VisualElement class="result-pane__buttons">
-                            <Button name="RematchButton" class="result-btn" text="リマッチ" />
-                            <Button name="TitleButton" class="result-btn result-btn--secondary" text="タイトルへ" />
-                        </VisualElement>
-                    </VisualElement>
-
-                    <VisualElement class="match-divider" />
-
-                    <VisualElement name="RightResultPane" class="result-pane result-pane--p2">
-                        <Label name="RightResultLabel" class="result-pane__result" text="" />
-                        <VisualElement class="result-pane__buttons">
-                            <Button name="RematchButton2" class="result-btn" text="リマッチ" />
-                            <Button name="TitleButton2" class="result-btn result-btn--secondary" text="タイトルへ" />
-                        </VisualElement>
-                    </VisualElement>
-                </VisualElement>
+                <VisualElement name="ResultPanesContainer" class="result-panes" />
             </VisualElement>
 
         </VisualElement>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="UnityEngine.UIElements"
+      xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
+
+    <VisualElement class="upgrade-pane">
+        <Label class="upgrade-pane__title" text="強化フェーズ" />
+        <Label name="Countdown" class="upgrade-pane__countdown" text="10" />
+        <VisualElement class="upgrade-pane__card-row">
+            <VisualElement name="Cards" class="upgrade-pane__cards" />
+            <Button name="RerollBtn" class="upgrade-pane__reroll-btn" text="リロール&#10;(1コイン)" />
+        </VisualElement>
+        <VisualElement name="Actions" class="upgrade-pane__actions">
+            <Button name="SkipBtn" class="upgrade-pane__done-btn" text="完了" />
+        </VisualElement>
+        <Label name="Status" class="upgrade-pane__status" />
+    </VisualElement>
+
+</UXML>

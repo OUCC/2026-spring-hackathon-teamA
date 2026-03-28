@@ -333,6 +333,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: App.UI::FloorBreaker.UI.RuntimeUI.Documents.MatchUIDocument
   _upgradeCardTemplate: {fileID: 9197481963319205126, guid: 07a4a38e08898af42afa998f719888f6, type: 3}
+  _playerHudTemplate: {fileID: 9197481963319205126, guid: 6f0af60b4d60bb94ba9f9649da6dd91f, type: 3}
+  _upgradePaneTemplate: {fileID: 9197481963319205126, guid: d29e6e5817c1f0446922e50636eb70a4, type: 3}
+  _resultPaneTemplate: {fileID: 9197481963319205126, guid: 3c2f01815e6d0c94fa23cc895d09522b, type: 3}
 --- !u!114 &1523085667
 MonoBehaviour:
   m_ObjectHideFlags: 0
