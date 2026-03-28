@@ -32,55 +32,13 @@ namespace FloorBreaker.Bootstrap
     /// </summary>
     public sealed class MatchLifetimeScope : LifetimeScope
     {
-        [Header("Fallback (Match 単体起動用)")]
-        [SerializeField] private FloorBreaker.ScriptableObjects.Balance.BalanceConfig _fallbackBalance;
-
-        [Header("CPU Player")]
-        [SerializeField] private bool _enableCpuPlayer = true;
-
         protected override void Configure(IContainerBuilder builder)
         {
-            // 親 (ProjectLifetimeScope) が無い場合のフォールバック登録
-            if (Parent == null && _fallbackBalance != null)
+            builder.Register(c =>
             {
-                Debug.Log("[MatchLifetimeScope] No parent scope — registering fallback globals");
-                builder.RegisterInstance<IBalanceParameters>(_fallbackBalance);
-                int seed = System.Environment.TickCount;
-                builder.Register<IRandomProvider>(
-                    c => new Shared.Infrastructure.Random.SeededRandomProvider(seed),
-                    Lifetime.Singleton);
-                builder.Register<Shared.Infrastructure.UnityTime.UnityTimeProvider>(Lifetime.Singleton)
-                    .As<ITimeProvider>();
-
-                // AudioService フォールバック: シーン内に AudioService があれば使う、なければ null 許容
-                var audioService = FindAnyObjectByType<Shared.Infrastructure.Audio.AudioService>();
-                if (audioService != null)
-                    builder.RegisterInstance<IAudioService>(audioService);
-                else
-                    builder.Register<IAudioService>(
-                        c => new Shared.Infrastructure.Audio.NullAudioService(), Lifetime.Singleton);
-
-                // シーン遷移サービスのフォールバック
-                builder.Register<Shared.Infrastructure.SceneTransition.UnitySceneTransitionService>(Lifetime.Singleton)
-                    .As<ISceneTransitionService>();
-
-                // MatchModeConfig のフォールバック
-                builder.Register<MatchModeConfig>(Lifetime.Singleton);
-            }
-
-            // タイトル画面から遷移した場合は親スコープの MatchModeConfig を参照
-            // Match 単体起動時 (Parent == null) は Inspector の値をフォールバックに使う
-            bool cpuMode;
-            if (Parent != null)
-            {
-                var modeConfig = Parent.Container.Resolve<MatchModeConfig>();
-                cpuMode = modeConfig.IsCpuPlayer;
-            }
-            else
-            {
-                cpuMode = _enableCpuPlayer;
-            }
-            builder.RegisterInstance(new MatchConfig(cpuMode));
+                var modeConfig = c.Resolve<MatchModeConfig>();
+                return new MatchConfig(modeConfig.IsCpuPlayer);
+            }, Lifetime.Scoped);
 
             RegisterStage(builder);
             RegisterUpgrades(builder);
@@ -89,8 +47,7 @@ namespace FloorBreaker.Bootstrap
             RegisterSlimes(builder);
             RegisterMatchFlow(builder);
             RegisterInput(builder);
-            if (cpuMode)
-                RegisterCpuPlayer(builder);
+            RegisterCpuPlayer(builder); // 常に登録 (実際の resolve は MatchTickRunner でゲート)
             RegisterPresentation(builder);
             RegisterEntryPoints(builder);
         }
@@ -293,8 +250,6 @@ namespace FloorBreaker.Bootstrap
                     c.Resolve<UpgradeSelectionState>());
             }, Lifetime.Scoped);
         }
-
-        public bool IsCpuPlayerEnabled => _enableCpuPlayer;
 
         private static void RegisterCpuPlayer(IContainerBuilder builder)
         {

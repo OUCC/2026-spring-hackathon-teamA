@@ -2,7 +2,8 @@
     "name": "App.Shared.Application",
     "rootNamespace": "FloorBreaker.Shared.Application",
     "references": [
-        "App.Shared.Domain"
+        "App.Shared.Domain",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

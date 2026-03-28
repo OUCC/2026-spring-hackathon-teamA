@@ -198,7 +198,6 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
-  _fallbackBalance: {fileID: 11400000, guid: e2151f532fbde4d41b9a8d07c864c06e, type: 2}
 --- !u!4 &309940265
 Transform:
   m_ObjectHideFlags: 0
