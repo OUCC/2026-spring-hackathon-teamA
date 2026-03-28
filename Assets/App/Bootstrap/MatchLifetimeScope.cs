@@ -74,6 +74,17 @@ namespace FloorBreaker.Bootstrap
 
             builder.Register<StageShrinkService>(Lifetime.Scoped);
             builder.Register<SafeTileSearchService>(Lifetime.Scoped);
+            builder.Register<WarpService>(Lifetime.Scoped);
+
+            builder.Register(c =>
+            {
+                var b = c.Resolve<IBalanceParameters>();
+                return new GasIgnitionService(
+                    c.Resolve<StageModel>(),
+                    c.Resolve<TileTimerService>(),
+                    0.1f,           // chainDelayPerStep: 0.1秒/マス
+                    b.FireBombDuration);
+            }, Lifetime.Scoped);
         }
 
         private static void RegisterUpgrades(IContainerBuilder builder)
@@ -221,6 +232,7 @@ namespace FloorBreaker.Bootstrap
                     c.Resolve<FireDamageTickService>(),
                     c.Resolve<BombFlightTracker>(),
                     c.Resolve<BombEffectSpreadService>(),
+                    c.Resolve<GasIgnitionService>(),
                     c.Resolve<StageShrinkService>(),
                     c.Resolve<UpgradePhaseUseCase>(),
                     c.Resolve<MatchEndUseCase>(),

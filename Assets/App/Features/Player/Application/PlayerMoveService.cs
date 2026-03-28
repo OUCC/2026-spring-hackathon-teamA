@@ -6,6 +6,13 @@ namespace FloorBreaker.Player.Application
 {
     public sealed class PlayerMoveService
     {
+        private readonly WarpService _warpService;
+
+        public PlayerMoveService(WarpService warpService = null)
+        {
+            _warpService = warpService;
+        }
+
         public bool TryMove(PlayerModel player, Direction8 direction, StageModel stage)
         {
             if (player.ForcedMove.IsForced) return false;
@@ -18,6 +25,10 @@ namespace FloorBreaker.Player.Application
             if (!IsMovable(player, target, stage)) return false;
 
             player.CurrentPosition = target;
+
+            // ワープチェック
+            CheckWarp(player);
+
             return true;
         }
 
@@ -44,11 +55,21 @@ namespace FloorBreaker.Player.Application
             if (!stage.IsInBounds(second) || IsSolidBlock(second, stage))
             {
                 player.CurrentPosition = first;
+                CheckWarp(player);
                 return true;
             }
 
             player.CurrentPosition = second;
+            CheckWarp(player);
             return true;
+        }
+
+        private void CheckWarp(PlayerModel player)
+        {
+            if (_warpService == null) return;
+            var dest = _warpService.TryGetWarpDestination(player.CurrentPosition);
+            if (dest.HasValue)
+                player.CurrentPosition = dest.Value;
         }
 
         /// <summary>

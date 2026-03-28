@@ -30,6 +30,7 @@ namespace FloorBreaker.MatchFlow.Application
         private readonly FireDamageTickService _fireDamageTickService;
         private readonly BombFlightTracker _bombFlightTracker;
         private readonly BombEffectSpreadService _bombEffectSpreadService;
+        private readonly GasIgnitionService _gasIgnitionService;
         private readonly StageShrinkService _stageShrinkService;
         private readonly UpgradePhaseUseCase _upgradePhaseUseCase;
         private readonly MatchEndUseCase _matchEndUseCase;
@@ -54,6 +55,7 @@ namespace FloorBreaker.MatchFlow.Application
             FireDamageTickService fireDamageTickService,
             BombFlightTracker bombFlightTracker,
             BombEffectSpreadService bombEffectSpreadService,
+            GasIgnitionService gasIgnitionService,
             StageShrinkService stageShrinkService,
             UpgradePhaseUseCase upgradePhaseUseCase,
             MatchEndUseCase matchEndUseCase,
@@ -71,6 +73,7 @@ namespace FloorBreaker.MatchFlow.Application
             _fireDamageTickService = fireDamageTickService;
             _bombFlightTracker = bombFlightTracker;
             _bombEffectSpreadService = bombEffectSpreadService;
+            _gasIgnitionService = gasIgnitionService;
             _stageShrinkService = stageShrinkService;
             _upgradePhaseUseCase = upgradePhaseUseCase;
             _matchEndUseCase = matchEndUseCase;
@@ -123,6 +126,7 @@ namespace FloorBreaker.MatchFlow.Application
             _fireDamageTickService.Tick(deltaTime, _players, _stage);
             _bombFlightTracker?.Tick(deltaTime, _players);
             _bombEffectSpreadService?.Tick(deltaTime);
+            _gasIgnitionService?.Tick(deltaTime);
 
             // HP 0 チェック
             var winner = _matchEndUseCase.CheckEnd(_players);

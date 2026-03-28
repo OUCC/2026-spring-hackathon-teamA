@@ -18,6 +18,7 @@ namespace FloorBreaker.Bombs.Application
         private readonly SlimeRegistry _slimeRegistry;
         private readonly SlimeDropResolver _slimeDropResolver;
         private readonly IRandomProvider _random;
+        private readonly GasIgnitionService _gasIgnitionService;
 
         private readonly List<SpreadWave> _activeWaves = new();
 
@@ -39,7 +40,8 @@ namespace FloorBreaker.Bombs.Application
             SafeTileSearchService safeTileSearch,
             SlimeRegistry slimeRegistry = null,
             SlimeDropResolver slimeDropResolver = null,
-            IRandomProvider random = null)
+            IRandomProvider random = null,
+            GasIgnitionService gasIgnitionService = null)
         {
             _stage = stage;
             _tileTimerService = tileTimerService;
@@ -48,6 +50,7 @@ namespace FloorBreaker.Bombs.Application
             _slimeRegistry = slimeRegistry;
             _slimeDropResolver = slimeDropResolver;
             _random = random;
+            _gasIgnitionService = gasIgnitionService;
         }
 
         public void EnqueueBreakBomb(
@@ -184,8 +187,16 @@ namespace FloorBreaker.Bombs.Application
                 }
                 else
                 {
-                    _stage.SetTileCondition(entry.Pos, TileCondition.OnFire);
-                    _tileTimerService.StartFireTimer(entry.Pos, wave.FireDuration);
+                    // EternalFire は炎ボムで上書きしない
+                    if (tileData.Condition != TileCondition.EternalFire)
+                    {
+                        _stage.SetTileCondition(entry.Pos, TileCondition.OnFire);
+                        _tileTimerService.StartFireTimer(entry.Pos, wave.FireDuration);
+
+                        // ガスタイルに炎が着いたら連鎖引火をトリガー
+                        if (tileData.Type == TileType.Gas && _gasIgnitionService != null)
+                            _gasIgnitionService.Ignite(entry.Pos);
+                    }
                 }
 
                 // ダメージ (そのタイルにいるプレイヤー)
