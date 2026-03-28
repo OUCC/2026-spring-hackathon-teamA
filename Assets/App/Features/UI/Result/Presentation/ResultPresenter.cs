@@ -41,12 +41,12 @@ namespace FloorBreaker.UI.Result.Presentation
 
             for (int i = 0; i < view.PaneCount; i++)
             {
-                view.GetRematchButton(i).clicked += () => sceneTransition.LoadMatchAsync().Forget();
-                view.GetTitleButton(i).clicked += () => sceneTransition.LoadTitleAsync().Forget();
+                view.GetRematchButton(i).clicked += () => sceneTransition.LoadMatchAsync().Forget(e => UnityEngine.Debug.LogException(e));
+                view.GetTitleButton(i).clicked += () => sceneTransition.LoadTitleAsync().Forget(e => UnityEngine.Debug.LogException(e));
                 view.GetSetupButton(i).clicked += () =>
                 {
                     modeConfig.StartInSetupMode = true;
-                    sceneTransition.LoadTitleAsync().Forget();
+                    sceneTransition.LoadTitleAsync().Forget(e => UnityEngine.Debug.LogException(e));
                 };
             }
         }

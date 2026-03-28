@@ -10,10 +10,24 @@ namespace FloorBreaker.Slimes.Presentation
         [Header("Stand Sprites — Direction8 順: N, NE, E, SE, S, SW, W, NW")]
         [SerializeField] private Sprite[] _standSprites = new Sprite[8];
 
-        [Header("Type Tints")]
+        [Header("Base Material (AllIn1SpriteShader)")]
+        [SerializeField] private Material _baseMaterial;
+
+        [Header("Type Tints (legacy, used as fallback if no material)")]
         [SerializeField] private Color _normalTint = new Color(0.38f, 0.78f, 0.50f, 1f);
         [SerializeField] private Color _goldTint = new Color(0.94f, 0.75f, 0.25f, 1f);
         [SerializeField] private Color _redTint = new Color(0.88f, 0.25f, 0.25f, 1f);
+
+        [Header("HSV Shift per Type (AllIn1SpriteShader)")]
+        [SerializeField] private float _normalHsvShift = 0f;
+        [SerializeField] private float _normalHsvSaturation = 1f;
+        [SerializeField] private float _normalHsvBright = 1f;
+        [SerializeField] private float _goldHsvShift = 245f;
+        [SerializeField] private float _goldHsvSaturation = 1.2f;
+        [SerializeField] private float _goldHsvBright = 1.3f;
+        [SerializeField] private float _redHsvShift = 195f;
+        [SerializeField] private float _redHsvSaturation = 1.2f;
+        [SerializeField] private float _redHsvBright = 1.1f;
 
         [Header("Scale")]
         [SerializeField] private float _slimeScale = 0.2f;
@@ -61,6 +75,29 @@ namespace FloorBreaker.Slimes.Presentation
                 _ => _normalTint
             };
         }
+
+        public Material BaseMaterial => _baseMaterial;
+
+        public float GetHsvShift(SlimeType type) => type switch
+        {
+            SlimeType.Gold => _goldHsvShift,
+            SlimeType.Red => _redHsvShift,
+            _ => _normalHsvShift,
+        };
+
+        public float GetHsvSaturation(SlimeType type) => type switch
+        {
+            SlimeType.Gold => _goldHsvSaturation,
+            SlimeType.Red => _redHsvSaturation,
+            _ => _normalHsvSaturation,
+        };
+
+        public float GetHsvBright(SlimeType type) => type switch
+        {
+            SlimeType.Gold => _goldHsvBright,
+            SlimeType.Red => _redHsvBright,
+            _ => _normalHsvBright,
+        };
 
         public float SlimeScale => _slimeScale;
         public int BaseSortingOrder => _baseSortingOrder;

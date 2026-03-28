@@ -203,14 +203,45 @@
     color: var(--color-text-dim);
 }
 
+.setup-slot__type {
+    font-size: 16px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.setup-slot__type--cpu {
+    color: var(--color-text-dim);
+}
+
+.setup-slot__device {
+    font-size: 12px;
+    color: var(--color-coin);
+    -unity-text-align: middle-center;
+    min-height: 20px;
+    margin-bottom: 8px;
+}
+
+.setup-slot__device--waiting {
+    color: var(--color-text-dim);
+    transition: opacity 0.5s ease-in-out;
+}
+
+.setup-slot__actions {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
 .setup-slot__toggle {
-    font-size: 14px;
+    font-size: 12px;
     color: var(--color-text);
     background-color: rgba(40, 35, 60, 0.8);
     border-width: 1px;
     border-color: rgba(240, 232, 216, 0.3);
     border-radius: 4px;
     padding: 4px 16px;
+    margin-bottom: 4px;
     transition-duration: 0.1s;
 }
 
@@ -239,11 +270,10 @@
 }
 
 .setup-slot__remove {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--color-text-dim);
     background-color: transparent;
     border-width: 0;
-    margin-top: 6px;
     padding: 2px 8px;
 }
 
@@ -629,4 +659,50 @@
     font-size: 13px;
     color: var(--color-text-dim);
     margin-bottom: 2px;
+}
+
+/* ==============================================
+   クレジットオーバーレイ
+   ============================================== */
+.credits-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+}
+
+.credits-panel {
+    background-color: var(--color-bg-panel);
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.15);
+    padding: 24px 32px;
+    width: 70%;
+    max-height: 80%;
+    align-items: center;
+}
+
+.credits-title {
+    font-size: 28px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-bottom: 16px;
+}
+
+.credits-scroll {
+    flex-grow: 1;
+    width: 100%;
+    max-height: 500px;
+}
+
+.credits-text {
+    font-size: 13px;
+    color: var(--color-text-dim);
+    white-space: normal;
+    -unity-text-align: upper-left;
+    padding: 8px;
 }

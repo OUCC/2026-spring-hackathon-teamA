@@ -5,6 +5,7 @@ using FloorBreaker.Bombs.Presentation;
 using FloorBreaker.Slimes.Presentation;
 using FloorBreaker.UI.HUD.Presentation;
 using FloorBreaker.UI.UpgradeOverlay.Presentation;
+using FloorBreaker.UI.Pause.Presentation;
 using FloorBreaker.UI.Result.Presentation;
 
 namespace FloorBreaker.Bootstrap
@@ -16,6 +17,7 @@ namespace FloorBreaker.Bootstrap
     /// </summary>
     public sealed class MatchPresenters : IDisposable
     {
+        public System.Collections.Generic.List<IDisposable> Subscriptions { get; } = new();
         public StagePresenter Stage { get; set; }
         public StageShrinkAnimator ShrinkAnimator { get; set; }
         public ShrinkWarningPresenter ShrinkWarning { get; set; }
@@ -24,6 +26,7 @@ namespace FloorBreaker.Bootstrap
         public SlimePresenter Slime { get; set; }
         public PlayerHudPresenter[] Huds { get; set; } = Array.Empty<PlayerHudPresenter>();
         public UpgradeOverlayPresenter UpgradeOverlay { get; set; }
+        public PauseOverlayPresenter Pause { get; set; }
         public ResultPresenter Result { get; set; }
 
         public void TickPresenters(float deltaTime)
@@ -51,7 +54,10 @@ namespace FloorBreaker.Bootstrap
             foreach (var hud in Huds)
                 hud?.Dispose();
             UpgradeOverlay?.Dispose();
+            Pause?.Dispose();
             Result?.Dispose();
+            foreach (var sub in Subscriptions) sub?.Dispose();
+            Subscriptions.Clear();
         }
     }
 }

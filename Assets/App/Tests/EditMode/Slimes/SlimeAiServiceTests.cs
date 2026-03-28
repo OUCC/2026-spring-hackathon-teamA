@@ -50,7 +50,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         {
             // Place slime 3 tiles away from player (cardinal direction)
             var slimePos = new GridPos(5, 2);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, 1f);
+            var slime = new SlimeModel(new SlimeId(1), SlimeType.Normal, slimePos, 1f);
             _registry.Add(slime);
 
             // Tick with enough time for move accumulator to trigger
@@ -67,7 +67,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         {
             // Place slime cardinally adjacent to player (5,5) => (5,4)
             var slimePos = new GridPos(5, 4);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
+            var slime = new SlimeModel(new SlimeId(1), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
             _registry.Add(slime);
 
             // First adjacent tick: should NOT attack (first-strike delay)
@@ -79,7 +79,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         public void TickAll_AttacksAfterFirstStrikeDelay()
         {
             var slimePos = new GridPos(5, 4);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
+            var slime = new SlimeModel(new SlimeId(1), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
             _registry.Add(slime);
 
             // First tick: sets first-strike delay (SlimeAttackCooldown = 1s)
@@ -97,7 +97,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
         public void TickAll_RespectsAttackCooldown()
         {
             var slimePos = new GridPos(5, 4);
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
+            var slime = new SlimeModel(new SlimeId(1), SlimeType.Normal, slimePos, initialAttackCooldown: 0f);
             _registry.Add(slime);
 
             // First tick: first-strike delay

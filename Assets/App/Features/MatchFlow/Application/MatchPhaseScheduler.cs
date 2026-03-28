@@ -109,8 +109,17 @@ namespace FloorBreaker.MatchFlow.Application
             }
         }
 
+        public void TogglePause()
+        {
+            if (State != SchedulerState.Running) return;
+            if (_clock.IsPausedValue) _clock.Resume(); else _clock.Pause();
+        }
+
         private void TickRunning(float deltaTime)
         {
+            // ポーズ中は全サービス Tick をスキップ
+            if (_clock.IsPausedValue) return;
+
             // 全サービスに Tick 配布
             _clock.Tick(deltaTime);
             _tileTimerService.Tick(deltaTime);

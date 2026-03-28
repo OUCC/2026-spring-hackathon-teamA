@@ -12,15 +12,23 @@ namespace FloorBreaker.Input.Infrastructure
     public sealed class InputMapSwitcher : IDisposable
     {
         private readonly InputActionAsset _actions;
+        private readonly MatchClock _clock;
         private readonly int _playerCount;
-        private readonly IDisposable _subscription;
+        private readonly IDisposable _phaseSub;
+        private readonly IDisposable _pauseSub;
 
         public InputMapSwitcher(InputActionAsset actions, MatchClock clock, int playerCount)
         {
             _actions = actions;
+            _clock = clock;
             _playerCount = playerCount;
 
-            _subscription = clock.CurrentPhase.Subscribe(phase => SwitchMaps(phase));
+            _phaseSub = clock.CurrentPhase.Subscribe(phase => SwitchMaps(phase));
+            _pauseSub = clock.IsPaused.Subscribe(paused =>
+            {
+                if (_clock.CurrentPhaseValue == GamePhase.MatchRunning)
+                    SetGameplayMaps(enabled: !paused);
+            });
             SwitchMaps(clock.CurrentPhaseValue);
         }
 
@@ -73,7 +81,8 @@ namespace FloorBreaker.Input.Infrastructure
 
         public void Dispose()
         {
-            _subscription?.Dispose();
+            _phaseSub?.Dispose();
+            _pauseSub?.Dispose();
         }
     }
 }

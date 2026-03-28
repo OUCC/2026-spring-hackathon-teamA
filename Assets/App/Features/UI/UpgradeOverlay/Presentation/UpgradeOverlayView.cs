@@ -58,6 +58,12 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
                 .StartingIn(300);
         }
 
+        public void HidePane(int paneIndex)
+        {
+            if (paneIndex >= 0 && paneIndex < _panes.Length)
+                _panes[paneIndex].style.display = DisplayStyle.None;
+        }
+
         public void SetCountdown(int seconds)
         {
             string text = seconds.ToString();

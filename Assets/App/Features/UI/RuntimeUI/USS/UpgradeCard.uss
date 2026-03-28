@@ -32,6 +32,28 @@
     background-color: var(--color-general);
 }
 
+/* --- アイコン --- */
+.card__icon {
+    width: 48px;
+    height: 48px;
+    align-self: center;
+    margin-top: 6px;
+    margin-bottom: 4px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.card__icon--fire {
+    -unity-background-image-tint-color: var(--color-fire);
+}
+
+.card__icon--break {
+    -unity-background-image-tint-color: var(--color-break);
+}
+
+.card__icon--general {
+    -unity-background-image-tint-color: var(--color-general);
+}
+
 /* --- カード本体 --- */
 .card__body {
     flex-grow: 1;

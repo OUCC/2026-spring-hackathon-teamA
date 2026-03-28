@@ -121,7 +121,11 @@ namespace FloorBreaker.Bootstrap
             var humanPlayers = new System.Collections.Generic.List<PlayerModel>();
             for (int i = 0; i < _players.PlayerCount; i++)
                 if (!_modeConfig.IsCpuAt(i)) humanPlayers.Add(_players.All[i]);
-            _cameraSetup.Initialize(humanPlayers, _stage.Bounds);
+
+            if (humanPlayers.Count > 0)
+                _cameraSetup.Initialize(humanPlayers, _stage.Bounds);
+            else
+                _cameraSetup.InitializeSpectator(_stage.Bounds, _players.All);
 
             // 4. 初期スライムスポーン
             _slimeSpawnService.SpawnIfNeeded();

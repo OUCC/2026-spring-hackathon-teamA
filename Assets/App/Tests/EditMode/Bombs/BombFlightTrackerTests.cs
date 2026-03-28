@@ -305,7 +305,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void Tick_SlimeOnPath_LandsAtSlimePosition()
         {
             // スライムを (4, 2) に配置（origin (2,2) から E 方向 2 マス先）
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(4, 2), 1f);
+            var slime = new SlimeModel(new SlimeId(1), SlimeType.Normal, new GridPos(4, 2), 1f);
             _slimeRegistry.Add(slime);
 
             BombLandedEvent? received = null;
@@ -326,7 +326,7 @@ namespace FloorBreaker.Tests.EditMode.Bombs
         public void Tick_SlimeOnPath_WithPenetration_PassesThrough()
         {
             // スライムを (4, 2) に配置
-            var slime = new SlimeModel(SlimeId.Next(), SlimeType.Normal, new GridPos(4, 2), 1f);
+            var slime = new SlimeModel(new SlimeId(1), SlimeType.Normal, new GridPos(4, 2), 1f);
             _slimeRegistry.Add(slime);
 
             // 貫通スペック

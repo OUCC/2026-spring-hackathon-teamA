@@ -6,6 +6,7 @@
     <VisualElement class="card">
         <VisualElement name="CategoryBand" class="card__band" />
         <VisualElement class="card__body">
+            <VisualElement name="CardIcon" class="card__icon" />
             <Label name="CardName" class="card__name" text="強化名" />
             <Label name="CardDesc" class="card__desc" text="効果説明" />
         </VisualElement>

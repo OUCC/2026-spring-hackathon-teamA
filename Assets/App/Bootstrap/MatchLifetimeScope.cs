@@ -323,7 +323,8 @@ namespace FloorBreaker.Bootstrap
                     brains.Add(new CpuPlayerBrain(
                         balance, cpuPlayer, opponent,
                         stage, moveService, flightTracker, launchUseCase,
-                        mp.Cooldowns[i], slimeRegistry, mp.All));
+                        mp.Cooldowns[i], slimeRegistry, mp.All,
+                        c.Resolve<IRandomProvider>()));
 
                     selectors.Add(new CpuUpgradeSelector(balance, mp.Drafts[i], cpuPlayer));
                 }
@@ -384,9 +385,13 @@ namespace FloorBreaker.Bootstrap
             {
                 var cpuService = c.Resolve<CpuPlayerService>();
 
+                var spectatorReader = new FloorBreaker.Input.Infrastructure.SpectatorInputReader();
+                var spectatorBridge = new FloorBreaker.Input.Application.SpectatorInputBridge(spectatorReader);
+
                 return new MatchTickRunner(
                     c.Resolve<MatchPhaseScheduler>(),
                     c.Resolve<GameplayInputBridge>(),
+                    spectatorBridge,
                     c.Resolve<MatchPresenters>(),
                     c.Resolve<SplitScreenCameraSetup>(),
                     c.Resolve<ITimeProvider>(),

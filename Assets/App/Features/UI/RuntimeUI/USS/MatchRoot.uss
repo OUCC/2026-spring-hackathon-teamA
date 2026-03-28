@@ -103,3 +103,71 @@
     background-color: rgba(255, 255, 255, 0.25);
     transition: background-color 0s;
 }
+
+/* --- ポーズオーバーレイ --- */
+.pause-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.pause-overlay--hidden {
+    display: none;
+}
+
+.pause-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-backdrop);
+}
+
+.pause-panel {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    background-color: var(--color-bg-panel);
+    border-radius: var(--radius-lg);
+    padding: 32px 48px;
+    align-items: center;
+    min-width: 260px;
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.15);
+}
+
+.pause-panel__title {
+    font-size: 36px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-bottom: 24px;
+    letter-spacing: 4px;
+}
+
+.pause-panel__btn {
+    font-size: 18px;
+    color: var(--color-text);
+    background-color: rgba(255, 255, 255, 0.06);
+    border-width: 1px;
+    border-color: rgba(240, 232, 216, 0.2);
+    border-radius: 8px;
+    padding: 10px 40px;
+    margin-bottom: 8px;
+    min-width: 200px;
+    -unity-text-align: middle-center;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.pause-panel__btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: var(--color-text);
+}
+
+.pause-panel__btn--danger:hover {
+    border-color: var(--color-hp);
+    color: var(--color-hp);
+}

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
-using FloorBreaker.Shared.Domain.Timing;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Player.Application;
@@ -30,8 +29,7 @@ namespace FloorBreaker.CpuPlayer.Application
         private readonly BombCooldownState _cooldown;
         private readonly SlimeRegistry _slimeRegistry;
         private readonly IReadOnlyList<PlayerModel> _allPlayers;
-
-        private readonly Random _rng = new Random();
+        private readonly IRandomProvider _random;
 
         private float _thinkTimer;
         private float _moveAccumulator;
@@ -51,7 +49,8 @@ namespace FloorBreaker.CpuPlayer.Application
             BombLaunchUseCase bombLaunchUseCase,
             BombCooldownState cooldown,
             SlimeRegistry slimeRegistry,
-            IReadOnlyList<PlayerModel> allPlayers)
+            IReadOnlyList<PlayerModel> allPlayers,
+            IRandomProvider random)
         {
             _balance = balance;
             _cpu = cpu;
@@ -63,6 +62,7 @@ namespace FloorBreaker.CpuPlayer.Application
             _cooldown = cooldown;
             _slimeRegistry = slimeRegistry;
             _allPlayers = allPlayers;
+            _random = random;
         }
 
         public void Tick(float deltaTime)
@@ -182,7 +182,7 @@ namespace FloorBreaker.CpuPlayer.Application
             if (newDir.HasValue)
             {
                 _wanderDirection = newDir.Value;
-                _wanderStepsRemaining = _rng.Next(2, 5);
+                _wanderStepsRemaining = _random.Range(2, 5);
                 _wanderStepsRemaining--;
                 return newDir.Value;
             }
@@ -344,7 +344,7 @@ namespace FloorBreaker.CpuPlayer.Application
         private Direction8? PickRandomSafeDirection(GridPos from)
         {
             var dirs = ((Direction8[])Enum.GetValues(typeof(Direction8)))
-                .OrderBy(_ => _rng.Next())
+                .OrderBy(_ => _random.Range(0, int.MaxValue))
                 .ToArray();
 
             foreach (var dir in dirs)

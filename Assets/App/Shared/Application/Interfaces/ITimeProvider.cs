@@ -4,5 +4,6 @@ namespace FloorBreaker.Shared.Application.Interfaces
     {
         float DeltaTime { get; }
         float Time { get; }
+        float UnscaledTime { get; }
     }
 }
