@@ -1,27 +1,28 @@
+using System.Collections.Generic;
 using FloorBreaker.Shared.Domain.Timing;
 
 namespace FloorBreaker.CpuPlayer.Application
 {
     /// <summary>
-    /// CpuPlayerBrain と CpuUpgradeSelector を統合し、
+    /// 複数の CpuPlayerBrain と CpuUpgradeSelector を統合し、
     /// 現在のフェーズに応じて適切な方を駆動するコーディネータ。
     /// MatchTickRunner から Tick される。
     /// </summary>
     public sealed class CpuPlayerService
     {
-        private readonly CpuPlayerBrain _brain;
-        private readonly CpuUpgradeSelector _upgradeSelector;
+        private readonly IReadOnlyList<CpuPlayerBrain> _brains;
+        private readonly IReadOnlyList<CpuUpgradeSelector> _selectors;
         private readonly MatchClock _clock;
 
         private bool _upgradePhaseStarted;
 
         public CpuPlayerService(
-            CpuPlayerBrain brain,
-            CpuUpgradeSelector upgradeSelector,
+            IReadOnlyList<CpuPlayerBrain> brains,
+            IReadOnlyList<CpuUpgradeSelector> selectors,
             MatchClock clock)
         {
-            _brain = brain;
-            _upgradeSelector = upgradeSelector;
+            _brains = brains;
+            _selectors = selectors;
             _clock = clock;
         }
 
@@ -33,16 +34,19 @@ namespace FloorBreaker.CpuPlayer.Application
             {
                 case GamePhase.MatchRunning:
                     _upgradePhaseStarted = false;
-                    _brain.Tick(deltaTime);
+                    foreach (var brain in _brains)
+                        brain.Tick(deltaTime);
                     break;
 
                 case GamePhase.UpgradePhase:
                     if (!_upgradePhaseStarted)
                     {
                         _upgradePhaseStarted = true;
-                        _upgradeSelector.Reset();
+                        foreach (var sel in _selectors)
+                            sel.Reset();
                     }
-                    _upgradeSelector.Tick(deltaTime);
+                    foreach (var sel in _selectors)
+                        sel.Tick(deltaTime);
                     break;
             }
         }

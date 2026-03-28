@@ -1,5 +1,42 @@
 # FLOOR BREAKER — 作業ログ
 
+## 2026-03-28: 4P対応 + ステージギミック + 演出改善 + タイトルリデザイン開始
+
+### Phase C: 演出改善 (PR #54)
+- 炎 VFX スケールが残り時間に応じて 1.0→0.3 に減衰
+- ShrinkWarningPresenter: 縮小5秒前から外周タイルにシェイク+赤ティント警告
+- StagePresenter.TickRecoveryPreview: 崩落復帰2秒前からグロー効果
+
+### Phase A: 4P対応 (PR #55)
+- PlayerId: Player3/Player4 追加、FromIndex() ファクトリ
+- MatchPlayers → コレクションベース (IReadOnlyList)
+- 全層29ファイルの2Pハードコードを根本修正
+- Camera: 1-4P対応 Viewport テーブル
+- 全 [Obsolete] 互換シム除去
+- 249 テスト全通過
+
+### Phase B: ステージギミック (PR #56)
+- TileState → TileType + TileCondition に分離 (43ファイル移行)
+- Bedrock: 通行不能・破壊不能・縮小耐性
+- EternalFire: 消えない炎、滑落ボムで崩落→復帰後Normal
+- Gas: 連鎖引火 (GasIgnitionService, BFS, 0.1秒/マス遅延)
+- Warp: ペアテレポート (WarpService)
+- StageConfig SO: プリセットタイル配列
+- ITileIgnitionHandler で Bombs→Stage 疎結合化
+- 271 テスト全通過 (+22 新規)
+
+### タイトルリデザイン Step 1-3 (PR #57)
+- TitleTestSpaceController 削除 + Title.unity シーンクリーンアップ
+- MatchModeConfig: IsCpuSlot[] 配列、SelectedStageName、StartInSetupMode
+- CpuPlayerService: 複数 CpuPlayerBrain リスト管理
+- GasIgnitionService DI: .AsSelf().As<ITileIgnitionHandler>() 修正
+
+### 残り: タイトルリデザイン Step 4-8
+- UXML/USS リデザイン (タイトル + セットアップ + 設定オーバーレイ)
+- TitlePresenter/TitleUIDocument 書き換え
+- リザルト画面ボタン変更
+- ステージアセット作成 (Standard, Arena, Gas Works, Fortress, Volcano)
+
 ## 2026-03-28: Boot シーンパターン導入 + バランスデバッグオーバーレイ
 
 ### 完了タスク

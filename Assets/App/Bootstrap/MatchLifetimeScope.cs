@@ -77,11 +77,16 @@ namespace FloorBreaker.Bootstrap
             builder.Register<SafeTileSearchService>(Lifetime.Scoped);
             builder.Register<WarpService>(Lifetime.Scoped);
 
-            // StageConfig: シーン上に配置されていればそれを使う、なければデフォルト生成
+            // StageConfig: MatchModeConfig のステージ名から Resources ロード、なければデフォルト生成
             builder.Register(c =>
             {
-                var existing = UnityEngine.Object.FindAnyObjectByType<StageConfig>();
-                return existing != null ? existing : ScriptableObject.CreateInstance<StageConfig>();
+                var modeConfig = c.Resolve<MatchModeConfig>();
+                if (!string.IsNullOrEmpty(modeConfig.SelectedStageName))
+                {
+                    var loaded = Resources.Load<StageConfig>($"StageConfigs/{modeConfig.SelectedStageName}");
+                    if (loaded != null) return loaded;
+                }
+                return ScriptableObject.CreateInstance<StageConfig>();
             }, Lifetime.Scoped);
 
             builder.Register(c =>
@@ -93,6 +98,7 @@ namespace FloorBreaker.Bootstrap
                     0.1f,           // chainDelayPerStep: 0.1秒/マス
                     b.FireBombDuration);
             }, Lifetime.Scoped)
+                .AsSelf()
                 .As<ITileIgnitionHandler>();
         }
 
@@ -285,38 +291,40 @@ namespace FloorBreaker.Bootstrap
             builder.Register(c =>
             {
                 var mp = c.Resolve<MatchPlayers>();
-                // CPU は最後のプレイヤースロット
-                int cpuIndex = mp.PlayerCount - 1;
-                var cpuPlayer = mp.All[cpuIndex];
-                var humanPlayer = mp.All[0];
-                return new CpuPlayerBrain(
-                    c.Resolve<IBalanceParameters>(),
-                    cpuPlayer, humanPlayer,
-                    c.Resolve<StageModel>(),
-                    c.Resolve<PlayerMoveService>(),
-                    c.Resolve<BombFlightTracker>(),
-                    c.Resolve<BombLaunchUseCase>(),
-                    mp.Cooldowns[cpuIndex],
-                    c.Resolve<SlimeRegistry>(),
-                    mp.All);
-            }, Lifetime.Scoped);
+                var modeConfig = c.Resolve<MatchModeConfig>();
+                var balance = c.Resolve<IBalanceParameters>();
+                var stage = c.Resolve<StageModel>();
+                var moveService = c.Resolve<PlayerMoveService>();
+                var flightTracker = c.Resolve<BombFlightTracker>();
+                var launchUseCase = c.Resolve<BombLaunchUseCase>();
+                var slimeRegistry = c.Resolve<SlimeRegistry>();
 
-            builder.Register(c =>
-            {
-                var mp = c.Resolve<MatchPlayers>();
-                int cpuIndex = mp.PlayerCount - 1;
-                return new CpuUpgradeSelector(
-                    c.Resolve<IBalanceParameters>(),
-                    mp.Drafts[cpuIndex],
-                    mp.All[cpuIndex]);
-            }, Lifetime.Scoped);
+                var brains = new List<CpuPlayerBrain>();
+                var selectors = new List<CpuUpgradeSelector>();
 
-            builder.Register(c =>
-                new CpuPlayerService(
-                    c.Resolve<CpuPlayerBrain>(),
-                    c.Resolve<CpuUpgradeSelector>(),
-                    c.Resolve<MatchClock>()),
-                Lifetime.Scoped);
+                for (int i = 0; i < mp.PlayerCount; i++)
+                {
+                    if (!modeConfig.IsCpuAt(i)) continue;
+
+                    var cpuPlayer = mp.All[i];
+                    // opponent: CPU 以外の最初のプレイヤー（ターゲット用）
+                    PlayerModel opponent = null;
+                    for (int j = 0; j < mp.PlayerCount; j++)
+                    {
+                        if (j != i && !modeConfig.IsCpuAt(j)) { opponent = mp.All[j]; break; }
+                    }
+                    opponent ??= mp.All[i == 0 ? 1 : 0]; // 全員CPUの場合のフォールバック
+
+                    brains.Add(new CpuPlayerBrain(
+                        balance, cpuPlayer, opponent,
+                        stage, moveService, flightTracker, launchUseCase,
+                        mp.Cooldowns[i], slimeRegistry, mp.All));
+
+                    selectors.Add(new CpuUpgradeSelector(balance, mp.Drafts[i], cpuPlayer));
+                }
+
+                return new CpuPlayerService(brains, selectors, c.Resolve<MatchClock>());
+            }, Lifetime.Scoped);
         }
 
         private static void RegisterPresentation(IContainerBuilder builder)
@@ -366,13 +374,10 @@ namespace FloorBreaker.Bootstrap
         {
             builder.RegisterEntryPoint<MatchInitializer>();
 
-            // MatchTickRunner: CpuPlayerService は CPU モード時のみ注入
+            // MatchTickRunner: CpuPlayerService は常に注入（CPU スロットがなければ空リストで何もしない）
             builder.Register(c =>
             {
-                CpuPlayerService cpuService = null;
-                var config = c.Resolve<MatchConfig>();
-                if (config.IsCpuPlayer)
-                    cpuService = c.Resolve<CpuPlayerService>();
+                var cpuService = c.Resolve<CpuPlayerService>();
 
                 return new MatchTickRunner(
                     c.Resolve<MatchPhaseScheduler>(),
