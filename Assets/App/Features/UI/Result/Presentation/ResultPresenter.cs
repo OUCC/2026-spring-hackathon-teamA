@@ -9,7 +9,7 @@ using FloorBreaker.MatchFlow.Application;
 namespace FloorBreaker.UI.Result.Presentation
 {
     /// <summary>
-    /// リザルト画面を駆動する Presenter。N-player 対応。
+    /// リザルト画面を駆動する Presenter。Human プレイヤーのみ表示対応。
     /// </summary>
     public sealed class ResultPresenter : IDisposable
     {
@@ -22,7 +22,8 @@ namespace FloorBreaker.UI.Result.Presentation
             MatchEndUseCase matchEnd,
             int playerCount,
             ISceneTransitionService sceneTransition,
-            MatchModeConfig modeConfig)
+            MatchModeConfig modeConfig,
+            int[] humanIndices = null)
         {
             _phaseSub = clock.CurrentPhase.Subscribe(phase =>
             {
@@ -35,7 +36,7 @@ namespace FloorBreaker.UI.Result.Presentation
             _winnerSub = matchEnd.Winner.Subscribe(winner =>
             {
                 if (!winner.HasValue) return;
-                view.SetResult(winner, playerCount);
+                view.SetResult(winner, playerCount, humanIndices);
             });
 
             for (int i = 0; i < view.PaneCount; i++)

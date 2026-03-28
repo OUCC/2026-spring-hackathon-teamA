@@ -93,6 +93,11 @@ namespace FloorBreaker.Input.Application
 
                 var player = GetPlayer(adapter.Owner);
                 if (player == null) continue;
+                if (player.Stats.IsDead)
+                {
+                    state.Reset();
+                    continue;
+                }
                 if (player.ForcedMove.IsForced)
                 {
                     state.Reset();
@@ -186,6 +191,7 @@ namespace FloorBreaker.Input.Application
 
             var player = GetPlayer(cmd.Owner);
             if (player == null) return;
+            if (player.Stats.IsDead) return;
 
             if (cmd.IsPressed)
             {
@@ -223,6 +229,7 @@ namespace FloorBreaker.Input.Application
 
             var player = GetPlayer(playerId);
             if (player == null) return;
+            if (player.Stats.IsDead) return;
             if (!player.Build.HasDash) return;
 
             // クールダウンチェック

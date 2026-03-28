@@ -78,10 +78,10 @@ namespace FloorBreaker.UI.HUD.Presentation
             _acquiredRow.Clear();
             foreach (var id in upgrades)
             {
-                var dot = new VisualElement();
-                dot.AddToClassList("hud__upgrade-dot");
-                dot.AddToClassList(UpgradeIdDisplayHelper.GetDotClass(id));
-                _acquiredRow.Add(dot);
+                var badge = new Label(UpgradeIdDisplayHelper.GetShortLabel(id));
+                badge.AddToClassList("hud__upgrade-badge");
+                badge.AddToClassList(UpgradeIdDisplayHelper.GetBadgeClass(id));
+                _acquiredRow.Add(badge);
             }
         }
     }

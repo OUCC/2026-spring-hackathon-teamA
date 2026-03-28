@@ -26,6 +26,7 @@ namespace FloorBreaker.UI.Title.Presentation
         // ステージ選択状態
         private readonly List<(VisualElement card, string assetName)> _stageCards = new();
         private readonly Dictionary<string, StageConfig> _stageConfigs = new();
+        private readonly List<IVisualElementScheduledItem> _gimmickAnimations = new();
         private string _selectedStageName;
 
         public TitlePresenter(
@@ -309,6 +310,9 @@ namespace FloorBreaker.UI.Title.Presentation
             if (hasEternalFire) AddGimmickBadge("永久炎", "gimmick-badge--eternal-fire");
             if (!hasGas && !hasBedrock && !hasWarp && !hasEternalFire)
                 AddGimmickBadge("ギミックなし", "");
+
+            // ギミック詳細パネル
+            UpdateGimmickDetails(hasGas, hasBedrock, hasWarp, hasEternalFire);
         }
 
         private void AddGimmickBadge(string text, string extraClass)
@@ -318,6 +322,251 @@ namespace FloorBreaker.UI.Title.Presentation
             if (!string.IsNullOrEmpty(extraClass))
                 badge.AddToClassList(extraClass);
             _doc.StagePreviewGimmicks.Add(badge);
+        }
+
+        // ═══════════════════════════════════════════
+        //  ギミック詳細 + ループプレビュー
+        // ═══════════════════════════════════════════
+
+        private void UpdateGimmickDetails(bool hasGas, bool hasBedrock, bool hasWarp, bool hasEternalFire)
+        {
+            // 旧アニメーション停止
+            foreach (var anim in _gimmickAnimations) anim?.Pause();
+            _gimmickAnimations.Clear();
+            _doc.GimmickDetails.Clear();
+
+            if (hasGas) AddGimmickDetail_Gas();
+            if (hasBedrock) AddGimmickDetail_Bedrock();
+            if (hasWarp) AddGimmickDetail_Warp();
+            if (hasEternalFire) AddGimmickDetail_EternalFire();
+        }
+
+        private VisualElement CreateMiniGrid(int size, string[,] tileClasses)
+        {
+            var grid = new VisualElement();
+            grid.AddToClassList("gimmick-detail__grid");
+            for (int y = size - 1; y >= 0; y--)
+                for (int x = 0; x < size; x++)
+                {
+                    var tile = new VisualElement();
+                    tile.AddToClassList("gimmick-tile");
+                    tile.AddToClassList(tileClasses[x, y]);
+                    tile.name = $"gt_{x}_{y}";
+                    grid.Add(tile);
+                }
+            return grid;
+        }
+
+        private void AddGimmickDetail_Gas()
+        {
+            var detail = new VisualElement();
+            detail.AddToClassList("gimmick-detail");
+
+            // 5x5 グリッド: 中央に Gas ライン
+            var classes = new string[5, 5];
+            for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
+                    classes[x, y] = "gimmick-tile--normal";
+            // Gas ライン: y=2 横一列
+            for (int x = 0; x < 5; x++) classes[x, 2] = "gimmick-tile--gas";
+            // Gas 縦: x=2, y=0..1
+            classes[2, 0] = "gimmick-tile--gas";
+            classes[2, 1] = "gimmick-tile--gas";
+
+            var grid = CreateMiniGrid(5, classes);
+            detail.Add(grid);
+
+            var name = new Label("ガスタイル");
+            name.AddToClassList("gimmick-detail__name");
+            name.AddToClassList("gimmick-detail__name--gas");
+            detail.Add(name);
+
+            var desc = new Label("炎が引火すると周囲のガスに連鎖延焼する。戦略的に利用しよう。");
+            desc.AddToClassList("gimmick-detail__desc");
+            detail.Add(desc);
+
+            _doc.GimmickDetails.Add(detail);
+
+            // アニメ: 炎が左から順に延焼
+            int step = 0;
+            var anim = grid.schedule.Execute(() =>
+            {
+                // リセット
+                for (int x = 0; x < 5; x++)
+                {
+                    var t = grid.Q($"gt_{x}_2");
+                    t?.RemoveFromClassList("gimmick-tile--gas-fire");
+                    t?.AddToClassList("gimmick-tile--gas");
+                }
+                var tv = grid.Q($"gt_2_0"); tv?.RemoveFromClassList("gimmick-tile--gas-fire"); tv?.AddToClassList("gimmick-tile--gas");
+                tv = grid.Q($"gt_2_1"); tv?.RemoveFromClassList("gimmick-tile--gas-fire"); tv?.AddToClassList("gimmick-tile--gas");
+
+                // 現在ステップまで延焼
+                int[] orderX = { 0, 1, 2, 3, 4, 2, 2 };
+                int[] orderY = { 2, 2, 2, 2, 2, 1, 0 };
+                for (int i = 0; i <= step && i < orderX.Length; i++)
+                {
+                    var t = grid.Q($"gt_{orderX[i]}_{orderY[i]}");
+                    t?.RemoveFromClassList("gimmick-tile--gas");
+                    t?.AddToClassList("gimmick-tile--gas-fire");
+                }
+                step = (step + 1) % (orderX.Length + 3); // 3フレーム空白
+            }).Every(400);
+            _gimmickAnimations.Add(anim);
+        }
+
+        private void AddGimmickDetail_Bedrock()
+        {
+            var detail = new VisualElement();
+            detail.AddToClassList("gimmick-detail");
+
+            var classes = new string[5, 5];
+            for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
+                    classes[x, y] = "gimmick-tile--normal";
+            // Bedrock 壁: x=2 縦一列
+            for (int y = 0; y < 5; y++) classes[2, y] = "gimmick-tile--bedrock";
+
+            var grid = CreateMiniGrid(5, classes);
+            // ボム範囲表示 (静的): x=1 が赤く光って壁で止まる
+            var bombTile = grid.Q("gt_1_2");
+            bombTile?.AddToClassList("gimmick-tile--bomb-range");
+            detail.Add(grid);
+
+            var name = new Label("岩盤");
+            name.AddToClassList("gimmick-detail__name");
+            name.AddToClassList("gimmick-detail__name--bedrock");
+            detail.Add(name);
+
+            var desc = new Label("破壊不能な壁。ボムの爆風も貫通しない。通路を形成する。");
+            desc.AddToClassList("gimmick-detail__desc");
+            detail.Add(desc);
+
+            _doc.GimmickDetails.Add(detail);
+            // Bedrock はアニメなし
+        }
+
+        private void AddGimmickDetail_Warp()
+        {
+            var detail = new VisualElement();
+            detail.AddToClassList("gimmick-detail");
+
+            var classes = new string[5, 5];
+            for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
+                    classes[x, y] = "gimmick-tile--normal";
+            // Warp ペア
+            classes[1, 2] = "gimmick-tile--warp";
+            classes[3, 2] = "gimmick-tile--warp";
+
+            var grid = CreateMiniGrid(5, classes);
+            detail.Add(grid);
+
+            var name = new Label("ワープタイル");
+            name.AddToClassList("gimmick-detail__name");
+            name.AddToClassList("gimmick-detail__name--warp");
+            detail.Add(name);
+
+            var desc = new Label("踏むとペアのタイルに瞬間移動。壁越しの移動が可能。");
+            desc.AddToClassList("gimmick-detail__desc");
+            detail.Add(desc);
+
+            _doc.GimmickDetails.Add(detail);
+
+            // アニメ: プレイヤーが左ワープに入り右ワープから出る
+            int step = 0;
+            var anim = grid.schedule.Execute(() =>
+            {
+                var warpA = grid.Q("gt_1_2");
+                var warpB = grid.Q("gt_3_2");
+                var approachTile = grid.Q("gt_0_2");
+                var exitTile = grid.Q("gt_4_2");
+
+                // リセット
+                approachTile?.RemoveFromClassList("gimmick-tile--player");
+                warpA?.RemoveFromClassList("gimmick-tile--warp-flash");
+                warpB?.RemoveFromClassList("gimmick-tile--warp-flash");
+                exitTile?.RemoveFromClassList("gimmick-tile--player");
+                approachTile?.AddToClassList("gimmick-tile--normal");
+                exitTile?.AddToClassList("gimmick-tile--normal");
+
+                switch (step % 6)
+                {
+                    case 0: // プレイヤーが左に近づく
+                        approachTile?.RemoveFromClassList("gimmick-tile--normal");
+                        approachTile?.AddToClassList("gimmick-tile--player");
+                        break;
+                    case 1: // ワープAに入る (フラッシュ)
+                        warpA?.AddToClassList("gimmick-tile--warp-flash");
+                        break;
+                    case 2: // ワープBから出る (フラッシュ)
+                        warpA?.RemoveFromClassList("gimmick-tile--warp-flash");
+                        warpB?.AddToClassList("gimmick-tile--warp-flash");
+                        break;
+                    case 3: // 出口タイルにプレイヤー
+                        warpB?.RemoveFromClassList("gimmick-tile--warp-flash");
+                        exitTile?.RemoveFromClassList("gimmick-tile--normal");
+                        exitTile?.AddToClassList("gimmick-tile--player");
+                        break;
+                    case 4: // クリア
+                    case 5:
+                        break;
+                }
+                step++;
+            }).Every(500);
+            _gimmickAnimations.Add(anim);
+        }
+
+        private void AddGimmickDetail_EternalFire()
+        {
+            var detail = new VisualElement();
+            detail.AddToClassList("gimmick-detail");
+
+            var classes = new string[5, 5];
+            for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
+                    classes[x, y] = "gimmick-tile--normal";
+            // 中央3x3 EternalFire
+            for (int x = 1; x <= 3; x++)
+                for (int y = 1; y <= 3; y++)
+                    classes[x, y] = "gimmick-tile--eternal-fire";
+
+            var grid = CreateMiniGrid(5, classes);
+            detail.Add(grid);
+
+            var name = new Label("永久炎");
+            name.AddToClassList("gimmick-detail__name");
+            name.AddToClassList("gimmick-detail__name--eternal-fire");
+            detail.Add(name);
+
+            var desc = new Label("消えない青い炎。触れるとダメージ。回避必須の危険地帯。");
+            desc.AddToClassList("gimmick-detail__desc");
+            detail.Add(desc);
+
+            _doc.GimmickDetails.Add(detail);
+
+            // アニメ: パルス明滅
+            bool bright = false;
+            var anim = grid.schedule.Execute(() =>
+            {
+                for (int x = 1; x <= 3; x++)
+                    for (int y = 1; y <= 3; y++)
+                    {
+                        var t = grid.Q($"gt_{x}_{y}");
+                        if (bright)
+                        {
+                            t?.RemoveFromClassList("gimmick-tile--eternal-fire-pulse");
+                            t?.AddToClassList("gimmick-tile--eternal-fire");
+                        }
+                        else
+                        {
+                            t?.RemoveFromClassList("gimmick-tile--eternal-fire");
+                            t?.AddToClassList("gimmick-tile--eternal-fire-pulse");
+                        }
+                    }
+                bright = !bright;
+            }).Every(600);
+            _gimmickAnimations.Add(anim);
         }
 
         // ═══════════════════════════════════════════

@@ -26,8 +26,11 @@
 
 .hud-root {
     flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
     flex-direction: column;
     justify-content: space-between;
+    overflow: hidden;
 }
 
 /* --- 中央仕切り線 --- */

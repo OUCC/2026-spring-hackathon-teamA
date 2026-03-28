@@ -8,6 +8,7 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Stage.Domain;
 using FloorBreaker.ScriptableObjects.Configs;
 using FloorBreaker.Slimes.Domain;
+using FloorBreaker.Player.Domain;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Cameras.Presentation;
 
@@ -32,6 +33,7 @@ namespace FloorBreaker.Bootstrap
         private readonly IAudioService _audio;
         private readonly StageConfig _stageConfig;
         private readonly WarpService _warpService;
+        private readonly MatchModeConfig _modeConfig;
 
         // Dispose 用: フェーズ SE 購読の解除
         private System.IDisposable _phaseSub;
@@ -49,7 +51,8 @@ namespace FloorBreaker.Bootstrap
             MatchClock clock,
             IAudioService audio,
             StageConfig stageConfig,
-            WarpService warpService)
+            WarpService warpService,
+            MatchModeConfig modeConfig)
         {
             _balance = balance;
             _random = random;
@@ -64,6 +67,7 @@ namespace FloorBreaker.Bootstrap
             _audio = audio;
             _stageConfig = stageConfig;
             _warpService = warpService;
+            _modeConfig = modeConfig;
         }
 
         public async UniTask StartAsync(CancellationToken ct)
@@ -113,8 +117,11 @@ namespace FloorBreaker.Bootstrap
             // 2. Presentation 初期化 (TileView → Presenter → HUD → Overlay → Result)
             _presentationInit.Initialize();
 
-            // 3. カメラセットアップ
-            _cameraSetup.Initialize(_players.All, _stage.Bounds);
+            // 3. カメラセットアップ (Human プレイヤーのみ)
+            var humanPlayers = new System.Collections.Generic.List<PlayerModel>();
+            for (int i = 0; i < _players.PlayerCount; i++)
+                if (!_modeConfig.IsCpuAt(i)) humanPlayers.Add(_players.All[i]);
+            _cameraSetup.Initialize(humanPlayers, _stage.Bounds);
 
             // 4. 初期スライムスポーン
             _slimeSpawnService.SpawnIfNeeded();

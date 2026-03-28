@@ -181,35 +181,43 @@ namespace FloorBreaker.Bootstrap
             // 8. ImpactFreezeService にフラッシュオーバーレイを設定
             _impactFreeze?.SetFlashOverlay(_matchUIDocument.ImpactFlashOverlay);
 
-            // 8b. N-player ペイン動的生成
-            _matchUIDocument.CreatePanes(_players.PlayerCount);
-
-            // 9. HUD Presenter 生成 (N-player)
-            var hudRoots = _matchUIDocument.HudRoots;
-            var huds = new PlayerHudPresenter[_players.PlayerCount];
+            // 8b. Human プレイヤーインデックスを算出
+            var humanIndices = new System.Collections.Generic.List<int>();
             for (int i = 0; i < _players.PlayerCount; i++)
+                if (!_modeConfig.IsCpuAt(i)) humanIndices.Add(i);
+            int humanCount = humanIndices.Count;
+
+            // 8c. Human 分のみペイン動的生成
+            _matchUIDocument.CreatePanes(humanCount);
+
+            // 9. HUD Presenter 生成 (Human のみ)
+            var hudRoots = _matchUIDocument.HudRoots;
+            var huds = new PlayerHudPresenter[humanCount];
+            for (int h = 0; h < humanCount; h++)
             {
-                var hudView = new PlayerHudView(hudRoots[i]);
-                huds[i] = new PlayerHudPresenter(
-                    hudView, _players.All[i].Stats, _players.All[i].Build,
-                    _players.Cooldowns[i], _clock);
+                int idx = humanIndices[h];
+                var hudView = new PlayerHudView(hudRoots[h]);
+                huds[h] = new PlayerHudPresenter(
+                    hudView, _players.All[idx].Stats, _players.All[idx].Build,
+                    _players.Cooldowns[idx], _clock);
             }
             _presenters.Huds = huds;
 
-            // 10. UpgradeOverlay Presenter 生成 (N-player)
+            // 10. UpgradeOverlay Presenter 生成 (Human のみ、インデックスマッピング付き)
             var overlayView = new UpgradeOverlayView(
                 _matchUIDocument.UpgradeOverlayRoot, _matchUIDocument.UpgradePanes);
-            var allStats = new PlayerStats[_players.PlayerCount];
-            for (int i = 0; i < _players.PlayerCount; i++)
-                allStats[i] = _players.All[i].Stats;
+            var humanStats = new PlayerStats[humanCount];
+            for (int h = 0; h < humanCount; h++)
+                humanStats[h] = _players.All[humanIndices[h]].Stats;
             _presenters.UpgradeOverlay = new UpgradeOverlayPresenter(
                 overlayView, _clock, _upgradePhase, _selectionState,
-                allStats, _matchUIDocument.UpgradeCardTemplate, _audio);
+                humanStats, _matchUIDocument.UpgradeCardTemplate, _audio,
+                humanIndices.ToArray());
 
-            // 11. Result Presenter 生成 (N-player)
+            // 11. Result Presenter 生成 (Human のみ)
             var resultView = new ResultView(
                 _matchUIDocument.ResultRoot, _matchUIDocument.ResultPanes);
-            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition, _modeConfig);
+            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition, _modeConfig, humanIndices.ToArray());
         }
     }
 }

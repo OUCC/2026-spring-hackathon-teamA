@@ -56,28 +56,8 @@ namespace FloorBreaker.Bootstrap
 
         private static void RegisterStage(IContainerBuilder builder)
         {
-            builder.Register(c =>
-            {
-                var balance = c.Resolve<IBalanceParameters>();
-                return new StageModel(TileCoordRange.FromSize(balance.StageSize));
-            }, Lifetime.Scoped);
-
-            builder.Register<TileTimerService>(Lifetime.Scoped);
-            builder.Register<StageQueryService>(Lifetime.Scoped);
-
-            builder.Register(c =>
-            {
-                var b = c.Resolve<IBalanceParameters>();
-                return new WallGenerationService(
-                    b.WallSeedPercent, b.WallGrowthChance,
-                    b.WallTargetPercent, b.SpawnProtectionRadius);
-            }, Lifetime.Scoped);
-
-            builder.Register<StageShrinkService>(Lifetime.Scoped);
-            builder.Register<SafeTileSearchService>(Lifetime.Scoped);
-            builder.Register<WarpService>(Lifetime.Scoped);
-
             // StageConfig: MatchModeConfig のステージ名から Resources ロード、なければデフォルト生成
+            // (StageModel より先に登録 — StageModel が StageConfig のサイズを参照するため)
             builder.Register(c =>
             {
                 var modeConfig = c.Resolve<MatchModeConfig>();
@@ -88,6 +68,30 @@ namespace FloorBreaker.Bootstrap
                 }
                 return ScriptableObject.CreateInstance<StageConfig>();
             }, Lifetime.Scoped);
+
+            // StageModel: StageConfig のサイズを使用（正方形でない場合は大きい方に合わせる）
+            builder.Register(c =>
+            {
+                var stageConfig = c.Resolve<StageConfig>();
+                int size = Mathf.Max(stageConfig.Width, stageConfig.Height);
+                return new StageModel(TileCoordRange.FromSize(size));
+            }, Lifetime.Scoped);
+
+            builder.Register<TileTimerService>(Lifetime.Scoped);
+            builder.Register<StageQueryService>(Lifetime.Scoped);
+
+            // WallGenerationService: StageConfig の壁パラメータを使用
+            builder.Register(c =>
+            {
+                var stageConfig = c.Resolve<StageConfig>();
+                return new WallGenerationService(
+                    stageConfig.WallSeedPercent, stageConfig.WallGrowthChance,
+                    stageConfig.WallTargetPercent, stageConfig.SpawnProtectionRadius);
+            }, Lifetime.Scoped);
+
+            builder.Register<StageShrinkService>(Lifetime.Scoped);
+            builder.Register<SafeTileSearchService>(Lifetime.Scoped);
+            builder.Register<WarpService>(Lifetime.Scoped);
 
             builder.Register(c =>
             {
@@ -132,10 +136,11 @@ namespace FloorBreaker.Bootstrap
             {
                 var b = c.Resolve<IBalanceParameters>();
                 var modeConfig = c.Resolve<MatchModeConfig>();
+                var stageConfig = c.Resolve<StageConfig>();
                 int playerCount = modeConfig.PlayerCount;
-                int size = b.StageSize;
+                int size = Mathf.Max(stageConfig.Width, stageConfig.Height);
 
-                var spawnPositions = GetSpawnPositions(playerCount, size, b.SpawnProtectionRadius);
+                var spawnPositions = GetSpawnPositions(playerCount, size, stageConfig.SpawnProtectionRadius);
 
                 var players = new List<PlayerModel>(playerCount);
                 var cooldowns = new List<BombCooldownState>(playerCount);

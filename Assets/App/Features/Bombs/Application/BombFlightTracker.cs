@@ -210,7 +210,7 @@ namespace FloorBreaker.Bombs.Application
                     // 貫通: 壁を無視して飛行続行
                 }
 
-                if (CheckEntityAt(nextPos, players))
+                if (CheckEntityAt(nextPos, players, state.Command.Owner))
                 {
                     if (!state.Command.Spec.FlightPenetration)
                     {
@@ -273,10 +273,13 @@ namespace FloorBreaker.Bombs.Application
                 state.Command.Spec.EffectRange, state.Command.Spec.WallPenetration));
         }
 
-        private bool CheckEntityAt(GridPos pos, IReadOnlyList<PlayerModel> players)
+        private bool CheckEntityAt(GridPos pos, IReadOnlyList<PlayerModel> players,
+            PlayerId? excludeOwner = null)
         {
             foreach (var player in players)
             {
+                // 発射者自身には当たらない
+                if (excludeOwner.HasValue && player.Id == excludeOwner.Value) continue;
                 if (player.CurrentPosition.Equals(pos))
                     return true;
             }
@@ -322,7 +325,7 @@ namespace FloorBreaker.Bombs.Application
                     return;
                 }
 
-                if (CheckEntityAt(nextPos, players) && !state.Command.Spec.FlightPenetration)
+                if (CheckEntityAt(nextPos, players, state.Command.Owner) && !state.Command.Spec.FlightPenetration)
                 {
                     state.CurrentTileDistance = nextTile;
                     _dualFlights[owner.Index] = state;

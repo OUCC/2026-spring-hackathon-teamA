@@ -49,17 +49,18 @@ namespace FloorBreaker.UI.Result.Presentation
 
         public void Hide() => _resultRoot.AddToClassList("result-root--hidden");
 
-        public void SetResult(PlayerId? winner, int playerCount)
+        public void SetResult(PlayerId? winner, int playerCount, int[] humanIndices = null)
         {
             for (int i = 0; i < _resultLabels.Length; i++)
             {
+                int playerIndex = humanIndices != null && i < humanIndices.Length ? humanIndices[i] : i;
                 if (!winner.HasValue)
                 {
                     _resultLabels[i].text = "DRAW";
                 }
                 else
                 {
-                    _resultLabels[i].text = winner.Value.Index == i ? "WIN!" : "LOSE";
+                    _resultLabels[i].text = winner.Value.Index == playerIndex ? "WIN!" : "LOSE";
                 }
             }
         }
