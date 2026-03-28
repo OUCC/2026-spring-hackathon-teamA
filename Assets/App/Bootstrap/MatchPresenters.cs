@@ -17,6 +17,7 @@ namespace FloorBreaker.Bootstrap
     /// </summary>
     public sealed class MatchPresenters : IDisposable
     {
+        public System.Collections.Generic.List<IDisposable> Subscriptions { get; } = new();
         public StagePresenter Stage { get; set; }
         public StageShrinkAnimator ShrinkAnimator { get; set; }
         public ShrinkWarningPresenter ShrinkWarning { get; set; }
@@ -55,6 +56,8 @@ namespace FloorBreaker.Bootstrap
             UpgradeOverlay?.Dispose();
             Pause?.Dispose();
             Result?.Dispose();
+            foreach (var sub in Subscriptions) sub?.Dispose();
+            Subscriptions.Clear();
         }
     }
 }

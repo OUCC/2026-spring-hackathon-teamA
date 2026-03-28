@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.Stage.Domain;
+using FloorBreaker.Shared.Application.Interfaces;
+using DeviceType = FloorBreaker.Shared.Application.Interfaces.DeviceType;
 
 namespace FloorBreaker.Cameras.Presentation
 {
@@ -17,6 +19,7 @@ namespace FloorBreaker.Cameras.Presentation
 
         private Camera[] _cameras;
         private CameraFollower[] _followers;
+        private SpectatorCamera[] _spectators;
 
         /// <summary>
         /// 画面シェイク用オフセット。DOTweenCameraShakeService から書き込まれる。
@@ -25,6 +28,7 @@ namespace FloorBreaker.Cameras.Presentation
 
         public Camera[] Cameras => _cameras;
         public int CameraCount => _cameras?.Length ?? 0;
+        public SpectatorCamera[] Spectators => _spectators;
 
         /// <summary>Viewport レイアウトテーブル。</summary>
         private static readonly Rect[][] ViewportTable =
@@ -83,13 +87,51 @@ namespace FloorBreaker.Cameras.Presentation
             camP2.transform.position = _followers[1].CurrentPosition;
         }
 
+        /// <summary>
+        /// 全員 CPU 時の観戦カメラを生成する。フルスクリーン1台。
+        /// </summary>
+        public void InitializeSpectator(StageBounds bounds, IReadOnlyList<PlayerModel> allPlayers)
+        {
+            _cameras = new Camera[1];
+            _followers = new CameraFollower[1]; // null のまま
+            _spectators = new SpectatorCamera[1];
+            ShakeOffsets = new Vector3[1];
+
+            _cameras[0] = CreateCamera("Camera_Spectator", new Rect(0f, 0f, 1f, 1f));
+            _cameras[0].gameObject.AddComponent<AudioListener>();
+            _spectators[0] = new SpectatorCamera(_cameras[0], bounds, allPlayers);
+        }
+
+        /// <summary>
+        /// 死亡した Human プレイヤーのカメラを観戦モードに変換する。
+        /// </summary>
+        public void ConvertToSpectator(
+            int cameraIndex, StageBounds bounds, IReadOnlyList<PlayerModel> allPlayers,
+            DeviceType deviceType = DeviceType.None, int gamepadIndex = -1)
+        {
+            if (_cameras == null || cameraIndex < 0 || cameraIndex >= _cameras.Length) return;
+            if (_spectators == null) _spectators = new SpectatorCamera[_cameras.Length];
+
+            // CameraFollower を破棄して SpectatorCamera に切り替え
+            _followers[cameraIndex]?.Dispose();
+            _followers[cameraIndex] = null;
+            _spectators[cameraIndex] = new SpectatorCamera(
+                _cameras[cameraIndex], bounds, allPlayers, deviceType, gamepadIndex);
+        }
+
         public void Tick(float deltaTime)
         {
-            if (_followers == null) return;
-            for (int i = 0; i < _followers.Length; i++)
+            if (_cameras == null) return;
+            for (int i = 0; i < _cameras.Length; i++)
             {
-                if (_followers[i] != null)
+                if (_spectators != null && _spectators.Length > i && _spectators[i] != null)
+                {
+                    _spectators[i].Tick(deltaTime);
+                }
+                else if (_followers != null && _followers.Length > i && _followers[i] != null)
+                {
                     _cameras[i].transform.position = _followers[i].Tick(deltaTime) + ShakeOffsets[i];
+                }
             }
         }
 

@@ -27,39 +27,63 @@
 
             <Label class="setup-title" text="マッチセットアップ" />
 
-            <!-- プレイヤースロット -->
+            <!-- プレイヤースロット (統一構造 x4) -->
             <VisualElement class="setup-slots">
-                <!-- P1: 常に Human -->
+
+                <!-- P1: デフォルト Human, 削除不可 -->
                 <VisualElement name="Slot_P1" class="setup-slot setup-slot--active">
-                    <Label class="setup-slot__label setup-slot__label--p1" text="P1" />
-                    <Label class="setup-slot__type" text="Human" />
+                    <Button name="SlotAdd_P1" class="setup-slot__add-btn" text="+" style="display: none;" />
+                    <VisualElement name="SlotContent_P1" class="setup-slot__content">
+                        <Label class="setup-slot__label setup-slot__label--p1" text="P1" />
+                        <Label name="SlotType_P1" class="setup-slot__type" text="Human" />
+                        <Label name="SlotDevice_P1" class="setup-slot__device" text="Keyboard (WASD)" />
+                        <VisualElement class="setup-slot__actions">
+                            <Button name="SlotToggle_P1" class="setup-slot__toggle" text="CPU に変更" />
+                        </VisualElement>
+                    </VisualElement>
                 </VisualElement>
 
-                <!-- P2: Human/CPU トグル -->
+                <!-- P2: デフォルト Human, 削除不可 -->
                 <VisualElement name="Slot_P2" class="setup-slot setup-slot--active">
-                    <Label class="setup-slot__label setup-slot__label--p2" text="P2" />
-                    <Button name="SlotToggle_P2" class="setup-slot__toggle" text="Human" />
+                    <Button name="SlotAdd_P2" class="setup-slot__add-btn" text="+" style="display: none;" />
+                    <VisualElement name="SlotContent_P2" class="setup-slot__content">
+                        <Label class="setup-slot__label setup-slot__label--p2" text="P2" />
+                        <Label name="SlotType_P2" class="setup-slot__type" text="Human" />
+                        <Label name="SlotDevice_P2" class="setup-slot__device" text="Keyboard (矢印)" />
+                        <VisualElement class="setup-slot__actions">
+                            <Button name="SlotToggle_P2" class="setup-slot__toggle" text="CPU に変更" />
+                        </VisualElement>
+                    </VisualElement>
                 </VisualElement>
 
-                <!-- P3: 追加可能スロット -->
+                <!-- P3: 追加可能, 削除可能 -->
                 <VisualElement name="Slot_P3" class="setup-slot setup-slot--empty">
                     <Button name="SlotAdd_P3" class="setup-slot__add-btn" text="+" />
                     <VisualElement name="SlotContent_P3" class="setup-slot__content" style="display: none;">
                         <Label class="setup-slot__label setup-slot__label--p3" text="P3" />
-                        <Button name="SlotToggle_P3" class="setup-slot__toggle" text="CPU" />
-                        <Button name="SlotRemove_P3" class="setup-slot__remove" text="&#x2715;" />
+                        <Label name="SlotType_P3" class="setup-slot__type" text="CPU" />
+                        <Label name="SlotDevice_P3" class="setup-slot__device" text="" />
+                        <VisualElement class="setup-slot__actions">
+                            <Button name="SlotToggle_P3" class="setup-slot__toggle" text="Human に変更" />
+                            <Button name="SlotRemove_P3" class="setup-slot__remove" text="&#x2715; 削除" />
+                        </VisualElement>
                     </VisualElement>
                 </VisualElement>
 
-                <!-- P4: 追加可能スロット -->
+                <!-- P4: 追加可能, 削除可能 -->
                 <VisualElement name="Slot_P4" class="setup-slot setup-slot--empty">
                     <Button name="SlotAdd_P4" class="setup-slot__add-btn" text="+" />
                     <VisualElement name="SlotContent_P4" class="setup-slot__content" style="display: none;">
                         <Label class="setup-slot__label setup-slot__label--p4" text="P4" />
-                        <Button name="SlotToggle_P4" class="setup-slot__toggle" text="CPU" />
-                        <Button name="SlotRemove_P4" class="setup-slot__remove" text="&#x2715;" />
+                        <Label name="SlotType_P4" class="setup-slot__type" text="CPU" />
+                        <Label name="SlotDevice_P4" class="setup-slot__device" text="" />
+                        <VisualElement class="setup-slot__actions">
+                            <Button name="SlotToggle_P4" class="setup-slot__toggle" text="Human に変更" />
+                            <Button name="SlotRemove_P4" class="setup-slot__remove" text="&#x2715; 削除" />
+                        </VisualElement>
                     </VisualElement>
                 </VisualElement>
+
             </VisualElement>
 
             <!-- ステージ選択: 左リスト + 右プレビュー -->

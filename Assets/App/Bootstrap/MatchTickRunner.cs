@@ -16,6 +16,7 @@ namespace FloorBreaker.Bootstrap
     {
         private readonly MatchPhaseScheduler _scheduler;
         private readonly GameplayInputBridge _inputBridge;
+        private readonly SpectatorInputBridge _spectatorBridge;
         private readonly MatchPresenters _presenters;
         private readonly SplitScreenCameraSetup _cameraSetup;
         private readonly ITimeProvider _timeProvider;
@@ -25,6 +26,7 @@ namespace FloorBreaker.Bootstrap
         public MatchTickRunner(
             MatchPhaseScheduler scheduler,
             GameplayInputBridge inputBridge,
+            SpectatorInputBridge spectatorBridge,
             MatchPresenters presenters,
             SplitScreenCameraSetup cameraSetup,
             ITimeProvider timeProvider,
@@ -32,6 +34,7 @@ namespace FloorBreaker.Bootstrap
         {
             _scheduler = scheduler;
             _inputBridge = inputBridge;
+            _spectatorBridge = spectatorBridge;
             _presenters = presenters;
             _cameraSetup = cameraSetup;
             _timeProvider = timeProvider;
@@ -58,6 +61,24 @@ namespace FloorBreaker.Bootstrap
 
             // カメラ追従
             _cameraSetup.Tick(dt);
+
+            // 観戦カメラ入力配送
+            TickSpectatorCameras();
+        }
+
+        private void TickSpectatorCameras()
+        {
+            var spectators = _cameraSetup.Spectators;
+            if (spectators == null) return;
+
+            foreach (var spec in spectators)
+            {
+                if (spec == null) continue;
+                var input = _spectatorBridge.ReadInput(spec.DeviceType, spec.GamepadIndex);
+                spec.SetPanInput(input.Pan);
+                spec.SetZoomInput(input.Zoom);
+                if (input.CycleTarget) spec.CycleFollowTarget();
+            }
         }
 
         public void Dispose()

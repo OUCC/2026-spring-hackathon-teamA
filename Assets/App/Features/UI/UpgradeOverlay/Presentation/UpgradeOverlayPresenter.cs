@@ -113,6 +113,12 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             }
         }
 
+        /// <summary>死亡した Human プレイヤーのペインを永久非表示にする。</summary>
+        public void DisablePane(int paneIndex)
+        {
+            _view.HidePane(paneIndex);
+        }
+
         public void UpdateCountdown()
         {
             if (!_upgradePhase.IsActive)

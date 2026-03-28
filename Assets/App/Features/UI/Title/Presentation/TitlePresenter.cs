@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -8,6 +9,7 @@ using FloorBreaker.Input.Infrastructure;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.ScriptableObjects.Configs;
 using FloorBreaker.UI.RuntimeUI.Documents;
+using DeviceType = FloorBreaker.Shared.Application.Interfaces.DeviceType;
 
 namespace FloorBreaker.UI.Title.Presentation
 {
@@ -22,6 +24,7 @@ namespace FloorBreaker.UI.Title.Presentation
         private readonly MatchModeConfig _modeConfig;
         private readonly KeyRebindingService _rebindService;
         private readonly KeyRebindingPresenter _rebindPresenter;
+        private readonly DeviceDetectionService _deviceDetection;
 
         // ステージ選択状態
         private readonly List<(VisualElement card, string assetName)> _stageCards = new();
@@ -34,12 +37,15 @@ namespace FloorBreaker.UI.Title.Presentation
             IAudioService audio,
             KeyRebindingService rebindService,
             MatchModeConfig modeConfig,
-            ISceneTransitionService sceneTransition)
+            ISceneTransitionService sceneTransition,
+            DeviceDetectionService deviceDetection = null)
         {
             _doc = doc;
             _audio = audio;
             _modeConfig = modeConfig;
             _rebindService = rebindService;
+            _deviceDetection = deviceDetection ?? new DeviceDetectionService();
+            _deviceDetection.OnDeviceAssigned += OnDeviceAssigned;
 
             // BGM 再生
             audio?.PlayBgm(SfxIds.BgmTitle);
@@ -71,7 +77,7 @@ namespace FloorBreaker.UI.Title.Presentation
             doc.SetupStartButton?.RegisterCallback<ClickEvent>(_ =>
             {
                 audio?.StopBgm(0.5f);
-                sceneTransition.LoadMatchAsync().Forget();
+                sceneTransition.LoadMatchAsync().Forget(e => Debug.LogException(e));
             });
             doc.SetupBackButton?.RegisterCallback<ClickEvent>(_ =>
             {
@@ -271,69 +277,171 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 
         private void SetupSlots()
         {
-            // P2 トグル
-            _doc.SlotToggleP2?.RegisterCallback<ClickEvent>(_ =>
-                ToggleSlot(_doc.SlotToggleP2, 1));
+            // P1/P2: デフォルト Human + デフォルトデバイス割り当て
+            _modeConfig.IsCpuSlot[0] = false;
+            _modeConfig.IsCpuSlot[1] = false;
+            _modeConfig.DeviceTypes[0] = DeviceType.KeyboardWasd;
+            _modeConfig.DeviceTypes[1] = DeviceType.KeyboardArrows;
 
-            // P3 追加/削除/トグル
-            _doc.SlotAddP3?.RegisterCallback<ClickEvent>(_ => ExpandSlot(3));
-            _doc.SlotRemoveP3?.RegisterCallback<ClickEvent>(_ => CollapseSlot(3));
-            _doc.SlotToggleP3?.RegisterCallback<ClickEvent>(_ =>
-                ToggleSlot(_doc.SlotToggleP3, 2));
+            for (int i = 0; i < 4; i++)
+            {
+                int slot = i; // capture
+                _doc.SlotToggleButtons[i]?.RegisterCallback<ClickEvent>(_ => OnToggleSlot(slot));
+                _doc.SlotAddButtons[i]?.RegisterCallback<ClickEvent>(_ => ExpandSlot(slot));
+                if (_doc.SlotRemoveButtons[i] != null)
+                    _doc.SlotRemoveButtons[i].RegisterCallback<ClickEvent>(_ => CollapseSlot(slot));
 
-            // P4 追加/削除/トグル
-            _doc.SlotAddP4?.RegisterCallback<ClickEvent>(_ => ExpandSlot(4));
-            _doc.SlotRemoveP4?.RegisterCallback<ClickEvent>(_ => CollapseSlot(4));
-            _doc.SlotToggleP4?.RegisterCallback<ClickEvent>(_ =>
-                ToggleSlot(_doc.SlotToggleP4, 3));
+                // デバイスラベルクリックで再割り当て
+                _doc.SlotDeviceLabels[i]?.RegisterCallback<ClickEvent>(_ =>
+                {
+                    if (!_modeConfig.IsCpuSlot[slot]) StartDeviceListening(slot);
+                });
+            }
+
+            // 初期状態を反映
+            RefreshAllSlotUI();
         }
 
-        private void ToggleSlot(Button toggleBtn, int slotIndex)
+        private void OnToggleSlot(int slot)
         {
-            _modeConfig.IsCpuSlot[slotIndex] = !_modeConfig.IsCpuSlot[slotIndex];
-            toggleBtn.text = _modeConfig.IsCpuSlot[slotIndex] ? "CPU" : "Human";
+            bool wasCpu = _modeConfig.IsCpuSlot[slot];
+            _modeConfig.IsCpuSlot[slot] = !wasCpu;
+
+            if (wasCpu)
+            {
+                // CPU → Human: デバイス割り当て待ちへ
+                _modeConfig.ClearDevice(slot);
+                StartDeviceListening(slot);
+            }
+            else
+            {
+                // Human → CPU: デバイス解放
+                StopDeviceListening();
+                _modeConfig.ClearDevice(slot);
+            }
+
+            RefreshSlotUI(slot);
             _audio?.PlaySfx(SfxIds.UiNavigate);
         }
 
-        private void ExpandSlot(int playerNum)
+        private void ExpandSlot(int slot)
         {
-            var (slot, content, addBtn) = GetSlotElements(playerNum);
-            addBtn.style.display = DisplayStyle.None;
-            content.style.display = DisplayStyle.Flex;
-            slot.RemoveFromClassList("setup-slot--empty");
-            slot.AddToClassList("setup-slot--active");
-            _modeConfig.IsCpuSlot[playerNum - 1] = true;
-            var toggle = playerNum == 3 ? _doc.SlotToggleP3 : _doc.SlotToggleP4;
-            if (toggle != null) toggle.text = "CPU";
+            _doc.SlotAddButtons[slot].style.display = DisplayStyle.None;
+            _doc.SlotContents[slot].style.display = DisplayStyle.Flex;
+            _doc.Slots[slot].RemoveFromClassList("setup-slot--empty");
+            _doc.Slots[slot].AddToClassList("setup-slot--active");
+            _modeConfig.IsCpuSlot[slot] = true;
+            _modeConfig.ClearDevice(slot);
+            RecalcPlayerCount();
+            RefreshSlotUI(slot);
+            _audio?.PlaySfx(SfxIds.UiNavigate);
+        }
+
+        private void CollapseSlot(int slot)
+        {
+            StopDeviceListening();
+            _doc.SlotContents[slot].style.display = DisplayStyle.None;
+            _doc.SlotAddButtons[slot].style.display = DisplayStyle.Flex;
+            _doc.Slots[slot].RemoveFromClassList("setup-slot--active");
+            _doc.Slots[slot].AddToClassList("setup-slot--empty");
+            _modeConfig.IsCpuSlot[slot] = false;
+            _modeConfig.ClearDevice(slot);
             RecalcPlayerCount();
             _audio?.PlaySfx(SfxIds.UiNavigate);
-        }
-
-        private void CollapseSlot(int playerNum)
-        {
-            var (slot, content, addBtn) = GetSlotElements(playerNum);
-            content.style.display = DisplayStyle.None;
-            addBtn.style.display = DisplayStyle.Flex;
-            slot.RemoveFromClassList("setup-slot--active");
-            slot.AddToClassList("setup-slot--empty");
-            _modeConfig.IsCpuSlot[playerNum - 1] = false;
-            RecalcPlayerCount();
-            _audio?.PlaySfx(SfxIds.UiNavigate);
-        }
-
-        private (VisualElement slot, VisualElement content, Button addBtn) GetSlotElements(int playerNum)
-        {
-            return playerNum == 3
-                ? (_doc.SlotP3, _doc.SlotContentP3, _doc.SlotAddP3)
-                : (_doc.SlotP4, _doc.SlotContentP4, _doc.SlotAddP4);
         }
 
         private void RecalcPlayerCount()
         {
             int count = 2; // P1 + P2 は常時
-            if (_doc.SlotContentP3?.resolvedStyle.display == DisplayStyle.Flex) count++;
-            if (_doc.SlotContentP4?.resolvedStyle.display == DisplayStyle.Flex) count++;
+            for (int i = 2; i < 4; i++)
+                if (_doc.SlotContents[i]?.resolvedStyle.display == DisplayStyle.Flex) count++;
             _modeConfig.PlayerCount = count;
+        }
+
+        // ── デバイス割り当て (Press to Join) ──
+
+        private void StartDeviceListening(int slot)
+        {
+            _deviceDetection.StopListening();
+            RefreshSlotUI(slot);
+            _deviceDetection.StartListening(slot);
+        }
+
+        private void StopDeviceListening()
+        {
+            int prev = _deviceDetection.ListeningSlot;
+            _deviceDetection.StopListening();
+            if (prev >= 0) RefreshSlotUI(prev);
+        }
+
+        private void OnDeviceAssigned(int slot, DeviceType type, int gamepadIndex)
+        {
+            // 既に他スロットで使用中なら無視
+            if (_modeConfig.IsDeviceTypeAssigned(type, slot, gamepadIndex)) return;
+
+            _modeConfig.DeviceTypes[slot] = type;
+            _modeConfig.GamepadIndices[slot] = gamepadIndex;
+            RefreshSlotUI(slot);
+            _audio?.PlaySfx(SfxIds.UiNavigate);
+        }
+
+        // ── スロット UI 更新 ──
+
+        private void RefreshAllSlotUI()
+        {
+            for (int i = 0; i < 4; i++) RefreshSlotUI(i);
+        }
+
+        private void RefreshSlotUI(int slot)
+        {
+            var typeLabel = _doc.SlotTypeLabels[slot];
+            var deviceLabel = _doc.SlotDeviceLabels[slot];
+            var toggleBtn = _doc.SlotToggleButtons[slot];
+            if (typeLabel == null) return;
+
+            bool isCpu = _modeConfig.IsCpuSlot[slot];
+
+            // タイプ表示
+            typeLabel.text = isCpu ? "CPU" : "Human";
+            typeLabel.EnableInClassList("setup-slot__type--cpu", isCpu);
+
+            // トグルボタンテキスト
+            if (toggleBtn != null)
+                toggleBtn.text = isCpu ? "Human に変更" : "CPU に変更";
+
+            // デバイス表示
+            if (deviceLabel != null)
+            {
+                if (isCpu)
+                {
+                    deviceLabel.text = "";
+                    deviceLabel.RemoveFromClassList("setup-slot__device--waiting");
+                }
+                else if (_deviceDetection.IsListening && _deviceDetection.ListeningSlot == slot)
+                {
+                    deviceLabel.text = "ボタンを押して割り当て";
+                    deviceLabel.AddToClassList("setup-slot__device--waiting");
+                }
+                else
+                {
+                    deviceLabel.text = GetDeviceDisplayName(slot);
+                    deviceLabel.RemoveFromClassList("setup-slot__device--waiting");
+                }
+            }
+        }
+
+        private string GetDeviceDisplayName(int slot)
+        {
+            var type = _modeConfig.DeviceTypes[slot];
+            return type switch
+            {
+                DeviceType.KeyboardWasd => "Keyboard (WASD)",
+                DeviceType.KeyboardArrows => "Keyboard (矢印)",
+                DeviceType.Gamepad => _modeConfig.GamepadIndices[slot] >= 0
+                    ? $"Gamepad {_modeConfig.GamepadIndices[slot] + 1}"
+                    : "Gamepad",
+                _ => "未割り当て",
+            };
         }
 
         // ═══════════════════════════════════════════
@@ -783,5 +891,6 @@ OR OTHER DEALINGS IN THE SOFTWARE.
             if (breakLabel != null)
                 breakLabel.text = $"ブレークボム:  {breakBomb} (ホールド)";
         }
+
     }
 }

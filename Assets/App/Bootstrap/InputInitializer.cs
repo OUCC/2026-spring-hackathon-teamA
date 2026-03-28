@@ -8,6 +8,7 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Input.Application;
 using FloorBreaker.Input.Infrastructure;
 using FloorBreaker.MatchFlow.Application;
+using DeviceType = FloorBreaker.Shared.Application.Interfaces.DeviceType;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -69,33 +70,36 @@ namespace FloorBreaker.Bootstrap
             for (int i = 0; i < _players.PlayerCount; i++)
                 if (!_modeConfig.IsCpuAt(i)) humanIndices.Add(i);
 
-            // 3. アダプター初期化: P1/P2 はシーン上のアダプター、P3/P4 はゲームパッドで動的生成
+            // 3. アダプター初期化: DeviceType に基づいてデバイスを割り当て
             int sceneAdapterIdx = 0;
-            int gamepadIdx = 0;
             foreach (int playerIdx in humanIndices)
             {
                 var id = PlayerId.FromIndex(playerIdx);
+                var deviceType = _modeConfig.DeviceTypes[playerIdx];
 
-                if (sceneAdapterIdx < sceneAdapters.Length && playerIdx < 2)
+                if (deviceType == DeviceType.KeyboardWasd || deviceType == DeviceType.KeyboardArrows)
                 {
-                    // P1/P2: シーン上のキーボードアダプター
-                    var adapter = sceneAdapters[sceneAdapterIdx++];
-                    adapter.Initialize(id, _timeProvider, inputActions);
-                    _gameplayInputBridge.RegisterAdapter(adapter);
+                    // キーボード: シーン上のアダプターを使用
+                    if (sceneAdapterIdx < sceneAdapters.Length)
+                    {
+                        var adapter = sceneAdapters[sceneAdapterIdx++];
+                        adapter.Initialize(id, _timeProvider, inputActions);
+                        _gameplayInputBridge.RegisterAdapter(adapter);
+                    }
                 }
-                else if (inputActions != null)
+                else if (deviceType == DeviceType.Gamepad && inputActions != null)
                 {
-                    // P3/P4 (または追加の Human): ゲームパッドアダプターを動的生成
+                    // ゲームパッド: 動的アダプター生成 + デバイス制限
+                    int gpIdx = _modeConfig.GamepadIndices[playerIdx];
                     var gamepads = Gamepad.all;
-                    if (gamepadIdx < gamepads.Count)
+                    if (gpIdx >= 0 && gpIdx < gamepads.Count)
                     {
                         var go = new GameObject($"GamepadAdapter_P{playerIdx + 1}");
                         var adapter = go.AddComponent<PlayerInputAdapter>();
                         adapter.Initialize(id, _timeProvider, inputActions);
-                        adapter.RestrictToDevice(gamepads[gamepadIdx]);
+                        adapter.RestrictToDevice(gamepads[gpIdx]);
                         _gameplayInputBridge.RegisterAdapter(adapter);
                         _dynamicAdapters.Add(go);
-                        gamepadIdx++;
                     }
                 }
             }

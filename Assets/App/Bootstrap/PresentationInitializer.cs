@@ -16,6 +16,7 @@ using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Shared.Presentation.Common;
 using FloorBreaker.Cameras.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
+using R3;
 using FloorBreaker.UI.HUD.Presentation;
 using FloorBreaker.UI.UpgradeOverlay.Presentation;
 using FloorBreaker.UI.Pause.Presentation;
@@ -56,6 +57,7 @@ namespace FloorBreaker.Bootstrap
         private readonly TileTimerService _tileTimerService;
         private readonly MatchModeConfig _modeConfig;
         private readonly MatchPhaseScheduler _scheduler;
+        private readonly SplitScreenCameraSetup _cameraSetup;
         private readonly MatchPresenters _presenters;
 
         public PresentationInitializer(
@@ -86,6 +88,7 @@ namespace FloorBreaker.Bootstrap
             TileTimerService tileTimerService,
             MatchModeConfig modeConfig,
             MatchPhaseScheduler scheduler,
+            SplitScreenCameraSetup cameraSetup,
             MatchPresenters presenters)
         {
             _stage = stage;
@@ -115,6 +118,7 @@ namespace FloorBreaker.Bootstrap
             _tileTimerService = tileTimerService;
             _modeConfig = modeConfig;
             _scheduler = scheduler;
+            _cameraSetup = cameraSetup;
             _presenters = presenters;
         }
 
@@ -227,6 +231,26 @@ namespace FloorBreaker.Bootstrap
             // 12. PauseOverlay Presenter 生成
             var pauseView = new PauseOverlayView(_matchUIDocument.PauseOverlayRoot);
             _presenters.Pause = new PauseOverlayPresenter(pauseView, _clock, _scheduler, _sceneTransition);
+
+            // 13. Human 死亡時の観戦カメラ切り替え + アップグレード UI 非表示
+            for (int h = 0; h < humanCount; h++)
+            {
+                int cameraIndex = h;
+                int paneIndex = h;
+                int playerIdx = humanIndices[h];
+                var devType = _modeConfig.DeviceTypes[playerIdx];
+                int gpIdx = _modeConfig.GamepadIndices[playerIdx];
+                var sub = _players.All[playerIdx].Stats.CurrentHp.Subscribe(hp =>
+                {
+                    if (hp <= 0)
+                    {
+                        _cameraSetup.ConvertToSpectator(
+                            cameraIndex, _stage.Bounds, _players.All, devType, gpIdx);
+                        _presenters.UpgradeOverlay?.DisablePane(paneIndex);
+                    }
+                });
+                _presenters.Subscriptions.Add(sub);
+            }
         }
     }
 }

@@ -44,7 +44,7 @@ namespace FloorBreaker.UI.Pause.Presentation
         private void OnTitle()
         {
             _scheduler.TogglePause();
-            _sceneTransition.LoadTitleAsync().Forget();
+            _sceneTransition.LoadTitleAsync().Forget(e => UnityEngine.Debug.LogException(e));
         }
 
         public void Dispose()

@@ -20,18 +20,14 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         public Button SettingsButton { get; private set; }
         public Button QuitButton { get; private set; }
 
-        // --- SetupState: プレイヤースロット ---
-        public VisualElement SlotP3 { get; private set; }
-        public VisualElement SlotP4 { get; private set; }
-        public VisualElement SlotContentP3 { get; private set; }
-        public VisualElement SlotContentP4 { get; private set; }
-        public Button SlotToggleP2 { get; private set; }
-        public Button SlotToggleP3 { get; private set; }
-        public Button SlotToggleP4 { get; private set; }
-        public Button SlotAddP3 { get; private set; }
-        public Button SlotAddP4 { get; private set; }
-        public Button SlotRemoveP3 { get; private set; }
-        public Button SlotRemoveP4 { get; private set; }
+        // --- SetupState: プレイヤースロット (統一構造 x4) ---
+        public VisualElement[] Slots { get; private set; } = new VisualElement[4];
+        public VisualElement[] SlotContents { get; private set; } = new VisualElement[4];
+        public Button[] SlotAddButtons { get; private set; } = new Button[4];
+        public Label[] SlotTypeLabels { get; private set; } = new Label[4];
+        public Label[] SlotDeviceLabels { get; private set; } = new Label[4];
+        public Button[] SlotToggleButtons { get; private set; } = new Button[4];
+        public Button[] SlotRemoveButtons { get; private set; } = new Button[4];
 
         // --- SetupState: ステージ選択 ---
         public VisualElement StageList { get; private set; }
@@ -96,18 +92,18 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             SettingsButton = root.Q<Button>("SettingsButton");
             QuitButton = root.Q<Button>("QuitButton");
 
-            // SetupState: スロット
-            SlotP3 = root.Q("Slot_P3");
-            SlotP4 = root.Q("Slot_P4");
-            SlotContentP3 = root.Q("SlotContent_P3");
-            SlotContentP4 = root.Q("SlotContent_P4");
-            SlotToggleP2 = root.Q<Button>("SlotToggle_P2");
-            SlotToggleP3 = root.Q<Button>("SlotToggle_P3");
-            SlotToggleP4 = root.Q<Button>("SlotToggle_P4");
-            SlotAddP3 = root.Q<Button>("SlotAdd_P3");
-            SlotAddP4 = root.Q<Button>("SlotAdd_P4");
-            SlotRemoveP3 = root.Q<Button>("SlotRemove_P3");
-            SlotRemoveP4 = root.Q<Button>("SlotRemove_P4");
+            // SetupState: スロット (統一構造 x4)
+            for (int i = 0; i < 4; i++)
+            {
+                int n = i + 1;
+                Slots[i] = root.Q($"Slot_P{n}");
+                SlotContents[i] = root.Q($"SlotContent_P{n}");
+                SlotAddButtons[i] = root.Q<Button>($"SlotAdd_P{n}");
+                SlotTypeLabels[i] = root.Q<Label>($"SlotType_P{n}");
+                SlotDeviceLabels[i] = root.Q<Label>($"SlotDevice_P{n}");
+                SlotToggleButtons[i] = root.Q<Button>($"SlotToggle_P{n}");
+                SlotRemoveButtons[i] = root.Q<Button>($"SlotRemove_P{n}");
+            }
 
             // SetupState: ステージ
             StageList = root.Q("StageList");
