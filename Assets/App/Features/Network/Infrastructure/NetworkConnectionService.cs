@@ -49,17 +49,6 @@ namespace FloorBreaker.Network.Infrastructure
             _callbacksBridge?.SetInputCollector(collector);
         }
 
-        /// <summary>NetworkMatchRunner プレハブをスポーンする。ホストのみ。</summary>
-        public void SpawnNetworkMatchRunner()
-        {
-            if (_runner == null || !IsHost) return;
-            var prefab = Resources.Load<NetworkObject>("Network/NetworkMatchRunner2");
-            if (prefab != null)
-                _runner.Spawn(prefab);
-            else
-                Debug.LogWarning("[NetworkConnectionService] NetworkMatchRunner prefab not found");
-        }
-
         /// <summary>ホストとしてルームを作成する。</summary>
         public async UniTask CreateRoomAsync(string roomCode, int maxPlayers)
         {

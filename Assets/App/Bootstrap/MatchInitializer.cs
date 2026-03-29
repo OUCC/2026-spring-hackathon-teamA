@@ -11,8 +11,6 @@ using FloorBreaker.Slimes.Domain;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Cameras.Presentation;
-using FloorBreaker.Network.Infrastructure;
-
 namespace FloorBreaker.Bootstrap
 {
     /// <summary>
@@ -35,7 +33,6 @@ namespace FloorBreaker.Bootstrap
         private readonly StageConfig _stageConfig;
         private readonly WarpService _warpService;
         private readonly MatchModeConfig _modeConfig;
-        private readonly NetworkConnectionService _connectionService;
 
         // Dispose 用: フェーズ SE 購読の解除
         private System.IDisposable _phaseSub;
@@ -54,8 +51,7 @@ namespace FloorBreaker.Bootstrap
             IAudioService audio,
             StageConfig stageConfig,
             WarpService warpService,
-            MatchModeConfig modeConfig,
-            NetworkConnectionService connectionService = null)
+            MatchModeConfig modeConfig)
         {
             _balance = balance;
             _random = random;
@@ -71,7 +67,6 @@ namespace FloorBreaker.Bootstrap
             _stageConfig = stageConfig;
             _warpService = warpService;
             _modeConfig = modeConfig;
-            _connectionService = connectionService;
         }
 
         public async UniTask StartAsync(CancellationToken ct)
@@ -121,10 +116,6 @@ namespace FloorBreaker.Bootstrap
 
             // 5. Input 配線 (PlayerInputAdapter → InputMapSwitcher → UpgradeUI)
             _inputInit.Initialize();
-
-            // 5b. オンライン: NetworkMatchRunner をスポーン（ホストのみ）
-            if (_modeConfig.IsOnline && _connectionService is { IsHost: true })
-                _connectionService.SpawnNetworkMatchRunner();
 
             // 6. フェーズ遷移 SE
             _phaseSub = _clock.CurrentPhase.Subscribe(phase =>
