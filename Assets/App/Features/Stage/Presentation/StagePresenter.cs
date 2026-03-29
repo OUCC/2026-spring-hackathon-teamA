@@ -164,19 +164,19 @@ namespace FloorBreaker.Stage.Presentation
                     view.ApplyState(evt.NewData, _config);
                     _animService.PlayFirePulse(view);
                     _fireVfxPool.SpawnAt(pos, view.BasePosition);
-                    _audio.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
+                    _audio?.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
                 case TileCondition.EternalFire:
                     view.ApplyState(evt.NewData, _config);
                     _animService.PlayFirePulse(view);
                     _fireVfxPool.SpawnAt(pos, view.BasePosition, _config.EternalFireTint);
-                    _audio.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
+                    _audio?.PlaySfx(SfxIds.TileFire, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
                 case TileCondition.Collapsing:
                     _animService.PlayCollapse(view, permanent: false);
-                    _audio.PlaySfx(SfxIds.TileCollapse, new Float2(view.BasePosition.x, view.BasePosition.y));
+                    _audio?.PlaySfx(SfxIds.TileCollapse, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
 
                 case TileCondition.Collapsed:
@@ -185,7 +185,7 @@ namespace FloorBreaker.Stage.Presentation
 
                 case TileCondition.PermanentlyDestroyed:
                     _animService.PlayPermanentDestroy(view);
-                    _audio.PlaySfx(SfxIds.TileDestroy, new Float2(view.BasePosition.x, view.BasePosition.y));
+                    _audio?.PlaySfx(SfxIds.TileDestroy, new Float2(view.BasePosition.x, view.BasePosition.y));
                     break;
             }
         }

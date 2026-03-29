@@ -45,13 +45,4 @@ namespace FloorBreaker.ScriptableObjects.Configs
         public PresetTileEntry[] PresetTiles => presetTiles;
     }
 
-    [System.Serializable]
-    public struct PresetTileEntry
-    {
-        public int x;
-        public int y;
-        public TileType type;
-        public TileCondition condition;
-        public short warpPairId;
-    }
 }

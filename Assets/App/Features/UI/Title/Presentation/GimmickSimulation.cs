@@ -157,7 +157,7 @@ namespace FloorBreaker.UI.Title.Presentation
             {
                 var worldPos = pos.ToWorldCenter().ToVector3(0f) + _worldOffset;
                 var go = UnityEngine.Object.Instantiate(_tilePrefab, worldPos, Quaternion.identity, _stageRoot.transform);
-                SetLayerRecursive(go, PreviewLayer);
+                go.SetLayerRecursive(PreviewLayer);
 
                 var renderer = go.GetComponent<SpriteRenderer>();
                 var tileView = go.GetComponent<TileView>();
@@ -243,25 +243,17 @@ namespace FloorBreaker.UI.Title.Presentation
 
         private void TriggerFireBombOnGas()
         {
-            var center = new GridPos(0, Mid); // ガスラインの左端
-            var queryService = new StageQueryService(_stage);
-            var areaResolver = new BombAreaResolver(queryService);
-            var fireResolver = new FireBombResolver(areaResolver);
-
+            var center = new GridPos(0, Mid);
             var spec = new BombSpec(BombType.Fire, 3, 3, 1, 1, 3.0f, false, 0f, 2f, 0f, false);
-            var result = fireResolver.Resolve(center, spec, _stage);
+            var result = BombResolverHelper.ResolveFireBomb(center, spec, _stage);
             _spreadService.EnqueueFireBomb(result, center, Array.Empty<PlayerModel>(), null, 0.15f);
         }
 
         private void TriggerBreakBombNearBedrock()
         {
-            var center = new GridPos(Mid - 1, Mid); // 岩盤の左隣
-            var queryService = new StageQueryService(_stage);
-            var areaResolver = new BombAreaResolver(queryService);
-            var breakResolver = new BreakBombResolver(areaResolver);
-
+            var center = new GridPos(Mid - 1, Mid);
             var spec = new BombSpec(BombType.Break, 3, 3, 1, 2, 0f, false, 0f, 3f, 5f, false);
-            var result = breakResolver.Resolve(center, spec, _stage);
+            var result = BombResolverHelper.ResolveBreakBomb(center, spec, _stage);
             _spreadService.EnqueueBreakBomb(result, center, Array.Empty<PlayerModel>(), null, 0.3f);
         }
 
@@ -290,11 +282,5 @@ namespace FloorBreaker.UI.Title.Presentation
             _presenter.SetTileTimerService(_tileTimer);
         }
 
-        private static void SetLayerRecursive(GameObject go, int layer)
-        {
-            go.layer = layer;
-            foreach (Transform child in go.transform)
-                SetLayerRecursive(child.gameObject, layer);
-        }
     }
 }
