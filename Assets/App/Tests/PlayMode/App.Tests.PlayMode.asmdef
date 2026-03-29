@@ -1,0 +1,44 @@
+{
+    "name": "App.Tests.PlayMode",
+    "rootNamespace": "FloorBreaker.Tests.PlayMode",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.Shared.Infrastructure",
+        "App.Stage",
+        "App.Player",
+        "App.Bombs",
+        "App.Slimes",
+        "App.Upgrades",
+        "App.MatchFlow",
+        "App.Input",
+        "App.Network",
+        "App.Bootstrap",
+        "App.ScriptableObjects",
+        "Fusion.Unity",
+        "VContainer",
+        "UniTask",
+        "R3.Unity",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "Fusion.Runtime.dll",
+        "Fusion.Sockets.dll",
+        "Fusion.Common.dll",
+        "Fusion.Realtime.dll",
+        "Fusion.Log.dll",
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
