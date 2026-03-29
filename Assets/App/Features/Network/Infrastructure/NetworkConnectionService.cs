@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
+using UnityEngine.SceneManagement;
 using Fusion;
 using Fusion.Sockets;
 using R3;
@@ -222,6 +223,8 @@ namespace FloorBreaker.Network.Infrastructure
             _errorOccurred.OnNext("接続がタイムアウトしました");
         }
 
+        private FusionSceneManager _sceneManager;
+
         private void CreateRunner()
         {
             var runnerObj = new GameObject("[NetworkRunner]");
@@ -231,6 +234,26 @@ namespace FloorBreaker.Network.Infrastructure
 
             _callbacksBridge = runnerObj.AddComponent<FusionCallbacksBridge>();
             _callbacksBridge.Initialize(this);
+
+            // カスタムシーンマネージャ: VContainer の EnqueueParent を統合
+            _sceneManager = runnerObj.AddComponent<FusionSceneManager>();
+        }
+
+        /// <summary>
+        /// FusionSceneManager に VContainer ルートスコープを設定する。
+        /// ProjectLifetimeScope から呼ばれる。
+        /// </summary>
+        public void SetRootScope(VContainer.Unity.LifetimeScope rootScope)
+        {
+            _sceneManager?.SetRootScope(rootScope);
+        }
+
+        /// <summary>Runner 経由でマッチシーンをロードする。Fusion がクライアントにも伝搬する。</summary>
+        public void LoadMatchScene()
+        {
+            if (_runner == null) return;
+            // Match シーンのビルドインデックス = 2
+            _runner.LoadScene(SceneRef.FromIndex(2), LoadSceneMode.Additive);
         }
 
         private void CleanupRunner()

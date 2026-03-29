@@ -13,6 +13,7 @@
         "App.Input",
         "App.ScriptableObjects",
         "Fusion.Unity",
+        "VContainer",
         "UniTask",
         "R3.Unity"
     ],
