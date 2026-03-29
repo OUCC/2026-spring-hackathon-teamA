@@ -357,6 +357,7 @@ namespace FloorBreaker.UI.Title.Presentation
             }
             catch (Exception ex)
             {
+                Debug.LogError($"[NetworkLobbyPresenter] CreateRoomAsync failed: {ex}");
                 _doc.LobbyStatusLabel.text = ex.Message;
                 _doc.LobbyRoomCodeDisplay.text = "-----";
             }
@@ -386,6 +387,7 @@ namespace FloorBreaker.UI.Title.Presentation
             }
             catch (Exception ex)
             {
+                Debug.LogError($"[NetworkLobbyPresenter] JoinRoomAsync failed: {ex}");
                 _doc.LobbyStatusLabel.text = ex.Message;
             }
         }
