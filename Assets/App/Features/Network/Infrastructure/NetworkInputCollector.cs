@@ -63,6 +63,12 @@ namespace FloorBreaker.Network.Infrastructure
             _state.SetUpgradeAction(action);
         }
 
+        /// <summary>テスト用: PlayerInputAdapter なしで直接移動入力を注入する。</summary>
+        public void InjectMoveForTest(Shared.Domain.Grid.Direction8 direction)
+        {
+            _state.OnMovePressed(direction);
+        }
+
         private void HandleMoveInput(PlayerId playerId, Shared.Domain.Grid.Direction8 direction)
         {
             _state.OnMovePressed(direction);

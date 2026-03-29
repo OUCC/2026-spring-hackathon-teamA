@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -76,33 +77,36 @@ namespace FloorBreaker.Tests.PlayMode
         }
 
         // =============================================
-        // Test C: クライアントの入力がホストに届く
+        // Test C: Player2 への入力ディスパッチが正しく動作する
         // =============================================
 
         [UnityTest]
-        public IEnumerator ClientInput_MovesPlayerOnHost()
+        public IEnumerator Player2Input_DispatchedOnHost_MovesPlayer()
         {
             var hostBridge = NetworkServiceBridge.Get(MultiPeerTestHelper.HostRunner);
             Assert.IsNotNull(hostBridge);
             Assert.IsTrue(hostBridge.Players.Count >= 2, "Should have at least 2 players");
 
-            // Player2（クライアント側プレイヤー）の初期位置
+            // Player2 の初期位置
             var player2 = hostBridge.Players[1];
             var startPos = player2.CurrentPosition;
 
-            // クライアントからの入力をシミュレート
-            // Host 側の InputDispatcher で Player2 として移動入力を送信
-            var input = new FloorBreakerInput
-            {
-                MoveHeld = true,
-                MoveDirection = Direction8.N,
-            };
+            // ホスト側で Player2(index=1) として移動入力をディスパッチ
+            var input = new FloorBreakerInput { MoveHeld = true, MoveDirection = Direction8.N };
             hostBridge.InputDispatcher.Dispatch(1, input);
 
+            // ディスパッチ後即座に位置が変わる（Domain 直接呼び出し）
             var endPos = player2.CurrentPosition;
             Assert.AreNotEqual(startPos, endPos,
                 $"Player2 should have moved: start={startPos}, end={endPos}");
-            yield return null;
+
+            // 位置がクライアントに同期されるか確認
+            yield return MultiPeerTestHelper.WaitFrames(30);
+
+            var clientBridge = NetworkServiceBridge.Get(MultiPeerTestHelper.ClientRunner);
+            var clientPos = clientBridge.Players[1].CurrentPosition;
+            Assert.AreEqual(endPos, clientPos,
+                $"Client Player2 position should match Host: host={endPos}, client={clientPos}");
         }
 
         // =============================================
@@ -221,6 +225,58 @@ namespace FloorBreaker.Tests.PlayMode
             var clientPos = clientBridge.Players[0].CurrentPosition;
             Assert.AreEqual(hostPos, clientPos,
                 $"Client position should match Host: host={hostPos}, client={clientPos}");
+        }
+
+        // =============================================
+        // Test H: ロビー — ステージ選択がクライアントに同期
+        // =============================================
+
+        [UnityTest]
+        public IEnumerator Lobby_StageName_SyncsToClient()
+        {
+            // LobbyController をスポーン
+            yield return MultiPeerTestHelper.SpawnLobbyController();
+
+            var hostLobby = MultiPeerTestHelper.FindLobbyForRunner(MultiPeerTestHelper.HostRunner);
+            var clientLobby = MultiPeerTestHelper.FindLobbyForRunner(MultiPeerTestHelper.ClientRunner);
+            Assert.IsNotNull(hostLobby, "Host should have LobbyController");
+            Assert.IsNotNull(clientLobby, "Client should have LobbyController");
+
+            // ホスト側でステージ名を変更
+            hostLobby.SetLobbyConfig(2, new[] { false, false, false, false }, "GasWorks");
+
+            // Fusion が [Networked] プロパティを同期するまで待機
+            yield return MultiPeerTestHelper.WaitFrames(30);
+
+            Assert.AreEqual("GasWorks", clientLobby.StageName.ToString(),
+                $"Client StageName should be 'GasWorks', was '{clientLobby.StageName}'");
+        }
+
+        // =============================================
+        // Test I: ロビー — プレイヤー数がクライアントに同期
+        // =============================================
+
+        [UnityTest]
+        public IEnumerator Lobby_PlayerCount_SyncsToClient()
+        {
+            yield return MultiPeerTestHelper.SpawnLobbyController();
+
+            var hostLobby = MultiPeerTestHelper.FindLobbyForRunner(MultiPeerTestHelper.HostRunner);
+            var clientLobby = MultiPeerTestHelper.FindLobbyForRunner(MultiPeerTestHelper.ClientRunner);
+            Assert.IsNotNull(hostLobby);
+            Assert.IsNotNull(clientLobby);
+
+            // ホスト側でプレイヤー数と CPU スロットを変更
+            hostLobby.SetLobbyConfig(3, new[] { false, false, true, false }, "Standard");
+
+            yield return MultiPeerTestHelper.WaitFrames(30);
+
+            Assert.AreEqual(3, clientLobby.PlayerCount,
+                $"Client PlayerCount should be 3, was {clientLobby.PlayerCount}");
+            Assert.AreEqual(
+                LobbyController.EncodeCpuSlots(new[] { false, false, true, false }),
+                clientLobby.CpuSlotMask,
+                "Client CpuSlotMask should match host");
         }
     }
 }

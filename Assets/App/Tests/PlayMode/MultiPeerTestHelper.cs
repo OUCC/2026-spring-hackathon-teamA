@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 using Fusion;
 using VContainer;
 using VContainer.Unity;
+using FloorBreaker.Shared.Domain.Grid;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Network.Infrastructure;
 using FloorBreaker.Bootstrap;
@@ -99,6 +101,9 @@ namespace FloorBreaker.Tests.PlayMode
             var runner = go.AddComponent<NetworkRunner>();
             runner.ProvideInput = true;
 
+            // Fusion コールバック（OnInput 等）を受け取るブリッジ
+            var callbacks = go.AddComponent<FusionCallbacksBridge>();
+
             var sceneManager = go.AddComponent<FusionSceneManager>();
             sceneManager.SetRootScope(rootScope);
 
@@ -161,6 +166,85 @@ namespace FloorBreaker.Tests.PlayMode
         {
             for (int i = 0; i < count; i++)
                 yield return null;
+        }
+
+        /// <summary>
+        /// クライアント Runner に NetworkInputCollector をセットし、入力注入を可能にする。
+        /// Fusion の OnInput() 経由でホストに入力が届くようになる。
+        /// </summary>
+        public static NetworkInputCollector SetupClientInput()
+        {
+            if (ClientRunner == null) return null;
+
+            var clientBridge = NetworkServiceBridge.Get(ClientRunner);
+            if (clientBridge == null) return null;
+
+            // クライアントのローカルプレイヤー (Player2 = index 1)
+            var localPlayer = clientBridge.Players.Count > 1 ? clientBridge.Players[1] : clientBridge.Players[0];
+
+            // IBalanceParameters を ProjectLifetimeScope から取得
+            var rootScope = Object.FindAnyObjectByType<ProjectLifetimeScope>();
+            var balance = rootScope.Container.Resolve(typeof(IBalanceParameters)) as IBalanceParameters;
+
+            var collector = new NetworkInputCollector(balance, localPlayer);
+
+            // クライアント Runner の FusionCallbacksBridge にセット
+            var callbacks = ClientRunner.GetComponent<FusionCallbacksBridge>();
+            callbacks?.SetInputCollector(collector);
+
+            return collector;
+        }
+
+        /// <summary>
+        /// クライアント入力に移動を注入する。Fusion OnInput() 経由でホストに届く。
+        /// </summary>
+        public static void InjectClientMove(NetworkInputCollector collector, Direction8 direction)
+        {
+            collector?.InjectMoveForTest(direction);
+        }
+
+        /// <summary>
+        /// ホスト Runner で LobbyController をスポーンし、両方で検出されるまで待機。
+        /// </summary>
+        public static IEnumerator SpawnLobbyController()
+        {
+            if (HostRunner == null) yield break;
+
+            var prefab = Resources.Load<NetworkObject>("Network/LobbyController");
+            if (prefab == null)
+            {
+                Debug.LogError("[MultiPeerTestHelper] LobbyController prefab not found");
+                yield break;
+            }
+
+            HostRunner.Spawn(prefab);
+
+            // LobbyController が両 Runner で見えるようになるまで待機
+            float elapsed = 0f;
+            while (elapsed < 5f)
+            {
+                var hostLobby = FindLobbyForRunner(HostRunner);
+                var clientLobby = FindLobbyForRunner(ClientRunner);
+                if (hostLobby != null && clientLobby != null)
+                {
+                    Debug.Log("[MultiPeerTestHelper] LobbyController found on both runners");
+                    yield break;
+                }
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+            Debug.LogError("[MultiPeerTestHelper] LobbyController discovery timeout");
+        }
+
+        /// <summary>指定 Runner のシーン内から LobbyController を見つける。</summary>
+        public static LobbyController FindLobbyForRunner(NetworkRunner runner)
+        {
+            if (runner == null) return null;
+            foreach (var obj in Object.FindObjectsByType<LobbyController>(FindObjectsSortMode.None))
+            {
+                if (obj.Runner == runner) return obj;
+            }
+            return null;
         }
     }
 }
