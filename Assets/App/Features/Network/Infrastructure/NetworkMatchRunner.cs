@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 
@@ -7,7 +6,7 @@ namespace FloorBreaker.Network.Infrastructure
     /// <summary>
     /// オンライン用ゲームループ。ホスト側で FixedUpdateNetwork() を駆動し、
     /// 全プレイヤーの入力をディスパッチ後、MatchPhaseScheduler を Tick する。
-    /// 状態同期アダプターの更新も担当する。
+    /// 状態同期アダプターは同じプレハブに事前配置され、Initialize() で接続される。
     /// Presentation の Tick は MatchTickRunner が引き続き担当。
     /// </summary>
     public class NetworkMatchRunner : NetworkBehaviour
@@ -15,9 +14,9 @@ namespace FloorBreaker.Network.Infrastructure
         private NetworkServiceBridge _bridge;
         private bool _initialized;
 
-        // 状態同期アダプター（Spawned 時に同じ GO のコンポーネントとして追加）
+        // 同じ GO に事前配置されたアダプター（プレハブに含まれる）
         private NetworkMatchStateAdapter _matchState;
-        private readonly List<NetworkPlayerStateAdapter> _playerStates = new();
+        private NetworkPlayerStateAdapter _playerState;
         private NetworkStageStateAdapter _stageState;
         private NetworkBombStateAdapter _bombState;
         private NetworkSlimeStateAdapter _slimeState;
@@ -25,41 +24,44 @@ namespace FloorBreaker.Network.Infrastructure
         public override void Spawned()
         {
             _bridge = NetworkServiceBridge.Current;
+
+            // クライアント側では bridge が null の場合がある（MatchLifetimeScope がまだ構築されていない）
+            // その場合はアダプターの初期化を遅延する
             if (_bridge == null)
             {
-                Debug.LogError("[NetworkMatchRunner] NetworkServiceBridge.Current is null");
+                Debug.LogWarning("[NetworkMatchRunner] NetworkServiceBridge.Current is null (client side, will retry)");
                 return;
             }
 
             InitializeAdapters();
-            _initialized = true;
+        }
+
+        /// <summary>クライアント側で遅延初期化を試みる。</summary>
+        public void TryLateInitialize()
+        {
+            if (_initialized) return;
+            _bridge = NetworkServiceBridge.Current;
+            if (_bridge == null) return;
+            InitializeAdapters();
         }
 
         private void InitializeAdapters()
         {
-            // MatchState
-            _matchState = gameObject.AddComponent<NetworkMatchStateAdapter>();
-            _matchState.Initialize(_bridge.Clock);
+            // プレハブに事前配置されたコンポーネントを取得
+            _matchState = GetComponent<NetworkMatchStateAdapter>();
+            _playerState = GetComponent<NetworkPlayerStateAdapter>();
+            _stageState = GetComponent<NetworkStageStateAdapter>();
+            _bombState = GetComponent<NetworkBombStateAdapter>();
+            _slimeState = GetComponent<NetworkSlimeStateAdapter>();
 
-            // PlayerState (プレイヤーごと)
-            for (int i = 0; i < _bridge.Players.Count; i++)
-            {
-                var adapter = gameObject.AddComponent<NetworkPlayerStateAdapter>();
-                adapter.Initialize(_bridge.Players[i], _bridge.Cooldowns[i]);
-                _playerStates.Add(adapter);
-            }
+            // Domain 参照を注入
+            _matchState?.Initialize(_bridge.Clock);
+            _playerState?.Initialize(_bridge.Players, _bridge.Cooldowns);
+            _stageState?.Initialize(_bridge.Stage);
+            _bombState?.Initialize(_bridge.BombFlightTracker);
+            _slimeState?.Initialize(_bridge.SlimeRegistry);
 
-            // StageState
-            _stageState = gameObject.AddComponent<NetworkStageStateAdapter>();
-            _stageState.Initialize(_bridge.Stage);
-
-            // BombState
-            _bombState = gameObject.AddComponent<NetworkBombStateAdapter>();
-            _bombState.Initialize(_bridge.BombFlightTracker);
-
-            // SlimeState
-            _slimeState = gameObject.AddComponent<NetworkSlimeStateAdapter>();
-            _slimeState.Initialize(_bridge.SlimeRegistry);
+            _initialized = true;
         }
 
         public override void FixedUpdateNetwork()
@@ -78,8 +80,7 @@ namespace FloorBreaker.Network.Infrastructure
             {
                 if (Runner.TryGetInputForPlayer(playerRef, out FloorBreakerInput input))
                 {
-                    int playerIndex = playerRef.AsIndex;
-                    _bridge.InputDispatcher.Dispatch(playerIndex, input);
+                    _bridge.InputDispatcher.Dispatch(playerRef.AsIndex, input);
                 }
             }
 
@@ -87,24 +88,28 @@ namespace FloorBreaker.Network.Infrastructure
             _bridge.Scheduler.Tick(dt);
 
             // 4. 状態同期: Domain → [Networked]
-            _matchState.SyncFromDomain();
-            foreach (var ps in _playerStates)
-                ps.SyncFromDomain();
+            _matchState?.SyncFromDomain();
+            _playerState?.SyncFromDomain();
 
             // 5. バッチ RPC 送信
-            _stageState.FlushBatch();
-            _slimeState.FlushMoveBatch();
+            _stageState?.FlushBatch();
+            _slimeState?.FlushMoveBatch();
         }
 
         public override void Render()
         {
+            // クライアント側: 遅延初期化の試行
+            if (!_initialized)
+            {
+                TryLateInitialize();
+                if (!_initialized) return;
+            }
+
             // クライアント側: [Networked] → Domain ミラー
             if (Object.HasStateAuthority) return;
-            if (!_initialized) return;
 
             _matchState?.SyncToLocal();
-            foreach (var ps in _playerStates)
-                ps.SyncToLocal();
+            _playerState?.SyncToLocal();
         }
     }
 }

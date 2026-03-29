@@ -1,49 +1,43 @@
+using System.Collections.Generic;
 using Fusion;
 using FloorBreaker.Shared.Domain.Grid;
 using FloorBreaker.Shared.Domain.Primitives;
 using FloorBreaker.Player.Domain;
+using FloorBreaker.Bombs.Domain;
 
 namespace FloorBreaker.Network.Infrastructure
 {
     /// <summary>
-    /// プレイヤー状態の同期。プレイヤーごとに1インスタンス。
-    /// ホスト: PlayerModel → [Networked]
-    /// クライアント: [Networked] → PlayerModel (ミラー)
+    /// 全プレイヤーの状態を同期する。NetworkArray で最大4人分を管理。
+    /// プレハブに事前配置し、Spawned() で Initialize を受ける。
     /// </summary>
     public class NetworkPlayerStateAdapter : NetworkBehaviour
     {
-        // --- 基本状態 ---
-        [Networked] public int Hp { get; set; }
-        [Networked] public int Coins { get; set; }
-        [Networked] public int PosX { get; set; }
-        [Networked] public int PosY { get; set; }
-        [Networked] public byte Facing { get; set; }
-        [Networked] public float MoveSpeed { get; set; }
+        private const int MaxPlayers = 4;
 
-        // --- 状態フラグ ---
-        [Networked] public NetworkBool IsInvulnerable { get; set; }
-        [Networked] public NetworkBool IsForced { get; set; }
-        [Networked] public int ForcedTargetX { get; set; }
-        [Networked] public int ForcedTargetY { get; set; }
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<int> Hp => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<int> Coins => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<int> PosX => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<int> PosY => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<byte> Facing => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<float> Speed => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<NetworkBool> Invulnerable => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<NetworkBool> Forced => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<NetworkBool> FireShieldArr => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<NetworkBool> LevitationArr => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<NetworkBool> DashArr => default;
+        [Networked, Capacity(MaxPlayers)] public NetworkArray<NetworkBool> DualShotArr => default;
 
-        // --- クールダウン ---
-        [Networked] public float BreakCooldown { get; set; }
-        [Networked] public float FireCooldown { get; set; }
-
-        // --- 一時効果・アビリティ ---
-        [Networked] public NetworkBool FireShield { get; set; }
-        [Networked] public NetworkBool Levitation { get; set; }
-        [Networked] public NetworkBool HasDash { get; set; }
-        [Networked] public NetworkBool HasDualShot { get; set; }
-
-        private PlayerModel _player;
-        private Bombs.Domain.BombCooldownState _cooldown;
+        private IReadOnlyList<PlayerModel> _players;
+        private IReadOnlyList<BombCooldownState> _cooldowns;
+        private int _playerCount;
         private ChangeDetector _changeDetector;
 
-        public void Initialize(PlayerModel player, Bombs.Domain.BombCooldownState cooldown)
+        public void Initialize(IReadOnlyList<PlayerModel> players, IReadOnlyList<BombCooldownState> cooldowns)
         {
-            _player = player;
-            _cooldown = cooldown;
+            _players = players;
+            _cooldowns = cooldowns;
+            _playerCount = players.Count;
         }
 
         public override void Spawned()
@@ -54,73 +48,48 @@ namespace FloorBreaker.Network.Infrastructure
         /// <summary>ホスト側: Domain → [Networked]</summary>
         public void SyncFromDomain()
         {
-            if (_player == null) return;
-
-            Hp = _player.Stats.CurrentHp.CurrentValue;
-            Coins = _player.Stats.Coins.CurrentValue;
-            PosX = _player.CurrentPosition.X;
-            PosY = _player.CurrentPosition.Y;
-            Facing = (byte)_player.CurrentFacing;
-            MoveSpeed = _player.Stats.MoveSpeed;
-
-            IsInvulnerable = _player.Invulnerability.IsInvulnerable;
-            IsForced = _player.ForcedMove.IsForced;
-            if (_player.ForcedMove.IsForced)
+            if (_players == null) return;
+            for (int i = 0; i < _playerCount; i++)
             {
-                ForcedTargetX = _player.ForcedMove.Target.X;
-                ForcedTargetY = _player.ForcedMove.Target.Y;
+                var p = _players[i];
+                Hp.Set(i, p.Stats.CurrentHp.CurrentValue);
+                Coins.Set(i, p.Stats.Coins.CurrentValue);
+                PosX.Set(i, p.CurrentPosition.X);
+                PosY.Set(i, p.CurrentPosition.Y);
+                Facing.Set(i, (byte)p.CurrentFacing);
+                Speed.Set(i, p.Stats.MoveSpeed);
+                Invulnerable.Set(i, p.Invulnerability.IsInvulnerable);
+                Forced.Set(i, p.ForcedMove.IsForced);
+                FireShieldArr.Set(i, p.Stats.FireShieldActive.CurrentValue);
+                LevitationArr.Set(i, p.Stats.LevitationActive.CurrentValue);
+                DashArr.Set(i, p.Build.HasDash);
+                DualShotArr.Set(i, p.Build.HasDualShot);
             }
-
-            if (_cooldown != null)
-            {
-                BreakCooldown = _cooldown.BreakBombRemaining.CurrentValue;
-                FireCooldown = _cooldown.FireBombRemaining.CurrentValue;
-            }
-
-            FireShield = _player.Stats.FireShieldActive.CurrentValue;
-            Levitation = _player.Stats.LevitationActive.CurrentValue;
-            HasDash = _player.Build.HasDash;
-            HasDualShot = _player.Build.HasDualShot;
         }
 
         /// <summary>クライアント側: [Networked] → Domain ミラー</summary>
         public void SyncToLocal()
         {
-            if (_player == null || Object.HasStateAuthority) return;
+            if (_players == null || Object.HasStateAuthority) return;
+            if (_changeDetector == null) return;
 
-            foreach (var change in _changeDetector.DetectChanges(this))
+            foreach (var _ in _changeDetector.DetectChanges(this))
             {
-                switch (change)
+                // 変更検知されたら全プレイヤーを一括反映（NetworkArray の個別変更検知は困難）
+                for (int i = 0; i < _playerCount; i++)
                 {
-                    case nameof(Hp):
-                        _player.Stats.SetHpDirect(Hp);
-                        break;
-                    case nameof(Coins):
-                        _player.Stats.SetCoinsDirect(Coins);
-                        break;
-                    case nameof(PosX):
-                    case nameof(PosY):
-                        _player.CurrentPosition = new GridPos(PosX, PosY);
-                        break;
-                    case nameof(Facing):
-                        _player.CurrentFacing = (Direction8)Facing;
-                        break;
-                    case nameof(MoveSpeed):
-                        _player.Stats.MoveSpeed = MoveSpeed;
-                        break;
-                    case nameof(FireShield):
-                        _player.Stats.SetFireShieldDirect(FireShield);
-                        break;
-                    case nameof(Levitation):
-                        _player.Stats.SetLevitationDirect(Levitation);
-                        break;
-                    case nameof(HasDash):
-                        _player.Build.HasDash = HasDash;
-                        break;
-                    case nameof(HasDualShot):
-                        _player.Build.HasDualShot = HasDualShot;
-                        break;
+                    var p = _players[i];
+                    p.Stats.SetHpDirect(Hp[i]);
+                    p.Stats.SetCoinsDirect(Coins[i]);
+                    p.CurrentPosition = new GridPos(PosX[i], PosY[i]);
+                    p.CurrentFacing = (Direction8)Facing[i];
+                    p.Stats.MoveSpeed = Speed[i];
+                    p.Stats.SetFireShieldDirect(FireShieldArr[i]);
+                    p.Stats.SetLevitationDirect(LevitationArr[i]);
+                    p.Build.HasDash = DashArr[i];
+                    p.Build.HasDualShot = DualShotArr[i];
                 }
+                break; // 1回の反映で十分
             }
         }
     }

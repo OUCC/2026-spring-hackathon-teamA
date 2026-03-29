@@ -53,7 +53,7 @@ namespace FloorBreaker.Network.Infrastructure
         public void SpawnNetworkMatchRunner()
         {
             if (_runner == null || !IsHost) return;
-            var prefab = Resources.Load<NetworkObject>("Network/NetworkMatchRunner");
+            var prefab = Resources.Load<NetworkObject>("Network/NetworkMatchRunner2");
             if (prefab != null)
                 _runner.Spawn(prefab);
             else
