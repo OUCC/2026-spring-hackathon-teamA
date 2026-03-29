@@ -21,6 +21,7 @@ namespace FloorBreaker.Bootstrap
         private readonly SplitScreenCameraSetup _cameraSetup;
         private readonly ITimeProvider _timeProvider;
         private readonly CpuPlayerService _cpuPlayerService;
+        private readonly bool _isOnline;
         private bool _disposed;
 
         public MatchTickRunner(
@@ -30,7 +31,8 @@ namespace FloorBreaker.Bootstrap
             MatchPresenters presenters,
             SplitScreenCameraSetup cameraSetup,
             ITimeProvider timeProvider,
-            CpuPlayerService cpuPlayerService = null)
+            CpuPlayerService cpuPlayerService = null,
+            bool isOnline = false)
         {
             _scheduler = scheduler;
             _inputBridge = inputBridge;
@@ -39,6 +41,7 @@ namespace FloorBreaker.Bootstrap
             _cameraSetup = cameraSetup;
             _timeProvider = timeProvider;
             _cpuPlayerService = cpuPlayerService;
+            _isOnline = isOnline;
         }
 
         public void Tick()
@@ -47,16 +50,15 @@ namespace FloorBreaker.Bootstrap
 
             float dt = _timeProvider.DeltaTime;
 
-            // 入力のリピート移動処理
-            _inputBridge.Tick(dt);
+            // オンラインモードでは入力・CPU・Scheduler は NetworkMatchRunner が駆動
+            if (!_isOnline)
+            {
+                _inputBridge.Tick(dt);
+                _cpuPlayerService?.Tick(dt);
+                _scheduler.Tick(dt);
+            }
 
-            // CPU プレイヤーの思考・行動
-            _cpuPlayerService?.Tick(dt);
-
-            // Domain / Application の Tick
-            _scheduler.Tick(dt);
-
-            // Presentation の Tick
+            // Presentation の Tick（全モードで実行）
             _presenters.TickPresenters(dt);
 
             // カメラ追従

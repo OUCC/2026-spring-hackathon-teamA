@@ -9,12 +9,16 @@ namespace FloorBreaker.Network.Infrastructure
     /// <summary>
     /// NetworkRunner の GameObject に付与し、INetworkRunnerCallbacks を実装する。
     /// 受け取ったコールバックを NetworkConnectionService に委譲する薄いブリッジ。
+    /// 注: Initialize() はセッター注入だが、Fusion が AddComponent で MonoBehaviour を追加するため
+    /// コンストラクタ DI は使用不可能（Fusion アーキテクチャ制約）。
     /// </summary>
     public sealed class FusionCallbacksBridge : MonoBehaviour, INetworkRunnerCallbacks
     {
         private NetworkConnectionService _service;
+        private NetworkInputCollector _inputCollector;
 
         public void Initialize(NetworkConnectionService service) => _service = service;
+        public void SetInputCollector(NetworkInputCollector collector) => _inputCollector = collector;
 
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
             => _service?.HandlePlayerJoined(runner, player);
@@ -33,7 +37,11 @@ namespace FloorBreaker.Network.Infrastructure
 
         // --- Phase 1 で未使用のコールバック ---
 
-        public void OnInput(NetworkRunner runner, NetworkInput input) { }
+        public void OnInput(NetworkRunner runner, NetworkInput input)
+        {
+            if (_inputCollector != null)
+                input.Set(_inputCollector.CollectInput(runner));
+        }
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
         public void OnConnectedToServer(NetworkRunner runner) { }
         public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }

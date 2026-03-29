@@ -95,6 +95,22 @@ namespace FloorBreaker.Stage.Domain
 
         public TileCoordRange GetCurrentBounds() => Bounds.Current;
 
+        /// <summary>
+        /// ネットワーク同期用: 全タイルデータを一括ロードする。
+        /// TileChanged イベントは発火しない（Presentation はスナップショット後に再構築される想定）。
+        /// </summary>
+        internal void LoadSnapshot(TileData[,] snapshot)
+        {
+            int w = Math.Min(snapshot.GetLength(0), _tiles.GetLength(0));
+            int h = Math.Min(snapshot.GetLength(1), _tiles.GetLength(1));
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    _tiles[x, y] = snapshot[x, y];
+        }
+
+        /// <summary>タイルデータの内部配列への直接参照（読み取り用スナップショット生成向け）。</summary>
+        internal TileData[,] GetTilesRaw() => _tiles;
+
         public void Dispose()
         {
             _tileChanged.Dispose();

@@ -26,6 +26,7 @@ using FloorBreaker.Cameras.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
 using FloorBreaker.CpuPlayer.Application;
 using FloorBreaker.ScriptableObjects.Configs;
+using FloorBreaker.Network.Infrastructure;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -51,6 +52,7 @@ namespace FloorBreaker.Bootstrap
             RegisterInput(builder);
             RegisterCpuPlayer(builder); // 常に登録 (実際の resolve は MatchTickRunner でゲート)
             RegisterPresentation(builder);
+            RegisterNetwork(builder);
             RegisterEntryPoints(builder);
         }
 
@@ -80,14 +82,8 @@ namespace FloorBreaker.Bootstrap
             builder.Register<TileTimerService>(Lifetime.Scoped);
             builder.Register<StageQueryService>(Lifetime.Scoped);
 
-            // WallGenerationService: StageConfig の壁パラメータを使用
-            builder.Register(c =>
-            {
-                var stageConfig = c.Resolve<StageConfig>();
-                return new WallGenerationService(
-                    stageConfig.WallSeedPercent, stageConfig.WallGrowthChance,
-                    stageConfig.WallTargetPercent, stageConfig.SpawnProtectionRadius);
-            }, Lifetime.Scoped);
+            // StageGenerationService: 壁 → ガス脈 → プリセットの一括生成
+            builder.Register<StageGenerationService>(Lifetime.Scoped);
 
             builder.Register<StageShrinkService>(Lifetime.Scoped);
             builder.Register<SafeTileSearchService>(Lifetime.Scoped);
@@ -376,13 +372,64 @@ namespace FloorBreaker.Bootstrap
                 .As<IImpactFreezeService>();
         }
 
+        private static void RegisterNetwork(IContainerBuilder builder)
+        {
+            // NetworkInputCollector: オンライン時のみ実体を生成
+            builder.Register(c =>
+            {
+                var modeConfig = c.Resolve<MatchModeConfig>();
+                if (!modeConfig.IsOnline) return (NetworkInputCollector)null;
+                var mp = c.Resolve<MatchPlayers>();
+                var localPlayer = mp.All[0]; // TODO: クライアント側は自分の PlayerRef に対応
+                return new NetworkInputCollector(c.Resolve<IBalanceParameters>(), localPlayer);
+            }, Lifetime.Scoped);
+
+            // NetworkInputDispatcher: ホスト側で FloorBreakerInput → Domain サービス
+            builder.Register(c =>
+            {
+                var mp = c.Resolve<MatchPlayers>();
+                return new NetworkInputDispatcher(
+                    c.Resolve<PlayerMoveService>(),
+                    c.Resolve<BombFlightTracker>(),
+                    c.Resolve<BombLaunchUseCase>(),
+                    c.Resolve<StageModel>(),
+                    mp.All,
+                    c.Resolve<MatchClock>(),
+                    mp.Drafts,
+                    c.Resolve<UpgradeSelectionState>(),
+                    c.Resolve<IRandomProvider>(),
+                    c.Resolve<IBalanceParameters>());
+            }, Lifetime.Scoped);
+
+            // NetworkServiceBridge: VContainer → NetworkBehaviour 橋渡し
+            builder.Register(c =>
+            {
+                var mp = c.Resolve<MatchPlayers>();
+                return new NetworkServiceBridge(
+                    c.Resolve<MatchPhaseScheduler>(),
+                    c.Resolve<NetworkInputDispatcher>(),
+                    c.Resolve<MatchClock>(),
+                    mp,
+                    c.Resolve<StageModel>(),
+                    c.Resolve<SlimeRegistry>(),
+                    c.Resolve<BombFlightTracker>());
+            }, Lifetime.Scoped);
+
+            builder.RegisterBuildCallback(c =>
+            {
+                var modeConfig = c.Resolve<MatchModeConfig>();
+                if (modeConfig.IsOnline)
+                    NetworkServiceBridge.Current = c.Resolve<NetworkServiceBridge>();
+            });
+        }
+
         private static void RegisterEntryPoints(IContainerBuilder builder)
         {
             builder.RegisterEntryPoint<MatchInitializer>();
 
-            // MatchTickRunner: CpuPlayerService は常に注入（CPU スロットがなければ空リストで何もしない）
             builder.Register(c =>
             {
+                var modeConfig = c.Resolve<MatchModeConfig>();
                 var cpuService = c.Resolve<CpuPlayerService>();
 
                 var spectatorReader = new FloorBreaker.Input.Infrastructure.SpectatorInputReader();
@@ -395,7 +442,8 @@ namespace FloorBreaker.Bootstrap
                     c.Resolve<MatchPresenters>(),
                     c.Resolve<SplitScreenCameraSetup>(),
                     c.Resolve<ITimeProvider>(),
-                    cpuService);
+                    cpuService,
+                    isOnline: modeConfig.IsOnline);
             }, Lifetime.Scoped).AsImplementedInterfaces();
         }
 

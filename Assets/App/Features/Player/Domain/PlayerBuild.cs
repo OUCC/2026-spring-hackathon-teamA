@@ -41,7 +41,7 @@ namespace FloorBreaker.Player.Domain
         public bool HasDualShot { get; set; }
 
         // --- 移動速度 ---
-        public float MoveSpeedBonus { get; private set; }
+        public float MoveSpeedBonus { get; internal set; }
 
         public PlayerBuild(
             int fireFlightRange, int fireEffectRange, int fireDamage, float fireCooldown,

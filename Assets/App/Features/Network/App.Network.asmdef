@@ -5,6 +5,13 @@
         "App.Shared.Domain",
         "App.Shared.Application",
         "App.MatchFlow",
+        "App.Player",
+        "App.Bombs",
+        "App.Stage",
+        "App.Slimes",
+        "App.Upgrades",
+        "App.Input",
+        "App.ScriptableObjects",
         "Fusion.Unity",
         "UniTask",
         "R3.Unity"

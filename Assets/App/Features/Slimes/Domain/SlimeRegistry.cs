@@ -39,6 +39,25 @@ namespace FloorBreaker.Slimes.Domain
             }
         }
 
+        public SlimeModel TryGet(SlimeId id)
+        {
+            _slimes.TryGetValue(id, out var slime);
+            return slime;
+        }
+
+        /// <summary>
+        /// ネットワーク同期用: リモートからスライムを追加する。
+        /// Spawned イベントを発火する（Presentation が購読して表示する）。
+        /// </summary>
+        public void AddRemote(SlimeId id, SlimeType type, GridPos position)
+        {
+            if (_slimes.ContainsKey(id)) return;
+            var slime = new SlimeModel(id, type, position, 1f);
+            _slimes[id] = slime;
+            _positionIndex[position] = id;
+            _spawned.OnNext(new SlimeSpawnedEvent(id, type, position));
+        }
+
         public SlimeModel GetAt(GridPos pos)
         {
             if (_positionIndex.TryGetValue(pos, out var id) && _slimes.TryGetValue(id, out var slime))

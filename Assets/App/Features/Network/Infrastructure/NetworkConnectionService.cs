@@ -40,6 +40,26 @@ namespace FloorBreaker.Network.Infrastructure
         public NetworkRunner Runner => _runner;
         public LobbyController LobbyController => _lobbyController;
 
+        /// <summary>LobbyController が発見/生成された際に発火する（static event の代替）。</summary>
+        public event Action<LobbyController> LobbyControllerDiscovered;
+
+        /// <summary>入力コレクターを FusionCallbacksBridge にセットする。</summary>
+        public void SetInputCollector(NetworkInputCollector collector)
+        {
+            _callbacksBridge?.SetInputCollector(collector);
+        }
+
+        /// <summary>NetworkMatchRunner プレハブをスポーンする。ホストのみ。</summary>
+        public void SpawnNetworkMatchRunner()
+        {
+            if (_runner == null || !IsHost) return;
+            var prefab = Resources.Load<NetworkObject>("Network/NetworkMatchRunner");
+            if (prefab != null)
+                _runner.Spawn(prefab);
+            else
+                Debug.LogWarning("[NetworkConnectionService] NetworkMatchRunner prefab not found");
+        }
+
         /// <summary>ホストとしてルームを作成する。</summary>
         public async UniTask CreateRoomAsync(string roomCode, int maxPlayers)
         {
@@ -91,6 +111,7 @@ namespace FloorBreaker.Network.Infrastructure
             {
                 var obj = _runner.Spawn(_lobbyControllerPrefab);
                 _lobbyController = obj.GetComponent<LobbyController>();
+                LobbyControllerDiscovered?.Invoke(_lobbyController);
             }
             else
             {
@@ -162,9 +183,13 @@ namespace FloorBreaker.Network.Infrastructure
             _connectedPlayerCount.Value = runner.ActivePlayers.Count();
 
             // クライアント側: ホストが Spawn した LobbyController を検出
+            // Fusion の制約上、クライアントは NetworkObject のスポーン通知を直接受け取れないため
+            // シーン検索をフォールバックとして使用する
             if (!IsHost && _lobbyController == null)
             {
                 _lobbyController = UnityEngine.Object.FindAnyObjectByType<LobbyController>();
+                if (_lobbyController != null)
+                    LobbyControllerDiscovered?.Invoke(_lobbyController);
             }
         }
 
@@ -213,7 +238,7 @@ namespace FloorBreaker.Network.Infrastructure
             var runnerObj = new GameObject("[NetworkRunner]");
             UnityEngine.Object.DontDestroyOnLoad(runnerObj);
             _runner = runnerObj.AddComponent<NetworkRunner>();
-            _runner.ProvideInput = IsHost;
+            _runner.ProvideInput = true; // 全ピアが入力を送信（クライアントも OnInput() が必要）
 
             _callbacksBridge = runnerObj.AddComponent<FusionCallbacksBridge>();
             _callbacksBridge.Initialize(this);
