@@ -2,8 +2,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer;
 using VContainer.Unity;
+using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Input.Infrastructure;
+using FloorBreaker.Stage.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
+using FloorBreaker.UI.Title.Presentation;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -14,11 +17,25 @@ namespace FloorBreaker.Bootstrap
     public sealed class TitleLifetimeScope : LifetimeScope
     {
         [SerializeField] private InputActionAsset _inputActions;
+        [SerializeField] private TileSpriteConfig _tileSpriteConfig;
+        [SerializeField] private GameObject _tilePrefab;
 
         protected override void Configure(IContainerBuilder builder)
         {
             // TitleUIDocument: シーン上の MonoBehaviour
             builder.RegisterComponentInHierarchy<TitleUIDocument>();
+
+            // TileSpriteConfig: ステージプレビューで実タイル表示に使用
+            if (_tileSpriteConfig != null)
+                builder.RegisterInstance(_tileSpriteConfig);
+
+            // StagePreviewRenderer: オフスクリーンプレビュー
+            if (_tilePrefab != null && _tileSpriteConfig != null)
+            {
+                builder.Register(c => new StagePreviewRenderer(
+                    _tilePrefab, _tileSpriteConfig, c.Resolve<IBalanceParameters>()),
+                    Lifetime.Scoped);
+            }
 
             // KeyRebindingService: InputActionAsset が設定されている場合のみ登録
             if (_inputActions != null)

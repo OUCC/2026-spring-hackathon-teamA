@@ -5,6 +5,7 @@ using R3;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Network.Infrastructure;
+using FloorBreaker.Stage.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
 
 namespace FloorBreaker.UI.Title.Presentation
@@ -12,12 +13,11 @@ namespace FloorBreaker.UI.Title.Presentation
     /// <summary>
     /// ロビー UI の制御を担当する Presenter。
     /// ホスト/クライアント両方のフローを管理する。
+    /// ホスト: スロット・ステージの操作 + LobbyController 同期。
+    /// クライアント: 読み取り専用表示 + LobbyController 変更検知。
     /// </summary>
     public sealed class NetworkLobbyPresenter : IDisposable
     {
-        private static readonly string[] PlayerColors = { "p1", "p2", "p3", "p4" };
-        private static readonly string[] PlayerLabels = { "P1", "P2", "P3", "P4" };
-
         private readonly TitleUIDocument _doc;
         private readonly NetworkConnectionService _connectionService;
         private readonly MatchModeConfig _modeConfig;
@@ -26,7 +26,12 @@ namespace FloorBreaker.UI.Title.Presentation
         private readonly IRandomProvider _random;
 
         private readonly CompositeDisposable _subscriptions = new();
+        private readonly TileSpriteConfig _tileSpriteConfig;
+        private readonly StagePreviewRenderer _previewRenderer;
+        private StageSelectUI _stageSelectUI;
         private bool _isHost;
+        private bool _boundToLobby;
+        private bool _slotsInitialized;
 
         public NetworkLobbyPresenter(
             TitleUIDocument doc,
@@ -34,7 +39,9 @@ namespace FloorBreaker.UI.Title.Presentation
             MatchModeConfig modeConfig,
             IAudioService audio,
             ISceneTransitionService sceneTransition,
-            IRandomProvider random)
+            IRandomProvider random,
+            TileSpriteConfig tileSpriteConfig = null,
+            StagePreviewRenderer previewRenderer = null)
         {
             _doc = doc;
             _connectionService = connectionService;
@@ -42,10 +49,11 @@ namespace FloorBreaker.UI.Title.Presentation
             _audio = audio;
             _sceneTransition = sceneTransition;
             _random = random;
+            _tileSpriteConfig = tileSpriteConfig;
+            _previewRenderer = previewRenderer;
 
-            // 接続状態の変更を購読
             _connectionService.ConnectedPlayerCount
-                .Subscribe(count => UpdatePlayerList(count))
+                .Subscribe(_ => RefreshAllSlotUI())
                 .AddTo(_subscriptions);
 
             _connectionService.ErrorOccurred
@@ -57,29 +65,31 @@ namespace FloorBreaker.UI.Title.Presentation
                 .AddTo(_subscriptions);
         }
 
-        /// <summary>ホストとしてロビーに入る。</summary>
+        // ═══════════════════════════════════════════
+        //  Public API
+        // ═══════════════════════════════════════════
+
         public void EnterAsHost()
         {
             _isHost = true;
             SetupHostUI();
+            InitializeSlotsAndStage();
             CreateRoomAsync().Forget();
         }
 
-        /// <summary>クライアントとしてロビーに入る。</summary>
         public void EnterAsClient()
         {
             _isHost = false;
             SetupClientUI();
         }
 
-        /// <summary>ロビーから離脱する。</summary>
         public async UniTask LeaveAsync()
         {
             await _connectionService.ShutdownAsync();
             _modeConfig.ResetOnlineState();
+            _boundToLobby = false;
         }
 
-        /// <summary>ホストがマッチを開始する。</summary>
         public void StartMatch()
         {
             if (!_isHost) return;
@@ -87,7 +97,6 @@ namespace FloorBreaker.UI.Title.Presentation
             _modeConfig.IsOnline = true;
             _modeConfig.IsHost = true;
 
-            // LobbyController 経由でクライアントに開始シグナルと設定を送信
             var lobby = _connectionService.LobbyController;
             if (lobby != null)
             {
@@ -98,18 +107,9 @@ namespace FloorBreaker.UI.Title.Presentation
                 lobby.StartMatch();
             }
 
-            // クライアントにシグナルが届くまで少し待ってからシーン遷移
             HostStartMatchAsync().Forget();
         }
 
-        private async UniTaskVoid HostStartMatchAsync()
-        {
-            // Fusion が [Networked] 変更を送信する時間を確保（数 Tick 分）
-            await UniTask.Delay(500);
-            _sceneTransition.LoadMatchAsync().Forget();
-        }
-
-        /// <summary>クライアントがルームコード入力後に接続する。</summary>
         public void JoinWithCode()
         {
             var input = _doc.LobbyRoomCodeInput?.value ?? string.Empty;
@@ -127,30 +127,212 @@ namespace FloorBreaker.UI.Title.Presentation
         public void Dispose()
         {
             LobbyController.OnLobbySpawned -= OnLobbySpawned;
+            _stageSelectUI?.Dispose();
             _subscriptions.Dispose();
         }
 
-        // --- Private ---
+        // ═══════════════════════════════════════════
+        //  UI 初期化
+        // ═══════════════════════════════════════════
 
         private void SetupHostUI()
         {
-            // ホスト: コード表示、START ボタン表示
             _doc.LobbyRoomCodeDisplay.style.display = DisplayStyle.Flex;
             _doc.LobbyJoinSection.style.display = DisplayStyle.None;
             _doc.LobbyStartButton.style.display = DisplayStyle.Flex;
             _doc.LobbyStatusLabel.text = "接続中...";
-            ClearPlayerList();
+            _doc.LobbySlots.style.display = DisplayStyle.Flex;
+            _doc.LobbyStageSection.style.display = DisplayStyle.Flex;
         }
 
         private void SetupClientUI()
         {
-            // クライアント: コード入力、START ボタン非表示
             _doc.LobbyRoomCodeDisplay.style.display = DisplayStyle.None;
             _doc.LobbyJoinSection.style.display = DisplayStyle.Flex;
             _doc.LobbyStartButton.style.display = DisplayStyle.None;
             _doc.LobbyStatusLabel.text = "ルームコードを入力してください";
             _doc.LobbyRoomCodeInput.value = string.Empty;
-            ClearPlayerList();
+            // スロット・ステージはクライアント接続後に表示
+            _doc.LobbySlots.style.display = DisplayStyle.None;
+            _doc.LobbyStageSection.style.display = DisplayStyle.None;
+        }
+
+        private void InitializeSlotsAndStage()
+        {
+            if (_slotsInitialized) return;
+            _slotsInitialized = true;
+
+            SetupSlotHandlers();
+
+            _stageSelectUI = new StageSelectUI(
+                _doc.LobbyStageList, _doc.LobbyStagePreviewThumb, _doc.LobbyStagePreviewName,
+                _doc.LobbyStagePreviewSize, _doc.LobbyStagePreviewDesc,
+                _doc.LobbyStagePreviewGimmicks, _doc.LobbyGimmickDetails,
+                _modeConfig, _tileSpriteConfig,
+                previewRenderer: _previewRenderer,
+                random: _random,
+                onStageSelected: _ => { _audio?.PlaySfx(SfxIds.UiNavigate); SyncLobbyConfig(); },
+                isReadOnly: !_isHost);
+            _stageSelectUI.PopulateStageList();
+        }
+
+        // ═══════════════════════════════════════════
+        //  スロット管理
+        // ═══════════════════════════════════════════
+
+        private void SetupSlotHandlers()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                int slot = i;
+
+                _doc.LobbySlotToggleButtons[i]?.RegisterCallback<ClickEvent>(_ =>
+                {
+                    if (!_isHost) return;
+                    _audio?.PlaySfx(SfxIds.UiNavigate);
+                    OnToggleSlot(slot);
+                });
+
+                _doc.LobbySlotAddButtons[i]?.RegisterCallback<ClickEvent>(_ =>
+                {
+                    if (!_isHost) return;
+                    _audio?.PlaySfx(SfxIds.UiNavigate);
+                    ExpandSlot(slot);
+                });
+
+                _doc.LobbySlotRemoveButtons[i]?.RegisterCallback<ClickEvent>(_ =>
+                {
+                    if (!_isHost) return;
+                    _audio?.PlaySfx(SfxIds.UiNavigate);
+                    CollapseSlot(slot);
+                });
+            }
+
+            // P1 はホスト固定なのでトグル非表示
+            if (_doc.LobbySlotToggleButtons[0] != null)
+                _doc.LobbySlotToggleButtons[0].style.display = DisplayStyle.None;
+
+            RefreshAllSlotUI();
+        }
+
+        private void OnToggleSlot(int slot)
+        {
+            if (slot == 0) return; // P1 はホスト固定
+
+            _modeConfig.IsCpuSlot[slot] = !_modeConfig.IsCpuSlot[slot];
+            RefreshSlotUI(slot);
+            SyncLobbyConfig();
+        }
+
+        private void ExpandSlot(int slot)
+        {
+            if (slot < 2) return; // P1/P2 は常に存在
+
+            _modeConfig.IsCpuSlot[slot] = true; // デフォルト CPU
+            var content = _doc.LobbySlotContents[slot];
+            var addBtn = _doc.LobbySlotAddButtons[slot];
+            var elem = _doc.LobbySlotElements[slot];
+
+            if (content != null) content.style.display = DisplayStyle.Flex;
+            if (addBtn != null) addBtn.style.display = DisplayStyle.None;
+            if (elem != null)
+            {
+                elem.RemoveFromClassList("setup-slot--empty");
+                elem.AddToClassList("setup-slot--active");
+            }
+
+            RecalcPlayerCount();
+            RefreshSlotUI(slot);
+            SyncLobbyConfig();
+        }
+
+        private void CollapseSlot(int slot)
+        {
+            if (slot < 2) return;
+
+            _modeConfig.IsCpuSlot[slot] = false;
+            var content = _doc.LobbySlotContents[slot];
+            var addBtn = _doc.LobbySlotAddButtons[slot];
+            var elem = _doc.LobbySlotElements[slot];
+
+            if (content != null) content.style.display = DisplayStyle.None;
+            if (addBtn != null) addBtn.style.display = DisplayStyle.Flex;
+            if (elem != null)
+            {
+                elem.RemoveFromClassList("setup-slot--active");
+                elem.AddToClassList("setup-slot--empty");
+            }
+
+            RecalcPlayerCount();
+            SyncLobbyConfig();
+        }
+
+        private void RecalcPlayerCount()
+        {
+            int count = 2; // P1 + P2 は常に存在
+            for (int i = 2; i < 4; i++)
+            {
+                var content = _doc.LobbySlotContents[i];
+                if (content != null && content.style.display != DisplayStyle.None)
+                    count++;
+            }
+            _modeConfig.PlayerCount = count;
+        }
+
+        private void RefreshAllSlotUI()
+        {
+            for (int i = 0; i < _modeConfig.PlayerCount; i++)
+                RefreshSlotUI(i);
+        }
+
+        private void RefreshSlotUI(int slot)
+        {
+            var typeLabel = _doc.LobbySlotTypeLabels[slot];
+            var toggleBtn = _doc.LobbySlotToggleButtons[slot];
+            if (typeLabel == null) return;
+
+            bool isCpu = _modeConfig.IsCpuAt(slot);
+            int connectedCount = _connectionService.ConnectedPlayerCount.CurrentValue;
+
+            if (slot == 0)
+            {
+                typeLabel.text = "ホスト";
+            }
+            else if (isCpu)
+            {
+                typeLabel.text = "CPU";
+                if (toggleBtn != null) toggleBtn.text = "Human に変更";
+            }
+            else
+            {
+                bool isConnected = slot < connectedCount;
+                typeLabel.text = isConnected ? $"プレイヤー {slot + 1}" : "(空席)";
+                if (toggleBtn != null) toggleBtn.text = "CPU に変更";
+            }
+
+            // クライアントは操作ボタン非表示
+            if (!_isHost)
+            {
+                if (toggleBtn != null) toggleBtn.style.display = DisplayStyle.None;
+                var addBtn = _doc.LobbySlotAddButtons[slot];
+                if (addBtn != null) addBtn.style.display = DisplayStyle.None;
+                var removeBtn = _doc.LobbySlotRemoveButtons[slot];
+                if (removeBtn != null) removeBtn.style.display = DisplayStyle.None;
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        //  ネットワーク同期
+        // ═══════════════════════════════════════════
+
+        private void SyncLobbyConfig()
+        {
+            if (!_isHost) return;
+            var lobby = _connectionService.LobbyController;
+            lobby?.SetLobbyConfig(
+                _modeConfig.PlayerCount,
+                _modeConfig.IsCpuSlot,
+                _modeConfig.SelectedStageName);
         }
 
         private async UniTaskVoid CreateRoomAsync()
@@ -168,6 +350,9 @@ namespace FloorBreaker.UI.Title.Presentation
                 _modeConfig.RoomCode = roomCode;
 
                 _doc.LobbyStatusLabel.text = "相手を待っています...";
+
+                // 初期設定を LobbyController に反映
+                SyncLobbyConfig();
             }
             catch (Exception ex)
             {
@@ -188,13 +373,16 @@ namespace FloorBreaker.UI.Title.Presentation
                 _modeConfig.IsHost = false;
                 _modeConfig.RoomCode = roomCode;
 
-                // 接続成功: コード表示に切り替え
                 _doc.LobbyJoinSection.style.display = DisplayStyle.None;
                 _doc.LobbyRoomCodeDisplay.style.display = DisplayStyle.Flex;
                 _doc.LobbyRoomCodeDisplay.text = roomCode;
                 _doc.LobbyStatusLabel.text = "接続完了。ホストの開始を待っています...";
 
-                // LobbyController のマッチ開始シグナルを購読
+                // スロット・ステージを読み取り専用で表示
+                _doc.LobbySlots.style.display = DisplayStyle.Flex;
+                _doc.LobbyStageSection.style.display = DisplayStyle.Flex;
+                InitializeSlotsAndStage();
+
                 SubscribeToMatchStart();
             }
             catch (Exception ex)
@@ -203,55 +391,22 @@ namespace FloorBreaker.UI.Title.Presentation
             }
         }
 
-        private void UpdatePlayerList(int playerCount)
+        private async UniTaskVoid HostStartMatchAsync()
         {
-            var container = _doc.LobbyPlayerList;
-            if (container == null) return;
-
-            container.Clear();
-
-            for (int i = 0; i < _modeConfig.PlayerCount; i++)
-            {
-                bool isConnected = i < playerCount;
-                bool isCpu = _modeConfig.IsCpuAt(i);
-
-                var slot = new VisualElement();
-                slot.AddToClassList("lobby-player-slot");
-                if (!isConnected && !isCpu) slot.AddToClassList("lobby-player-slot--empty");
-
-                var label = new Label(PlayerLabels[i]);
-                label.AddToClassList("lobby-player-slot__label");
-                label.AddToClassList($"lobby-player-slot__label--{PlayerColors[i]}");
-                slot.Add(label);
-
-                var name = new Label(isCpu ? "CPU" : isConnected ? (i == 0 ? "ホスト" : $"プレイヤー {i + 1}") : "(空席)");
-                name.AddToClassList("lobby-player-slot__name");
-                slot.Add(name);
-
-                var status = new Label(isCpu ? "" : isConnected ? "接続済み" : "待機中");
-                status.AddToClassList("lobby-player-slot__status");
-                slot.Add(status);
-
-                container.Add(slot);
-            }
+            await UniTask.Delay(500);
+            _sceneTransition.LoadMatchAsync().Forget();
         }
 
-        private void ClearPlayerList()
-        {
-            _doc.LobbyPlayerList?.Clear();
-        }
+        // ═══════════════════════════════════════════
+        //  クライアント側: LobbyController 購読
+        // ═══════════════════════════════════════════
 
         private void SubscribeToMatchStart()
         {
-            // LobbyController が Spawned されたときに通知を受け取る
             LobbyController.OnLobbySpawned += OnLobbySpawned;
-
-            // 既に存在する場合（接続が速かった場合のフォールバック）
             var existing = _connectionService.LobbyController;
             if (existing != null) BindToLobby(existing);
         }
-
-        private bool _boundToLobby;
 
         private void OnLobbySpawned(LobbyController lobby)
         {
@@ -263,6 +418,52 @@ namespace FloorBreaker.UI.Title.Presentation
             if (_boundToLobby || _isHost) return;
             _boundToLobby = true;
             lobby.OnMatchStartDetected += OnClientMatchStart;
+            lobby.OnLobbyConfigChanged += OnClientConfigChanged;
+
+            // 初回の設定を反映
+            OnClientConfigChanged();
+        }
+
+        private void OnClientConfigChanged()
+        {
+            var lobby = _connectionService.LobbyController;
+            if (lobby == null) return;
+
+            _modeConfig.PlayerCount = lobby.PlayerCount;
+            _modeConfig.IsCpuSlot = LobbyController.DecodeCpuSlots(lobby.CpuSlotMask, lobby.PlayerCount);
+            var stageName = lobby.StageName.ToString();
+            if (!string.IsNullOrEmpty(stageName))
+            {
+                _modeConfig.SelectedStageName = stageName;
+                _stageSelectUI?.SelectStageWithoutCallback(stageName);
+            }
+
+            // スロット表示の更新（P3/P4 の展開/折りたたみ含む）
+            for (int i = 2; i < 4; i++)
+            {
+                bool isActive = i < _modeConfig.PlayerCount;
+                var content = _doc.LobbySlotContents[i];
+                var addBtn = _doc.LobbySlotAddButtons[i];
+                var elem = _doc.LobbySlotElements[i];
+
+                if (content != null) content.style.display = isActive ? DisplayStyle.Flex : DisplayStyle.None;
+                if (addBtn != null) addBtn.style.display = DisplayStyle.None; // クライアントは追加ボタン非表示
+                if (elem != null)
+                {
+                    if (isActive)
+                    {
+                        elem.RemoveFromClassList("setup-slot--empty");
+                        elem.AddToClassList("setup-slot--active");
+                    }
+                    else
+                    {
+                        elem.RemoveFromClassList("setup-slot--active");
+                        elem.AddToClassList("setup-slot--empty");
+                    }
+                }
+            }
+
+            RefreshAllSlotUI();
         }
 
         private void OnClientMatchStart()
@@ -270,7 +471,6 @@ namespace FloorBreaker.UI.Title.Presentation
             var lobby = _connectionService.LobbyController;
             if (lobby != null)
             {
-                // ホストの設定をクライアント側の MatchModeConfig に反映
                 _modeConfig.PlayerCount = lobby.PlayerCount;
                 _modeConfig.IsCpuSlot = LobbyController.DecodeCpuSlots(lobby.CpuSlotMask, lobby.PlayerCount);
                 _modeConfig.SelectedStageName = lobby.StageName.ToString();

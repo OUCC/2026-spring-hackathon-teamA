@@ -13,19 +13,23 @@ namespace FloorBreaker.Stage.Presentation
 
         private readonly GameObject _prefab;
         private readonly Transform _poolParent;
+        private readonly int _overrideLayer;
         private readonly Stack<GameObject> _available = new();
         private readonly Dictionary<GridPos, GameObject> _active = new();
 
-        public TileFireVfxPool(GameObject prefab, Transform poolParent, int initialCapacity = 20)
+        /// <param name="overrideLayer">-1 の場合レイヤー変更なし。0以上でプール内全 GO のレイヤーを上書き。</param>
+        public TileFireVfxPool(GameObject prefab, Transform poolParent, int initialCapacity = 20, int overrideLayer = -1)
         {
             _prefab = prefab;
             _poolParent = poolParent;
+            _overrideLayer = overrideLayer;
 
             if (_prefab == null) return;
 
             for (int i = 0; i < initialCapacity; i++)
             {
                 var go = UnityEngine.Object.Instantiate(_prefab, _poolParent);
+                if (_overrideLayer >= 0) SetLayerRecursive(go, _overrideLayer);
                 go.SetActive(false);
                 _available.Push(go);
             }
@@ -44,6 +48,7 @@ namespace FloorBreaker.Stage.Presentation
             else
             {
                 go = UnityEngine.Object.Instantiate(_prefab, _poolParent);
+                if (_overrideLayer >= 0) SetLayerRecursive(go, _overrideLayer);
             }
 
             go.transform.position = worldPos + VfxOffset;
@@ -110,6 +115,13 @@ namespace FloorBreaker.Stage.Presentation
                 if (go != null) UnityEngine.Object.Destroy(go);
             }
             _active.Clear();
+        }
+
+        private static void SetLayerRecursive(GameObject go, int layer)
+        {
+            go.layer = layer;
+            foreach (Transform child in go.transform)
+                SetLayerRecursive(child.gameObject, layer);
         }
     }
 }

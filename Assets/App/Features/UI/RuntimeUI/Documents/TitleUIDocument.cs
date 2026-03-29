@@ -86,6 +86,26 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         public Button LobbyStartButton { get; private set; }
         public Button LobbyBackButton { get; private set; }
 
+        // --- ロビー: スロット ---
+        public VisualElement LobbySlots { get; private set; }
+        public VisualElement[] LobbySlotElements { get; private set; } = new VisualElement[4];
+        public VisualElement[] LobbySlotContents { get; private set; } = new VisualElement[4];
+        public Button[] LobbySlotAddButtons { get; private set; } = new Button[4];
+        public Label[] LobbySlotTypeLabels { get; private set; } = new Label[4];
+        public Button[] LobbySlotToggleButtons { get; private set; } = new Button[4];
+        public Button[] LobbySlotRemoveButtons { get; private set; } = new Button[4];
+
+        // --- ロビー: ステージ ---
+        public VisualElement LobbyStageSection { get; private set; }
+        public VisualElement LobbyStageList { get; private set; }
+        public VisualElement LobbyStagePreview { get; private set; }
+        public VisualElement LobbyStagePreviewThumb { get; private set; }
+        public Label LobbyStagePreviewName { get; private set; }
+        public Label LobbyStagePreviewSize { get; private set; }
+        public Label LobbyStagePreviewDesc { get; private set; }
+        public VisualElement LobbyStagePreviewGimmicks { get; private set; }
+        public VisualElement LobbyGimmickDetails { get; private set; }
+
         // --- 操作説明ラベル ---
         public Label P1Move { get; private set; }
         public Label P1AimLock { get; private set; }
@@ -179,6 +199,30 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             LobbyPlayerList = root.Q("LobbyPlayerList");
             LobbyStartButton = root.Q<Button>("LobbyStartButton");
             LobbyBackButton = root.Q<Button>("LobbyBackButton");
+
+            // ロビー: スロット
+            LobbySlots = root.Q("LobbySlots");
+            for (int i = 0; i < 4; i++)
+            {
+                int n = i + 1;
+                LobbySlotElements[i] = root.Q($"LobbySlot_P{n}");
+                LobbySlotContents[i] = root.Q($"LobbySlotContent_P{n}");
+                LobbySlotAddButtons[i] = root.Q<Button>($"LobbySlotAdd_P{n}");
+                LobbySlotTypeLabels[i] = root.Q<Label>($"LobbySlotType_P{n}");
+                LobbySlotToggleButtons[i] = root.Q<Button>($"LobbySlotToggle_P{n}");
+                LobbySlotRemoveButtons[i] = root.Q<Button>($"LobbySlotRemove_P{n}");
+            }
+
+            // ロビー: ステージ
+            LobbyStageSection = root.Q("LobbyStageSection");
+            LobbyStageList = root.Q("LobbyStageList");
+            LobbyStagePreview = root.Q("LobbyStagePreview");
+            LobbyStagePreviewThumb = root.Q("LobbyStagePreviewThumb");
+            LobbyStagePreviewName = root.Q<Label>("LobbyStagePreviewName");
+            LobbyStagePreviewSize = root.Q<Label>("LobbyStagePreviewSize");
+            LobbyStagePreviewDesc = root.Q<Label>("LobbyStagePreviewDesc");
+            LobbyStagePreviewGimmicks = root.Q("LobbyStagePreviewGimmicks");
+            LobbyGimmickDetails = root.Q("LobbyGimmickDetails");
 
             // 操作説明
             P1Move = root.Q<Label>("P1_Move");

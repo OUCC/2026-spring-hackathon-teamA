@@ -153,6 +153,8 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   _inputActions: {fileID: -944628639613478452, guid: aa807c9f189d8ff468f446e59056ba5c, type: 3}
+  _tileSpriteConfig: {fileID: 11400000, guid: dc5161764ec227c4297f67264dd60ca9, type: 2}
+  _tilePrefab: {fileID: 8792956690973735451, guid: 3689f1ad7864f7d47a1d8532a069f2c8, type: 3}
 --- !u!4 &792245891
 Transform:
   m_ObjectHideFlags: 0

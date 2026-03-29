@@ -21,10 +21,14 @@
 /* ===== Lobby ===== */
 
 .lobby-state {
-    flex-grow: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: stretch;
     justify-content: flex-start;
-    align-items: center;
-    padding: 40px;
 }
 
 .lobby-room-code {
