@@ -423,8 +423,19 @@ namespace FloorBreaker.Bootstrap
                 var modeConfig = c.Resolve<MatchModeConfig>();
                 if (modeConfig.IsOnline)
                 {
-                    NetworkServiceBridge.Current = c.Resolve<NetworkServiceBridge>();
-                    Debug.Log($"[MatchLifetimeScope] NetworkServiceBridge.Current set (IsHost={modeConfig.IsHost})");
+                    var bridge = c.Resolve<NetworkServiceBridge>();
+                    var runner = FusionSceneManager.CurrentLoadingRunner;
+                    if (runner != null)
+                    {
+                        NetworkServiceBridge.Register(runner, bridge);
+                        Debug.Log($"[MatchLifetimeScope] NetworkServiceBridge registered for runner (IsHost={modeConfig.IsHost})");
+                    }
+                    else
+                    {
+                        // Single-Peer / PlayMode テスト用フォールバック
+                        NetworkServiceBridge.Current = bridge;
+                        Debug.Log("[MatchLifetimeScope] NetworkServiceBridge.Current set (fallback, no runner)");
+                    }
                 }
             });
         }
