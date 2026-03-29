@@ -16,6 +16,8 @@
     "precompiledReferences": [
         "Fusion.Runtime.dll",
         "Fusion.Sockets.dll",
+        "Fusion.Common.dll",
+        "Fusion.Realtime.dll",
         "R3.dll"
     ],
     "autoReferenced": false,

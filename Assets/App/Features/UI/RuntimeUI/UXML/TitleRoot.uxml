@@ -145,9 +145,73 @@
             <!-- 接続ステータス -->
             <Label name="LobbyStatusLabel" class="lobby-status" text="" />
 
-            <!-- プレイヤーリスト -->
-            <VisualElement name="LobbyPlayerList" class="lobby-player-list">
-                <!-- C# で動的生成 -->
+            <!-- プレイヤースロット (ホスト: 操作可能, クライアント: 読み取り専用) -->
+            <VisualElement name="LobbySlots" class="setup-slots" style="display: none;">
+                <!-- P1: ホスト固定 -->
+                <VisualElement name="LobbySlot_P1" class="setup-slot setup-slot--active">
+                    <Button name="LobbySlotAdd_P1" class="setup-slot__add-btn" text="+" style="display: none;" />
+                    <VisualElement name="LobbySlotContent_P1" class="setup-slot__content">
+                        <Label class="setup-slot__label setup-slot__label--p1" text="P1" />
+                        <Label name="LobbySlotType_P1" class="setup-slot__type" text="ホスト" />
+                        <VisualElement class="setup-slot__actions">
+                            <Button name="LobbySlotToggle_P1" class="setup-slot__toggle" text="CPU に変更" style="display: none;" />
+                        </VisualElement>
+                    </VisualElement>
+                </VisualElement>
+                <!-- P2 -->
+                <VisualElement name="LobbySlot_P2" class="setup-slot setup-slot--active">
+                    <Button name="LobbySlotAdd_P2" class="setup-slot__add-btn" text="+" style="display: none;" />
+                    <VisualElement name="LobbySlotContent_P2" class="setup-slot__content">
+                        <Label class="setup-slot__label setup-slot__label--p2" text="P2" />
+                        <Label name="LobbySlotType_P2" class="setup-slot__type" text="(空席)" />
+                        <VisualElement class="setup-slot__actions">
+                            <Button name="LobbySlotToggle_P2" class="setup-slot__toggle" text="CPU に変更" />
+                        </VisualElement>
+                    </VisualElement>
+                </VisualElement>
+                <!-- P3: 追加可能 -->
+                <VisualElement name="LobbySlot_P3" class="setup-slot setup-slot--empty">
+                    <Button name="LobbySlotAdd_P3" class="setup-slot__add-btn" text="+" />
+                    <VisualElement name="LobbySlotContent_P3" class="setup-slot__content" style="display: none;">
+                        <Label class="setup-slot__label setup-slot__label--p3" text="P3" />
+                        <Label name="LobbySlotType_P3" class="setup-slot__type" text="CPU" />
+                        <VisualElement class="setup-slot__actions">
+                            <Button name="LobbySlotToggle_P3" class="setup-slot__toggle" text="Human に変更" />
+                            <Button name="LobbySlotRemove_P3" class="setup-slot__remove" text="&#x2715; 削除" />
+                        </VisualElement>
+                    </VisualElement>
+                </VisualElement>
+                <!-- P4: 追加可能 -->
+                <VisualElement name="LobbySlot_P4" class="setup-slot setup-slot--empty">
+                    <Button name="LobbySlotAdd_P4" class="setup-slot__add-btn" text="+" />
+                    <VisualElement name="LobbySlotContent_P4" class="setup-slot__content" style="display: none;">
+                        <Label class="setup-slot__label setup-slot__label--p4" text="P4" />
+                        <Label name="LobbySlotType_P4" class="setup-slot__type" text="CPU" />
+                        <VisualElement class="setup-slot__actions">
+                            <Button name="LobbySlotToggle_P4" class="setup-slot__toggle" text="Human に変更" />
+                            <Button name="LobbySlotRemove_P4" class="setup-slot__remove" text="&#x2715; 削除" />
+                        </VisualElement>
+                    </VisualElement>
+                </VisualElement>
+            </VisualElement>
+
+            <!-- ステージ選択 (ホスト: 選択可能, クライアント: 読み取り専用) -->
+            <VisualElement name="LobbyStageSection" class="setup-stage" style="display: none;">
+                <Label class="setup-stage__header" text="ステージ" />
+                <VisualElement class="setup-stage__body">
+                    <!-- 左: ステージリスト -->
+                    <VisualElement name="LobbyStageList" class="setup-stage__list" />
+                    <!-- 中央: 選択中ステージのプレビュー -->
+                    <VisualElement name="LobbyStagePreview" class="stage-preview">
+                        <VisualElement name="LobbyStagePreviewThumb" class="stage-preview__thumb" />
+                        <Label name="LobbyStagePreviewName" class="stage-preview__name" text="" />
+                        <Label name="LobbyStagePreviewSize" class="stage-preview__size" text="" />
+                        <Label name="LobbyStagePreviewDesc" class="stage-preview__desc" text="" />
+                        <VisualElement name="LobbyStagePreviewGimmicks" class="stage-preview__gimmicks" />
+                    </VisualElement>
+                    <!-- 右: ギミック詳細 -->
+                    <VisualElement name="LobbyGimmickDetails" class="gimmick-details" />
+                </VisualElement>
             </VisualElement>
 
             <!-- アクションボタン -->

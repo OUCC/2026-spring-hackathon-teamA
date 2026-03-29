@@ -18,23 +18,46 @@ namespace FloorBreaker.Network.Infrastructure
         /// <summary>クライアント側でマッチ開始を検知した際に発火する。</summary>
         public event Action OnMatchStartDetected;
 
+        /// <summary>クライアント側でロビー設定が変更された際に発火する。</summary>
+        public event Action OnLobbyConfigChanged;
+
         /// <summary>Spawned 時にクライアント側で発火する。</summary>
         public static event Action<LobbyController> OnLobbySpawned;
 
         private bool _wasMatchStarted;
+        private int _prevPlayerCount;
+        private int _prevCpuSlotMask;
+        private NetworkString<_64> _prevStageName;
 
         public override void Spawned()
         {
-            // クライアント側で LobbyController が同期された時点で通知
             if (!Object.HasStateAuthority)
             {
+                // 初期値を記録
+                _prevPlayerCount = PlayerCount;
+                _prevCpuSlotMask = CpuSlotMask;
+                _prevStageName = StageName;
                 OnLobbySpawned?.Invoke(this);
             }
         }
 
         public override void Render()
         {
-            if (!Object.HasStateAuthority && MatchStarted && !_wasMatchStarted)
+            if (Object.HasStateAuthority) return;
+
+            // 設定変更検知
+            if (PlayerCount != _prevPlayerCount
+                || CpuSlotMask != _prevCpuSlotMask
+                || !StageName.Equals(_prevStageName))
+            {
+                _prevPlayerCount = PlayerCount;
+                _prevCpuSlotMask = CpuSlotMask;
+                _prevStageName = StageName;
+                OnLobbyConfigChanged?.Invoke();
+            }
+
+            // マッチ開始検知
+            if (MatchStarted && !_wasMatchStarted)
             {
                 _wasMatchStarted = true;
                 OnMatchStartDetected?.Invoke();
