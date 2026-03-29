@@ -224,6 +224,7 @@ namespace FloorBreaker.Network.Infrastructure
         }
 
         private FusionSceneManager _sceneManager;
+        private VContainer.Unity.LifetimeScope _rootScope;
 
         private void CreateRunner()
         {
@@ -237,14 +238,17 @@ namespace FloorBreaker.Network.Infrastructure
 
             // カスタムシーンマネージャ: VContainer の EnqueueParent を統合
             _sceneManager = runnerObj.AddComponent<FusionSceneManager>();
+            if (_rootScope != null)
+                _sceneManager.SetRootScope(_rootScope);
         }
 
         /// <summary>
         /// FusionSceneManager に VContainer ルートスコープを設定する。
-        /// ProjectLifetimeScope から呼ばれる。
+        /// ProjectLifetimeScope の BuildCallback から呼ばれる（CreateRunner より前）。
         /// </summary>
         public void SetRootScope(VContainer.Unity.LifetimeScope rootScope)
         {
+            _rootScope = rootScope;
             _sceneManager?.SetRootScope(rootScope);
         }
 
