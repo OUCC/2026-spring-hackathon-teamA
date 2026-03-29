@@ -381,7 +381,8 @@ namespace FloorBreaker.Bootstrap
                 if (!modeConfig.IsOnline) return (NetworkInputCollector)null;
                 var mp = c.Resolve<MatchPlayers>();
                 var conn = c.Resolve<NetworkConnectionService>();
-                int localIdx = conn.LocalPlayerIndex;
+                // Fusion Host Mode: ホスト=0, クライアント=1
+                int localIdx = conn.IsHost ? 0 : 1;
                 if (localIdx >= mp.PlayerCount) localIdx = 0;
                 return new NetworkInputCollector(c.Resolve<IBalanceParameters>(), mp.All[localIdx]);
             }, Lifetime.Scoped);
@@ -421,7 +422,10 @@ namespace FloorBreaker.Bootstrap
             {
                 var modeConfig = c.Resolve<MatchModeConfig>();
                 if (modeConfig.IsOnline)
+                {
                     NetworkServiceBridge.Current = c.Resolve<NetworkServiceBridge>();
+                    Debug.Log($"[MatchLifetimeScope] NetworkServiceBridge.Current set (IsHost={modeConfig.IsHost})");
+                }
             });
         }
 

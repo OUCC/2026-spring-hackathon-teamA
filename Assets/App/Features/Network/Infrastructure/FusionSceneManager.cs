@@ -42,7 +42,12 @@ namespace FloorBreaker.Network.Infrastructure
             // EnqueueParent: 次に生成される LifetimeScope の親を指定
             if (_rootScope != null)
             {
+                Debug.Log($"[FusionSceneManager] EnqueueParent: rootScope={_rootScope.name}");
                 _enqueueHandle = LifetimeScope.EnqueueParent(_rootScope);
+            }
+            else
+            {
+                Debug.LogError("[FusionSceneManager] _rootScope is null! DI hierarchy will not be established.");
             }
 
             // 基底クラスの LoadSceneCoroutine を実行

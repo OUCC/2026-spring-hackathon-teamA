@@ -35,7 +35,13 @@ namespace FloorBreaker.Network.Infrastructure
         public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
             => _service?.HandleConnectFailed(reason);
 
-        // --- Phase 1 で未使用のコールバック ---
+        private void Update()
+        {
+            // LobbyController 未検出時のリトライポーリング
+            _service?.PollDiscovery();
+        }
+
+        // --- ネットワーク入力 ---
 
         public void OnInput(NetworkRunner runner, NetworkInput input)
         {

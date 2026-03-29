@@ -26,6 +26,7 @@ namespace FloorBreaker.Network.Infrastructure
         private FusionCallbacksBridge _callbacksBridge;
         private LobbyController _lobbyController;
         private NetworkObject _lobbyControllerPrefab;
+        private bool _needsLobbyControllerDiscovery;
 
         private readonly ReactiveProperty<ConnectionState> _state = new(ConnectionState.Disconnected);
         private readonly ReactiveProperty<int> _connectedPlayerCount = new(0);
@@ -180,19 +181,47 @@ namespace FloorBreaker.Network.Infrastructure
             _connectedPlayerCount.Value = runner.ActivePlayers.Count();
 
             // クライアント側: ホストが Spawn した LobbyController を検出
-            // Fusion の制約上、クライアントは NetworkObject のスポーン通知を直接受け取れないため
-            // シーン検索をフォールバックとして使用する
             if (!IsHost && _lobbyController == null)
             {
-                _lobbyController = UnityEngine.Object.FindAnyObjectByType<LobbyController>();
-                if (_lobbyController != null)
-                    LobbyControllerDiscovered?.Invoke(_lobbyController);
+                TryDiscoverLobbyController();
             }
         }
 
         internal void HandlePlayerLeft(NetworkRunner runner, PlayerRef player)
         {
             _connectedPlayerCount.Value = Math.Max(0, runner.ActivePlayers.Count());
+        }
+
+        /// <summary>
+        /// クライアント側: LobbyController の検出を試みる。
+        /// HandlePlayerJoined で検出できなかった場合、FusionCallbacksBridge.Update() から毎フレーム呼ばれる。
+        /// </summary>
+        internal void TryDiscoverLobbyController()
+        {
+            if (IsHost || _lobbyController != null)
+            {
+                _needsLobbyControllerDiscovery = false;
+                return;
+            }
+
+            _lobbyController = UnityEngine.Object.FindAnyObjectByType<LobbyController>();
+            if (_lobbyController != null)
+            {
+                _needsLobbyControllerDiscovery = false;
+                Debug.Log("[NetworkConnectionService] LobbyController discovered");
+                LobbyControllerDiscovered?.Invoke(_lobbyController);
+            }
+            else
+            {
+                _needsLobbyControllerDiscovery = true;
+            }
+        }
+
+        /// <summary>毎フレーム呼ばれるポーリング。LobbyController 未検出時のリトライ。</summary>
+        internal void PollDiscovery()
+        {
+            if (_needsLobbyControllerDiscovery)
+                TryDiscoverLobbyController();
         }
 
         internal void HandleShutdown(ShutdownReason reason)

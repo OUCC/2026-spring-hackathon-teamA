@@ -169,7 +169,10 @@ namespace FloorBreaker.Bootstrap
             }
 
             // ローカルプレイヤーのアダプター初期化 + NetworkInputCollector にバインド
-            int localIdx = _connectionService?.LocalPlayerIndex ?? 0;
+            // Fusion Host Mode: ホスト=PlayerRef(0), クライアント=PlayerRef(1)
+            // Runner.LocalPlayer は Match シーンロード時点で正しい値を返す
+            int localIdx = _connectionService != null && !_connectionService.IsHost ? 1 : 0;
+            Debug.Log($"[InputInitializer] InitializeOnline: localIdx={localIdx}, isHost={_connectionService?.IsHost}");
             var localPlayerId = PlayerId.FromIndex(localIdx);
             var deviceType = localIdx < _modeConfig.DeviceTypes.Length
                 ? _modeConfig.DeviceTypes[localIdx]

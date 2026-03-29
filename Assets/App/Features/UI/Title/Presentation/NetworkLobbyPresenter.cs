@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 using Cysharp.Threading.Tasks;
 using R3;
@@ -472,11 +473,10 @@ namespace FloorBreaker.UI.Title.Presentation
                 _lobbyConfig.ApplyMatchStart(lobby.PlayerCount, cpuSlots, lobby.StageName.ToString());
             }
 
-            // クライアント側: Fusion がホストのシーンロードを自動伝搬するが、
-            // FusionSceneManager 経由で VContainer の EnqueueParent も実行される。
-            // 明示的なロードは不要（Fusion の SceneManager が処理する）。
-            // ただし Fusion の自動シーンロードが遅れる場合のフォールバック:
-            _connectionService.LoadMatchScene();
+            // Fusion がホストのシーンロード指示をクライアントに自動伝搬する。
+            // クライアント側から明示的に LoadMatchScene() を呼ぶとシーンが二重ロードされるため呼ばない。
+            // FusionSceneManager が EnqueueParent を処理し、VContainer の DI 階層も正しく構築される。
+            Debug.Log("[NetworkLobbyPresenter] Client: OnClientMatchStart — waiting for Fusion scene propagation");
         }
     }
 }
