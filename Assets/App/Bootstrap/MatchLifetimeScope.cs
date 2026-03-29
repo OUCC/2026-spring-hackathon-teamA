@@ -380,8 +380,10 @@ namespace FloorBreaker.Bootstrap
                 var modeConfig = c.Resolve<MatchModeConfig>();
                 if (!modeConfig.IsOnline) return (NetworkInputCollector)null;
                 var mp = c.Resolve<MatchPlayers>();
-                var localPlayer = mp.All[0]; // TODO: クライアント側は自分の PlayerRef に対応
-                return new NetworkInputCollector(c.Resolve<IBalanceParameters>(), localPlayer);
+                var conn = c.Resolve<NetworkConnectionService>();
+                int localIdx = conn.LocalPlayerIndex;
+                if (localIdx >= mp.PlayerCount) localIdx = 0;
+                return new NetworkInputCollector(c.Resolve<IBalanceParameters>(), mp.All[localIdx]);
             }, Lifetime.Scoped);
 
             // NetworkInputDispatcher: ホスト側で FloorBreakerInput → Domain サービス

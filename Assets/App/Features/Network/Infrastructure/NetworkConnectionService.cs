@@ -41,6 +41,13 @@ namespace FloorBreaker.Network.Infrastructure
         public NetworkRunner Runner => _runner;
         public LobbyController LobbyController => _lobbyController;
 
+        /// <summary>
+        /// ローカルプレイヤーのインデックス（0-based）。
+        /// Fusion Host Mode ではホスト=0、クライアント=1,2,3...
+        /// Runner が未起動の場合は 0 を返す。
+        /// </summary>
+        public int LocalPlayerIndex => _runner != null ? _runner.LocalPlayer.AsIndex : 0;
+
         /// <summary>LobbyController が発見/生成された際に発火する（static event の代替）。</summary>
         public event Action<LobbyController> LobbyControllerDiscovered;
 

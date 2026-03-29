@@ -169,9 +169,10 @@ namespace FloorBreaker.Bootstrap
             }
 
             // ローカルプレイヤーのアダプター初期化 + NetworkInputCollector にバインド
-            var localPlayerId = PlayerId.FromIndex(0); // ホスト = Player1
-            var deviceType = _modeConfig.DeviceTypes.Length > 0
-                ? _modeConfig.DeviceTypes[0]
+            int localIdx = _connectionService?.LocalPlayerIndex ?? 0;
+            var localPlayerId = PlayerId.FromIndex(localIdx);
+            var deviceType = localIdx < _modeConfig.DeviceTypes.Length
+                ? _modeConfig.DeviceTypes[localIdx]
                 : FloorBreaker.Shared.Application.Interfaces.DeviceType.KeyboardWasd;
 
             PlayerInputAdapter localAdapter = null;
@@ -186,7 +187,7 @@ namespace FloorBreaker.Bootstrap
             }
             else if (deviceType == DeviceType.Gamepad && inputActions != null)
             {
-                int gpIdx = _modeConfig.GamepadIndices.Length > 0 ? _modeConfig.GamepadIndices[0] : 0;
+                int gpIdx = localIdx < _modeConfig.GamepadIndices.Length ? _modeConfig.GamepadIndices[localIdx] : 0;
                 var gamepads = Gamepad.all;
                 if (gpIdx >= 0 && gpIdx < gamepads.Count)
                 {
