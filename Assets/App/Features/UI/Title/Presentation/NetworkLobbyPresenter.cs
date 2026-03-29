@@ -1,14 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using UnityEngine.UIElements;
 using Cysharp.Threading.Tasks;
 using R3;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Network.Infrastructure;
-using FloorBreaker.ScriptableObjects.Configs;
+using FloorBreaker.Stage.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
 
 namespace FloorBreaker.UI.Title.Presentation
@@ -29,9 +26,9 @@ namespace FloorBreaker.UI.Title.Presentation
         private readonly IRandomProvider _random;
 
         private readonly CompositeDisposable _subscriptions = new();
-        private readonly List<(VisualElement card, string assetName)> _stageCards = new();
-        private readonly Dictionary<string, StageConfig> _stageConfigs = new();
-        private string _selectedStageName;
+        private readonly TileSpriteConfig _tileSpriteConfig;
+        private readonly StagePreviewRenderer _previewRenderer;
+        private StageSelectUI _stageSelectUI;
         private bool _isHost;
         private bool _boundToLobby;
         private bool _slotsInitialized;
@@ -42,7 +39,9 @@ namespace FloorBreaker.UI.Title.Presentation
             MatchModeConfig modeConfig,
             IAudioService audio,
             ISceneTransitionService sceneTransition,
-            IRandomProvider random)
+            IRandomProvider random,
+            TileSpriteConfig tileSpriteConfig = null,
+            StagePreviewRenderer previewRenderer = null)
         {
             _doc = doc;
             _connectionService = connectionService;
@@ -50,6 +49,8 @@ namespace FloorBreaker.UI.Title.Presentation
             _audio = audio;
             _sceneTransition = sceneTransition;
             _random = random;
+            _tileSpriteConfig = tileSpriteConfig;
+            _previewRenderer = previewRenderer;
 
             _connectionService.ConnectedPlayerCount
                 .Subscribe(_ => RefreshAllSlotUI())
@@ -126,6 +127,7 @@ namespace FloorBreaker.UI.Title.Presentation
         public void Dispose()
         {
             LobbyController.OnLobbySpawned -= OnLobbySpawned;
+            _stageSelectUI?.Dispose();
             _subscriptions.Dispose();
         }
 
@@ -161,7 +163,17 @@ namespace FloorBreaker.UI.Title.Presentation
             _slotsInitialized = true;
 
             SetupSlotHandlers();
-            PopulateStageList();
+
+            _stageSelectUI = new StageSelectUI(
+                _doc.LobbyStageList, _doc.LobbyStagePreviewThumb, _doc.LobbyStagePreviewName,
+                _doc.LobbyStagePreviewSize, _doc.LobbyStagePreviewDesc,
+                _doc.LobbyStagePreviewGimmicks, _doc.LobbyGimmickDetails,
+                _modeConfig, _tileSpriteConfig,
+                previewRenderer: _previewRenderer,
+                random: _random,
+                onStageSelected: _ => { _audio?.PlaySfx(SfxIds.UiNavigate); SyncLobbyConfig(); },
+                isReadOnly: !_isHost);
+            _stageSelectUI.PopulateStageList();
         }
 
         // ═══════════════════════════════════════════
@@ -310,85 +322,6 @@ namespace FloorBreaker.UI.Title.Presentation
         }
 
         // ═══════════════════════════════════════════
-        //  ステージ選択
-        // ═══════════════════════════════════════════
-
-        private void PopulateStageList()
-        {
-            var configs = Resources.LoadAll<StageConfig>("StageConfigs");
-            if (configs == null || configs.Length == 0) return;
-
-            var sorted = configs.OrderBy(c => c.DisplayName).ToArray();
-
-            foreach (var cfg in sorted)
-            {
-                _stageConfigs[cfg.name] = cfg;
-
-                var card = new VisualElement();
-                card.AddToClassList("stage-card");
-
-                var thumb = new VisualElement();
-                thumb.AddToClassList("stage-card__thumbnail");
-                if (cfg.Thumbnail != null)
-                    thumb.style.backgroundImage = new StyleBackground(cfg.Thumbnail);
-                card.Add(thumb);
-
-                var nameLabel = new Label(cfg.DisplayName);
-                nameLabel.AddToClassList("stage-card__name");
-                card.Add(nameLabel);
-
-                string assetName = cfg.name;
-                card.RegisterCallback<ClickEvent>(_ =>
-                {
-                    if (!_isHost) return; // クライアントは選択不可
-                    SelectStage(assetName);
-                });
-
-                _doc.LobbyStageList.Add(card);
-                _stageCards.Add((card, assetName));
-            }
-
-            // デフォルト選択
-            string defaultName = !string.IsNullOrEmpty(_modeConfig.SelectedStageName)
-                ? _modeConfig.SelectedStageName
-                : sorted.FirstOrDefault(c => c.name == "Standard")?.name ?? sorted[0].name;
-            SelectStage(defaultName);
-        }
-
-        private void SelectStage(string assetName)
-        {
-            _selectedStageName = assetName;
-            _modeConfig.SelectedStageName = assetName;
-
-            foreach (var (card, name) in _stageCards)
-            {
-                if (name == assetName)
-                    card.AddToClassList("stage-card--selected");
-                else
-                    card.RemoveFromClassList("stage-card--selected");
-            }
-
-            if (_stageConfigs.TryGetValue(assetName, out var cfg))
-                UpdateStagePreview(cfg);
-
-            if (_isHost)
-            {
-                _audio?.PlaySfx(SfxIds.UiNavigate);
-                SyncLobbyConfig();
-            }
-        }
-
-        private void UpdateStagePreview(StageConfig cfg)
-        {
-            if (cfg.Thumbnail != null && _doc.LobbyStagePreviewThumb != null)
-                _doc.LobbyStagePreviewThumb.style.backgroundImage = new StyleBackground(cfg.Thumbnail);
-
-            if (_doc.LobbyStagePreviewName != null) _doc.LobbyStagePreviewName.text = cfg.DisplayName;
-            if (_doc.LobbyStagePreviewSize != null) _doc.LobbyStagePreviewSize.text = $"{cfg.Width} x {cfg.Height}";
-            if (_doc.LobbyStagePreviewDesc != null) _doc.LobbyStagePreviewDesc.text = cfg.Description;
-        }
-
-        // ═══════════════════════════════════════════
         //  ネットワーク同期
         // ═══════════════════════════════════════════
 
@@ -502,16 +435,7 @@ namespace FloorBreaker.UI.Title.Presentation
             if (!string.IsNullOrEmpty(stageName))
             {
                 _modeConfig.SelectedStageName = stageName;
-                // ステージカードの選択状態を更新
-                foreach (var (card, name) in _stageCards)
-                {
-                    if (name == stageName)
-                        card.AddToClassList("stage-card--selected");
-                    else
-                        card.RemoveFromClassList("stage-card--selected");
-                }
-                if (_stageConfigs.TryGetValue(stageName, out var cfg))
-                    UpdateStagePreview(cfg);
+                _stageSelectUI?.SelectStageWithoutCallback(stageName);
             }
 
             // スロット表示の更新（P3/P4 の展開/折りたたみ含む）

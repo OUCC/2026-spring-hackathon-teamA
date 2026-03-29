@@ -3,6 +3,7 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Input.Infrastructure;
 using FloorBreaker.Network.Infrastructure;
+using FloorBreaker.Stage.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
 using FloorBreaker.UI.Title.Presentation;
 
@@ -20,6 +21,8 @@ namespace FloorBreaker.Bootstrap
         private readonly ISceneTransitionService _sceneTransition;
         private readonly IRandomProvider _random;
         private readonly NetworkConnectionService _connectionService;
+        private readonly TileSpriteConfig _tileSpriteConfig;
+        private readonly StagePreviewRenderer _previewRenderer;
         private readonly KeyRebindingService _rebindService;
 
         public TitleInitializer(
@@ -29,6 +32,8 @@ namespace FloorBreaker.Bootstrap
             ISceneTransitionService sceneTransition,
             IRandomProvider random,
             NetworkConnectionService connectionService,
+            TileSpriteConfig tileSpriteConfig = null,
+            StagePreviewRenderer previewRenderer = null,
             KeyRebindingService rebindService = null)
         {
             _doc = doc;
@@ -37,6 +42,8 @@ namespace FloorBreaker.Bootstrap
             _sceneTransition = sceneTransition;
             _random = random;
             _connectionService = connectionService;
+            _tileSpriteConfig = tileSpriteConfig;
+            _previewRenderer = previewRenderer;
             _rebindService = rebindService;
         }
 
@@ -47,11 +54,13 @@ namespace FloorBreaker.Bootstrap
 
             // ロビーPresenter を生成
             var lobbyPresenter = new NetworkLobbyPresenter(
-                _doc, _connectionService, _modeConfig, _audio, _sceneTransition, _random);
+                _doc, _connectionService, _modeConfig, _audio, _sceneTransition, _random,
+                _tileSpriteConfig, _previewRenderer);
 
             // TitlePresenter を生成（ボタンコールバック・BGM・音量・キーコンフィグを接続）
             new TitlePresenter(_doc, _audio, _rebindService, _modeConfig, _sceneTransition,
-                lobbyPresenter: lobbyPresenter);
+                lobbyPresenter: lobbyPresenter, tileSpriteConfig: _tileSpriteConfig,
+                previewRenderer: _previewRenderer, random: _random);
         }
     }
 }

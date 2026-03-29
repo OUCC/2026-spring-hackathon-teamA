@@ -88,25 +88,23 @@
 
             </VisualElement>
 
-            <!-- ステージ選択: 左リスト + 右プレビュー -->
+            <!-- ステージ選択: 左リスト + 中央マップ + 右情報 -->
             <VisualElement class="setup-stage">
                 <Label class="setup-stage__header" text="ステージ" />
                 <VisualElement class="setup-stage__body">
                     <!-- 左: ステージリスト -->
-                    <VisualElement name="StageList" class="setup-stage__list">
-                        <!-- C# で StageConfig SO からカードを動的生成 -->
-                    </VisualElement>
-                    <!-- 中央: 選択中ステージのプレビュー -->
+                    <VisualElement name="StageList" class="setup-stage__list" />
+                    <!-- 中央: マッププレビュー（大きく表示） -->
                     <VisualElement name="StagePreview" class="stage-preview">
                         <VisualElement name="StagePreviewThumb" class="stage-preview__thumb" />
-                        <Label name="StagePreviewName" class="stage-preview__name" text="" />
-                        <Label name="StagePreviewSize" class="stage-preview__size" text="" />
-                        <Label name="StagePreviewDesc" class="stage-preview__desc" text="" />
-                        <VisualElement name="StagePreviewGimmicks" class="stage-preview__gimmicks" />
                     </VisualElement>
-                    <!-- 右: ギミック詳細 + ループプレビュー -->
-                    <VisualElement name="GimmickDetails" class="gimmick-details">
-                        <!-- C# で動的生成 -->
+                    <!-- 右: ステージ情報 + ギミック詳細 -->
+                    <VisualElement class="stage-info">
+                        <Label name="StagePreviewName" class="stage-info__name" text="" />
+                        <Label name="StagePreviewSize" class="stage-info__size" text="" />
+                        <Label name="StagePreviewDesc" class="stage-info__desc" text="" />
+                        <VisualElement name="StagePreviewGimmicks" class="stage-info__gimmicks" />
+                        <VisualElement name="GimmickDetails" class="gimmick-details" />
                     </VisualElement>
                 </VisualElement>
             </VisualElement>
@@ -199,18 +197,17 @@
             <VisualElement name="LobbyStageSection" class="setup-stage" style="display: none;">
                 <Label class="setup-stage__header" text="ステージ" />
                 <VisualElement class="setup-stage__body">
-                    <!-- 左: ステージリスト -->
                     <VisualElement name="LobbyStageList" class="setup-stage__list" />
-                    <!-- 中央: 選択中ステージのプレビュー -->
                     <VisualElement name="LobbyStagePreview" class="stage-preview">
                         <VisualElement name="LobbyStagePreviewThumb" class="stage-preview__thumb" />
-                        <Label name="LobbyStagePreviewName" class="stage-preview__name" text="" />
-                        <Label name="LobbyStagePreviewSize" class="stage-preview__size" text="" />
-                        <Label name="LobbyStagePreviewDesc" class="stage-preview__desc" text="" />
-                        <VisualElement name="LobbyStagePreviewGimmicks" class="stage-preview__gimmicks" />
                     </VisualElement>
-                    <!-- 右: ギミック詳細 -->
-                    <VisualElement name="LobbyGimmickDetails" class="gimmick-details" />
+                    <VisualElement class="stage-info">
+                        <Label name="LobbyStagePreviewName" class="stage-info__name" text="" />
+                        <Label name="LobbyStagePreviewSize" class="stage-info__size" text="" />
+                        <Label name="LobbyStagePreviewDesc" class="stage-info__desc" text="" />
+                        <VisualElement name="LobbyStagePreviewGimmicks" class="stage-info__gimmicks" />
+                        <VisualElement name="LobbyGimmickDetails" class="gimmick-details" />
+                    </VisualElement>
                 </VisualElement>
             </VisualElement>
 

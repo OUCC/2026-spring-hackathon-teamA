@@ -354,52 +354,58 @@
     display: none;
 }
 
-/* ステージプレビュー (右パネル) */
+/* ステージプレビュー (マッププレビュー左寄せ) */
 .stage-preview {
-    flex-grow: 1;
     background-color: rgba(15, 12, 25, 0.6);
     border-radius: 8px;
     border-width: 1px;
     border-color: rgba(240, 232, 216, 0.1);
-    padding: 24px;
+    padding: 8px;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .stage-preview__thumb {
-    width: 360px;
-    height: 360px;
-    border-radius: 8px;
-    margin-bottom: 16px;
+    flex-grow: 1;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 6px;
     background-color: rgba(40, 35, 60, 0.6);
 }
 
-.stage-preview__name {
-    font-size: 26px;
+/* ステージ情報 (右カラム) */
+.stage-info {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 16px;
+    overflow: hidden;
+}
+
+.stage-info__name {
+    font-size: 24px;
     color: var(--color-coin);
     -unity-font-style: bold;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
-.stage-preview__size {
-    font-size: 14px;
+.stage-info__size {
+    font-size: 13px;
     color: var(--color-text-dim);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
-.stage-preview__desc {
+.stage-info__desc {
     font-size: 14px;
     color: var(--color-text);
-    -unity-text-align: middle-center;
-    margin-bottom: 12px;
     white-space: normal;
-    max-width: 600px;
+    margin-bottom: 12px;
 }
 
-.stage-preview__gimmicks {
+.stage-info__gimmicks {
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: center;
+    margin-bottom: 12px;
 }
 
 .gimmick-badge {
@@ -435,20 +441,19 @@
 /* ギミック詳細パネル (右カラム) */
 .gimmick-details {
     flex-direction: column;
-    min-width: 280px;
-    max-width: 280px;
-    margin-left: 16px;
+    margin-top: 8px;
     overflow: hidden;
 }
 
 .gimmick-detail {
+    flex-direction: row;
     background-color: rgba(15, 12, 25, 0.6);
     border-radius: 6px;
     border-width: 1px;
     border-color: rgba(240, 232, 216, 0.1);
-    padding: 12px;
+    padding: 8px;
     margin-bottom: 8px;
-    align-items: center;
+    align-items: stretch;
 }
 
 .gimmick-detail__grid {
@@ -519,6 +524,23 @@
 .gimmick-detail__name--bedrock { color: #807090; }
 .gimmick-detail__name--warp { color: #33B0B0; }
 .gimmick-detail__name--eternal-fire { color: #4488FF; }
+
+.gimmick-detail__preview {
+    width: 180px;
+    min-width: 180px;
+    height: 180px;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    background-color: rgba(40, 35, 60, 0.6);
+}
+
+.gimmick-detail__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    justify-content: center;
+}
 
 .gimmick-detail__desc {
     font-size: 12px;
