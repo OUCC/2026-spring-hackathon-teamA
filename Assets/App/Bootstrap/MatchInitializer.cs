@@ -76,6 +76,14 @@ namespace FloorBreaker.Bootstrap
             _audio?.PlayBgm(SfxIds.BgmMatch);
 
             // 1. ステージ生成 (壁 → ガス脈 → プリセット)
+            // オンライン時はホストが決定した乱数シードで生成（ホスト・クライアントで同じ盤面）
+            var stageRandom = _random;
+            if (_modeConfig.IsOnline && _modeConfig.OnlineRandomSeed != 0)
+            {
+                stageRandom = new FloorBreaker.Shared.Infrastructure.Random.SeededRandomProvider(
+                    _modeConfig.OnlineRandomSeed);
+            }
+
             var spawnPositions = new System.Collections.Generic.List<FloorBreaker.Shared.Domain.Grid.GridPos>();
             foreach (var p in _players.All) spawnPositions.Add(p.CurrentPosition);
 
@@ -92,7 +100,7 @@ namespace FloorBreaker.Bootstrap
                     GasVeinMaxLength = _stageConfig.GasVeinMaxLength,
                     PresetTiles = _stageConfig.PresetTiles,
                 };
-                _stageGen.PopulateStage(_stage, genParams, spawnPositions, _random);
+                _stageGen.PopulateStage(_stage, genParams, spawnPositions, stageRandom);
             }
 
             // 1d. WarpService レジストリ構築

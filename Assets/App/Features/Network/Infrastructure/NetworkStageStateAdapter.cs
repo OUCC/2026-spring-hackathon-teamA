@@ -36,15 +36,19 @@ namespace FloorBreaker.Network.Infrastructure
         public void Initialize(StageModel stage)
         {
             _stage = stage;
-        }
 
-        public override void Spawned()
-        {
-            if (Object.HasStateAuthority && _stage != null)
+            // Spawned() は TryInitialize() より前に呼ばれるため、
+            // Initialize() でイベント購読を開始する
+            if (Object != null && Object.HasStateAuthority && _stage != null)
             {
                 _tileChangedSub = _stage.TileChanged.Subscribe(e => OnTileChanged(e));
                 SendFullSnapshot();
             }
+        }
+
+        public override void Spawned()
+        {
+            // 購読は Initialize() で行う（Spawned 時点では _stage が null）
         }
 
         private void OnTileChanged(TileChangedEvent e)

@@ -27,11 +27,8 @@ namespace FloorBreaker.Network.Infrastructure
         public void Initialize(SlimeRegistry registry)
         {
             _registry = registry;
-        }
 
-        public override void Spawned()
-        {
-            if (Object.HasStateAuthority && _registry != null)
+            if (Object != null && Object.HasStateAuthority && _registry != null)
             {
                 _spawnedSub = _registry.Spawned.Subscribe(e =>
                     RPC_SlimeSpawned(e.Id.Value, (byte)e.Type, e.Position.X, e.Position.Y));
@@ -46,6 +43,11 @@ namespace FloorBreaker.Network.Infrastructure
                 _killedSub = _registry.Killed.Subscribe(e =>
                     RPC_SlimeKilled(e.Id.Value, (byte)e.Type, e.Position.X, e.Position.Y));
             }
+        }
+
+        public override void Spawned()
+        {
+            // 購読は Initialize() で行う
         }
 
         /// <summary>ホスト側: Tick 末尾で呼ぶ。移動バッチを RPC 送信。</summary>
