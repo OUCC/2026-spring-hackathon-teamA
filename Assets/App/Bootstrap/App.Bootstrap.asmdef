@@ -20,6 +20,7 @@
         "App.Input",
         "App.CpuPlayer",
         "App.UI",
+        "App.Network",
         "App.Cameras.Presentation",
         "VContainer",
         "UniTask",
