@@ -465,6 +465,156 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1813992634
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1813992642}
+  - component: {fileID: 1813992641}
+  - component: {fileID: 1813992640}
+  - component: {fileID: 1813992639}
+  - component: {fileID: 1813992638}
+  - component: {fileID: 1813992637}
+  - component: {fileID: 1813992636}
+  - component: {fileID: 1813992635}
+  m_Layer: 0
+  m_Name: '[NetworkMatchRunner]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1813992635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813992634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 1139165949
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 1813992641}
+  - {fileID: 1813992640}
+  - {fileID: 1813992639}
+  - {fileID: 1813992638}
+  - {fileID: 1813992637}
+  - {fileID: 1813992636}
+  ForceRemoteRenderTimeframe: 0
+--- !u!114 &1813992636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813992634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aacfc5d518a2b34caea7c061d8eef75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: App.Network::FloorBreaker.Network.Infrastructure.NetworkMatchRunner
+--- !u!114 &1813992637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813992634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 735670ad884637243a1148e036406489, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: App.Network::FloorBreaker.Network.Infrastructure.NetworkSlimeStateAdapter
+--- !u!114 &1813992638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813992634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 104c7c7d507d7af4a9551911eb2902b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: App.Network::FloorBreaker.Network.Infrastructure.NetworkBombStateAdapter
+--- !u!114 &1813992639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813992634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1767a15c3653c834ab588bb8e529a38f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: App.Network::FloorBreaker.Network.Infrastructure.NetworkStageStateAdapter
+--- !u!114 &1813992640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813992634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfc5cecc3381854459c054438b7330ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: App.Network::FloorBreaker.Network.Infrastructure.NetworkPlayerStateAdapter
+  _Hp: 
+  _Coins: 
+  _PosX: 
+  _PosY: 
+  _Facing: 
+  _Speed: []
+  _Invulnerable: []
+  _Forced: []
+  _FireShieldArr: []
+  _LevitationArr: []
+  _DashArr: []
+  _DualShotArr: []
+--- !u!114 &1813992641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813992634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9232dfc6b9b5e047b84a16d5395d6e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: App.Network::FloorBreaker.Network.Infrastructure.NetworkMatchStateAdapter
+  _Phase: 0
+  _Remaining: 0
+  _IsPaused:
+    _value: 0
+--- !u!4 &1813992642
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813992634}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2017483122
 GameObject:
   m_ObjectHideFlags: 0
@@ -568,3 +718,4 @@ SceneRoots:
   - {fileID: 1523085668}
   - {fileID: 405809939}
   - {fileID: 2017483125}
+  - {fileID: 1813992642}

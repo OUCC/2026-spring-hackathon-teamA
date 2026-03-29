@@ -41,7 +41,14 @@ namespace FloorBreaker.Bootstrap
             builder.Register<MatchModeConfig>(Lifetime.Singleton);
 
             // ネットワーク接続サービス（シーンをまたいで生存）
+            // BuildCallback でルートスコープを FusionSceneManager に渡す
+            var rootScope = this;
             builder.Register<NetworkConnectionService>(Lifetime.Singleton);
+            builder.RegisterBuildCallback(c =>
+            {
+                var conn = c.Resolve<NetworkConnectionService>();
+                conn.SetRootScope(rootScope);
+            });
 
             // AudioService: 子 GameObject から取得 (Boot シーンと一緒に生存)
             var audioService = GetComponentInChildren<AudioService>();

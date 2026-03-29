@@ -70,6 +70,14 @@ namespace FloorBreaker.Player.Domain
             _levitationActive.Value = false;
         }
 
+        // --- ネットワーク同期用ミラーセッター ---
+        // クライアント側で [Networked] 値を Domain に反映するために使用
+
+        internal void SetHpDirect(int value) => _currentHp.Value = value;
+        internal void SetCoinsDirect(int value) => _coins.Value = value;
+        internal void SetFireShieldDirect(bool value) => _fireShieldActive.Value = value;
+        internal void SetLevitationDirect(bool value) => _levitationActive.Value = value;
+
         public void Dispose()
         {
             _currentHp.Dispose();

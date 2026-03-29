@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 using Cysharp.Threading.Tasks;
 using R3;
@@ -21,6 +22,7 @@ namespace FloorBreaker.UI.Title.Presentation
         private readonly TitleUIDocument _doc;
         private readonly NetworkConnectionService _connectionService;
         private readonly MatchModeConfig _modeConfig;
+        private readonly LobbyConfigUseCase _lobbyConfig;
         private readonly IAudioService _audio;
         private readonly ISceneTransitionService _sceneTransition;
         private readonly IRandomProvider _random;
@@ -37,6 +39,7 @@ namespace FloorBreaker.UI.Title.Presentation
             TitleUIDocument doc,
             NetworkConnectionService connectionService,
             MatchModeConfig modeConfig,
+            LobbyConfigUseCase lobbyConfig,
             IAudioService audio,
             ISceneTransitionService sceneTransition,
             IRandomProvider random,
@@ -46,6 +49,7 @@ namespace FloorBreaker.UI.Title.Presentation
             _doc = doc;
             _connectionService = connectionService;
             _modeConfig = modeConfig;
+            _lobbyConfig = lobbyConfig;
             _audio = audio;
             _sceneTransition = sceneTransition;
             _random = random;
@@ -86,7 +90,7 @@ namespace FloorBreaker.UI.Title.Presentation
         public async UniTask LeaveAsync()
         {
             await _connectionService.ShutdownAsync();
-            _modeConfig.ResetOnlineState();
+            _lobbyConfig.ResetOnline();
             _boundToLobby = false;
         }
 
@@ -94,8 +98,7 @@ namespace FloorBreaker.UI.Title.Presentation
         {
             if (!_isHost) return;
 
-            _modeConfig.IsOnline = true;
-            _modeConfig.IsHost = true;
+            _lobbyConfig.ConfigureAsHost(_modeConfig.RoomCode);
 
             var lobby = _connectionService.LobbyController;
             if (lobby != null)
@@ -126,7 +129,7 @@ namespace FloorBreaker.UI.Title.Presentation
 
         public void Dispose()
         {
-            LobbyController.OnLobbySpawned -= OnLobbySpawned;
+            _connectionService.LobbyControllerDiscovered -= OnLobbySpawned;
             _stageSelectUI?.Dispose();
             _subscriptions.Dispose();
         }
@@ -345,9 +348,7 @@ namespace FloorBreaker.UI.Title.Presentation
 
                 await _connectionService.CreateRoomAsync(roomCode, _modeConfig.PlayerCount);
 
-                _modeConfig.IsOnline = true;
-                _modeConfig.IsHost = true;
-                _modeConfig.RoomCode = roomCode;
+                _lobbyConfig.ConfigureAsHost(roomCode);
 
                 _doc.LobbyStatusLabel.text = "相手を待っています...";
 
@@ -369,9 +370,7 @@ namespace FloorBreaker.UI.Title.Presentation
 
                 await _connectionService.JoinRoomAsync(roomCode);
 
-                _modeConfig.IsOnline = true;
-                _modeConfig.IsHost = false;
-                _modeConfig.RoomCode = roomCode;
+                _lobbyConfig.ConfigureAsClient(roomCode);
 
                 _doc.LobbyJoinSection.style.display = DisplayStyle.None;
                 _doc.LobbyRoomCodeDisplay.style.display = DisplayStyle.Flex;
@@ -394,7 +393,8 @@ namespace FloorBreaker.UI.Title.Presentation
         private async UniTaskVoid HostStartMatchAsync()
         {
             await UniTask.Delay(500);
-            _sceneTransition.LoadMatchAsync().Forget();
+            // Fusion 経由でシーンロード（クライアントにも自動伝搬）
+            _connectionService.LoadMatchScene();
         }
 
         // ═══════════════════════════════════════════
@@ -403,7 +403,7 @@ namespace FloorBreaker.UI.Title.Presentation
 
         private void SubscribeToMatchStart()
         {
-            LobbyController.OnLobbySpawned += OnLobbySpawned;
+            _connectionService.LobbyControllerDiscovered += OnLobbySpawned;
             var existing = _connectionService.LobbyController;
             if (existing != null) BindToLobby(existing);
         }
@@ -429,14 +429,12 @@ namespace FloorBreaker.UI.Title.Presentation
             var lobby = _connectionService.LobbyController;
             if (lobby == null) return;
 
-            _modeConfig.PlayerCount = lobby.PlayerCount;
-            _modeConfig.IsCpuSlot = LobbyController.DecodeCpuSlots(lobby.CpuSlotMask, lobby.PlayerCount);
+            var cpuSlots = LobbyController.DecodeCpuSlots(lobby.CpuSlotMask, lobby.PlayerCount);
             var stageName = lobby.StageName.ToString();
+            _lobbyConfig.ApplyLobbySync(lobby.PlayerCount, cpuSlots, stageName);
+
             if (!string.IsNullOrEmpty(stageName))
-            {
-                _modeConfig.SelectedStageName = stageName;
                 _stageSelectUI?.SelectStageWithoutCallback(stageName);
-            }
 
             // スロット表示の更新（P3/P4 の展開/折りたたみ含む）
             for (int i = 2; i < 4; i++)
@@ -471,15 +469,14 @@ namespace FloorBreaker.UI.Title.Presentation
             var lobby = _connectionService.LobbyController;
             if (lobby != null)
             {
-                _modeConfig.PlayerCount = lobby.PlayerCount;
-                _modeConfig.IsCpuSlot = LobbyController.DecodeCpuSlots(lobby.CpuSlotMask, lobby.PlayerCount);
-                _modeConfig.SelectedStageName = lobby.StageName.ToString();
+                var cpuSlots = LobbyController.DecodeCpuSlots(lobby.CpuSlotMask, lobby.PlayerCount);
+                _lobbyConfig.ApplyMatchStart(lobby.PlayerCount, cpuSlots, lobby.StageName.ToString());
             }
 
-            _modeConfig.IsOnline = true;
-            _modeConfig.IsHost = false;
-
-            _sceneTransition.LoadMatchAsync().Forget();
+            // Fusion がホストのシーンロード指示をクライアントに自動伝搬する。
+            // クライアント側から明示的に LoadMatchScene() を呼ぶとシーンが二重ロードされるため呼ばない。
+            // FusionSceneManager が EnqueueParent を処理し、VContainer の DI 階層も正しく構築される。
+            Debug.Log("[NetworkLobbyPresenter] Client: OnClientMatchStart — waiting for Fusion scene propagation");
         }
     }
 }

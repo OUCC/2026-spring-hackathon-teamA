@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using FloorBreaker.Shared.Domain.Grid;
-
+using FloorBreaker.Shared.Presentation.Common;
 
 namespace FloorBreaker.Stage.Presentation
 {
@@ -29,7 +29,7 @@ namespace FloorBreaker.Stage.Presentation
             for (int i = 0; i < initialCapacity; i++)
             {
                 var go = UnityEngine.Object.Instantiate(_prefab, _poolParent);
-                if (_overrideLayer >= 0) SetLayerRecursive(go, _overrideLayer);
+                if (_overrideLayer >= 0) go.SetLayerRecursive(_overrideLayer);
                 go.SetActive(false);
                 _available.Push(go);
             }
@@ -48,7 +48,7 @@ namespace FloorBreaker.Stage.Presentation
             else
             {
                 go = UnityEngine.Object.Instantiate(_prefab, _poolParent);
-                if (_overrideLayer >= 0) SetLayerRecursive(go, _overrideLayer);
+                if (_overrideLayer >= 0) go.SetLayerRecursive(_overrideLayer);
             }
 
             go.transform.position = worldPos + VfxOffset;
@@ -117,11 +117,5 @@ namespace FloorBreaker.Stage.Presentation
             _active.Clear();
         }
 
-        private static void SetLayerRecursive(GameObject go, int layer)
-        {
-            go.layer = layer;
-            foreach (Transform child in go.transform)
-                SetLayerRecursive(child.gameObject, layer);
-        }
     }
 }

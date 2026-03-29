@@ -23,7 +23,7 @@ namespace FloorBreaker.UI.Title.Presentation
 
         private readonly GameObject _tilePrefab;
         private readonly TileSpriteConfig _spriteConfig;
-        private readonly IBalanceParameters _balance;
+        private readonly StageGenerationService _stageGen;
 
         private GameObject _root;
 
@@ -47,11 +47,11 @@ namespace FloorBreaker.UI.Title.Presentation
         public StagePreviewRenderer(
             GameObject tilePrefab,
             TileSpriteConfig spriteConfig,
-            IBalanceParameters balance)
+            StageGenerationService stageGen)
         {
             _tilePrefab = tilePrefab;
             _spriteConfig = spriteConfig;
-            _balance = balance;
+            _stageGen = stageGen;
 
             _root = new GameObject("[StagePreviewRenderer]");
             UnityEngine.Object.DontDestroyOnLoad(_root);
@@ -65,32 +65,22 @@ namespace FloorBreaker.UI.Title.Presentation
         {
             ClearStageObjects();
 
-            // StageModel 生成
+            // StageModel 生成 + タイル配置（Domain サービスに委譲）
             var bounds = new TileCoordRange(0, 0, config.Width - 1, config.Height - 1);
             var model = new StageModel(bounds);
 
-            // 壁生成
-            var wallService = new WallGenerationService(
-                config.WallSeedPercent, config.WallGrowthChance,
-                config.WallTargetPercent, config.SpawnProtectionRadius);
-            var wallPositions = wallService.Generate(bounds, new List<GridPos>(), random);
-            foreach (var pos in wallPositions)
-                model.SetTileData(pos, new TileData { Type = TileType.Wall, Condition = TileCondition.Intact });
-
-            // ガス脈生成
-            if (config.GasVeinCount > 0)
-                GenerateGasVeins(model, config, bounds, random);
-
-            // プリセットタイル
-            if (config.PresetTiles != null)
+            var genParams = new StageGenerationParams
             {
-                foreach (var preset in config.PresetTiles)
-                {
-                    var pos = new GridPos(preset.x, preset.y);
-                    if (!model.IsInBounds(pos)) continue;
-                    model.SetTileData(pos, new TileData { Type = preset.type, Condition = preset.condition, WarpPairId = preset.warpPairId });
-                }
-            }
+                WallSeedPercent = config.WallSeedPercent,
+                WallGrowthChance = config.WallGrowthChance,
+                WallTargetPercent = config.WallTargetPercent,
+                SpawnProtectionRadius = config.SpawnProtectionRadius,
+                GasVeinCount = config.GasVeinCount,
+                GasVeinMinLength = config.GasVeinMinLength,
+                GasVeinMaxLength = config.GasVeinMaxLength,
+                PresetTiles = config.PresetTiles,
+            };
+            _stageGen.PopulateStage(model, genParams, new List<GridPos>(), random);
 
             // TileView 生成
             _stageObjects = new GameObject("PreviewStage");
@@ -101,7 +91,7 @@ namespace FloorBreaker.UI.Title.Presentation
             {
                 var worldPos = pos.ToWorldCenter().ToVector3(0f) + StageOffset;
                 var go = UnityEngine.Object.Instantiate(_tilePrefab, worldPos, Quaternion.identity, _stageObjects.transform);
-                SetLayerRecursive(go, PreviewLayer);
+                go.SetLayerRecursive(PreviewLayer);
 
                 var renderer = go.GetComponent<SpriteRenderer>();
                 var tileView = go.GetComponent<TileView>();
@@ -231,57 +221,5 @@ namespace FloorBreaker.UI.Title.Presentation
             _gimmickEntries.Clear();
         }
 
-        private static void GenerateGasVeins(StageModel model, StageConfig config, TileCoordRange bounds, IRandomProvider random)
-        {
-            var dirs = new (int dx, int dy)[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
-
-            for (int v = 0; v < config.GasVeinCount; v++)
-            {
-                int sx = random.Range(bounds.MinX + 3, bounds.MaxX - 2);
-                int sy = random.Range(bounds.MinY + 3, bounds.MaxY - 2);
-
-                int length = random.Range(config.GasVeinMinLength, config.GasVeinMaxLength + 1);
-                int cx = sx, cy = sy;
-                var dir = dirs[random.Range(0, 4)];
-
-                for (int step = 0; step < length; step++)
-                {
-                    var pos = new GridPos(cx, cy);
-                    if (!model.IsInBounds(pos)) break;
-
-                    var existing = model.GetTileData(pos);
-                    if (existing.Type == TileType.Wall || existing.Type == TileType.Bedrock)
-                        break;
-                    if (existing.Type != TileType.Gas && existing.Condition == TileCondition.Intact)
-                        model.SetTileData(pos, new TileData { Type = TileType.Gas, Condition = TileCondition.Intact, WarpPairId = -1 });
-
-                    if (random.Range(0, 100) < 30)
-                    {
-                        if (dir.dx != 0)
-                            dir = random.Range(0, 2) == 0 ? (0, 1) : (0, -1);
-                        else
-                            dir = random.Range(0, 2) == 0 ? (1, 0) : (-1, 0);
-                    }
-
-                    cx += dir.dx;
-                    cy += dir.dy;
-                }
-            }
-        }
-
-        private static void SetLayerRecursive(GameObject go, int layer)
-        {
-            go.layer = layer;
-            foreach (Transform child in go.transform)
-                SetLayerRecursive(child.gameObject, layer);
-        }
-    }
-
-    public enum GimmickType
-    {
-        Gas,
-        Bedrock,
-        Warp,
-        EternalFire,
     }
 }

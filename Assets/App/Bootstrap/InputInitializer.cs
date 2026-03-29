@@ -8,6 +8,7 @@ using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Input.Application;
 using FloorBreaker.Input.Infrastructure;
 using FloorBreaker.MatchFlow.Application;
+using FloorBreaker.Network.Infrastructure;
 using DeviceType = FloorBreaker.Shared.Application.Interfaces.DeviceType;
 
 namespace FloorBreaker.Bootstrap
@@ -25,6 +26,8 @@ namespace FloorBreaker.Bootstrap
         private readonly MatchPlayers _players;
         private readonly MatchPhaseScheduler _scheduler;
         private readonly ITimeProvider _timeProvider;
+        private readonly NetworkInputCollector _networkInputCollector;
+        private readonly NetworkConnectionService _connectionService;
 
         private InputMapSwitcher _inputMapSwitcher;
         private readonly List<(InputActionMap map, PlayerId id)> _upgradeMaps = new();
@@ -38,7 +41,9 @@ namespace FloorBreaker.Bootstrap
             MatchModeConfig modeConfig,
             MatchPlayers players,
             MatchPhaseScheduler scheduler,
-            ITimeProvider timeProvider)
+            ITimeProvider timeProvider,
+            NetworkInputCollector networkInputCollector = null,
+            NetworkConnectionService connectionService = null)
         {
             _gameplayInputBridge = gameplayInputBridge;
             _upgradeUIInputBridge = upgradeUIInputBridge;
@@ -47,9 +52,21 @@ namespace FloorBreaker.Bootstrap
             _players = players;
             _scheduler = scheduler;
             _timeProvider = timeProvider;
+            _networkInputCollector = networkInputCollector;
+            _connectionService = connectionService;
         }
 
         public void Initialize()
+        {
+            if (_modeConfig.IsOnline)
+            {
+                InitializeOnline();
+                return;
+            }
+            InitializeLocal();
+        }
+
+        private void InitializeLocal()
         {
             // 1. シーン上の PlayerInputAdapter 検出（P1/P2 キーボード用）
             var sceneAdapters = UnityEngine.Object.FindObjectsByType<PlayerInputAdapter>(
@@ -129,6 +146,97 @@ namespace FloorBreaker.Bootstrap
                     map["Navigate"].performed += ctx => _upgradeUIInputBridge.OnNavigate(capturedId, ctx);
                     map["Submit"].performed += ctx => _upgradeUIInputBridge.OnSubmit(capturedId, ctx);
                     _upgradeMaps.Add((map, id));
+                }
+            }
+        }
+
+        /// <summary>オンラインモード: ローカルプレイヤーのアダプターを NetworkInputCollector に接続。</summary>
+        private void InitializeOnline()
+        {
+            if (_networkInputCollector == null)
+            {
+                Debug.LogError("[InputInitializer] NetworkInputCollector is null in online mode");
+                return;
+            }
+
+            var sceneAdapters = UnityEngine.Object.FindObjectsByType<PlayerInputAdapter>(
+                FindObjectsSortMode.None);
+
+            InputActionAsset inputActions = null;
+            foreach (var adapter in sceneAdapters)
+            {
+                if (adapter.InputActions != null) { inputActions = adapter.InputActions; break; }
+            }
+
+            // ローカルプレイヤーのアダプター初期化 + NetworkInputCollector にバインド
+            // Fusion Host Mode: ホスト=PlayerRef(0), クライアント=PlayerRef(1)
+            // Runner.LocalPlayer は Match シーンロード時点で正しい値を返す
+            int localIdx = _connectionService != null && !_connectionService.IsHost ? 1 : 0;
+            Debug.Log($"[InputInitializer] InitializeOnline: localIdx={localIdx}, isHost={_connectionService?.IsHost}");
+            var localPlayerId = PlayerId.FromIndex(localIdx);
+            var deviceType = localIdx < _modeConfig.DeviceTypes.Length
+                ? _modeConfig.DeviceTypes[localIdx]
+                : FloorBreaker.Shared.Application.Interfaces.DeviceType.KeyboardWasd;
+
+            PlayerInputAdapter localAdapter = null;
+
+            if (deviceType == DeviceType.KeyboardWasd || deviceType == DeviceType.KeyboardArrows)
+            {
+                if (sceneAdapters.Length > 0)
+                {
+                    localAdapter = sceneAdapters[0];
+                    localAdapter.Initialize(localPlayerId, _timeProvider, inputActions);
+                }
+            }
+            else if (deviceType == DeviceType.Gamepad && inputActions != null)
+            {
+                int gpIdx = localIdx < _modeConfig.GamepadIndices.Length ? _modeConfig.GamepadIndices[localIdx] : 0;
+                var gamepads = Gamepad.all;
+                if (gpIdx >= 0 && gpIdx < gamepads.Count)
+                {
+                    var go = new GameObject("GamepadAdapter_Online");
+                    localAdapter = go.AddComponent<PlayerInputAdapter>();
+                    localAdapter.Initialize(localPlayerId, _timeProvider, inputActions);
+                    localAdapter.RestrictToDevice(gamepads[gpIdx]);
+                    _dynamicAdapters.Add(go);
+                }
+            }
+
+            if (localAdapter != null)
+                _networkInputCollector.BindAdapter(localAdapter);
+
+            // FusionCallbacksBridge に入力コレクターをセット
+            _connectionService?.SetInputCollector(_networkInputCollector);
+
+            // InputMapSwitcher + ポーズ
+            if (inputActions != null)
+            {
+                _inputMapSwitcher = new InputMapSwitcher(inputActions, _clock, _players.PlayerCount);
+
+                var systemMap = inputActions.FindActionMap("System");
+                if (systemMap != null)
+                {
+                    _pauseAction = systemMap.FindAction("Pause");
+                    if (_pauseAction != null)
+                        _pauseAction.performed += OnPausePerformed;
+                }
+
+                // UpgradeUI: オンラインでは NetworkInput 経由で送信
+                var upgradeMap = inputActions.FindActionMap("UpgradeUI_P1");
+                if (upgradeMap != null)
+                {
+                    var collector = _networkInputCollector;
+                    upgradeMap["Navigate"].performed += ctx =>
+                    {
+                        var v = ctx.ReadValue<UnityEngine.Vector2>();
+                        if (v.x > 0.5f) collector.SetUpgradeAction(UpgradeInputAction.NavigateRight);
+                        else if (v.x < -0.5f) collector.SetUpgradeAction(UpgradeInputAction.NavigateLeft);
+                        else if (v.y > 0.5f) collector.SetUpgradeAction(UpgradeInputAction.NavigateUp);
+                        else if (v.y < -0.5f) collector.SetUpgradeAction(UpgradeInputAction.NavigateDown);
+                    };
+                    upgradeMap["Submit"].performed += _ =>
+                        collector.SetUpgradeAction(UpgradeInputAction.Skip);
+                    _upgradeMaps.Add((upgradeMap, localPlayerId));
                 }
             }
         }

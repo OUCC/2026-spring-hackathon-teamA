@@ -2,8 +2,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer;
 using VContainer.Unity;
-using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.Input.Infrastructure;
+using FloorBreaker.MatchFlow.Application;
+using FloorBreaker.Stage.Domain;
 using FloorBreaker.Stage.Presentation;
 using FloorBreaker.UI.RuntimeUI.Documents;
 using FloorBreaker.UI.Title.Presentation;
@@ -29,11 +30,17 @@ namespace FloorBreaker.Bootstrap
             if (_tileSpriteConfig != null)
                 builder.RegisterInstance(_tileSpriteConfig);
 
+            // LobbyConfigUseCase: ロビー設定を MatchModeConfig に適用
+            builder.Register<LobbyConfigUseCase>(Lifetime.Scoped);
+
+            // StageGenerationService: ステージ生成 Domain サービス
+            builder.Register<StageGenerationService>(Lifetime.Scoped);
+
             // StagePreviewRenderer: オフスクリーンプレビュー
             if (_tilePrefab != null && _tileSpriteConfig != null)
             {
                 builder.Register(c => new StagePreviewRenderer(
-                    _tilePrefab, _tileSpriteConfig, c.Resolve<IBalanceParameters>()),
+                    _tilePrefab, _tileSpriteConfig, c.Resolve<StageGenerationService>()),
                     Lifetime.Scoped);
             }
 

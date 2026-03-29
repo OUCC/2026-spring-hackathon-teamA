@@ -11,7 +11,6 @@ using FloorBreaker.Slimes.Domain;
 using FloorBreaker.Player.Domain;
 using FloorBreaker.MatchFlow.Application;
 using FloorBreaker.Cameras.Presentation;
-
 namespace FloorBreaker.Bootstrap
 {
     /// <summary>
@@ -23,7 +22,7 @@ namespace FloorBreaker.Bootstrap
         private readonly IBalanceParameters _balance;
         private readonly IRandomProvider _random;
         private readonly StageModel _stage;
-        private readonly WallGenerationService _wallGen;
+        private readonly StageGenerationService _stageGen;
         private readonly MatchPlayers _players;
         private readonly SlimeSpawnService _slimeSpawnService;
         private readonly SplitScreenCameraSetup _cameraSetup;
@@ -42,7 +41,7 @@ namespace FloorBreaker.Bootstrap
             IBalanceParameters balance,
             IRandomProvider random,
             StageModel stage,
-            WallGenerationService wallGen,
+            StageGenerationService stageGen,
             MatchPlayers players,
             SlimeSpawnService slimeSpawnService,
             SplitScreenCameraSetup cameraSetup,
@@ -57,7 +56,7 @@ namespace FloorBreaker.Bootstrap
             _balance = balance;
             _random = random;
             _stage = stage;
-            _wallGen = wallGen;
+            _stageGen = stageGen;
             _players = players;
             _slimeSpawnService = slimeSpawnService;
             _cameraSetup = cameraSetup;
@@ -76,43 +75,28 @@ namespace FloorBreaker.Bootstrap
             _audio?.StopBgm(0.3f);
             _audio?.PlayBgm(SfxIds.BgmMatch);
 
-            // 1. 壁生成 (Domain)
-            var bounds = _stage.GetCurrentBounds();
+            // 1. ステージ生成 (壁 → ガス脈 → プリセット)
             var spawnPositions = new System.Collections.Generic.List<FloorBreaker.Shared.Domain.Grid.GridPos>();
             foreach (var p in _players.All) spawnPositions.Add(p.CurrentPosition);
-            var walls = _wallGen.Generate(bounds, spawnPositions, _random);
-            foreach (var pos in walls)
-                _stage.SetTileData(pos, new TileData
-                {
-                    Type = TileType.Wall,
-                    Condition = TileCondition.Intact,
-                    WarpPairId = -1,
-                });
 
-            // 1b. ガス管ランダム生成 (StageConfig.GasVeinCount > 0 の場合)
-            if (_stageConfig != null && _stageConfig.GasVeinCount > 0)
+            if (_stageConfig != null)
             {
-                GenerateGasVeins(bounds);
-            }
-
-            // 1c. プリセットタイル配置 (StageConfig)
-            if (_stageConfig?.PresetTiles != null)
-            {
-                foreach (var preset in _stageConfig.PresetTiles)
+                var genParams = new StageGenerationParams
                 {
-                    var presetPos = new FloorBreaker.Shared.Domain.Grid.GridPos(preset.x, preset.y);
-                    if (!_stage.IsInBounds(presetPos)) continue;
-                    _stage.SetTileData(presetPos, new TileData
-                    {
-                        Type = preset.type,
-                        Condition = preset.condition,
-                        WarpPairId = preset.warpPairId,
-                    });
-                }
+                    WallSeedPercent = _stageConfig.WallSeedPercent,
+                    WallGrowthChance = _stageConfig.WallGrowthChance,
+                    WallTargetPercent = _stageConfig.WallTargetPercent,
+                    SpawnProtectionRadius = _stageConfig.SpawnProtectionRadius,
+                    GasVeinCount = _stageConfig.GasVeinCount,
+                    GasVeinMinLength = _stageConfig.GasVeinMinLength,
+                    GasVeinMaxLength = _stageConfig.GasVeinMaxLength,
+                    PresetTiles = _stageConfig.PresetTiles,
+                };
+                _stageGen.PopulateStage(_stage, genParams, spawnPositions, _random);
             }
 
             // 1d. WarpService レジストリ構築
-            _warpService?.BuildRegistry(bounds);
+            _warpService?.BuildRegistry(_stage.GetCurrentBounds());
 
             // 2. Presentation 初期化 (TileView → Presenter → HUD → Overlay → Result)
             _presentationInit.Initialize();
@@ -155,88 +139,6 @@ namespace FloorBreaker.Bootstrap
             });
 
             await UniTask.CompletedTask;
-        }
-
-        /// <summary>
-        /// ガス管をランダムウォークで生成する。各 vein は seed 地点から
-        /// ランダムな4方向に伸びる細い連結線。
-        /// </summary>
-        private void GenerateGasVeins(FloorBreaker.Shared.Domain.Grid.TileCoordRange bounds)
-        {
-            int veinCount = _stageConfig.GasVeinCount;
-            int minLen = _stageConfig.GasVeinMinLength;
-            int maxLen = _stageConfig.GasVeinMaxLength;
-            int protect = _balance.SpawnProtectionRadius;
-
-            var spawnPositions = new System.Collections.Generic.List<FloorBreaker.Shared.Domain.Grid.GridPos>();
-            foreach (var p in _players.All) spawnPositions.Add(p.CurrentPosition);
-
-            // 4方向
-            var dirs = new (int dx, int dy)[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
-
-            for (int v = 0; v < veinCount; v++)
-            {
-                // ランダム seed 位置
-                int attempts = 0;
-                int sx, sy;
-                do
-                {
-                    sx = _random.Range(bounds.MinX + 3, bounds.MaxX - 2);
-                    sy = _random.Range(bounds.MinY + 3, bounds.MaxY - 2);
-                    attempts++;
-                } while (attempts < 50 && IsNearSpawn(sx, sy, spawnPositions, protect));
-
-                if (attempts >= 50) continue;
-
-                // ランダムウォークで vein を伸ばす
-                int length = _random.Range(minLen, maxLen + 1);
-                int cx = sx, cy = sy;
-                var dir = dirs[_random.Range(0, 4)];
-
-                for (int step = 0; step < length; step++)
-                {
-                    var pos = new FloorBreaker.Shared.Domain.Grid.GridPos(cx, cy);
-                    if (!_stage.IsInBounds(pos)) break;
-
-                    var existing = _stage.GetTileData(pos);
-                    // 壁・岩盤・既にガスの場合はスキップ
-                    if (existing.Type == TileType.Wall || existing.Type == TileType.Bedrock)
-                        break;
-                    if (existing.Type != TileType.Gas && existing.Condition == TileCondition.Intact)
-                    {
-                        _stage.SetTileData(pos, new TileData
-                        {
-                            Type = TileType.Gas,
-                            Condition = TileCondition.Intact,
-                            WarpPairId = -1,
-                        });
-                    }
-
-                    // 次のステップ: 70% で同方向、30% で直角に曲がる
-                    if (_random.Range(0, 100) < 30)
-                    {
-                        // 直角方向に変更
-                        if (dir.dx != 0)
-                            dir = _random.Range(0, 2) == 0 ? (0, 1) : (0, -1);
-                        else
-                            dir = _random.Range(0, 2) == 0 ? (1, 0) : (-1, 0);
-                    }
-
-                    cx += dir.dx;
-                    cy += dir.dy;
-                }
-            }
-        }
-
-        private static bool IsNearSpawn(int x, int y,
-            System.Collections.Generic.List<FloorBreaker.Shared.Domain.Grid.GridPos> spawns, int radius)
-        {
-            foreach (var s in spawns)
-            {
-                if (System.Math.Abs(x - s.X) <= radius && System.Math.Abs(y - s.Y) <= radius)
-                    return true;
-            }
-            return false;
         }
 
         public void Dispose()

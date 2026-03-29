@@ -187,21 +187,11 @@ namespace FloorBreaker.UI.Title.Presentation
             if (_previewDesc != null) _previewDesc.text = cfg.Description;
 
             // ギミック検知
-            bool hasGas = cfg.GasVeinCount > 0;
-            bool hasBedrock = false;
-            bool hasWarp = false;
-            bool hasEternalFire = false;
-
-            if (cfg.PresetTiles != null)
-            {
-                foreach (var p in cfg.PresetTiles)
-                {
-                    if (p.type == TileType.Bedrock) hasBedrock = true;
-                    if (p.type == TileType.Warp) hasWarp = true;
-                    if (p.type == TileType.Gas) hasGas = true;
-                    if (p.condition == TileCondition.EternalFire) hasEternalFire = true;
-                }
-            }
+            var gimmickFlags = StageGimmickDetector.Detect(cfg.GasVeinCount, cfg.PresetTiles);
+            bool hasGas = gimmickFlags.HasFlag(GimmickFlags.Gas);
+            bool hasBedrock = gimmickFlags.HasFlag(GimmickFlags.Bedrock);
+            bool hasWarp = gimmickFlags.HasFlag(GimmickFlags.Warp);
+            bool hasEternalFire = gimmickFlags.HasFlag(GimmickFlags.EternalFire);
 
             // ギミックバッジ
             if (_previewGimmicks != null)

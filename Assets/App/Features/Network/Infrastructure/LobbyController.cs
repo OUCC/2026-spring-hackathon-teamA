@@ -21,9 +21,6 @@ namespace FloorBreaker.Network.Infrastructure
         /// <summary>クライアント側でロビー設定が変更された際に発火する。</summary>
         public event Action OnLobbyConfigChanged;
 
-        /// <summary>Spawned 時にクライアント側で発火する。</summary>
-        public static event Action<LobbyController> OnLobbySpawned;
-
         private bool _wasMatchStarted;
         private int _prevPlayerCount;
         private int _prevCpuSlotMask;
@@ -37,7 +34,7 @@ namespace FloorBreaker.Network.Infrastructure
                 _prevPlayerCount = PlayerCount;
                 _prevCpuSlotMask = CpuSlotMask;
                 _prevStageName = StageName;
-                OnLobbySpawned?.Invoke(this);
+                // LobbyController の発見は NetworkConnectionService.LobbyControllerDiscovered 経由
             }
         }
 

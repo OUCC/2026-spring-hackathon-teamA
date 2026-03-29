@@ -21,6 +21,7 @@ namespace FloorBreaker.Bootstrap
         private readonly ISceneTransitionService _sceneTransition;
         private readonly IRandomProvider _random;
         private readonly NetworkConnectionService _connectionService;
+        private readonly LobbyConfigUseCase _lobbyConfig;
         private readonly TileSpriteConfig _tileSpriteConfig;
         private readonly StagePreviewRenderer _previewRenderer;
         private readonly KeyRebindingService _rebindService;
@@ -32,6 +33,7 @@ namespace FloorBreaker.Bootstrap
             ISceneTransitionService sceneTransition,
             IRandomProvider random,
             NetworkConnectionService connectionService,
+            LobbyConfigUseCase lobbyConfig,
             TileSpriteConfig tileSpriteConfig = null,
             StagePreviewRenderer previewRenderer = null,
             KeyRebindingService rebindService = null)
@@ -42,6 +44,7 @@ namespace FloorBreaker.Bootstrap
             _sceneTransition = sceneTransition;
             _random = random;
             _connectionService = connectionService;
+            _lobbyConfig = lobbyConfig;
             _tileSpriteConfig = tileSpriteConfig;
             _previewRenderer = previewRenderer;
             _rebindService = rebindService;
@@ -54,7 +57,7 @@ namespace FloorBreaker.Bootstrap
 
             // ロビーPresenter を生成
             var lobbyPresenter = new NetworkLobbyPresenter(
-                _doc, _connectionService, _modeConfig, _audio, _sceneTransition, _random,
+                _doc, _connectionService, _modeConfig, _lobbyConfig, _audio, _sceneTransition, _random,
                 _tileSpriteConfig, _previewRenderer);
 
             // TitlePresenter を生成（ボタンコールバック・BGM・音量・キーコンフィグを接続）
