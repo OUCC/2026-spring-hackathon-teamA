@@ -10,7 +10,7 @@ namespace FloorBreaker.Network.Infrastructure
 {
     /// <summary>
     /// タイル状態の同期。
-    /// ホスト: TileChanged イベント → バッチ RPC + 定期フルスナップショット
+    /// ホスト: TileChanged イベント → バッチ RPC + 定期フルスナップショット（分割送信）
     /// クライアント: RPC → StageModel.SetTileData()
     /// </summary>
     public class NetworkStageStateAdapter : NetworkBehaviour
@@ -29,6 +29,10 @@ namespace FloorBreaker.Network.Infrastructure
         private int _ticksSinceSnapshot;
         private const int SnapshotIntervalTicks = 150; // 5秒 @30Hz
 
+        // RPC ペイロード上限対策: 1回の RPC で送る最大タイル数
+        // 4byte/tile * 100 = 400byte（ヘッダ含めて 512byte 以内）
+        private const int MaxTilesPerRpc = 100;
+
         public void Initialize(StageModel stage)
         {
             _stage = stage;
@@ -38,10 +42,7 @@ namespace FloorBreaker.Network.Infrastructure
         {
             if (Object.HasStateAuthority && _stage != null)
             {
-                // ホスト: タイル変更を購読してバッファに蓄積
                 _tileChangedSub = _stage.TileChanged.Subscribe(e => OnTileChanged(e));
-
-                // 初回フルスナップショット送信
                 SendFullSnapshot();
             }
         }
@@ -60,11 +61,8 @@ namespace FloorBreaker.Network.Infrastructure
         {
             if (_batchPosX.Count > 0)
             {
-                RPC_TileBatchChanged(
-                    _batchPosX.ToArray(), _batchPosY.ToArray(),
-                    _batchType.ToArray(), _batchCondition.ToArray(),
-                    _batchWarpPairId.ToArray());
-
+                // バッチも分割送信（大量のタイル変更時）
+                SendBatchInChunks();
                 _batchPosX.Clear();
                 _batchPosY.Clear();
                 _batchType.Clear();
@@ -72,7 +70,6 @@ namespace FloorBreaker.Network.Infrastructure
                 _batchWarpPairId.Clear();
             }
 
-            // 定期フルスナップショット
             _ticksSinceSnapshot++;
             if (_ticksSinceSnapshot >= SnapshotIntervalTicks)
             {
@@ -81,30 +78,58 @@ namespace FloorBreaker.Network.Infrastructure
             }
         }
 
+        private void SendBatchInChunks()
+        {
+            int total = _batchPosX.Count;
+            for (int offset = 0; offset < total; offset += MaxTilesPerRpc)
+            {
+                int count = Math.Min(MaxTilesPerRpc, total - offset);
+                var px = new int[count];
+                var py = new int[count];
+                var bt = new byte[count];
+                var bc = new byte[count];
+                var bw = new short[count];
+                for (int i = 0; i < count; i++)
+                {
+                    px[i] = _batchPosX[offset + i];
+                    py[i] = _batchPosY[offset + i];
+                    bt[i] = _batchType[offset + i];
+                    bc[i] = _batchCondition[offset + i];
+                    bw[i] = _batchWarpPairId[offset + i];
+                }
+                RPC_TileBatchChanged(px, py, bt, bc, bw);
+            }
+        }
+
         private void SendFullSnapshot()
         {
             if (_stage == null) return;
-            var bounds = _stage.GetCurrentBounds();
             var tiles = _stage.GetTilesRaw();
             int w = tiles.GetLength(0);
             int h = tiles.GetLength(1);
+            int totalTiles = w * h;
 
-            // バイト配列にパック: type(1) + condition(1) + warpPairId(2) = 4byte/tile
-            var data = new byte[w * h * 4];
-            int idx = 0;
-            for (int y = 0; y < h; y++)
+            // 分割送信: MaxTilesPerRpc タイルずつ
+            for (int offset = 0; offset < totalTiles; offset += MaxTilesPerRpc)
             {
-                for (int x = 0; x < w; x++)
+                int count = Math.Min(MaxTilesPerRpc, totalTiles - offset);
+                var data = new byte[count * 4];
+                int idx = 0;
+
+                for (int i = 0; i < count; i++)
                 {
+                    int tileIdx = offset + i;
+                    int x = tileIdx % w;
+                    int y = tileIdx / w;
                     var tile = tiles[x, y];
                     data[idx++] = (byte)tile.Type;
                     data[idx++] = (byte)tile.Condition;
                     data[idx++] = (byte)(tile.WarpPairId & 0xFF);
                     data[idx++] = (byte)((tile.WarpPairId >> 8) & 0xFF);
                 }
-            }
 
-            RPC_FullSnapshot(w, h, data);
+                RPC_SnapshotChunk(w, h, offset, count, data);
+            }
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -115,38 +140,39 @@ namespace FloorBreaker.Network.Infrastructure
             for (int i = 0; i < posX.Length; i++)
             {
                 var pos = new GridPos(posX[i], posY[i]);
-                var data = new TileData
+                var tileData = new TileData
                 {
                     Type = (TileType)type[i],
                     Condition = (TileCondition)condition[i],
                     WarpPairId = warpPairId[i],
                 };
-                _stage.SetTileData(pos, data);
+                _stage.SetTileData(pos, tileData);
             }
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_FullSnapshot(int width, int height, byte[] data)
+        private void RPC_SnapshotChunk(int width, int height, int tileOffset, int tileCount, byte[] data)
         {
             if (Object.HasStateAuthority || _stage == null) return;
 
-            var snapshot = new TileData[width, height];
             int idx = 0;
-            for (int y = 0; y < height; y++)
+            for (int i = 0; i < tileCount; i++)
             {
-                for (int x = 0; x < width; x++)
-                {
-                    snapshot[x, y] = new TileData
-                    {
-                        Type = (TileType)data[idx],
-                        Condition = (TileCondition)data[idx + 1],
-                        WarpPairId = (short)(data[idx + 2] | (data[idx + 3] << 8)),
-                    };
-                    idx += 4;
-                }
-            }
+                int tileIdx = tileOffset + i;
+                int x = tileIdx % width;
+                int y = tileIdx / width;
+                var pos = new GridPos(x, y);
 
-            _stage.LoadSnapshot(snapshot);
+                var tileData = new TileData
+                {
+                    Type = (TileType)data[idx],
+                    Condition = (TileCondition)data[idx + 1],
+                    WarpPairId = (short)(data[idx + 2] | (data[idx + 3] << 8)),
+                };
+                idx += 4;
+
+                _stage.SetTileData(pos, tileData);
+            }
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
