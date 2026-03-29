@@ -81,7 +81,7 @@ namespace FloorBreaker.Network.Infrastructure
                 {
                     _state.Value = ConnectionState.InRoom;
                     _connectedPlayerCount.Value = 1;
-                    SpawnLobbyController();
+                    await SpawnLobbyControllerAsync();
                 }
                 else
                 {
@@ -98,22 +98,41 @@ namespace FloorBreaker.Network.Infrastructure
             }
         }
 
-        private void SpawnLobbyController()
+        private async UniTask SpawnLobbyControllerAsync()
         {
             if (_runner == null || !IsHost) return;
 
             if (_lobbyControllerPrefab == null)
                 _lobbyControllerPrefab = Resources.Load<NetworkObject>("Network/LobbyController");
 
-            if (_lobbyControllerPrefab != null)
+            if (_lobbyControllerPrefab == null)
             {
-                var obj = _runner.Spawn(_lobbyControllerPrefab);
+                Debug.LogWarning("[NetworkConnectionService] LobbyController prefab not found in Resources/Network/");
+                return;
+            }
+
+            var obj = _runner.Spawn(_lobbyControllerPrefab);
+            if (obj == null)
+            {
+                // EnqueueIncompleteSynchronousSpawns=true の場合、Spawn が即座に返せない。
+                // 次フレームまで待ってからシーン検索でフォールバック。
+                Debug.Log("[NetworkConnectionService] Spawn returned null, waiting for async completion...");
+                await UniTask.DelayFrame(3);
+                _lobbyController = UnityEngine.Object.FindAnyObjectByType<LobbyController>();
+            }
+            else
+            {
                 _lobbyController = obj.GetComponent<LobbyController>();
+            }
+
+            if (_lobbyController != null)
+            {
+                Debug.Log("[NetworkConnectionService] LobbyController spawned successfully");
                 LobbyControllerDiscovered?.Invoke(_lobbyController);
             }
             else
             {
-                Debug.LogWarning("[NetworkConnectionService] LobbyController prefab not found in Resources/Network/");
+                Debug.LogError("[NetworkConnectionService] LobbyController spawn failed");
             }
         }
 
