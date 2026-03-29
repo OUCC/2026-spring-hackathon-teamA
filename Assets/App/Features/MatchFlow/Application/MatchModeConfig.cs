@@ -23,6 +23,25 @@ namespace FloorBreaker.MatchFlow.Application
         /// <summary>リザルトから「設定に戻る」で遷移した場合 true。</summary>
         public bool StartInSetupMode { get; set; }
 
+        // --- オンラインモード ---
+
+        /// <summary>オンライン対戦中かどうか。</summary>
+        public bool IsOnline { get; set; }
+
+        /// <summary>このクライアントがホストかどうか（IsOnline 時のみ有効）。</summary>
+        public bool IsHost { get; set; }
+
+        /// <summary>現在のルームコード。</summary>
+        public string RoomCode { get; set; }
+
+        /// <summary>オンライン関連の状態をリセットする。</summary>
+        public void ResetOnlineState()
+        {
+            IsOnline = false;
+            IsHost = false;
+            RoomCode = null;
+        }
+
         public bool IsCpuPlayer => System.Array.Exists(IsCpuSlot, x => x);
         public bool IsCpuAt(int index) => index >= 0 && index < IsCpuSlot.Length && IsCpuSlot[index];
 

@@ -8,6 +8,7 @@ using FloorBreaker.ScriptableObjects.Balance;
 using FloorBreaker.Shared.Infrastructure.Audio;
 using FloorBreaker.Shared.Infrastructure.SceneTransition;
 using FloorBreaker.MatchFlow.Application;
+using FloorBreaker.Network.Infrastructure;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -38,6 +39,9 @@ namespace FloorBreaker.Bootstrap
 
             // シーン間モード選択状態
             builder.Register<MatchModeConfig>(Lifetime.Singleton);
+
+            // ネットワーク接続サービス（シーンをまたいで生存）
+            builder.Register<NetworkConnectionService>(Lifetime.Singleton);
 
             // AudioService: 子 GameObject から取得 (Boot シーンと一緒に生存)
             var audioService = GetComponentInChildren<AudioService>();

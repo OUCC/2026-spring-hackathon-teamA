@@ -17,6 +17,8 @@
         "App.Upgrades",
         "App.MatchFlow",
         "App.Input",
+        "App.Network",
+        "Fusion.Unity",
         "Unity.InputSystem",
         "UniTask"
     ],
@@ -27,7 +29,8 @@
     "precompiledReferences": [
         "R3.dll",
         "DOTween.dll",
-        "DOTweenPro.dll"
+        "DOTweenPro.dll",
+        "Fusion.Runtime.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [],

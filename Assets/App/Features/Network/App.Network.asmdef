@@ -1,0 +1,25 @@
+{
+    "name": "App.Network",
+    "rootNamespace": "FloorBreaker.Network",
+    "references": [
+        "App.Shared.Domain",
+        "App.Shared.Application",
+        "App.MatchFlow",
+        "Fusion.Unity",
+        "UniTask",
+        "R3.Unity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Fusion.Runtime.dll",
+        "Fusion.Sockets.dll",
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

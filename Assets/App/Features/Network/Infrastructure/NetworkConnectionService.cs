@@ -1,0 +1,253 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using Cysharp.Threading.Tasks;
+using Fusion;
+using Fusion.Sockets;
+using R3;
+
+namespace FloorBreaker.Network.Infrastructure
+{
+    public enum ConnectionState
+    {
+        Disconnected,
+        Connecting,
+        InRoom,
+    }
+
+    /// <summary>
+    /// NetworkRunner のライフサイクルを管理し、接続状態を R3 で公開する。
+    /// VContainer の Singleton として登録される plain C# クラス。
+    /// </summary>
+    public sealed class NetworkConnectionService : IDisposable
+    {
+        private NetworkRunner _runner;
+        private FusionCallbacksBridge _callbacksBridge;
+        private LobbyController _lobbyController;
+        private NetworkObject _lobbyControllerPrefab;
+
+        private readonly ReactiveProperty<ConnectionState> _state = new(ConnectionState.Disconnected);
+        private readonly ReactiveProperty<int> _connectedPlayerCount = new(0);
+        private readonly Subject<string> _errorOccurred = new();
+        private readonly Subject<Unit> _matchStartRequested = new();
+
+        public ReadOnlyReactiveProperty<ConnectionState> State => _state;
+        public ReadOnlyReactiveProperty<int> ConnectedPlayerCount => _connectedPlayerCount;
+        public Observable<string> ErrorOccurred => _errorOccurred;
+        public Observable<Unit> MatchStartRequested => _matchStartRequested;
+
+        public bool IsHost { get; private set; }
+        public NetworkRunner Runner => _runner;
+        public LobbyController LobbyController => _lobbyController;
+
+        /// <summary>ホストとしてルームを作成する。</summary>
+        public async UniTask CreateRoomAsync(string roomCode, int maxPlayers)
+        {
+            if (_runner != null) await ShutdownAsync();
+
+            _state.Value = ConnectionState.Connecting;
+            IsHost = true;
+
+            try
+            {
+                CreateRunner();
+
+                var result = await _runner.StartGame(new StartGameArgs
+                {
+                    GameMode = GameMode.Host,
+                    SessionName = roomCode,
+                    PlayerCount = maxPlayers,
+                });
+
+                if (result.Ok)
+                {
+                    _state.Value = ConnectionState.InRoom;
+                    _connectedPlayerCount.Value = 1;
+                    SpawnLobbyController();
+                }
+                else
+                {
+                    _state.Value = ConnectionState.Disconnected;
+                    CleanupRunner();
+                    throw new InvalidOperationException($"部屋の作成に失敗しました: {result.ShutdownReason}");
+                }
+            }
+            catch (Exception) when (_state.Value == ConnectionState.Connecting)
+            {
+                _state.Value = ConnectionState.Disconnected;
+                CleanupRunner();
+                throw;
+            }
+        }
+
+        private void SpawnLobbyController()
+        {
+            if (_runner == null || !IsHost) return;
+
+            if (_lobbyControllerPrefab == null)
+                _lobbyControllerPrefab = Resources.Load<NetworkObject>("Network/LobbyController");
+
+            if (_lobbyControllerPrefab != null)
+            {
+                var obj = _runner.Spawn(_lobbyControllerPrefab);
+                _lobbyController = obj.GetComponent<LobbyController>();
+            }
+            else
+            {
+                Debug.LogWarning("[NetworkConnectionService] LobbyController prefab not found in Resources/Network/");
+            }
+        }
+
+        /// <summary>クライアントとしてルームに参加する。</summary>
+        public async UniTask JoinRoomAsync(string roomCode)
+        {
+            if (_runner != null) await ShutdownAsync();
+
+            _state.Value = ConnectionState.Connecting;
+            IsHost = false;
+
+            try
+            {
+                CreateRunner();
+
+                var result = await _runner.StartGame(new StartGameArgs
+                {
+                    GameMode = GameMode.Client,
+                    SessionName = roomCode,
+                });
+
+                if (result.Ok)
+                {
+                    _state.Value = ConnectionState.InRoom;
+                }
+                else
+                {
+                    _state.Value = ConnectionState.Disconnected;
+                    CleanupRunner();
+
+                    string message = result.ShutdownReason switch
+                    {
+                        ShutdownReason.GameNotFound => "ルームが見つかりません",
+                        ShutdownReason.GameIsFull => "ルームが満員です",
+                        _ => $"接続に失敗しました: {result.ShutdownReason}",
+                    };
+                    throw new InvalidOperationException(message);
+                }
+            }
+            catch (Exception) when (_state.Value == ConnectionState.Connecting)
+            {
+                _state.Value = ConnectionState.Disconnected;
+                CleanupRunner();
+                throw;
+            }
+        }
+
+        /// <summary>接続を切断し Runner を破棄する。</summary>
+        public async UniTask ShutdownAsync()
+        {
+            if (_runner != null)
+            {
+                await _runner.Shutdown();
+            }
+            CleanupRunner();
+            _state.Value = ConnectionState.Disconnected;
+            _connectedPlayerCount.Value = 0;
+            IsHost = false;
+        }
+
+        // --- FusionCallbacksBridge からの委譲 ---
+
+        internal void HandlePlayerJoined(NetworkRunner runner, PlayerRef player)
+        {
+            _connectedPlayerCount.Value = runner.ActivePlayers.Count();
+
+            // クライアント側: ホストが Spawn した LobbyController を検出
+            if (!IsHost && _lobbyController == null)
+            {
+                _lobbyController = UnityEngine.Object.FindAnyObjectByType<LobbyController>();
+            }
+        }
+
+        internal void HandlePlayerLeft(NetworkRunner runner, PlayerRef player)
+        {
+            _connectedPlayerCount.Value = Math.Max(0, runner.ActivePlayers.Count());
+        }
+
+        internal void HandleShutdown(ShutdownReason reason)
+        {
+            if (_state.Value == ConnectionState.Disconnected) return;
+
+            _state.Value = ConnectionState.Disconnected;
+            _connectedPlayerCount.Value = 0;
+            CleanupRunner();
+
+            if (reason != ShutdownReason.Ok)
+            {
+                string message = reason switch
+                {
+                    ShutdownReason.DisconnectedByPluginLogic => "ホストが切断しました",
+                    ShutdownReason.ConnectionRefused => "接続が拒否されました",
+                    _ => $"ネットワークエラーが発生しました: {reason}",
+                };
+                _errorOccurred.OnNext(message);
+            }
+        }
+
+        internal void HandleDisconnected(NetDisconnectReason reason)
+        {
+            _state.Value = ConnectionState.Disconnected;
+            _connectedPlayerCount.Value = 0;
+            CleanupRunner();
+            _errorOccurred.OnNext("ホストとの接続が切断されました");
+        }
+
+        internal void HandleConnectFailed(NetConnectFailedReason reason)
+        {
+            _state.Value = ConnectionState.Disconnected;
+            CleanupRunner();
+            _errorOccurred.OnNext("接続がタイムアウトしました");
+        }
+
+        private void CreateRunner()
+        {
+            var runnerObj = new GameObject("[NetworkRunner]");
+            UnityEngine.Object.DontDestroyOnLoad(runnerObj);
+            _runner = runnerObj.AddComponent<NetworkRunner>();
+            _runner.ProvideInput = IsHost;
+
+            _callbacksBridge = runnerObj.AddComponent<FusionCallbacksBridge>();
+            _callbacksBridge.Initialize(this);
+        }
+
+        private void CleanupRunner()
+        {
+            _lobbyController = null;
+            if (_runner != null)
+            {
+                if (_runner.gameObject != null)
+                    UnityEngine.Object.Destroy(_runner.gameObject);
+                _runner = null;
+                _callbacksBridge = null;
+            }
+        }
+
+        public void Dispose()
+        {
+            CleanupRunner();
+            _state.Dispose();
+            _connectedPlayerCount.Dispose();
+            _errorOccurred.Dispose();
+            _matchStartRequested.Dispose();
+        }
+    }
+
+    internal static class PlayerRefEnumerable
+    {
+        public static int Count(this IEnumerable<PlayerRef> players)
+        {
+            int count = 0;
+            foreach (var _ in players) count++;
+            return count;
+        }
+    }
+}

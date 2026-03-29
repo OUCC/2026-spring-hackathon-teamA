@@ -5,6 +5,7 @@
 
     <Style src="../USS/TitleRoot.uss" />
     <Style src="../USS/KeyRebindingOverlay.uss" />
+    <Style src="../USS/LobbyOverlay.uss" />
 
     <VisualElement name="TitleRoot" class="title-root">
 
@@ -17,6 +18,7 @@
             <Label class="title-subtitle" text="床破壊対戦ゲーム" />
             <VisualElement class="title-menu">
                 <Button name="StartButton" class="title-btn title-btn--primary" text="はじめる" />
+                <Button name="OnlineButton" class="title-btn title-btn--primary" text="オンライン対戦" />
                 <Button name="SettingsButton" class="title-btn title-btn--settings" text="設定" />
                 <Button name="QuitButton" class="title-btn title-btn--quit" text="終了" />
             </VisualElement>
@@ -116,7 +118,46 @@
             </VisualElement>
         </VisualElement>
 
-        <!-- ===== STATE 3: 設定オーバーレイ ===== -->
+        <!-- ===== STATE 3: オンラインメニュー ===== -->
+        <VisualElement name="OnlineMenuState" class="online-menu-state" style="display: none;">
+            <Label class="setup-title" text="オンライン対戦" />
+            <VisualElement class="online-menu-buttons">
+                <Button name="CreateRoomButton" class="title-btn title-btn--primary" text="部屋を作る" />
+                <Button name="JoinRoomButton" class="title-btn title-btn--primary" text="部屋に入る" />
+                <Button name="OnlineBackButton" class="title-btn title-btn--quit" text="戻る" />
+            </VisualElement>
+        </VisualElement>
+
+        <!-- ===== STATE 4: ロビー ===== -->
+        <VisualElement name="LobbyState" class="lobby-state" style="display: none;">
+            <Label class="setup-title" text="ロビー" />
+
+            <!-- ルームコード表示 / 入力 -->
+            <VisualElement class="lobby-room-code">
+                <Label name="LobbyRoomCodeLabel" class="lobby-room-code__label" text="ルームコード" />
+                <Label name="LobbyRoomCodeDisplay" class="lobby-room-code__display" text="-----" />
+                <VisualElement name="LobbyJoinSection" class="lobby-join-section" style="display: none;">
+                    <TextField name="LobbyRoomCodeInput" class="lobby-room-code__input" max-length="5" />
+                    <Button name="LobbyJoinButton" class="title-btn title-btn--primary" text="接続" />
+                </VisualElement>
+            </VisualElement>
+
+            <!-- 接続ステータス -->
+            <Label name="LobbyStatusLabel" class="lobby-status" text="" />
+
+            <!-- プレイヤーリスト -->
+            <VisualElement name="LobbyPlayerList" class="lobby-player-list">
+                <!-- C# で動的生成 -->
+            </VisualElement>
+
+            <!-- アクションボタン -->
+            <VisualElement class="setup-actions">
+                <Button name="LobbyStartButton" class="title-btn title-btn--primary" text="START" style="display: none;" />
+                <Button name="LobbyBackButton" class="title-btn title-btn--quit" text="戻る" />
+            </VisualElement>
+        </VisualElement>
+
+        <!-- ===== STATE 5: 設定オーバーレイ ===== -->
         <VisualElement name="SettingsOverlay" class="settings-overlay" style="display: none;">
             <VisualElement class="settings-panel">
                 <Label class="settings-title" text="設定" />

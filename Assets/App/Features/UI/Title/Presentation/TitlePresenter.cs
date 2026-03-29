@@ -25,6 +25,7 @@ namespace FloorBreaker.UI.Title.Presentation
         private readonly KeyRebindingService _rebindService;
         private readonly KeyRebindingPresenter _rebindPresenter;
         private readonly DeviceDetectionService _deviceDetection;
+        private readonly NetworkLobbyPresenter _lobbyPresenter;
 
         // ステージ選択状態
         private readonly List<(VisualElement card, string assetName)> _stageCards = new();
@@ -38,7 +39,8 @@ namespace FloorBreaker.UI.Title.Presentation
             KeyRebindingService rebindService,
             MatchModeConfig modeConfig,
             ISceneTransitionService sceneTransition,
-            DeviceDetectionService deviceDetection = null)
+            DeviceDetectionService deviceDetection = null,
+            NetworkLobbyPresenter lobbyPresenter = null)
         {
             _doc = doc;
             _audio = audio;
@@ -46,6 +48,7 @@ namespace FloorBreaker.UI.Title.Presentation
             _rebindService = rebindService;
             _deviceDetection = deviceDetection ?? new DeviceDetectionService();
             _deviceDetection.OnDeviceAssigned += OnDeviceAssigned;
+            _lobbyPresenter = lobbyPresenter;
 
             // BGM 再生
             audio?.PlayBgm(SfxIds.BgmTitle);
@@ -121,6 +124,46 @@ namespace FloorBreaker.UI.Title.Presentation
                 HideCreditsOverlay();
             });
 
+            // ── Online ──
+            doc.OnlineButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                ShowOnlineMenuState();
+            });
+            doc.CreateRoomButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                _lobbyPresenter?.EnterAsHost();
+                ShowLobbyState();
+            });
+            doc.JoinRoomButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                _lobbyPresenter?.EnterAsClient();
+                ShowLobbyState();
+            });
+            doc.OnlineBackButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                ShowTitleState();
+            });
+            doc.LobbyJoinButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                _lobbyPresenter?.JoinWithCode();
+            });
+            doc.LobbyStartButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.StopBgm(0.5f);
+                _lobbyPresenter?.StartMatch();
+            });
+            doc.LobbyBackButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                _lobbyPresenter?.LeaveAsync().Forget();
+                ShowOnlineMenuState();
+            });
+
             // ── StartInSetupMode (リザルト「設定に戻る」から遷移) ──
             if (modeConfig.StartInSetupMode)
             {
@@ -138,6 +181,10 @@ namespace FloorBreaker.UI.Title.Presentation
             _doc.TitleState.style.display = DisplayStyle.Flex;
             _doc.SetupState.style.display = DisplayStyle.None;
             _doc.SettingsOverlay.style.display = DisplayStyle.None;
+            if (_doc.OnlineMenuState != null)
+                _doc.OnlineMenuState.style.display = DisplayStyle.None;
+            if (_doc.LobbyState != null)
+                _doc.LobbyState.style.display = DisplayStyle.None;
         }
 
         private void ShowSetupState()
@@ -145,6 +192,24 @@ namespace FloorBreaker.UI.Title.Presentation
             _doc.TitleState.style.display = DisplayStyle.None;
             _doc.SetupState.style.display = DisplayStyle.Flex;
             _doc.SettingsOverlay.style.display = DisplayStyle.None;
+        }
+
+        private void ShowOnlineMenuState()
+        {
+            _doc.TitleState.style.display = DisplayStyle.None;
+            _doc.SetupState.style.display = DisplayStyle.None;
+            if (_doc.OnlineMenuState != null)
+                _doc.OnlineMenuState.style.display = DisplayStyle.Flex;
+            if (_doc.LobbyState != null)
+                _doc.LobbyState.style.display = DisplayStyle.None;
+        }
+
+        private void ShowLobbyState()
+        {
+            if (_doc.OnlineMenuState != null)
+                _doc.OnlineMenuState.style.display = DisplayStyle.None;
+            if (_doc.LobbyState != null)
+                _doc.LobbyState.style.display = DisplayStyle.Flex;
         }
 
         private void ShowSettingsOverlay()

@@ -1,0 +1,126 @@
+/* ===== Online Menu ===== */
+
+.online-menu-state {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.online-menu-buttons {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 32px;
+}
+
+.online-menu-buttons > .title-btn {
+    margin-bottom: 12px;
+    min-width: 280px;
+}
+
+/* ===== Lobby ===== */
+
+.lobby-state {
+    flex-grow: 1;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 40px;
+}
+
+.lobby-room-code {
+    align-items: center;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.lobby-room-code__label {
+    font-size: 18px;
+    color: #A09888;
+    margin-bottom: 8px;
+}
+
+.lobby-room-code__display {
+    font-size: 48px;
+    color: #F0C040;
+    -unity-font-style: bold;
+    letter-spacing: 12px;
+}
+
+.lobby-join-section {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.lobby-room-code__input {
+    font-size: 28px;
+    min-width: 200px;
+    -unity-text-align: middle-center;
+    margin-right: 12px;
+}
+
+.lobby-room-code__input #unity-text-input {
+    color: #F0E8D8;
+    background-color: rgba(40, 35, 50, 0.8);
+    border-color: #606060;
+    border-width: 2px;
+    border-radius: 6px;
+    padding: 8px 12px;
+    -unity-font-style: bold;
+}
+
+.lobby-room-code__input:focus #unity-text-input {
+    border-color: #F0C040;
+}
+
+.lobby-status {
+    font-size: 16px;
+    color: #A09888;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    min-height: 24px;
+}
+
+.lobby-player-list {
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 400px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.lobby-player-slot {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+    margin-bottom: 4px;
+    background-color: rgba(30, 25, 40, 0.6);
+    border-radius: 6px;
+}
+
+.lobby-player-slot__label {
+    font-size: 18px;
+    -unity-font-style: bold;
+    min-width: 40px;
+    margin-right: 12px;
+}
+
+.lobby-player-slot__label--p1 { color: #4A90D9; }
+.lobby-player-slot__label--p2 { color: #D94A4A; }
+.lobby-player-slot__label--p3 { color: #40A050; }
+.lobby-player-slot__label--p4 { color: #F0C040; }
+
+.lobby-player-slot__name {
+    font-size: 16px;
+    color: #F0E8D8;
+    flex-grow: 1;
+}
+
+.lobby-player-slot__status {
+    font-size: 14px;
+    color: #A09888;
+}
+
+.lobby-player-slot--empty .lobby-player-slot__name {
+    color: #606060;
+}

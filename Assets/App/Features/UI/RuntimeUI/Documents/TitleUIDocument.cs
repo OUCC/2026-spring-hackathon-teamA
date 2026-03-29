@@ -68,6 +68,24 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         public VisualElement KeyConfigP1 { get; private set; }
         public VisualElement KeyConfigP2 { get; private set; }
 
+        // --- オンラインメニュー ---
+        public VisualElement OnlineMenuState { get; private set; }
+        public Button OnlineButton { get; private set; }
+        public Button CreateRoomButton { get; private set; }
+        public Button JoinRoomButton { get; private set; }
+        public Button OnlineBackButton { get; private set; }
+
+        // --- ロビー ---
+        public VisualElement LobbyState { get; private set; }
+        public Label LobbyRoomCodeDisplay { get; private set; }
+        public VisualElement LobbyJoinSection { get; private set; }
+        public TextField LobbyRoomCodeInput { get; private set; }
+        public Button LobbyJoinButton { get; private set; }
+        public Label LobbyStatusLabel { get; private set; }
+        public VisualElement LobbyPlayerList { get; private set; }
+        public Button LobbyStartButton { get; private set; }
+        public Button LobbyBackButton { get; private set; }
+
         // --- 操作説明ラベル ---
         public Label P1Move { get; private set; }
         public Label P1AimLock { get; private set; }
@@ -143,6 +161,24 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             KeyConfigOverlay = root.Q("KeyConfigOverlay");
             KeyConfigP1 = root.Q("KeyConfigP1");
             KeyConfigP2 = root.Q("KeyConfigP2");
+
+            // オンラインメニュー
+            OnlineMenuState = root.Q("OnlineMenuState");
+            OnlineButton = root.Q<Button>("OnlineButton");
+            CreateRoomButton = root.Q<Button>("CreateRoomButton");
+            JoinRoomButton = root.Q<Button>("JoinRoomButton");
+            OnlineBackButton = root.Q<Button>("OnlineBackButton");
+
+            // ロビー
+            LobbyState = root.Q("LobbyState");
+            LobbyRoomCodeDisplay = root.Q<Label>("LobbyRoomCodeDisplay");
+            LobbyJoinSection = root.Q("LobbyJoinSection");
+            LobbyRoomCodeInput = root.Q<TextField>("LobbyRoomCodeInput");
+            LobbyJoinButton = root.Q<Button>("LobbyJoinButton");
+            LobbyStatusLabel = root.Q<Label>("LobbyStatusLabel");
+            LobbyPlayerList = root.Q("LobbyPlayerList");
+            LobbyStartButton = root.Q<Button>("LobbyStartButton");
+            LobbyBackButton = root.Q<Button>("LobbyBackButton");
 
             // 操作説明
             P1Move = root.Q<Label>("P1_Move");
