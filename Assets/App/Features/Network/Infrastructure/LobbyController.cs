@@ -14,6 +14,7 @@ namespace FloorBreaker.Network.Infrastructure
         [Networked] public int PlayerCount { get; set; }
         [Networked] public int CpuSlotMask { get; set; }
         [Networked, Capacity(64)] public NetworkString<_64> StageName { get; set; }
+        [Networked] public int RandomSeed { get; set; }
 
         /// <summary>クライアント側でマッチ開始を検知した際に発火する。</summary>
         public event Action OnMatchStartDetected;
@@ -26,16 +27,20 @@ namespace FloorBreaker.Network.Infrastructure
         private int _prevCpuSlotMask;
         private NetworkString<_64> _prevStageName;
 
+        /// <summary>LobbyController が Spawn 完了した際に発火する（ホスト・クライアント両方）。</summary>
+        public static event System.Action<LobbyController> OnLobbySpawned;
+
         public override void Spawned()
         {
             if (!Object.HasStateAuthority)
             {
-                // 初期値を記録
                 _prevPlayerCount = PlayerCount;
                 _prevCpuSlotMask = CpuSlotMask;
                 _prevStageName = StageName;
-                // LobbyController の発見は NetworkConnectionService.LobbyControllerDiscovered 経由
             }
+
+            // Spawn 完了を通知（Runner.Spawn() の戻り値に依存しない）
+            OnLobbySpawned?.Invoke(this);
         }
 
         public override void Render()
@@ -75,6 +80,7 @@ namespace FloorBreaker.Network.Infrastructure
         public void StartMatch()
         {
             if (!Object.HasStateAuthority) return;
+            RandomSeed = System.Environment.TickCount;
             MatchStarted = true;
         }
 

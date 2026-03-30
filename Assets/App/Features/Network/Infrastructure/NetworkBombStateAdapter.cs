@@ -26,11 +26,8 @@ namespace FloorBreaker.Network.Infrastructure
         public void Initialize(BombFlightTracker tracker)
         {
             _tracker = tracker;
-        }
 
-        public override void Spawned()
-        {
-            if (Object.HasStateAuthority && _tracker != null)
+            if (Object != null && Object.HasStateAuthority && _tracker != null)
             {
                 _flightStartedSub = _tracker.FlightStarted.Subscribe(e =>
                     RPC_BombFlightStarted(e.Owner.Index, e.Origin.X, e.Origin.Y, (byte)e.Direction,
@@ -40,6 +37,11 @@ namespace FloorBreaker.Network.Infrastructure
                     RPC_BombLanded(e.Owner.Index, e.LandingPos.X, e.LandingPos.Y,
                         (byte)e.Type, e.EffectRange));
             }
+        }
+
+        public override void Spawned()
+        {
+            // 購読は Initialize() で行う（Spawned 時点では _tracker が null）
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

@@ -20,6 +20,13 @@ namespace FloorBreaker.Network.Infrastructure
         private IDisposable _enqueueHandle;
 
         /// <summary>
+        /// 現在シーンをロード中の Runner。MatchLifetimeScope が BuildCallback で
+        /// NetworkServiceBridge.Register(runner, bridge) するために参照する。
+        /// LoadSceneCoroutine の開始時にセットされ、完了後にクリアされる。
+        /// </summary>
+        public static NetworkRunner CurrentLoadingRunner { get; private set; }
+
+        /// <summary>
         /// Boot シーンの ProjectLifetimeScope を設定する。
         /// EnqueueParent でマッチシーンの LifetimeScope が子になる。
         /// </summary>
@@ -30,6 +37,9 @@ namespace FloorBreaker.Network.Infrastructure
 
         protected override IEnumerator LoadSceneCoroutine(SceneRef sceneRef, NetworkLoadSceneParameters sceneParams)
         {
+            // Runner 参照を公開（MatchLifetimeScope が BuildCallback で使用）
+            CurrentLoadingRunner = Runner;
+
             // Title シーンがロード中ならアンロード
             var titleScene = SceneManager.GetSceneByName("Title");
             if (titleScene.isLoaded)
@@ -57,6 +67,9 @@ namespace FloorBreaker.Network.Infrastructure
             // EnqueueParent のハンドルを解放
             _enqueueHandle?.Dispose();
             _enqueueHandle = null;
+
+            // Runner 参照をクリア
+            CurrentLoadingRunner = null;
         }
     }
 }

@@ -108,6 +108,8 @@ namespace FloorBreaker.UI.Title.Presentation
                     _modeConfig.IsCpuSlot,
                     _modeConfig.SelectedStageName);
                 lobby.StartMatch();
+                // ホスト側もシードを保存（MatchInitializer で使用）
+                _modeConfig.OnlineRandomSeed = lobby.RandomSeed;
             }
 
             HostStartMatchAsync().Forget();
@@ -357,6 +359,7 @@ namespace FloorBreaker.UI.Title.Presentation
             }
             catch (Exception ex)
             {
+                Debug.LogError($"[NetworkLobbyPresenter] CreateRoomAsync failed: {ex}");
                 _doc.LobbyStatusLabel.text = ex.Message;
                 _doc.LobbyRoomCodeDisplay.text = "-----";
             }
@@ -386,6 +389,7 @@ namespace FloorBreaker.UI.Title.Presentation
             }
             catch (Exception ex)
             {
+                Debug.LogError($"[NetworkLobbyPresenter] JoinRoomAsync failed: {ex}");
                 _doc.LobbyStatusLabel.text = ex.Message;
             }
         }
@@ -470,7 +474,7 @@ namespace FloorBreaker.UI.Title.Presentation
             if (lobby != null)
             {
                 var cpuSlots = LobbyController.DecodeCpuSlots(lobby.CpuSlotMask, lobby.PlayerCount);
-                _lobbyConfig.ApplyMatchStart(lobby.PlayerCount, cpuSlots, lobby.StageName.ToString());
+                _lobbyConfig.ApplyMatchStart(lobby.PlayerCount, cpuSlots, lobby.StageName.ToString(), lobby.RandomSeed);
             }
 
             // Fusion がホストのシーンロード指示をクライアントに自動伝搬する。

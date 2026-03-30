@@ -39,13 +39,14 @@ namespace FloorBreaker.MatchFlow.Application
         }
 
         /// <summary>マッチ開始時の最終設定を適用する（クライアント側）。</summary>
-        public void ApplyMatchStart(int playerCount, bool[] cpuSlots, string stageName)
+        public void ApplyMatchStart(int playerCount, bool[] cpuSlots, string stageName, int randomSeed = 0)
         {
             _config.PlayerCount = playerCount;
             _config.IsCpuSlot = cpuSlots;
             _config.SelectedStageName = stageName;
             _config.IsOnline = true;
             _config.IsHost = false;
+            _config.OnlineRandomSeed = randomSeed;
         }
 
         /// <summary>オンライン状態をリセットする。</summary>

@@ -36,7 +36,7 @@ namespace FloorBreaker.Network.Infrastructure
         {
             if (_initialized) return true;
 
-            _bridge = NetworkServiceBridge.Current;
+            _bridge = NetworkServiceBridge.Get(Runner);
             if (_bridge == null) return false;
 
             _matchState = GetComponent<NetworkMatchStateAdapter>();

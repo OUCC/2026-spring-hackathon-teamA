@@ -34,6 +34,9 @@ namespace FloorBreaker.MatchFlow.Application
         /// <summary>現在のルームコード。</summary>
         public string RoomCode { get; set; }
 
+        /// <summary>ステージ生成の乱数シード（オンライン時、ホストが決定しクライアントに共有）。</summary>
+        public int OnlineRandomSeed { get; set; }
+
         /// <summary>オンライン関連の状態をリセットする。</summary>
         public void ResetOnlineState()
         {
