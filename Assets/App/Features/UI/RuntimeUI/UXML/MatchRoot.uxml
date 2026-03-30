@@ -9,6 +9,7 @@
     <Style src="../USS/UpgradeOverlay.uss" />
     <Style src="../USS/UpgradeCard.uss" />
     <Style src="../USS/Result.uss" />
+    <Style src="../USS/Countdown.uss" />
 
     <VisualElement name="MatchRoot" class="match-root">
 
@@ -17,6 +18,12 @@
 
         <!-- OverlayLayer -->
         <VisualElement name="OverlayLayer" class="overlay-layer">
+
+            <!-- カウントダウンオーバーレイ -->
+            <VisualElement name="CountdownOverlayRoot" class="countdown-overlay countdown-overlay--hidden">
+                <VisualElement class="countdown-backdrop" />
+                <VisualElement name="CountdownPanesContainer" class="countdown-panes" />
+            </VisualElement>
 
             <!-- インパクトフラッシュ -->
             <VisualElement name="ImpactFlashOverlay" class="impact-flash" />

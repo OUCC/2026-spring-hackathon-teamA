@@ -14,6 +14,57 @@ namespace FloorBreaker.Upgrades.Application
             _balance = balance;
         }
 
+        /// <summary>
+        /// Apply 前に呼び出し、undo 用のクロージャを返す。
+        /// クロージャは Apply 前の状態をキャプチャし、呼び出すと元に戻す。
+        /// </summary>
+        public Action<PlayerModel> CaptureUndo(UpgradeId id, PlayerModel player)
+        {
+            switch (id)
+            {
+                case UpgradeId.FireFlightRange:
+                    { var prev = player.Build.FireFlightRange; return p => p.Build.FireFlightRange = prev; }
+                case UpgradeId.FireEffectRange:
+                    { var prev = player.Build.FireEffectRange; return p => p.Build.FireEffectRange = prev; }
+                case UpgradeId.FireDamage:
+                    { var prev = player.Build.FireDamage; return p => p.Build.FireDamage = prev; }
+                case UpgradeId.FireDuration:
+                    { var prev = player.Build.FireDuration; return p => p.Build.FireDuration = prev; }
+                case UpgradeId.FireCooldown:
+                    { var prev = player.Build.FireCooldown; return p => p.Build.FireCooldown = prev; }
+                case UpgradeId.FireWallPenetration:
+                    { var prev = player.Build.FireWallPenetration; return p => p.Build.FireWallPenetration = prev; }
+                case UpgradeId.FireBombPenetration:
+                    { var prev = player.Build.HasFireBombPenetration; return p => p.Build.HasFireBombPenetration = prev; }
+                case UpgradeId.BreakFlightRange:
+                    { var prev = player.Build.BreakFlightRange; return p => p.Build.BreakFlightRange = prev; }
+                case UpgradeId.BreakEffectRange:
+                    { var prev = player.Build.BreakEffectRange; return p => p.Build.BreakEffectRange = prev; }
+                case UpgradeId.BreakDamage:
+                    { var prev = player.Build.BreakDamage; return p => p.Build.BreakDamage = prev; }
+                case UpgradeId.BreakCollapseTime:
+                    { var prev = player.Build.BreakCollapseTime; return p => p.Build.BreakCollapseTime = prev; }
+                case UpgradeId.BreakCooldown:
+                    { var prev = player.Build.BreakCooldown; return p => p.Build.BreakCooldown = prev; }
+                case UpgradeId.BreakBombPenetration:
+                    { var prev = player.Build.HasBreakBombPenetration; return p => p.Build.HasBreakBombPenetration = prev; }
+                case UpgradeId.MoveSpeed:
+                    { var prev = player.Stats.MoveSpeed; return p => p.Stats.MoveSpeed = prev; }
+                case UpgradeId.HpRecovery:
+                    { var prevHp = player.Stats.CurrentHpValue; return p => p.Stats.SetHp(prevHp); }
+                case UpgradeId.FireShield:
+                    return p => p.Stats.DeactivateFireShield();
+                case UpgradeId.Levitation:
+                    return p => p.Stats.DeactivateLevitation();
+                case UpgradeId.Dash:
+                    { var prev = player.Build.HasDash; return p => p.Build.HasDash = prev; }
+                case UpgradeId.DualShot:
+                    { var prev = player.Build.HasDualShot; return p => p.Build.HasDualShot = prev; }
+                default:
+                    return _ => { };
+            }
+        }
+
         public void Apply(UpgradeId id, PlayerModel player)
         {
             switch (id)

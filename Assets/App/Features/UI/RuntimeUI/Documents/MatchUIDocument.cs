@@ -15,6 +15,7 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         [SerializeField] private VisualTreeAsset _playerHudTemplate;
         [SerializeField] private VisualTreeAsset _upgradePaneTemplate;
         [SerializeField] private VisualTreeAsset _resultPaneTemplate;
+        [SerializeField] private VisualTreeAsset _countdownPaneTemplate;
         [SerializeField] private UpgradeIconMap _upgradeIconMap;
 
         public VisualTreeAsset UpgradeCardTemplate => _upgradeCardTemplate;
@@ -25,15 +26,18 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         public VisualElement ResultRoot { get; private set; }
         public VisualElement ImpactFlashOverlay { get; private set; }
         public VisualElement PauseOverlayRoot { get; private set; }
+        public VisualElement CountdownOverlayRoot { get; private set; }
 
         // 動的生成されるペイン配列 (CreatePanes 後に有効)
         public VisualElement[] HudRoots { get; private set; }
         public VisualElement[] UpgradePanes { get; private set; }
         public VisualElement[] ResultPanes { get; private set; }
+        public VisualElement[] CountdownPanes { get; private set; }
 
         private VisualElement _matchLayer;
         private VisualElement _upgradePanesContainer;
         private VisualElement _resultPanesContainer;
+        private VisualElement _countdownPanesContainer;
         private VisualElement _root;
 
         private void Awake()
@@ -47,6 +51,8 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             _resultPanesContainer = _root.Q("ResultPanesContainer");
             ImpactFlashOverlay = _root.Q("ImpactFlashOverlay");
             PauseOverlayRoot = _root.Q("PauseOverlayRoot");
+            CountdownOverlayRoot = _root.Q("CountdownOverlayRoot");
+            _countdownPanesContainer = _root.Q("CountdownPanesContainer");
         }
 
         /// <summary>
@@ -147,6 +153,19 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
                     ResultPanes[i] = pane;
                 }
             }
+
+            // --- カウントダウンペイン ---
+            CountdownPanes = new VisualElement[playerCount];
+            if (_countdownPanesContainer != null)
+            {
+                _countdownPanesContainer.AddToClassList(layoutClass);
+                for (int i = 0; i < playerCount; i++)
+                {
+                    var cdPane = InstantiateCountdownPane(playerClasses[i]);
+                    _countdownPanesContainer.Add(cdPane);
+                    CountdownPanes[i] = cdPane;
+                }
+            }
         }
 
         /// <summary>
@@ -217,6 +236,23 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
                 pane.AddToClassList("result-pane");
             }
             pane.AddToClassList($"result-pane--{playerClass}");
+            return pane;
+        }
+
+        private VisualElement InstantiateCountdownPane(string playerClass)
+        {
+            VisualElement pane;
+            if (_countdownPaneTemplate != null)
+            {
+                var container = _countdownPaneTemplate.Instantiate();
+                pane = container.Q(className: "countdown-panel") ?? container;
+            }
+            else
+            {
+                pane = new VisualElement();
+                pane.AddToClassList("countdown-panel");
+            }
+            pane.AddToClassList($"countdown-panel--{playerClass}");
             return pane;
         }
     }

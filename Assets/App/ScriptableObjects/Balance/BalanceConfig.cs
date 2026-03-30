@@ -69,6 +69,7 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [SerializeField] private float bombFlightSpeed = 12f;
         [SerializeField] private int bombMinFlightDistance = 3;
         [SerializeField] private float stageShrinkAnimDuration = 1f;
+        [SerializeField] private float countdownDuration = 4f;
 
         [Header("Bomb Effect Spread")]
         [SerializeField] private float fireBombSpreadInterval = 0.15f;
@@ -160,6 +161,7 @@ namespace FloorBreaker.ScriptableObjects.Balance
         public float BombFlightSpeed => bombFlightSpeed;
         public int BombMinFlightDistance => bombMinFlightDistance;
         public float StageShrinkAnimDuration => stageShrinkAnimDuration;
+        public float CountdownDuration => countdownDuration;
 
         public float FireBombSpreadInterval => fireBombSpreadInterval;
         public float BreakBombSpreadInterval => breakBombSpreadInterval;

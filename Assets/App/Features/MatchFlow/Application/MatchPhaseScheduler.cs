@@ -15,6 +15,7 @@ namespace FloorBreaker.MatchFlow.Application
 {
     public enum SchedulerState : byte
     {
+        Countdown,
         Running,
         StageShrink,
         UpgradePhase,
@@ -42,10 +43,14 @@ namespace FloorBreaker.MatchFlow.Application
         private readonly IRandomProvider _random;
 
         private readonly float _shrinkAnimDuration;
+        private readonly float _countdownDuration;
         private float _shrinkTimer;
+        private float _countdownTimer;
 
         public SchedulerState State { get; private set; }
         public MatchClock Clock => _clock;
+        public float CountdownRemaining => _countdownDuration - _countdownTimer;
+        public float CountdownDuration => _countdownDuration;
 
         public MatchPhaseScheduler(
             MatchClock clock,
@@ -85,15 +90,20 @@ namespace FloorBreaker.MatchFlow.Application
             _random = random;
 
             _shrinkAnimDuration = balance.StageShrinkAnimDuration;
+            _countdownDuration = balance.CountdownDuration;
 
-            State = SchedulerState.Running;
-            _clock.SetPhase(GamePhase.MatchRunning);
+            State = SchedulerState.Countdown;
+            _countdownTimer = 0f;
+            _clock.SetPhase(GamePhase.Countdown);
         }
 
         public void Tick(float deltaTime)
         {
             switch (State)
             {
+                case SchedulerState.Countdown:
+                    TickCountdown(deltaTime);
+                    break;
                 case SchedulerState.Running:
                     TickRunning(deltaTime);
                     break;
@@ -113,6 +123,15 @@ namespace FloorBreaker.MatchFlow.Application
         {
             if (State != SchedulerState.Running) return;
             if (_clock.IsPausedValue) _clock.Resume(); else _clock.Pause();
+        }
+
+        private void TickCountdown(float deltaTime)
+        {
+            _countdownTimer += deltaTime;
+            if (_countdownTimer >= _countdownDuration)
+            {
+                TransitionToRunning();
+            }
         }
 
         private void TickRunning(float deltaTime)
@@ -233,8 +252,15 @@ namespace FloorBreaker.MatchFlow.Application
 
             if (_upgradePhaseUseCase.IsComplete)
             {
-                TransitionToRunning();
+                TransitionToCountdown();
             }
+        }
+
+        private void TransitionToCountdown()
+        {
+            State = SchedulerState.Countdown;
+            _countdownTimer = 0f;
+            _clock.SetPhase(GamePhase.Countdown);
         }
 
         private void TransitionToRunning()

@@ -18,6 +18,8 @@ namespace FloorBreaker.UI.HUD.Presentation
         private readonly VisualElement _fireCdFill;
         private readonly VisualElement _breakCdFill;
         private readonly VisualElement _acquiredRow;
+        private readonly Label _fireKeyLabel;
+        private readonly Label _breakKeyLabel;
 
         public PlayerHudView(VisualElement hudRoot)
         {
@@ -28,6 +30,8 @@ namespace FloorBreaker.UI.HUD.Presentation
             _fireCdFill = hudRoot.Q("FireCdFill");
             _breakCdFill = hudRoot.Q("BreakCdFill");
             _acquiredRow = hudRoot.Q("AcquiredUpgrades");
+            _fireKeyLabel = hudRoot.Q<Label>("FireKeyLabel");
+            _breakKeyLabel = hudRoot.Q<Label>("BreakKeyLabel");
         }
 
         public void SetTimer(int seconds)
@@ -71,6 +75,16 @@ namespace FloorBreaker.UI.HUD.Presentation
             _coinLabel.AddToClassList("hud__coin-value--punch");
             _coinLabel.schedule.Execute(() =>
                 _coinLabel.RemoveFromClassList("hud__coin-value--punch")).StartingIn(50);
+        }
+
+        public void SetFireKeyLabel(string text)
+        {
+            if (_fireKeyLabel != null) _fireKeyLabel.text = text;
+        }
+
+        public void SetBreakKeyLabel(string text)
+        {
+            if (_breakKeyLabel != null) _breakKeyLabel.text = text;
         }
 
         public void SetAcquiredUpgrades(IReadOnlyList<UpgradeId> upgrades, UpgradeIconMap iconMap = null)

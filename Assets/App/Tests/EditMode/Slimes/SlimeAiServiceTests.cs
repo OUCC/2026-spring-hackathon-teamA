@@ -167,6 +167,7 @@ namespace FloorBreaker.Tests.EditMode.Slimes
             public float BombFlightSpeed => 12f;
             public int BombMinFlightDistance => 3;
             public float StageShrinkAnimDuration => 1f;
+            public float CountdownDuration => 4f;
             public float FireBombSpreadInterval => 0.15f;
             public float BreakBombSpreadInterval => 0.3f;
             public float DashCooldown => 1f;

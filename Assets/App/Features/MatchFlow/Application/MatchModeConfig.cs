@@ -6,8 +6,16 @@ namespace FloorBreaker.MatchFlow.Application
     /// タイトル画面 / マッチセットアップで選択された設定をシーン遷移をまたいで保持する。
     /// ProjectLifetimeScope に Singleton 登録され、DI 経由でアクセスする。
     /// </summary>
+    public enum LocalGameMode : byte
+    {
+        Solo,
+        Local,
+        Online,
+    }
+
     public sealed class MatchModeConfig
     {
+        public LocalGameMode CurrentMode { get; set; } = LocalGameMode.Local;
         public int PlayerCount { get; set; } = 2;
         public bool[] IsCpuSlot { get; set; } = { false, false, false, false };
 

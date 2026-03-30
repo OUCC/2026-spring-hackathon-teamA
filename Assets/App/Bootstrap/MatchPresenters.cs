@@ -7,6 +7,7 @@ using FloorBreaker.UI.HUD.Presentation;
 using FloorBreaker.UI.UpgradeOverlay.Presentation;
 using FloorBreaker.UI.Pause.Presentation;
 using FloorBreaker.UI.Result.Presentation;
+using FloorBreaker.UI.Countdown.Presentation;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -28,6 +29,7 @@ namespace FloorBreaker.Bootstrap
         public UpgradeOverlayPresenter UpgradeOverlay { get; set; }
         public PauseOverlayPresenter Pause { get; set; }
         public ResultPresenter Result { get; set; }
+        public CountdownOverlayPresenter Countdown { get; set; }
 
         public void TickPresenters(float deltaTime)
         {
@@ -37,6 +39,7 @@ namespace FloorBreaker.Bootstrap
             foreach (var hud in Huds)
                 hud?.UpdatePerFrame();
             UpgradeOverlay?.UpdateCountdown();
+            Countdown?.UpdateCountdown();
             Stage?.TickFireDecay();
             Stage?.TickRecoveryPreview();
             ShrinkWarning?.Tick();
@@ -56,6 +59,7 @@ namespace FloorBreaker.Bootstrap
             UpgradeOverlay?.Dispose();
             Pause?.Dispose();
             Result?.Dispose();
+            Countdown?.Dispose();
             foreach (var sub in Subscriptions) sub?.Dispose();
             Subscriptions.Clear();
         }

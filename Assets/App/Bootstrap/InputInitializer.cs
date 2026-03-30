@@ -145,6 +145,9 @@ namespace FloorBreaker.Bootstrap
                     var capturedId = id;
                     map["Navigate"].performed += ctx => _upgradeUIInputBridge.OnNavigate(capturedId, ctx);
                     map["Submit"].performed += ctx => _upgradeUIInputBridge.OnSubmit(capturedId, ctx);
+                    var cancelAction = map.FindAction("Cancel");
+                    if (cancelAction != null)
+                        cancelAction.performed += ctx => _upgradeUIInputBridge.OnCancel(capturedId, ctx);
                     _upgradeMaps.Add((map, id));
                 }
             }

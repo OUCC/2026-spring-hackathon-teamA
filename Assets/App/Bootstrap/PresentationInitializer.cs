@@ -21,6 +21,8 @@ using FloorBreaker.UI.HUD.Presentation;
 using FloorBreaker.UI.UpgradeOverlay.Presentation;
 using FloorBreaker.UI.Pause.Presentation;
 using FloorBreaker.UI.Result.Presentation;
+using FloorBreaker.UI.Countdown.Presentation;
+using FloorBreaker.Input.Application;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -206,6 +208,9 @@ namespace FloorBreaker.Bootstrap
             {
                 int idx = humanIndices[h];
                 var hudView = new PlayerHudView(hudRoots[h]);
+                var (fireKey, breakKey, _) = KeyLabelResolver.GetBombKeyLabels(_modeConfig.DeviceTypes[idx]);
+                hudView.SetFireKeyLabel(fireKey);
+                hudView.SetBreakKeyLabel(breakKey);
                 huds[h] = new PlayerHudPresenter(
                     hudView, _players.All[idx].Stats, _players.All[idx].Build,
                     _players.Cooldowns[idx], _clock, iconMap);
@@ -228,7 +233,22 @@ namespace FloorBreaker.Bootstrap
                 _matchUIDocument.ResultRoot, _matchUIDocument.ResultPanes);
             _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition, _modeConfig, humanIndices.ToArray());
 
-            // 12. PauseOverlay Presenter 生成
+            // 12. Countdown Presenter 生成
+            if (_matchUIDocument.CountdownOverlayRoot != null && _matchUIDocument.CountdownPanes != null)
+            {
+                var countdownView = new CountdownOverlayView(
+                    _matchUIDocument.CountdownOverlayRoot, _matchUIDocument.CountdownPanes);
+                for (int h = 0; h < humanCount; h++)
+                {
+                    int idx = humanIndices[h];
+                    var (fireKey, breakKey, moveKeys) = KeyLabelResolver.GetBombKeyLabels(_modeConfig.DeviceTypes[idx]);
+                    countdownView.SetKeyGuide(h, $"{moveKeys}  移動", $"{fireKey}  炎ボム", $"{breakKey}  ブレークボム");
+                }
+                _presenters.Countdown = new CountdownOverlayPresenter(
+                    countdownView, _clock, _scheduler, _audio);
+            }
+
+            // 13. PauseOverlay Presenter 生成
             var pauseView = new PauseOverlayView(_matchUIDocument.PauseOverlayRoot);
             _presenters.Pause = new PauseOverlayPresenter(pauseView, _clock, _scheduler, _sceneTransition);
 

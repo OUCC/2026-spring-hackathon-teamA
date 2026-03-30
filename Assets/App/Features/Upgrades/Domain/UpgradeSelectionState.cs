@@ -54,6 +54,12 @@ namespace FloorBreaker.Upgrades.Domain
         public bool IsPurchased(PlayerId player, int index)
             => _purchased[player.Index].Contains(index);
 
+        public void UnmarkPurchased(PlayerId player, int index)
+        {
+            if (_purchased[player.Index].Remove(index))
+                _purchaseCounts[player.Index].Value = Math.Max(0, _purchaseCounts[player.Index].Value - 1);
+        }
+
         public void ClearPurchased(PlayerId player)
             => _purchased[player.Index].Clear();
 

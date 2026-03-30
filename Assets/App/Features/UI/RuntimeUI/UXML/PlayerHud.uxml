@@ -34,6 +34,7 @@
         <VisualElement class="hud__bottom-bar">
             <VisualElement class="hud__cd-container">
                 <VisualElement class="hud__cd-slot">
+                    <Label name="FireKeyLabel" class="hud__cd-key hud__cd-key--fire" />
                     <VisualElement class="hud__cd-icon-wrap hud__cd-icon-wrap--fire">
                         <Label class="hud__cd-icon" text="炎" />
                     </VisualElement>
@@ -42,6 +43,7 @@
                     </VisualElement>
                 </VisualElement>
                 <VisualElement class="hud__cd-slot">
+                    <Label name="BreakKeyLabel" class="hud__cd-key hud__cd-key--break" />
                     <VisualElement class="hud__cd-icon-wrap hud__cd-icon-wrap--break">
                         <Label class="hud__cd-icon" text="壊" />
                     </VisualElement>

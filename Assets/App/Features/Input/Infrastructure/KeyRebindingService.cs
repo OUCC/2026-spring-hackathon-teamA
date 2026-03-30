@@ -13,6 +13,8 @@ namespace FloorBreaker.Input.Infrastructure
         private const string PlayerPrefsKey = "InputBindingOverrides";
         private readonly InputActionAsset _actions;
 
+        public InputActionAsset Actions => _actions;
+
         public KeyRebindingService(InputActionAsset actions)
         {
             _actions = actions;

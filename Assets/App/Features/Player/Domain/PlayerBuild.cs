@@ -74,6 +74,22 @@ namespace FloorBreaker.Player.Domain
             _acquiredUpgrades.Value = _acquiredList.ToArray();
         }
 
+        /// <summary>
+        /// 最後に取得した該当 ID の強化を履歴から除去する。Undo 用。
+        /// </summary>
+        public void RemoveUpgrade(UpgradeId id)
+        {
+            for (int i = _acquiredList.Count - 1; i >= 0; i--)
+            {
+                if (_acquiredList[i] == id)
+                {
+                    _acquiredList.RemoveAt(i);
+                    _acquiredUpgrades.Value = _acquiredList.ToArray();
+                    return;
+                }
+            }
+        }
+
         public void Dispose()
         {
             _acquiredUpgrades.Dispose();

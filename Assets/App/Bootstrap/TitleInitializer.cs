@@ -1,3 +1,5 @@
+using System;
+using VContainer;
 using VContainer.Unity;
 using FloorBreaker.Shared.Application.Interfaces;
 using FloorBreaker.MatchFlow.Application;
@@ -13,7 +15,7 @@ namespace FloorBreaker.Bootstrap
     /// Title シーンの初期化 EntryPoint。
     /// TitlePresenter を生成し、BGM・ボタン・キーコンフィグを接続する。
     /// </summary>
-    public sealed class TitleInitializer : IStartable
+    public sealed class TitleInitializer : IStartable, IDisposable
     {
         private readonly TitleUIDocument _doc;
         private readonly IAudioService _audio;
@@ -22,9 +24,8 @@ namespace FloorBreaker.Bootstrap
         private readonly IRandomProvider _random;
         private readonly NetworkConnectionService _connectionService;
         private readonly LobbyConfigUseCase _lobbyConfig;
-        private readonly TileSpriteConfig _tileSpriteConfig;
-        private readonly StagePreviewRenderer _previewRenderer;
-        private readonly KeyRebindingService _rebindService;
+        private readonly IObjectResolver _resolver;
+        private TitleInputBridge _inputBridge;
 
         public TitleInitializer(
             TitleUIDocument doc,
@@ -34,9 +35,7 @@ namespace FloorBreaker.Bootstrap
             IRandomProvider random,
             NetworkConnectionService connectionService,
             LobbyConfigUseCase lobbyConfig,
-            TileSpriteConfig tileSpriteConfig = null,
-            StagePreviewRenderer previewRenderer = null,
-            KeyRebindingService rebindService = null)
+            IObjectResolver resolver)
         {
             _doc = doc;
             _audio = audio;
@@ -45,25 +44,45 @@ namespace FloorBreaker.Bootstrap
             _random = random;
             _connectionService = connectionService;
             _lobbyConfig = lobbyConfig;
-            _tileSpriteConfig = tileSpriteConfig;
-            _previewRenderer = previewRenderer;
-            _rebindService = rebindService;
+            _resolver = resolver;
         }
 
         public void Start()
         {
+            // optional 依存を手動解決（VContainer が optional パラメータを解決できないため）
+            var rebindService = TryResolve<KeyRebindingService>();
+            var tileSpriteConfig = TryResolve<TileSpriteConfig>();
+            var previewRenderer = TryResolve<StagePreviewRenderer>();
+
             // 保存済みキーバインドを適用
-            _rebindService?.LoadOverrides();
+            rebindService?.LoadOverrides();
 
             // ロビーPresenter を生成
             var lobbyPresenter = new NetworkLobbyPresenter(
                 _doc, _connectionService, _modeConfig, _lobbyConfig, _audio, _sceneTransition, _random,
-                _tileSpriteConfig, _previewRenderer);
+                tileSpriteConfig, previewRenderer);
+
+            // TitleInputBridge を生成（TitleInitializer が Dispose で破棄する）
+            var inputActions = rebindService?.Actions;
+            _inputBridge = new TitleInputBridge(inputActions);
 
             // TitlePresenter を生成（ボタンコールバック・BGM・音量・キーコンフィグを接続）
-            new TitlePresenter(_doc, _audio, _rebindService, _modeConfig, _sceneTransition,
-                lobbyPresenter: lobbyPresenter, tileSpriteConfig: _tileSpriteConfig,
-                previewRenderer: _previewRenderer, random: _random);
+            new TitlePresenter(_doc, _audio, rebindService, _modeConfig, _sceneTransition,
+                lobbyPresenter: lobbyPresenter, tileSpriteConfig: tileSpriteConfig,
+                previewRenderer: previewRenderer, random: _random,
+                inputBridge: _inputBridge);
+        }
+
+        public void Dispose()
+        {
+            _inputBridge?.Dispose();
+            _inputBridge = null;
+        }
+
+        private T TryResolve<T>() where T : class
+        {
+            try { return _resolver.Resolve<T>(); }
+            catch (System.Exception) { return null; }
         }
     }
 }

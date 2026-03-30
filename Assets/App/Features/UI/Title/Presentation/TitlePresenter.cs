@@ -27,6 +27,8 @@ namespace FloorBreaker.UI.Title.Presentation
         private readonly DeviceDetectionService _deviceDetection;
         private readonly NetworkLobbyPresenter _lobbyPresenter;
         private readonly StageSelectUI _stageSelectUI;
+        private readonly TitleInputBridge _inputBridge;
+        private readonly ISceneTransitionService _sceneTransition;
 
         public TitlePresenter(
             TitleUIDocument doc,
@@ -38,7 +40,8 @@ namespace FloorBreaker.UI.Title.Presentation
             NetworkLobbyPresenter lobbyPresenter = null,
             TileSpriteConfig tileSpriteConfig = null,
             StagePreviewRenderer previewRenderer = null,
-            IRandomProvider random = null)
+            IRandomProvider random = null,
+            TitleInputBridge inputBridge = null)
         {
             _doc = doc;
             _audio = audio;
@@ -47,6 +50,8 @@ namespace FloorBreaker.UI.Title.Presentation
             _deviceDetection = deviceDetection ?? new DeviceDetectionService();
             _deviceDetection.OnDeviceAssigned += OnDeviceAssigned;
             _lobbyPresenter = lobbyPresenter;
+            _inputBridge = inputBridge;
+            _sceneTransition = sceneTransition;
 
             _stageSelectUI = new StageSelectUI(
                 doc.StageList, doc.StagePreviewThumb, doc.StagePreviewName,
@@ -61,9 +66,16 @@ namespace FloorBreaker.UI.Title.Presentation
             audio?.PlayBgm(SfxIds.BgmTitle);
 
             // ── TitleState ボタン ──
-            doc.StartButton?.RegisterCallback<ClickEvent>(_ =>
+            doc.SoloButton?.RegisterCallback<ClickEvent>(_ =>
             {
                 audio?.PlaySfx(SfxIds.UiNavigate);
+                PresetSolo();
+                ShowSetupState();
+            });
+            doc.LocalButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                audio?.PlaySfx(SfxIds.UiNavigate);
+                PresetLocal();
                 ShowSetupState();
             });
             doc.SettingsButton?.RegisterCallback<ClickEvent>(_ =>
@@ -115,7 +127,8 @@ namespace FloorBreaker.UI.Title.Presentation
                     doc.KeyConfigCloseButton,
                     UpdateControlsDisplay);
 
-                doc.KeyConfigButton?.RegisterCallback<ClickEvent>(_ => _rebindPresenter.Show());
+                doc.KeyConfigButton?.RegisterCallback<ClickEvent>(_ => OpenKeyConfig());
+                doc.KeyConfigCloseButton?.RegisterCallback<ClickEvent>(_ => CloseKeyConfig());
                 UpdateControlsDisplay();
             }
 
@@ -131,12 +144,7 @@ namespace FloorBreaker.UI.Title.Presentation
                 HideCreditsOverlay();
             });
 
-            // ── Online ──
-            doc.OnlineButton?.RegisterCallback<ClickEvent>(_ =>
-            {
-                audio?.PlaySfx(SfxIds.UiNavigate);
-                ShowOnlineMenuState();
-            });
+            // ── Online (Coming Soon — ボタンは無効化済み) ──
             doc.CreateRoomButton?.RegisterCallback<ClickEvent>(_ =>
             {
                 audio?.PlaySfx(SfxIds.UiNavigate);
@@ -177,6 +185,11 @@ namespace FloorBreaker.UI.Title.Presentation
                 modeConfig.StartInSetupMode = false;
                 ShowSetupState();
             }
+            else
+            {
+                // 初期状態のキーボードナビ設定
+                SetTitleMenu();
+            }
         }
 
         // ═══════════════════════════════════════════
@@ -192,6 +205,8 @@ namespace FloorBreaker.UI.Title.Presentation
                 _doc.OnlineMenuState.style.display = DisplayStyle.None;
             if (_doc.LobbyState != null)
                 _doc.LobbyState.style.display = DisplayStyle.None;
+
+            SetTitleMenu();
         }
 
         private void ShowSetupState()
@@ -199,6 +214,16 @@ namespace FloorBreaker.UI.Title.Presentation
             _doc.TitleState.style.display = DisplayStyle.None;
             _doc.SetupState.style.display = DisplayStyle.Flex;
             _doc.SettingsOverlay.style.display = DisplayStyle.None;
+
+            _inputBridge?.SetMenu(
+                new[] { _doc.SetupStartButton, _doc.SetupBackButton },
+                new Action[]
+                {
+                    () => { _audio?.StopBgm(0.5f); _sceneTransition.LoadMatchAsync().Forget(e => Debug.LogException(e)); },
+                    () => { _audio?.PlaySfx(SfxIds.UiNavigate); ShowTitleState(); },
+                },
+                () => { _audio?.PlaySfx(SfxIds.UiNavigate); ShowTitleState(); }
+            );
         }
 
         private void ShowOnlineMenuState()
@@ -222,6 +247,17 @@ namespace FloorBreaker.UI.Title.Presentation
         private void ShowSettingsOverlay()
         {
             _doc.SettingsOverlay.style.display = DisplayStyle.Flex;
+
+            _inputBridge?.SetMenu(
+                new[] { _doc.KeyConfigButton, _doc.CreditsButton, _doc.SettingsCloseButton },
+                new Action[]
+                {
+                    () => { OpenKeyConfig(); },
+                    () => { _audio?.PlaySfx(SfxIds.UiNavigate); ShowCreditsOverlay(); },
+                    () => { _audio?.PlaySfx(SfxIds.UiNavigate); HideSettingsOverlay(); SetTitleMenu(); },
+                },
+                () => { _audio?.PlaySfx(SfxIds.UiNavigate); HideSettingsOverlay(); SetTitleMenu(); }
+            );
         }
 
         private void HideSettingsOverlay()
@@ -229,11 +265,52 @@ namespace FloorBreaker.UI.Title.Presentation
             _doc.SettingsOverlay.style.display = DisplayStyle.None;
         }
 
+        private void OpenKeyConfig()
+        {
+            _inputBridge?.Suspend(cancelAction: () => CloseKeyConfig());
+            _rebindPresenter?.Show();
+        }
+
+        private void CloseKeyConfig()
+        {
+            _rebindPresenter?.Hide();
+            _inputBridge?.Resume();
+            ShowSettingsOverlay();
+        }
+
+        private void SetTitleMenu()
+        {
+            _inputBridge?.SetMenu(
+                new[] { _doc.SoloButton, _doc.LocalButton, _doc.SettingsButton, _doc.QuitButton },
+                new Action[]
+                {
+                    () => { _audio?.PlaySfx(SfxIds.UiNavigate); PresetSolo(); ShowSetupState(); },
+                    () => { _audio?.PlaySfx(SfxIds.UiNavigate); PresetLocal(); ShowSetupState(); },
+                    () => { _audio?.PlaySfx(SfxIds.UiNavigate); ShowSettingsOverlay(); },
+                    () =>
+                    {
+#if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false;
+#else
+                        Application.Quit();
+#endif
+                    },
+                },
+                null
+            );
+        }
+
         private void ShowCreditsOverlay()
         {
             if (_doc.CreditsText != null)
                 _doc.CreditsText.text = GetCreditsText();
             _doc.CreditsOverlay.style.display = DisplayStyle.Flex;
+            _inputBridge?.Suspend(cancelAction: () =>
+            {
+                HideCreditsOverlay();
+                _inputBridge?.Resume();
+                ShowSettingsOverlay();
+            });
         }
 
         private void HideCreditsOverlay()
@@ -344,17 +421,69 @@ OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         // ═══════════════════════════════════════════
-        //  プレイヤースロット
+        //  モードプリセット
         // ═══════════════════════════════════════════
 
-        private void SetupSlots()
+        private void PresetSolo()
         {
-            // P1/P2: デフォルト Human + デフォルトデバイス割り当て
+            _modeConfig.CurrentMode = LocalGameMode.Solo;
+            _modeConfig.IsOnline = false;
+            _modeConfig.PlayerCount = 2;
+            _modeConfig.IsCpuSlot[0] = false;
+            _modeConfig.IsCpuSlot[1] = true;
+            _modeConfig.DeviceTypes[0] = DeviceType.KeyboardWasd;
+            _modeConfig.ClearDevice(1);
+
+            // P3/P4 を折り畳み
+            for (int i = 2; i < 4; i++)
+            {
+                _modeConfig.IsCpuSlot[i] = false;
+                _modeConfig.ClearDevice(i);
+                if (_doc.SlotContents[i] != null)
+                {
+                    _doc.SlotContents[i].style.display = DisplayStyle.None;
+                    _doc.SlotAddButtons[i].style.display = DisplayStyle.Flex;
+                    _doc.Slots[i]?.RemoveFromClassList("setup-slot--active");
+                    _doc.Slots[i]?.AddToClassList("setup-slot--empty");
+                }
+            }
+
+            RefreshAllSlotUI();
+        }
+
+        private void PresetLocal()
+        {
+            _modeConfig.CurrentMode = LocalGameMode.Local;
+            _modeConfig.IsOnline = false;
+            _modeConfig.PlayerCount = 2;
             _modeConfig.IsCpuSlot[0] = false;
             _modeConfig.IsCpuSlot[1] = false;
             _modeConfig.DeviceTypes[0] = DeviceType.KeyboardWasd;
             _modeConfig.DeviceTypes[1] = DeviceType.KeyboardArrows;
 
+            // P3/P4 を折り畳み
+            for (int i = 2; i < 4; i++)
+            {
+                _modeConfig.IsCpuSlot[i] = false;
+                _modeConfig.ClearDevice(i);
+                if (_doc.SlotContents[i] != null)
+                {
+                    _doc.SlotContents[i].style.display = DisplayStyle.None;
+                    _doc.SlotAddButtons[i].style.display = DisplayStyle.Flex;
+                    _doc.Slots[i]?.RemoveFromClassList("setup-slot--active");
+                    _doc.Slots[i]?.AddToClassList("setup-slot--empty");
+                }
+            }
+
+            RefreshAllSlotUI();
+        }
+
+        // ═══════════════════════════════════════════
+        //  プレイヤースロット
+        // ═══════════════════════════════════════════
+
+        private void SetupSlots()
+        {
             for (int i = 0; i < 4; i++)
             {
                 int slot = i; // capture

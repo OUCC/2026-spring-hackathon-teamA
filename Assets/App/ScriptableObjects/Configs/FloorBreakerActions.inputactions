@@ -377,18 +377,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Skip",
+                    "name": "Cancel",
                     "type": "Button",
                     "id": "a1b2c3d4-2222-4000-8000-000000000012",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Reroll",
-                    "type": "Button",
-                    "id": "a1b2c3d4-2222-4000-8000-000000000013",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -476,7 +467,7 @@
                 {
                     "name": "",
                     "id": "b3000001-0000-4000-8000-000000000011",
-                    "path": "<Keyboard>/space",
+                    "path": "<Keyboard>/l",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -491,40 +482,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Skip",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "b3000001-0000-4000-8000-000000000021",
-                    "path": "<Keyboard>/l",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Skip",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b3000001-0000-4000-8000-000000000030",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Reroll",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b3000001-0000-4000-8000-000000000031",
                     "path": "<Keyboard>/p",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Reroll",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -553,18 +522,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Skip",
+                    "name": "Cancel",
                     "type": "Button",
                     "id": "a1b2c3d4-3333-4000-8000-000000000012",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Reroll",
-                    "type": "Button",
-                    "id": "a1b2c3d4-3333-4000-8000-000000000013",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -652,7 +612,7 @@
                 {
                     "name": "",
                     "id": "b4000001-0000-4000-8000-000000000011",
-                    "path": "<Keyboard>/numpad0",
+                    "path": "<Keyboard>/numpad2",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -667,40 +627,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Skip",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "b4000001-0000-4000-8000-000000000021",
-                    "path": "<Keyboard>/numpad2",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Skip",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b4000001-0000-4000-8000-000000000030",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Reroll",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b4000001-0000-4000-8000-000000000031",
                     "path": "<Keyboard>/numpad6",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Reroll",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -984,18 +922,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Skip",
+                    "name": "Cancel",
                     "type": "Button",
                     "id": "7c48c078-42b2-4fbb-ac72-8918840155a9",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Reroll",
-                    "type": "Button",
-                    "id": "7f3676a2-b88d-4db3-8e01-e4016464564a",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1032,18 +961,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Skip",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "cebb85aa-1e66-4060-b98a-d6ff605abfe7",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Reroll",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -1072,18 +990,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Skip",
+                    "name": "Cancel",
                     "type": "Button",
                     "id": "b688da47-0b3f-45a0-8256-d3c43e9e789e",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Reroll",
-                    "type": "Button",
-                    "id": "106a4abd-d82d-488e-9c46-a1d115e2fa34",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1120,18 +1029,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Skip",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d66c9dc4-2018-433b-b38b-4669f1622adc",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Reroll",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

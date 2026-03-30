@@ -17,8 +17,9 @@
             <Label name="TitleLogo" class="title-logo" text="FLOOR BREAKER" />
             <Label class="title-subtitle" text="床破壊対戦ゲーム" />
             <VisualElement class="title-menu">
-                <Button name="StartButton" class="title-btn title-btn--primary" text="はじめる" />
-                <Button name="OnlineButton" class="title-btn title-btn--primary" text="オンライン対戦" />
+                <Button name="SoloButton" class="title-btn title-btn--primary" text="ひとりで あそぶ" />
+                <Button name="LocalButton" class="title-btn title-btn--primary" text="みんなで あそぶ" />
+                <Button name="OnlineComingSoonButton" class="title-btn title-btn--coming-soon" text="オンライン対戦 (Coming Soon)" />
                 <Button name="SettingsButton" class="title-btn title-btn--settings" text="設定" />
                 <Button name="QuitButton" class="title-btn title-btn--quit" text="終了" />
             </VisualElement>

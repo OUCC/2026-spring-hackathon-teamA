@@ -115,8 +115,16 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         }
 
         [Test]
-        public void InitialState_IsRunning()
+        public void InitialState_IsCountdown()
         {
+            Assert.AreEqual(SchedulerState.Countdown, _scheduler.State);
+            Assert.AreEqual(GamePhase.Countdown, _scheduler.Clock.CurrentPhaseValue);
+        }
+
+        [Test]
+        public void Countdown_AfterDuration_TransitionsToRunning()
+        {
+            _scheduler.Tick(4f);
             Assert.AreEqual(SchedulerState.Running, _scheduler.State);
             Assert.AreEqual(GamePhase.MatchRunning, _scheduler.Clock.CurrentPhaseValue);
         }
@@ -124,6 +132,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         [Test]
         public void Tick20Seconds_TransitionsToStageShrink()
         {
+            SkipCountdown();
             _scheduler.Tick(20f);
             Assert.AreEqual(SchedulerState.StageShrink, _scheduler.State);
         }
@@ -131,6 +140,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         [Test]
         public void StageShrink_AfterAnimDuration_TransitionsToUpgradePhase()
         {
+            SkipCountdown();
             // Running -> StageShrink
             _scheduler.Tick(20f);
             Assert.AreEqual(SchedulerState.StageShrink, _scheduler.State);
@@ -141,8 +151,9 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         }
 
         [Test]
-        public void UpgradePhase_BothSkip_TransitionsToRunning()
+        public void UpgradePhase_BothSkip_TransitionsToCountdown()
         {
+            SkipCountdown();
             // Running -> StageShrink -> UpgradePhase
             _scheduler.Tick(20f);
             _scheduler.Tick(1f);
@@ -152,14 +163,19 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             _draftP1.Skip();
             _draftP2.Skip();
 
-            // Tick to process completion
+            // Tick to process completion → Countdown (not directly Running)
             _scheduler.Tick(0.1f);
+            Assert.AreEqual(SchedulerState.Countdown, _scheduler.State);
+
+            // After countdown duration → Running
+            _scheduler.Tick(4f);
             Assert.AreEqual(SchedulerState.Running, _scheduler.State);
         }
 
         [Test]
         public void UpgradePhase_Timeout_AutoSkips()
         {
+            SkipCountdown();
             // Running -> StageShrink -> UpgradePhase
             _scheduler.Tick(20f);
             _scheduler.Tick(1f);
@@ -168,15 +184,16 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             // Tick past the 10s upgrade selection timeout
             _scheduler.Tick(10.1f);
 
-            // Both should be timed out and scheduler back to Running
+            // Both should be timed out and scheduler in Countdown
             Assert.AreNotEqual(DraftState.Choosing, _draftP1.State.CurrentValue);
             Assert.AreNotEqual(DraftState.Choosing, _draftP2.State.CurrentValue);
-            Assert.AreEqual(SchedulerState.Running, _scheduler.State);
+            Assert.AreEqual(SchedulerState.Countdown, _scheduler.State);
         }
 
         [Test]
         public void PlayerDeath_TransitionsToResult()
         {
+            SkipCountdown();
             // Kill player 1 by direct damage
             _player1.Stats.TakeDamage(10);
 
@@ -184,6 +201,12 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             _scheduler.Tick(0.1f);
             Assert.AreEqual(SchedulerState.Result, _scheduler.State);
             Assert.AreEqual(GamePhase.Result, _scheduler.Clock.CurrentPhaseValue);
+        }
+
+        private void SkipCountdown()
+        {
+            _scheduler.Tick(4f);
+            Assert.AreEqual(SchedulerState.Running, _scheduler.State);
         }
 
         private sealed class TestBalanceParameters : IBalanceParameters
@@ -236,6 +259,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             public float BombFlightSpeed => 12f;
             public int BombMinFlightDistance => 3;
             public float StageShrinkAnimDuration => 1f;
+            public float CountdownDuration => 4f;
             public float FireBombSpreadInterval => 0.15f;
             public float BreakBombSpreadInterval => 0.3f;
             public int HpRecoveryAmount => 3;

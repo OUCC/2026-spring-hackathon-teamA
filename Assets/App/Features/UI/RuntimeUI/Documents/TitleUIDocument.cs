@@ -16,7 +16,9 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
         public VisualElement SettingsOverlay { get; private set; }
 
         // --- TitleState ボタン ---
-        public Button StartButton { get; private set; }
+        public Button SoloButton { get; private set; }
+        public Button LocalButton { get; private set; }
+        public Button OnlineComingSoonButton { get; private set; }
         public Button SettingsButton { get; private set; }
         public Button QuitButton { get; private set; }
 
@@ -126,9 +128,13 @@ namespace FloorBreaker.UI.RuntimeUI.Documents
             SettingsOverlay = root.Q("SettingsOverlay");
 
             // TitleState
-            StartButton = root.Q<Button>("StartButton");
+            SoloButton = root.Q<Button>("SoloButton");
+            LocalButton = root.Q<Button>("LocalButton");
+            OnlineComingSoonButton = root.Q<Button>("OnlineComingSoonButton");
             SettingsButton = root.Q<Button>("SettingsButton");
             QuitButton = root.Q<Button>("QuitButton");
+
+            OnlineComingSoonButton?.SetEnabled(false);
 
             // SetupState: スロット (統一構造 x4)
             for (int i = 0; i < 4; i++)

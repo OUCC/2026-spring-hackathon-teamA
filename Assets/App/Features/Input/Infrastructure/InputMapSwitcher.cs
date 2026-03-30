@@ -38,6 +38,11 @@ namespace FloorBreaker.Input.Infrastructure
 
             switch (phase)
             {
+                case GamePhase.Countdown:
+                    SetGameplayMaps(enabled: false);
+                    SetUpgradeMaps(enabled: false);
+                    system?.Enable();
+                    break;
                 case GamePhase.MatchRunning:
                     SetGameplayMaps(enabled: true);
                     SetUpgradeMaps(enabled: false);

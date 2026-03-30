@@ -58,8 +58,17 @@ namespace FloorBreaker.Player.Domain
             return true;
         }
 
+        public int CurrentHpValue => _currentHp.Value;
+
+        public void SetHp(int value)
+        {
+            _currentHp.Value = Math.Clamp(value, 0, MaxHp);
+        }
+
         public void ActivateFireShield() => _fireShieldActive.Value = true;
+        public void DeactivateFireShield() => _fireShieldActive.Value = false;
         public void ActivateLevitation() => _levitationActive.Value = true;
+        public void DeactivateLevitation() => _levitationActive.Value = false;
 
         /// <summary>
         /// フェーズ開始時に全一時効果をリセットする。

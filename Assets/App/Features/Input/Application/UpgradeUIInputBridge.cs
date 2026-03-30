@@ -54,16 +54,21 @@ namespace FloorBreaker.Input.Application
             Submit(player, _drafts[player.Index], _players[player.Index]);
         }
 
-        public void OnSkip(PlayerId player, InputAction.CallbackContext ctx)
+        public void OnCancel(PlayerId player, InputAction.CallbackContext ctx)
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
-            _drafts[player.Index].Skip();
-        }
 
-        public void OnReroll(PlayerId player, InputAction.CallbackContext ctx)
-        {
-            if (!IsUpgradePhase() || !ctx.performed) return;
-            _drafts[player.Index].Reroll(_players[player.Index], _random);
+            var draft = _drafts[player.Index];
+            if (draft.CanUndo)
+            {
+                var record = draft.UndoLastPurchase(_players[player.Index]);
+                if (record.HasValue)
+                    _selectionState.UnmarkPurchased(player, record.Value.CardIndex);
+            }
+            else
+            {
+                draft.Skip();
+            }
         }
 
         // --- 共通 ---
