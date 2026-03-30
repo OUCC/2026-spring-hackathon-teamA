@@ -94,7 +94,5 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         public void SetDoneHighlight(int index, bool on)
             => _skipBtns[index]?.EnableInClassList("upgrade-pane__done-btn--selected", on);
 
-        public Button GetRerollBtn(int index) => _rerollBtns[index];
-        public Button GetSkipBtn(int index) => _skipBtns[index];
     }
 }

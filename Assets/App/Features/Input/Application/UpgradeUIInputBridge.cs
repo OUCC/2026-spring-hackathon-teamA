@@ -129,11 +129,6 @@ namespace FloorBreaker.Input.Application
         private bool IsUpgradePhase()
             => !_disposed && _clock.CurrentPhaseValue == GamePhase.UpgradePhase;
 
-        public void ResetSelection()
-        {
-            if (!_disposed) _selectionState.Reset();
-        }
-
         public void Dispose()
         {
             _disposed = true;

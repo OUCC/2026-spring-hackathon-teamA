@@ -26,17 +26,6 @@ namespace FloorBreaker.Stage.Domain
             _model = model;
         }
 
-        public IReadOnlyList<GridPos> GetPassableTiles()
-        {
-            var result = new List<GridPos>();
-            foreach (var pos in _model.GetCurrentBounds().GetAllPositions())
-            {
-                if (_model.IsPassable(pos))
-                    result.Add(pos);
-            }
-            return result;
-        }
-
         public IReadOnlyList<GridPos> GetTilesInCross(GridPos center, int range, bool penetrateWalls)
         {
             var result = new List<GridPos>();

@@ -10,7 +10,6 @@ namespace FloorBreaker.MatchFlow.Application
     {
         Solo,
         Local,
-        Online,
     }
 
     public sealed class MatchModeConfig
@@ -55,16 +54,6 @@ namespace FloorBreaker.MatchFlow.Application
 
         public bool IsCpuPlayer => System.Array.Exists(IsCpuSlot, x => x);
         public bool IsCpuAt(int index) => index >= 0 && index < IsCpuSlot.Length && IsCpuSlot[index];
-
-        public bool IsAllCpu
-        {
-            get
-            {
-                for (int i = 0; i < PlayerCount; i++)
-                    if (!IsCpuSlot[i]) return false;
-                return true;
-            }
-        }
 
         /// <summary>スロットのデバイス割り当てをクリアする。</summary>
         public void ClearDevice(int slot)

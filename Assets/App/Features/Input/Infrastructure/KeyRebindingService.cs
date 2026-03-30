@@ -68,13 +68,6 @@ namespace FloorBreaker.Input.Infrastructure
             return operation;
         }
 
-        /// <summary>指定バインドをデフォルトにリセットする。</summary>
-        public void ResetBinding(InputAction action, int bindingIndex)
-        {
-            action.RemoveBindingOverride(bindingIndex);
-            SaveOverrides();
-        }
-
         /// <summary>全バインドをデフォルトにリセットする。</summary>
         public void ResetAllBindings()
         {

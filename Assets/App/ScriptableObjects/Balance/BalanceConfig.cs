@@ -21,7 +21,7 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [SerializeField] private float breakBombCooldown = 4f;
         [SerializeField] private float breakBombCooldownMin = 1f;
         [SerializeField] private float breakBombCooldownReduction = 0.5f;
-        [SerializeField] private bool breakBombDefaultWallPenetration = true;
+
 
         [Header("Fire Bomb")]
         [SerializeField] private int fireBombMaxFlightDistance = 3;
@@ -46,7 +46,6 @@ namespace FloorBreaker.ScriptableObjects.Balance
         [SerializeField] private float slimeSpawnCheckInterval = 5f;
         [SerializeField] private float slimeTargetRatio = 0.03f;
         [SerializeField] private int slimeMinDistanceFromPlayer = 5;
-        [SerializeField] private int slimeHp = 1;
         [SerializeField] private float slimeSpeedMultiplier = 1.2f;
         [SerializeField] private int slimeDetectionRange = 5;
         [SerializeField] private int slimeAttackDamage = 1;
@@ -103,7 +102,6 @@ namespace FloorBreaker.ScriptableObjects.Balance
 
         [Header("Dash")]
         [SerializeField] private float dashCooldown = 1f;
-        [SerializeField] private float dashDoubleTapWindow = 0.3f;
 
         // --- IBalanceParameters ---
         public int InitialHp => initialHp;
@@ -118,8 +116,7 @@ namespace FloorBreaker.ScriptableObjects.Balance
         public float BreakBombRecoveryDuration => breakBombRecoveryDuration;
         public float BreakBombCooldown => breakBombCooldown;
         public float BreakBombCooldownMin => breakBombCooldownMin;
-        public float BreakBombCooldownReduction => breakBombCooldownReduction;
-        public bool BreakBombDefaultWallPenetration => breakBombDefaultWallPenetration;
+
 
         public int FireBombMaxFlightDistance => fireBombMaxFlightDistance;
         public int FireBombEffectRange => fireBombEffectRange;
@@ -129,7 +126,6 @@ namespace FloorBreaker.ScriptableObjects.Balance
         public float FireBombDuration => fireBombDuration;
         public float FireBombCooldown => fireBombCooldown;
         public float FireBombCooldownMin => fireBombCooldownMin;
-        public float FireBombCooldownReduction => fireBombCooldownReduction;
         public bool FireBombDefaultWallPenetration => fireBombDefaultWallPenetration;
 
         public int StageSize => stageSize;
@@ -141,7 +137,6 @@ namespace FloorBreaker.ScriptableObjects.Balance
         public float SlimeSpawnCheckInterval => slimeSpawnCheckInterval;
         public float SlimeTargetRatio => slimeTargetRatio;
         public int SlimeMinDistanceFromPlayer => slimeMinDistanceFromPlayer;
-        public int SlimeHp => slimeHp;
         public float SlimeSpeedMultiplier => slimeSpeedMultiplier;
         public int SlimeDetectionRange => slimeDetectionRange;
         public int SlimeAttackDamage => slimeAttackDamage;
@@ -170,7 +165,6 @@ namespace FloorBreaker.ScriptableObjects.Balance
         public int HpRecoveryThreshold => hpRecoveryThreshold;
 
         public float DashCooldown => dashCooldown;
-        public float DashDoubleTapWindow => dashDoubleTapWindow;
 
         public float InputBaseMoveInterval => inputBaseMoveInterval;
         public float InputInitialRepeatDelay => inputInitialRepeatDelay;

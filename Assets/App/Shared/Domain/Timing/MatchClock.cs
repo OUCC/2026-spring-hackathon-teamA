@@ -19,7 +19,6 @@ namespace FloorBreaker.Shared.Domain.Timing
 
         public float PhaseDuration { get; }
 
-        public ReadOnlyReactiveProperty<float> Remaining => _remaining;
         public ReadOnlyReactiveProperty<GamePhase> CurrentPhase => _currentPhase;
         public ReadOnlyReactiveProperty<bool> IsPaused => _isPaused;
 

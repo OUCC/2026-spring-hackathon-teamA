@@ -28,11 +28,6 @@ namespace FloorBreaker.Bombs.Application
 
         public bool HasActiveWaves => _activeWaves.Count > 0;
 
-        /// <summary>
-        /// 全アクティブ波の未適用タイル。退避先探索の除外に使う。
-        /// </summary>
-        public IReadOnlyCollection<GridPos> PendingTiles => _pendingTiles;
-
         public BombEffectSpreadService(
             StageModel stage,
             TileTimerService tileTimerService,

@@ -68,19 +68,6 @@ namespace FloorBreaker.Stage.Presentation
         }
 
         /// <summary>
-        /// MonoBehaviour の LateUpdate から呼ぶ。
-        /// 同一フレームのバッチを処理する。
-        /// </summary>
-        public void LateUpdate()
-        {
-            if (_pendingDestroys.Count == 0) return;
-            if (Time.frameCount != _lastCollectFrame) return;
-
-            // フレーム末尾でフラッシュ (Subscribe は同期なのでフレーム末に呼ばれる想定)
-            // → 実際には次フレームの HandleTileChanged か明示的な LateUpdate で呼ぶ
-        }
-
-        /// <summary>
         /// 蓄積された PermanentlyDestroyed タイルのウェーブアニメーションを実行する。
         /// </summary>
         public void FlushPendingWave()

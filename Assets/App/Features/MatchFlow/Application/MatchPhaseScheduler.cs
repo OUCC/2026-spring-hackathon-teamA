@@ -50,7 +50,6 @@ namespace FloorBreaker.MatchFlow.Application
         public SchedulerState State { get; private set; }
         public MatchClock Clock => _clock;
         public float CountdownRemaining => _countdownDuration - _countdownTimer;
-        public float CountdownDuration => _countdownDuration;
 
         public MatchPhaseScheduler(
             MatchClock clock,
@@ -254,13 +253,6 @@ namespace FloorBreaker.MatchFlow.Application
             {
                 TransitionToRunning();
             }
-        }
-
-        private void TransitionToCountdown()
-        {
-            State = SchedulerState.Countdown;
-            _countdownTimer = 0f;
-            _clock.SetPhase(GamePhase.Countdown);
         }
 
         private void TransitionToRunning()

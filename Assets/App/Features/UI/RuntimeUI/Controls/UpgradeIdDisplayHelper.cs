@@ -60,34 +60,5 @@ namespace FloorBreaker.UI.RuntimeUI.Controls
             };
         }
 
-        public static string GetShortLabel(UpgradeId id)
-        {
-            return id switch
-            {
-                UpgradeId.FireFlightRange => "炎距",
-                UpgradeId.FireEffectRange => "炎範",
-                UpgradeId.FireDamage => "炎攻",
-                UpgradeId.FireDuration => "炎時",
-                UpgradeId.FireWallPenetration => "炎貫",
-                UpgradeId.FireCooldown => "炎速",
-                UpgradeId.FireBombPenetration => "炎飛",
-                UpgradeId.BreakFlightRange => "壊距",
-                UpgradeId.BreakEffectRange => "壊範",
-                UpgradeId.BreakDamage => "壊攻",
-                UpgradeId.BreakCollapseTime => "壊時",
-                UpgradeId.BreakCooldown => "壊速",
-                UpgradeId.BreakBombPenetration => "壊飛",
-                UpgradeId.HpRecovery => "回復",
-                UpgradeId.MoveSpeed => "移速",
-                UpgradeId.Dash => "疾走",
-                UpgradeId.DualShot => "双射",
-                UpgradeId.FireShield => "炎盾",
-                UpgradeId.Levitation => "浮遊",
-                _ => "?",
-            };
-        }
-
-        // Legacy: kept for backward compat if needed
-        public static string GetDotClass(UpgradeId id) => GetBadgeClass(id);
     }
 }

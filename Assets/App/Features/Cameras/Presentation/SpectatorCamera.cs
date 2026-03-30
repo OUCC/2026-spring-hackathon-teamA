@@ -34,12 +34,8 @@ namespace FloorBreaker.Cameras.Presentation
         private Vector2 _panInput;
         private float _zoomInput;
 
-        public Camera Camera => _camera;
         public DeviceType DeviceType => _deviceType;
         public int GamepadIndex => _gamepadIndex;
-
-        /// <summary>現在追従中のプレイヤーインデックス (-1 = フリー)。</summary>
-        public int FollowTargetIndex => _followTargetIndex;
 
         public SpectatorCamera(
             Camera camera, StageBounds bounds, IReadOnlyList<PlayerModel> allPlayers,
