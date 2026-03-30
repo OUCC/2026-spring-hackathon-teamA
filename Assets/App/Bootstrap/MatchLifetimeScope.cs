@@ -308,16 +308,9 @@ namespace FloorBreaker.Bootstrap
                     if (!modeConfig.IsCpuAt(i)) continue;
 
                     var cpuPlayer = mp.All[i];
-                    // opponent: CPU 以外の最初のプレイヤー（ターゲット用）
-                    PlayerModel opponent = null;
-                    for (int j = 0; j < mp.PlayerCount; j++)
-                    {
-                        if (j != i && !modeConfig.IsCpuAt(j)) { opponent = mp.All[j]; break; }
-                    }
-                    opponent ??= mp.All[i == 0 ? 1 : 0]; // 全員CPUの場合のフォールバック
 
                     brains.Add(new CpuPlayerBrain(
-                        balance, cpuPlayer, opponent,
+                        balance, cpuPlayer,
                         stage, moveService, flightTracker, launchUseCase,
                         mp.Cooldowns[i], slimeRegistry, mp.All,
                         c.Resolve<IRandomProvider>()));

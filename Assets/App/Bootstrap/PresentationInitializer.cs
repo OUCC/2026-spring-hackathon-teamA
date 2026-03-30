@@ -243,7 +243,7 @@ namespace FloorBreaker.Bootstrap
             // 11. Result Presenter 生成 (Human のみ)
             var resultView = new ResultView(
                 _matchUIDocument.ResultRoot, _matchUIDocument.ResultPanes);
-            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition, _modeConfig, humanIndices.ToArray());
+            _presenters.Result = new ResultPresenter(resultView, _clock, _matchEnd, _players.PlayerCount, _sceneTransition, _modeConfig, inputActions, humanIndices.ToArray());
 
             // 12. Countdown Presenter 生成
             if (_matchUIDocument.CountdownOverlayRoot != null && _matchUIDocument.CountdownPanes != null)
