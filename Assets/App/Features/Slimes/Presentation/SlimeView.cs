@@ -12,16 +12,12 @@ namespace FloorBreaker.Slimes.Presentation
     {
         private SpriteRenderer _renderer;
         private SlimeId _slimeId;
-        private SlimeType _slimeType;
-
         public SpriteRenderer Renderer => _renderer;
         public SlimeId SlimeId => _slimeId;
-        public SlimeType SlimeType => _slimeType;
 
         public void Initialize(SlimeId id, SlimeType type, SpriteRenderer renderer, SlimeSpriteConfig config)
         {
             _slimeId = id;
-            _slimeType = type;
             _renderer = renderer;
             _renderer.sortingOrder = config.BaseSortingOrder;
 
@@ -46,11 +42,6 @@ namespace FloorBreaker.Slimes.Presentation
             {
                 _renderer.sprite = sprite;
             }
-        }
-
-        public void SetPositionImmediate(Vector3 worldPos)
-        {
-            transform.position = worldPos;
         }
 
         public void SetDirection(Direction8 dir, SlimeSpriteConfig config)

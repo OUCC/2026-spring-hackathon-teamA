@@ -133,16 +133,6 @@ namespace FloorBreaker.UI.Title.Presentation
             UpdateGridFocus();
         }
 
-        public void ClearMenu()
-        {
-            ClearAllFocus();
-            _isGridMode = false;
-            _gridRows = null;
-            _currentButtons = Array.Empty<Button>();
-            _currentActions = Array.Empty<Action>();
-            _onCancel = null;
-        }
-
         private void OnMove(InputAction.CallbackContext ctx)
         {
             if (_suspended) return;

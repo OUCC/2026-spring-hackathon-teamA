@@ -160,9 +160,6 @@ namespace FloorBreaker.UI.Title.Presentation
             return result;
         }
 
-        /// <summary>カード数を返す。</summary>
-        public int CardCount => _stageCards.Count;
-
         public void Dispose()
         {
             _tickSchedule?.Pause();

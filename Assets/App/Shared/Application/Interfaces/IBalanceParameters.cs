@@ -20,8 +20,6 @@ namespace FloorBreaker.Shared.Application.Interfaces
         float BreakBombRecoveryDuration { get; }
         float BreakBombCooldown { get; }
         float BreakBombCooldownMin { get; }
-        float BreakBombCooldownReduction { get; }
-        bool BreakBombDefaultWallPenetration { get; }
 
         // --- Fire Bomb ---
         int FireBombMaxFlightDistance { get; }
@@ -32,7 +30,6 @@ namespace FloorBreaker.Shared.Application.Interfaces
         float FireBombDuration { get; }
         float FireBombCooldown { get; }
         float FireBombCooldownMin { get; }
-        float FireBombCooldownReduction { get; }
         bool FireBombDefaultWallPenetration { get; }
 
         // --- Stage ---
@@ -46,7 +43,6 @@ namespace FloorBreaker.Shared.Application.Interfaces
         float SlimeSpawnCheckInterval { get; }
         float SlimeTargetRatio { get; }
         int SlimeMinDistanceFromPlayer { get; }
-        int SlimeHp { get; }
         float SlimeSpeedMultiplier { get; }
         int SlimeDetectionRange { get; }
         int SlimeAttackDamage { get; }
@@ -81,7 +77,6 @@ namespace FloorBreaker.Shared.Application.Interfaces
 
         // --- Dash ---
         float DashCooldown { get; }
-        float DashDoubleTapWindow { get; }
 
         // --- Input ---
         float InputBaseMoveInterval { get; }

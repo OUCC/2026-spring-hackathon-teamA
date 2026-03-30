@@ -21,12 +21,8 @@ namespace FloorBreaker.Shared.Application.Interfaces
         public const string PlayerHit = "player_hit";
         public const string PlayerDeath = "player_death";
 
-        // コイン
-        public const string CoinPickup = "coin_pickup";
-
         // 強化フェーズ
         public const string UpgradeSelect = "upgrade_select";
-        public const string UpgradeReroll = "upgrade_reroll";
         public const string UpgradeDone = "upgrade_done";
 
         // フェーズ遷移

@@ -28,10 +28,6 @@ namespace FloorBreaker.MatchFlow.Application
             Drafts = drafts;
         }
 
-        public PlayerModel GetPlayer(PlayerId id) => All[id.Index];
-        public BombCooldownState GetCooldown(PlayerId id) => Cooldowns[id.Index];
-        public UpgradeDraftService GetDraft(PlayerId id) => Drafts[id.Index];
-
         public void Dispose()
         {
             foreach (var p in All) p?.Dispose();

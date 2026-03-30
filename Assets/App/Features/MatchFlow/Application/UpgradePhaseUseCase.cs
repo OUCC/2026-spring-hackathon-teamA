@@ -21,7 +21,6 @@ namespace FloorBreaker.MatchFlow.Application
 
         private readonly ReactiveProperty<float> _remainingTime = new(0f);
 
-        public IReadOnlyList<UpgradeDraftService> Drafts => _drafts;
         public bool IsActive => _isActive;
         public ReadOnlyReactiveProperty<float> RemainingTime => _remainingTime;
 

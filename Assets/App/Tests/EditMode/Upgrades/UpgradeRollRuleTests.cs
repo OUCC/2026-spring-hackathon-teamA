@@ -106,8 +106,6 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             public float BreakBombRecoveryDuration => 5f;
             public float BreakBombCooldown => 4f;
             public float BreakBombCooldownMin => 1f;
-            public float BreakBombCooldownReduction => 0.5f;
-            public bool BreakBombDefaultWallPenetration => false;
             public int FireBombMaxFlightDistance => 3;
             public int FireBombEffectRange => 1;
             public int FireBombContactDamage => 1;
@@ -116,7 +114,6 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             public float FireBombDuration => 3.5f;
             public float FireBombCooldown => 2f;
             public float FireBombCooldownMin => 0.5f;
-            public float FireBombCooldownReduction => 0.3f;
             public bool FireBombDefaultWallPenetration => false;
             public int StageSize => 30;
             public float WallSeedPercent => 0.08f;
@@ -126,7 +123,6 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             public float SlimeSpawnCheckInterval => 5f;
             public float SlimeTargetRatio => 0.03f;
             public int SlimeMinDistanceFromPlayer => 5;
-            public int SlimeHp => 1;
             public float SlimeSpeedMultiplier => 0.5f;
             public int SlimeDetectionRange => 5;
             public int SlimeAttackDamage => 1;
@@ -149,7 +145,6 @@ namespace FloorBreaker.Tests.EditMode.Upgrades
             public float FireBombSpreadInterval => 0.15f;
             public float BreakBombSpreadInterval => 0.3f;
             public float DashCooldown => 1f;
-            public float DashDoubleTapWindow => 0.3f;
             public int FireFlightRangeIncrement => 2;
             public int FireEffectRangeIncrement => 1;
             public int FireDamageIncrement => 1;

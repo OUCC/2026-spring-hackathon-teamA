@@ -73,14 +73,6 @@ namespace FloorBreaker.Bombs.Application
         }
 
         /// <summary>
-        /// 着弾位置を解決する。
-        /// </summary>
-        public GridPos ResolveLanding(BombFlightCommand cmd, int actualFlightDistance, Func<GridPos, bool> isEntityAt)
-        {
-            return _landingResolver.Resolve(cmd, actualFlightDistance, isEntityAt);
-        }
-
-        /// <summary>
         /// ボム着弾後の効果を適用する。
         /// </summary>
         public void ExecuteLanding(

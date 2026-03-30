@@ -11,8 +11,6 @@ namespace FloorBreaker.Stage.Presentation
     {
         private Dictionary<GridPos, TileView> _views;
 
-        public Dictionary<GridPos, TileView> Views => _views;
-
         public void SetViews(Dictionary<GridPos, TileView> views)
         {
             _views = views;

@@ -35,13 +35,6 @@ namespace FloorBreaker.Network.Infrastructure
             return runner != null && _instances.TryGetValue(runner, out var b) ? b : null;
         }
 
-        /// <summary>Runner の Bridge を登録解除する。</summary>
-        public static void Unregister(NetworkRunner runner)
-        {
-            if (runner != null)
-                _instances.Remove(runner);
-        }
-
         /// <summary>
         /// 後方互換: Single-Peer / PlayMode テスト用。
         /// 辞書の最初の Bridge を返す。Multi-Peer では Get(Runner) を使うこと。

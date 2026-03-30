@@ -14,10 +14,7 @@ namespace FloorBreaker.Bombs.Presentation
         private PlayerId _owner;
         private BombType _type;
 
-        public SpriteRenderer Renderer => _renderer;
-        public TrailRenderer Trail => _trail;
         public PlayerId Owner => _owner;
-        public BombType Type => _type;
 
         public void Initialize(PlayerId owner, BombType type,
             SpriteRenderer renderer, TrailRenderer trail, BombSpriteConfig config)

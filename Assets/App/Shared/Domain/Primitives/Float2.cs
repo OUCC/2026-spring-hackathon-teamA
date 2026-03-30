@@ -13,9 +13,6 @@ namespace FloorBreaker.Shared.Domain.Primitives
             Y = y;
         }
 
-        public static Float2 Zero => new(0f, 0f);
-        public static Float2 One => new(1f, 1f);
-
         public static Float2 operator +(Float2 a, Float2 b) => new(a.X + b.X, a.Y + b.Y);
         public static Float2 operator -(Float2 a, Float2 b) => new(a.X - b.X, a.Y - b.Y);
         public static Float2 operator *(Float2 a, float s) => new(a.X * s, a.Y * s);

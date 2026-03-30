@@ -20,7 +20,6 @@ namespace FloorBreaker.Player.Presentation
         /// <summary>All In 1 Sprite Shader 用のマテリアルインスタンス。</summary>
         public Material MaterialInstance => _materialInstance;
         public PlayerId PlayerId => _playerId;
-        public Direction8 CurrentDirection => _currentDirection;
 
         public void Initialize(PlayerId id, SpriteRenderer renderer, PlayerSpriteConfig config)
         {
@@ -63,11 +62,6 @@ namespace FloorBreaker.Player.Presentation
             if (_isWalkFrame == isWalk) return;
             _isWalkFrame = isWalk;
             ApplySprite(config);
-        }
-
-        public void SetPositionImmediate(Vector3 worldPos)
-        {
-            transform.position = worldPos;
         }
 
         private void ApplySprite(PlayerSpriteConfig config)

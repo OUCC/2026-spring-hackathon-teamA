@@ -40,8 +40,6 @@ namespace FloorBreaker.Input.Infrastructure
         private float _lastTapTime;
         private float _doubleTapWindow = 0.3f;
 
-        public void SetDoubleTapWindow(float window) => _doubleTapWindow = window;
-
         /// <summary>
         /// 特定のデバイスのみに制限する（ゲームパッド割り当て用）。
         /// </summary>

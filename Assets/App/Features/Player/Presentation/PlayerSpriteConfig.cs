@@ -18,7 +18,6 @@ namespace FloorBreaker.Player.Presentation
         [SerializeField] private Color _player2Tint = new Color(1f, 0.55f, 0.55f, 1f);
 
         [Header("Movement")]
-        [SerializeField] private float _moveDuration = 0.12f;
         [SerializeField] private float _forcedMoveDuration = 0.4f;
         [SerializeField] private float _forcedMoveArcHeight = 0.6f;
         [SerializeField] private float _walkFrameInterval = 0.08f;
@@ -70,7 +69,6 @@ namespace FloorBreaker.Player.Presentation
         public Color GetPlayerTint(PlayerId id) =>
             id == PlayerId.Player1 ? _player1Tint : _player2Tint;
 
-        public float MoveDuration => _moveDuration;
         public float ForcedMoveDuration => _forcedMoveDuration;
         public float ForcedMoveArcHeight => _forcedMoveArcHeight;
         public float WalkFrameInterval => _walkFrameInterval;

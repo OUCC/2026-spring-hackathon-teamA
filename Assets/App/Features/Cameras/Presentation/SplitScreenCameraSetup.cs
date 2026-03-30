@@ -27,7 +27,6 @@ namespace FloorBreaker.Cameras.Presentation
         public Vector3[] ShakeOffsets { get; private set; }
 
         public Camera[] Cameras => _cameras;
-        public int CameraCount => _cameras?.Length ?? 0;
         public SpectatorCamera[] Spectators => _spectators;
 
         /// <summary>Viewport レイアウトテーブル。</summary>
@@ -61,30 +60,6 @@ namespace FloorBreaker.Cameras.Presentation
                 _followers[i] = new CameraFollower(players[i], bounds, OrthographicSize, viewportAspect);
                 _cameras[i].transform.position = _followers[i].CurrentPosition;
             }
-        }
-
-        /// <summary>
-        /// 既存の Camera を使って初期化する (デバッグシーン用)。
-        /// </summary>
-        public void InitializeWithCameras(
-            Camera camP1, Camera camP2,
-            PlayerModel p1, PlayerModel p2,
-            StageBounds bounds)
-        {
-            _cameras = new[] { camP1, camP2 };
-            _followers = new CameraFollower[2];
-            ShakeOffsets = new Vector3[2];
-
-            var rects = ViewportTable[1]; // 2P
-            ConfigureCamera(camP1, rects[0]);
-            ConfigureCamera(camP2, rects[1]);
-
-            float viewportAspect = CalculateViewportAspect(rects[0]);
-            _followers[0] = new CameraFollower(p1, bounds, OrthographicSize, viewportAspect);
-            _followers[1] = new CameraFollower(p2, bounds, OrthographicSize, viewportAspect);
-
-            camP1.transform.position = _followers[0].CurrentPosition;
-            camP2.transform.position = _followers[1].CurrentPosition;
         }
 
         /// <summary>
