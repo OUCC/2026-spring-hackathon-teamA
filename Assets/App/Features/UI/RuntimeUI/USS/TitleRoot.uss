@@ -107,6 +107,10 @@
     background-color: rgba(240, 192, 64, 0.15);
 }
 
+.title-btn--primary.title-btn--focused {
+    background-color: rgba(240, 192, 64, 0.15);
+}
+
 .title-btn--coming-soon {
     font-size: 18px;
     color: #606060;
@@ -115,6 +119,12 @@
 }
 
 .title-btn--coming-soon:hover {
+    background-color: rgba(20, 15, 30, 0.75);
+    border-color: #404040;
+    scale: 1 1;
+}
+
+.title-btn--coming-soon.title-btn--focused {
     background-color: rgba(20, 15, 30, 0.75);
     border-color: #404040;
     scale: 1 1;
@@ -133,6 +143,11 @@
     color: var(--color-text);
 }
 
+.title-btn--settings.title-btn--focused {
+    border-color: var(--color-text);
+    color: var(--color-text);
+}
+
 .title-btn--quit {
     font-size: 16px;
     padding: 8px 32px;
@@ -143,6 +158,10 @@
 }
 
 .title-btn--quit:hover {
+    border-color: var(--color-text-dim);
+}
+
+.title-btn--quit.title-btn--focused {
     border-color: var(--color-text-dim);
 }
 
@@ -196,6 +215,18 @@
     border-color: var(--color-coin);
 }
 
+.setup-slot:hover {
+    background-color: rgba(240, 192, 64, 0.1);
+    border-color: var(--color-coin);
+    scale: 1.03 1.03;
+}
+
+.setup-slot--focused {
+    background-color: rgba(240, 192, 64, 0.1);
+    border-color: var(--color-coin);
+    scale: 1.03 1.03;
+}
+
 .setup-slot--empty {
     opacity: 0.6;
     border-color: rgba(240, 232, 216, 0.1);
@@ -204,6 +235,12 @@
 .setup-slot--empty:hover {
     opacity: 0.8;
     border-color: rgba(240, 232, 216, 0.3);
+}
+
+.setup-slot--empty.setup-slot--focused {
+    opacity: 0.8;
+    border-color: rgba(240, 232, 216, 0.3);
+    scale: 1 1;
 }
 
 .setup-slot__label {
@@ -353,6 +390,11 @@
 .stage-card--selected {
     border-color: var(--color-coin);
     background-color: rgba(240, 192, 64, 0.1);
+}
+
+.stage-card--focused {
+    border-color: var(--color-text);
+    background-color: rgba(40, 35, 60, 0.9);
 }
 
 .stage-card__thumbnail {

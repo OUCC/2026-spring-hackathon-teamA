@@ -215,13 +215,67 @@ namespace FloorBreaker.UI.Title.Presentation
             _doc.SetupState.style.display = DisplayStyle.Flex;
             _doc.SettingsOverlay.style.display = DisplayStyle.None;
 
-            _inputBridge?.SetMenu(
-                new[] { _doc.SetupStartButton, _doc.SetupBackButton },
-                new Action[]
+            SetupGridMenu();
+        }
+
+        private void SetupGridMenu()
+        {
+            if (_inputBridge == null) return;
+
+            var rows = new List<GridMenuItem[]>();
+
+            // Row 0: プレイヤースロット操作（Submit でサイクル）
+            var slotItems = new List<GridMenuItem>();
+            for (int i = 0; i < 4; i++)
+            {
+                int slot = i;
+                var slotElement = _doc.Slots[i];
+                if (slotElement == null) continue;
+
+                slotItems.Add(new GridMenuItem
                 {
-                    () => { _audio?.StopBgm(0.5f); _sceneTransition.LoadMatchAsync().Forget(e => Debug.LogException(e)); },
-                    () => { _audio?.PlaySfx(SfxIds.UiNavigate); ShowTitleState(); },
+                    Element = slotElement,
+                    OnSubmit = () => CycleSlot(slot),
+                    FocusClass = "setup-slot--focused",
+                });
+            }
+            if (slotItems.Count > 0) rows.Add(slotItems.ToArray());
+
+            // Rows 1..N: ステージ選択カード（縦並びなので1カード1行 → 上下で切り替え）
+            var cards = _stageSelectUI.GetCardElements();
+            for (int i = 0; i < cards.Length; i++)
+            {
+                int idx = i;
+                rows.Add(new[]
+                {
+                    new GridMenuItem
+                    {
+                        Element = cards[i],
+                        OnSubmit = () => { _stageSelectUI.SelectByIndex(idx); },
+                        FocusClass = "stage-card--focused",
+                    },
+                });
+            }
+
+            // Row 2: アクションボタン (START / 戻る)
+            rows.Add(new[]
+            {
+                new GridMenuItem
+                {
+                    Element = _doc.SetupStartButton,
+                    OnSubmit = () => { _audio?.StopBgm(0.5f); _sceneTransition.LoadMatchAsync().Forget(e => Debug.LogException(e)); },
+                    FocusClass = "title-btn--focused",
                 },
+                new GridMenuItem
+                {
+                    Element = _doc.SetupBackButton,
+                    OnSubmit = () => { _audio?.PlaySfx(SfxIds.UiNavigate); ShowTitleState(); },
+                    FocusClass = "title-btn--focused",
+                },
+            });
+
+            _inputBridge.SetGridMenu(
+                rows.ToArray(),
                 () => { _audio?.PlaySfx(SfxIds.UiNavigate); ShowTitleState(); }
             );
         }
@@ -267,8 +321,38 @@ namespace FloorBreaker.UI.Title.Presentation
 
         private void OpenKeyConfig()
         {
-            _inputBridge?.Suspend(cancelAction: () => CloseKeyConfig());
             _rebindPresenter?.Show();
+
+            if (_rebindPresenter != null && _inputBridge != null)
+            {
+                // リバインド行 + Reset + Close のキーボードナビを設定
+                _rebindPresenter.OnRebindStarted = () => _inputBridge.Suspend();
+                _rebindPresenter.OnRebindEnded = () =>
+                {
+                    _inputBridge.Resume();
+                    SetKeyConfigMenu();
+                };
+
+                SetKeyConfigMenu();
+            }
+            else
+            {
+                _inputBridge?.Suspend(cancelAction: () => CloseKeyConfig());
+            }
+        }
+
+        private void SetKeyConfigMenu()
+        {
+            var (buttons, actions) = _rebindPresenter.GetAllButtons();
+
+            // Close ボタンのアクションを設定（GetAllButtons では null）
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                if (buttons[i] == _doc.KeyConfigCloseButton)
+                    actions[i] = () => CloseKeyConfig();
+            }
+
+            _inputBridge?.SetMenu(buttons, actions, () => CloseKeyConfig());
         }
 
         private void CloseKeyConfig()
@@ -487,10 +571,16 @@ OR OTHER DEALINGS IN THE SOFTWARE.
             for (int i = 0; i < 4; i++)
             {
                 int slot = i; // capture
-                _doc.SlotToggleButtons[i]?.RegisterCallback<ClickEvent>(_ => OnToggleSlot(slot));
-                _doc.SlotAddButtons[i]?.RegisterCallback<ClickEvent>(_ => ExpandSlot(slot));
+
+                // スロット全体のクリックでサイクル
+                _doc.Slots[i]?.RegisterCallback<ClickEvent>(_ => CycleSlot(slot));
+                _doc.SlotAddButtons[i]?.RegisterCallback<ClickEvent>(_ => CycleSlot(slot));
+
+                // トグル・削除ボタンは非表示（サイクルで代替）
+                if (_doc.SlotToggleButtons[i] != null)
+                    _doc.SlotToggleButtons[i].style.display = DisplayStyle.None;
                 if (_doc.SlotRemoveButtons[i] != null)
-                    _doc.SlotRemoveButtons[i].RegisterCallback<ClickEvent>(_ => CollapseSlot(slot));
+                    _doc.SlotRemoveButtons[i].style.display = DisplayStyle.None;
 
                 // デバイスラベルクリックで再割り当て
                 _doc.SlotDeviceLabels[i]?.RegisterCallback<ClickEvent>(_ =>
@@ -503,26 +593,50 @@ OR OTHER DEALINGS IN THE SOFTWARE.
             RefreshAllSlotUI();
         }
 
-        private void OnToggleSlot(int slot)
+        /// <summary>
+        /// スロットの状態をサイクルする。
+        /// P1/P2 (常設): CPU ↔ Human
+        /// P3/P4: 未展開 → CPU → Human → 折り畳み(なし)
+        /// </summary>
+        private void CycleSlot(int slot)
         {
-            bool wasCpu = _modeConfig.IsCpuSlot[slot];
-            _modeConfig.IsCpuSlot[slot] = !wasCpu;
+            bool isExpanded = _doc.SlotContents[slot]?.resolvedStyle.display == DisplayStyle.Flex;
 
-            if (wasCpu)
+            if (!isExpanded)
             {
-                // CPU → Human: デバイス割り当て待ちへ
+                // 未展開 → CPU として展開
+                ExpandSlot(slot);
+                return;
+            }
+
+            bool isCpu = _modeConfig.IsCpuSlot[slot];
+
+            if (isCpu)
+            {
+                // CPU → Human
+                _modeConfig.IsCpuSlot[slot] = false;
                 _modeConfig.ClearDevice(slot);
                 StartDeviceListening(slot);
+                RefreshSlotUI(slot);
+                _audio?.PlaySfx(SfxIds.UiNavigate);
+            }
+            else if (slot >= 2)
+            {
+                // Human → 折り畳み (P3/P4 のみ)
+                CollapseSlot(slot);
             }
             else
             {
-                // Human → CPU: デバイス解放
+                // P1/P2: Human → CPU
                 StopDeviceListening();
+                _modeConfig.IsCpuSlot[slot] = true;
                 _modeConfig.ClearDevice(slot);
+                RefreshSlotUI(slot);
+                _audio?.PlaySfx(SfxIds.UiNavigate);
             }
 
-            RefreshSlotUI(slot);
-            _audio?.PlaySfx(SfxIds.UiNavigate);
+            // グリッドメニューを再構築（スロット状態が変わった）
+            SetupGridMenu();
         }
 
         private void ExpandSlot(int slot)

@@ -22,6 +22,11 @@ namespace FloorBreaker.UI.Title.Presentation
         private readonly List<(Button keyButton, InputAction action, int bindingIndex)> _bindingRows = new();
         private InputActionRebindingExtensions.RebindingOperation _activeRebind;
 
+        /// <summary>リバインド開始時に呼ばれる（TitlePresenter が Suspend するため）。</summary>
+        public Action OnRebindStarted { get; set; }
+        /// <summary>リバインド完了/キャンセル時に呼ばれる（TitlePresenter が Resume するため）。</summary>
+        public Action OnRebindEnded { get; set; }
+
         public KeyRebindingPresenter(
             KeyRebindingService service,
             VisualElement overlay,
@@ -95,6 +100,40 @@ namespace FloorBreaker.UI.Title.Presentation
             }
         }
 
+        /// <summary>
+        /// リバインド行のボタン一覧 + Reset + Close を返す。
+        /// SetMenu で使うための Button[] と Action[] のペアを生成する。
+        /// </summary>
+        public (Button[] buttons, Action[] actions) GetAllButtons()
+        {
+            var buttons = new List<Button>();
+            var actions = new List<Action>();
+
+            foreach (var (keyButton, action, bindingIndex) in _bindingRows)
+            {
+                var kb = keyButton;
+                var act = action;
+                var bi = bindingIndex;
+                buttons.Add(kb);
+                actions.Add(() => OnBindingClicked(kb, act, bi));
+            }
+
+            if (_resetButton != null)
+            {
+                buttons.Add(_resetButton);
+                actions.Add(() => OnResetAll());
+            }
+
+            if (_closeButton != null)
+            {
+                buttons.Add(_closeButton);
+                // Close はアクション側で制御するため null
+                actions.Add(null);
+            }
+
+            return (buttons.ToArray(), actions.ToArray());
+        }
+
         private void OnBindingClicked(Button keyButton, InputAction action, int bindingIndex)
         {
             // 既にリバインド中なら無視
@@ -102,6 +141,7 @@ namespace FloorBreaker.UI.Title.Presentation
 
             keyButton.text = "...";
             keyButton.AddToClassList("keyconfig-row__key--listening");
+            OnRebindStarted?.Invoke();
 
             _activeRebind = _service.StartRebinding(action, bindingIndex,
                 onComplete: () =>
@@ -111,12 +151,14 @@ namespace FloorBreaker.UI.Title.Presentation
                     _activeRebind = null;
                     RefreshAllDisplayStrings();
                     _onBindingsChanged?.Invoke();
+                    OnRebindEnded?.Invoke();
                 },
                 onCancel: () =>
                 {
                     keyButton.RemoveFromClassList("keyconfig-row__key--listening");
                     keyButton.text = _service.GetBindingDisplayString(action, bindingIndex);
                     _activeRebind = null;
+                    OnRebindEnded?.Invoke();
                 });
         }
 
