@@ -112,7 +112,7 @@
 
             <!-- アクションボタン -->
             <VisualElement class="setup-actions">
-                <Button name="SetupStartButton" class="title-btn title-btn--primary" text="START" />
+                <Button name="SetupStartButton" class="title-btn title-btn--primary" text="はじめる" />
                 <Button name="SetupBackButton" class="title-btn title-btn--quit" text="戻る" />
             </VisualElement>
         </VisualElement>

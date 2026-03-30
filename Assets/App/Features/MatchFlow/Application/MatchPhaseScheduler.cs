@@ -252,7 +252,7 @@ namespace FloorBreaker.MatchFlow.Application
 
             if (_upgradePhaseUseCase.IsComplete)
             {
-                TransitionToCountdown();
+                TransitionToRunning();
             }
         }
 

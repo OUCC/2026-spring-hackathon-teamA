@@ -113,7 +113,7 @@
                 {
                     "name": "",
                     "id": "b1000001-0000-4000-8000-000000000010",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -135,7 +135,7 @@
                 {
                     "name": "",
                     "id": "b1000001-0000-4000-8000-000000000020",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -289,7 +289,7 @@
                 {
                     "name": "",
                     "id": "b2000001-0000-4000-8000-000000000010",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -311,7 +311,7 @@
                 {
                     "name": "",
                     "id": "b2000001-0000-4000-8000-000000000020",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -467,7 +467,7 @@
                 {
                     "name": "",
                     "id": "b3000001-0000-4000-8000-000000000011",
-                    "path": "<Keyboard>/l",
+                    "path": "<Keyboard>/p",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -489,7 +489,7 @@
                 {
                     "name": "",
                     "id": "b3000001-0000-4000-8000-000000000021",
-                    "path": "<Keyboard>/p",
+                    "path": "<Keyboard>/l",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -612,7 +612,7 @@
                 {
                     "name": "",
                     "id": "b4000001-0000-4000-8000-000000000011",
-                    "path": "<Keyboard>/numpad2",
+                    "path": "<Keyboard>/numpad6",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -634,7 +634,7 @@
                 {
                     "name": "",
                     "id": "b4000001-0000-4000-8000-000000000021",
-                    "path": "<Keyboard>/numpad6",
+                    "path": "<Keyboard>/numpad2",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -779,7 +779,7 @@
                 {
                     "name": "",
                     "id": "1450db3d-ca7d-48ef-8f86-30fde2370a5e",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -790,7 +790,7 @@
                 {
                     "name": "",
                     "id": "cc52ae5f-3228-43ba-89d1-85bfdc19b17b",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -867,7 +867,7 @@
                 {
                     "name": "",
                     "id": "b46bab68-d936-4f58-b692-b267377b6dfd",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -878,7 +878,7 @@
                 {
                     "name": "",
                     "id": "c85220c4-0965-42a1-a9c4-62a2a3321367",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

@@ -151,7 +151,7 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
         }
 
         [Test]
-        public void UpgradePhase_BothSkip_TransitionsToCountdown()
+        public void UpgradePhase_BothSkip_TransitionsToRunning()
         {
             SkipCountdown();
             // Running -> StageShrink -> UpgradePhase
@@ -163,12 +163,8 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             _draftP1.Skip();
             _draftP2.Skip();
 
-            // Tick to process completion → Countdown (not directly Running)
+            // Tick to process completion → directly to Running (no countdown)
             _scheduler.Tick(0.1f);
-            Assert.AreEqual(SchedulerState.Countdown, _scheduler.State);
-
-            // After countdown duration → Running
-            _scheduler.Tick(4f);
             Assert.AreEqual(SchedulerState.Running, _scheduler.State);
         }
 
@@ -184,10 +180,10 @@ namespace FloorBreaker.Tests.EditMode.MatchFlow
             // Tick past the 10s upgrade selection timeout
             _scheduler.Tick(10.1f);
 
-            // Both should be timed out and scheduler in Countdown
+            // Both should be timed out and scheduler in Running (no post-upgrade countdown)
             Assert.AreNotEqual(DraftState.Choosing, _draftP1.State.CurrentValue);
             Assert.AreNotEqual(DraftState.Choosing, _draftP2.State.CurrentValue);
-            Assert.AreEqual(SchedulerState.Countdown, _scheduler.State);
+            Assert.AreEqual(SchedulerState.Running, _scheduler.State);
         }
 
         [Test]

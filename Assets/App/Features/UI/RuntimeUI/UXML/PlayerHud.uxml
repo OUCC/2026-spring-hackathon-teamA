@@ -4,12 +4,11 @@
       xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
 
     <VisualElement class="hud">
-        <!-- 上辺バー: タイマー + HP + コイン -->
-        <VisualElement class="hud__top-bar">
-            <!-- タイマーバッジ -->
+        <!-- 1行バー: タイマー | HP | FIRE列 | BREAK列 | コイン -->
+        <VisualElement class="hud__bar">
+            <!-- タイマー -->
             <VisualElement class="hud__timer-badge">
                 <Label name="TimerLabel" class="hud__timer-value" text="20" />
-                <Label class="hud__timer-unit" text="秒" />
             </VisualElement>
 
             <!-- HP -->
@@ -23,36 +22,43 @@
                 <Label name="HpLabel" class="hud__hp-value" text="10" />
             </VisualElement>
 
-            <!-- コインバッジ -->
-            <VisualElement class="hud__coin-badge">
-                <Label class="hud__coin-icon" text="&#x25C9;" />
-                <Label name="CoinLabel" class="hud__coin-value" text="0" />
-            </VisualElement>
-        </VisualElement>
-
-        <!-- 下辺バー: ボムCD + 取得済み強化 -->
-        <VisualElement class="hud__bottom-bar">
-            <VisualElement class="hud__cd-container">
-                <VisualElement class="hud__cd-slot">
+            <!-- FIRE 列 -->
+            <VisualElement class="hud__bomb-column hud__bomb-column--fire">
+                <VisualElement class="hud__bomb-cd-row">
                     <Label name="FireKeyLabel" class="hud__cd-key hud__cd-key--fire" />
-                    <VisualElement class="hud__cd-icon-wrap hud__cd-icon-wrap--fire">
-                        <Label class="hud__cd-icon" text="炎" />
-                    </VisualElement>
+                    <Label class="hud__bomb-label hud__bomb-label--fire" text="FIRE" />
                     <VisualElement class="hud__cd-bar">
                         <VisualElement name="FireCdFill" class="hud__cd-fill hud__cd-fill--fire" />
                     </VisualElement>
                 </VisualElement>
-                <VisualElement class="hud__cd-slot">
+                <VisualElement name="FireStatsRow" class="hud__bomb-stats-row">
+                    <VisualElement name="FireEffectGrid" class="hud__effect-grid" />
+                    <VisualElement name="FireFlightDots" class="hud__flight-dots" />
+                    <VisualElement name="FireAbilityIcons" class="hud__bomb-abilities" />
+                </VisualElement>
+            </VisualElement>
+
+            <!-- BREAK 列 -->
+            <VisualElement class="hud__bomb-column hud__bomb-column--break">
+                <VisualElement class="hud__bomb-cd-row">
                     <Label name="BreakKeyLabel" class="hud__cd-key hud__cd-key--break" />
-                    <VisualElement class="hud__cd-icon-wrap hud__cd-icon-wrap--break">
-                        <Label class="hud__cd-icon" text="壊" />
-                    </VisualElement>
+                    <Label class="hud__bomb-label hud__bomb-label--break" text="BREAK" />
                     <VisualElement class="hud__cd-bar">
                         <VisualElement name="BreakCdFill" class="hud__cd-fill hud__cd-fill--break" />
                     </VisualElement>
                 </VisualElement>
+                <VisualElement name="BreakStatsRow" class="hud__bomb-stats-row">
+                    <VisualElement name="BreakEffectGrid" class="hud__effect-grid" />
+                    <VisualElement name="BreakFlightDots" class="hud__flight-dots" />
+                    <VisualElement name="BreakAbilityIcons" class="hud__bomb-abilities" />
+                </VisualElement>
             </VisualElement>
-            <VisualElement name="AcquiredUpgrades" class="hud__upgrades-row" />
+
+            <!-- コイン -->
+            <VisualElement class="hud__coin-badge">
+                <Label class="hud__coin-icon" text="&#x25C9;" />
+                <Label name="CoinLabel" class="hud__coin-value" text="0" />
+            </VisualElement>
         </VisualElement>
     </VisualElement>
 
