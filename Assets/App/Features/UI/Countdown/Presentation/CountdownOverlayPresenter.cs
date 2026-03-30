@@ -14,6 +14,8 @@ namespace FloorBreaker.UI.Countdown.Presentation
         private readonly IAudioService _audio;
         private readonly List<IDisposable> _subscriptions = new();
         private int _lastDisplayedSecond = -1;
+        private float _glowTimer;
+        private bool _glowOn;
 
         public CountdownOverlayPresenter(
             CountdownOverlayView view,
@@ -39,7 +41,7 @@ namespace FloorBreaker.UI.Countdown.Presentation
             }));
         }
 
-        public void UpdateCountdown()
+        public void UpdateCountdown(float deltaTime)
         {
             if (_scheduler.State != SchedulerState.Countdown) return;
 
@@ -63,6 +65,15 @@ namespace FloorBreaker.UI.Countdown.Presentation
                 _view.SetNumber(second.ToString());
                 _view.PulseNumber();
                 _audio?.PlaySfx(SfxIds.CountdownTick);
+            }
+
+            // キーキャップのパルスグロー (0.6s 周期で ON/OFF)
+            _glowTimer += deltaTime;
+            if (_glowTimer >= 0.6f)
+            {
+                _glowTimer -= 0.6f;
+                _glowOn = !_glowOn;
+                _view.SetKeycapGlow(_glowOn);
             }
         }
 

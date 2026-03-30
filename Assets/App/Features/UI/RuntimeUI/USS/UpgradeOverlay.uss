@@ -40,9 +40,9 @@
 .upgrade-pane {
     flex-grow: 1;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-sm);
 }
 
 /* --- ペイン内要素 --- */
@@ -50,6 +50,7 @@
     font-size: var(--font-size-lg);
     color: var(--color-text);
     -unity-font-style: bold;
+    -unity-text-align: middle-center;
     margin-bottom: var(--spacing-xs);
 }
 
@@ -57,7 +58,8 @@
     font-size: 40px;
     color: var(--color-text);
     -unity-font-style: bold;
-    margin-bottom: var(--spacing-md);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--spacing-sm);
     transition: scale 0.4s ease-out, color 0.4s ease-out;
 }
 
@@ -69,17 +71,18 @@
 /* --- カード行 (カード3枚 + リロール) --- */
 .upgrade-pane__card-row {
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: var(--spacing-md);
+    align-items: stretch;
+    margin-bottom: var(--spacing-sm);
 }
 
 .upgrade-pane__cards {
     flex-direction: row;
-    justify-content: center;
+    flex-grow: 1;
 }
 
 .upgrade-pane__cards > .card {
+    flex-grow: 1;
+    flex-basis: 0;
     margin: 0 var(--spacing-xs);
 }
 
@@ -113,6 +116,7 @@
 .upgrade-pane__actions {
     flex-direction: row;
     justify-content: center;
+    align-self: center;
     margin-bottom: var(--spacing-sm);
 }
 

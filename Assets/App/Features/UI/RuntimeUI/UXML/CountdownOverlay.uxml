@@ -6,9 +6,22 @@
     <VisualElement class="countdown-panel">
         <Label name="CountdownNumber" class="countdown-number" text="3" />
         <VisualElement name="CountdownKeyGuide" class="countdown-key-guide">
-            <Label name="CountdownMoveLabel" class="countdown-key-line" />
-            <Label name="CountdownFireLabel" class="countdown-key-line" />
-            <Label name="CountdownBreakLabel" class="countdown-key-line" />
+            <VisualElement class="countdown-key-row">
+                <Label name="CountdownMoveKeys" class="countdown-keycap" />
+                <Label class="countdown-key-desc" text="移動" />
+            </VisualElement>
+            <VisualElement class="countdown-key-row">
+                <Label name="CountdownAimKey" class="countdown-keycap" />
+                <Label class="countdown-key-desc" text="位置固定" />
+            </VisualElement>
+            <VisualElement class="countdown-key-row">
+                <Label name="CountdownFireKey" class="countdown-keycap countdown-keycap--fire" />
+                <Label class="countdown-key-desc" text="FIRE (長押しで遠投)" />
+            </VisualElement>
+            <VisualElement class="countdown-key-row">
+                <Label name="CountdownBreakKey" class="countdown-keycap countdown-keycap--break" />
+                <Label class="countdown-key-desc" text="BREAK (長押しで遠投)" />
+            </VisualElement>
         </VisualElement>
     </VisualElement>
 

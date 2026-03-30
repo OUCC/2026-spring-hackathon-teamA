@@ -46,8 +46,8 @@
     --cd-bar-width: 100px;
     --cd-bar-height: 10px;
 
-    --card-width: 180px;
-    --card-height: 220px;
+    --card-width: auto;
+    --card-height: auto;
     --card-band-height: 6px;
 
     /* --- 間隔 --- */

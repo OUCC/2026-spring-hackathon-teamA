@@ -28,11 +28,11 @@ MonoBehaviour:
   _normalHsvShift: 0
   _normalHsvSaturation: 1
   _normalHsvBright: 1
-  _goldHsvShift: 245
-  _goldHsvSaturation: 1.2
-  _goldHsvBright: 1.3
-  _redHsvShift: 195
-  _redHsvSaturation: 1.2
+  _goldHsvShift: 143
+  _goldHsvSaturation: 1.3
+  _goldHsvBright: 1.4
+  _redHsvShift: 193
+  _redHsvSaturation: 1.3
   _redHsvBright: 1.1
   _slimeScale: 0.2
   _baseSortingOrder: 5

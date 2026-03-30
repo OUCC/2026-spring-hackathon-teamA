@@ -15,7 +15,7 @@ namespace FloorBreaker.Input.Application
     /// Row 0 = カード行 (左右でカード選択、Submit で購入)
     /// Row 1 = アクション行 (左右でリロール/スキップ切替、Submit で実行)
     /// </summary>
-    public sealed class UpgradeUIInputBridge
+    public sealed class UpgradeUIInputBridge : IDisposable
     {
         /// <summary>カード行のインデックス上限。0,1,2=カード、3=リロール。</summary>
         private const int RerollIndex = 3;
@@ -25,6 +25,7 @@ namespace FloorBreaker.Input.Application
         private readonly MatchClock _clock;
         private readonly IRandomProvider _random;
         private readonly UpgradeSelectionState _selectionState;
+        private bool _disposed;
 
         public UpgradeUIInputBridge(
             IReadOnlyList<UpgradeDraftService> drafts,
@@ -58,16 +59,14 @@ namespace FloorBreaker.Input.Application
         {
             if (!IsUpgradePhase() || !ctx.performed) return;
 
+            // Cancel は最後の購入を取り消す（Undo）のみ。
+            // 購入履歴がなければ何もしない。Skip は Done ボタンで行う。
             var draft = _drafts[player.Index];
             if (draft.CanUndo)
             {
                 var record = draft.UndoLastPurchase(_players[player.Index]);
                 if (record.HasValue)
                     _selectionState.UnmarkPurchased(player, record.Value.CardIndex);
-            }
-            else
-            {
-                draft.Skip();
             }
         }
 
@@ -110,6 +109,7 @@ namespace FloorBreaker.Input.Application
                 {
                     _selectionState.ClearPurchased(player);
                     draft.Reroll(playerModel, _random);
+                    _selectionState.SetIndex(player, 0); // リロール後はカード0に戻す
                 }
                 else
                 {
@@ -127,11 +127,16 @@ namespace FloorBreaker.Input.Application
         }
 
         private bool IsUpgradePhase()
-            => _clock.CurrentPhaseValue == GamePhase.UpgradePhase;
+            => !_disposed && _clock.CurrentPhaseValue == GamePhase.UpgradePhase;
 
         public void ResetSelection()
         {
-            _selectionState.Reset();
+            if (!_disposed) _selectionState.Reset();
+        }
+
+        public void Dispose()
+        {
+            _disposed = true;
         }
     }
 }

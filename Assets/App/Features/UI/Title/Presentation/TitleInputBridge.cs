@@ -41,6 +41,10 @@ namespace FloorBreaker.UI.Title.Presentation
         private const float NavRepeatDelay = 0.2f;
         private bool _suspended;
 
+        // ゲームパッド A/B 用のランタイムアクション
+        private InputAction _gamepadSubmitAction;
+        private InputAction _gamepadCancelAction;
+
         public TitleInputBridge(InputActionAsset actions)
         {
             if (actions == null) return;
@@ -62,12 +66,21 @@ namespace FloorBreaker.UI.Title.Presentation
 
                 moveAction.performed += moveCb;
                 moveAction.started += moveCb;
-                if (breakAction != null) breakAction.performed += submitCb;
-                if (fireAction != null) fireAction.performed += cancelCb;
+                if (fireAction != null) fireAction.performed += submitCb;
+                if (breakAction != null) breakAction.performed += cancelCb;
 
                 if (!map.enabled) map.Enable();
                 _bindings.Add((map, moveCb, submitCb, cancelCb));
             }
+
+            // ゲームパッド A/B ボタン（全ゲームパッド共通）
+            _gamepadSubmitAction = new InputAction("TitleSubmit", binding: "<Gamepad>/buttonSouth");
+            _gamepadSubmitAction.performed += ctx => OnSubmit(ctx);
+            _gamepadSubmitAction.Enable();
+
+            _gamepadCancelAction = new InputAction("TitleCancel", binding: "<Gamepad>/buttonEast");
+            _gamepadCancelAction.performed += ctx => OnCancel(ctx);
+            _gamepadCancelAction.Enable();
         }
 
         private Action _suspendedCancelAction;
@@ -352,10 +365,15 @@ namespace FloorBreaker.UI.Title.Presentation
                 var fireAction = map.FindAction("FireBombHold");
 
                 if (moveAction != null) { moveAction.performed -= moveCb; moveAction.started -= moveCb; }
-                if (breakAction != null) breakAction.performed -= submitCb;
-                if (fireAction != null) fireAction.performed -= cancelCb;
+                if (fireAction != null) fireAction.performed -= submitCb;
+                if (breakAction != null) breakAction.performed -= cancelCb;
             }
             _bindings.Clear();
+
+            _gamepadSubmitAction?.Disable();
+            _gamepadSubmitAction?.Dispose();
+            _gamepadCancelAction?.Disable();
+            _gamepadCancelAction?.Dispose();
         }
     }
 }

@@ -23,6 +23,8 @@ using FloorBreaker.UI.Pause.Presentation;
 using FloorBreaker.UI.Result.Presentation;
 using FloorBreaker.UI.Countdown.Presentation;
 using FloorBreaker.Input.Application;
+using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 namespace FloorBreaker.Bootstrap
 {
@@ -129,6 +131,9 @@ namespace FloorBreaker.Bootstrap
         /// </summary>
         public void Initialize()
         {
+            // InputActionAsset を名前で検索
+            InputActionAsset inputActions = FindInputActionAsset();
+
             var bounds = _stage.GetCurrentBounds();
 
             // 1. TileView 生成
@@ -204,11 +209,18 @@ namespace FloorBreaker.Bootstrap
             var iconMap = _matchUIDocument.UpgradeIconMap;
             var hudRoots = _matchUIDocument.HudRoots;
             var huds = new PlayerHudPresenter[humanCount];
+            bool isSolo = humanCount == 1;
             for (int h = 0; h < humanCount; h++)
             {
                 int idx = humanIndices[h];
+                // ソロモード時にフォントサイズ拡大クラスを付与
+                if (isSolo)
+                {
+                    var hudElement = hudRoots[h].Q(className: "hud");
+                    hudElement?.AddToClassList("hud--solo");
+                }
                 var hudView = new PlayerHudView(hudRoots[h]);
-                var (fireKey, breakKey, _) = KeyLabelResolver.GetBombKeyLabels(_modeConfig.DeviceTypes[idx]);
+                var (fireKey, breakKey, _) = KeyLabelResolver.GetBombKeyLabels(inputActions, idx);
                 hudView.SetFireKeyLabel(fireKey);
                 hudView.SetBreakKeyLabel(breakKey);
                 huds[h] = new PlayerHudPresenter(
@@ -241,8 +253,9 @@ namespace FloorBreaker.Bootstrap
                 for (int h = 0; h < humanCount; h++)
                 {
                     int idx = humanIndices[h];
-                    var (fireKey, breakKey, moveKeys) = KeyLabelResolver.GetBombKeyLabels(_modeConfig.DeviceTypes[idx]);
-                    countdownView.SetKeyGuide(h, $"{moveKeys}  移動", $"{fireKey}  炎ボム", $"{breakKey}  ブレークボム");
+                    var (fireKey, breakKey, moveKeys) = KeyLabelResolver.GetBombKeyLabels(inputActions, idx);
+                    var aimKey = KeyLabelResolver.GetAimKeyLabel(inputActions, idx);
+                    countdownView.SetKeyGuide(h, moveKeys, aimKey, fireKey, breakKey);
                 }
                 _presenters.Countdown = new CountdownOverlayPresenter(
                     countdownView, _clock, _scheduler, _audio);
@@ -271,6 +284,16 @@ namespace FloorBreaker.Bootstrap
                 });
                 _presenters.Subscriptions.Add(sub);
             }
+        }
+
+        private static InputActionAsset FindInputActionAsset()
+        {
+            var assets = UnityEngine.Resources.FindObjectsOfTypeAll<InputActionAsset>();
+            foreach (var a in assets)
+            {
+                if (a.name == "FloorBreakerActions") return a;
+            }
+            return assets.Length > 0 ? assets[0] : null;
         }
     }
 }

@@ -31,6 +31,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         private readonly List<UpgradeCardElement>[] _cardElements;
         private readonly List<IDisposable> _subscriptions = new();
         private int _lastPulseSecond = -1;
+        private readonly bool[] _hasPopulatedOnce;
 
         /// <summary>Number of visible panes (min of player count and UXML pane count).</summary>
         private readonly int _visiblePaneCount;
@@ -59,6 +60,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
 
             // Initialize card element lists per pane
             _cardElements = new List<UpgradeCardElement>[_visiblePaneCount];
+            _hasPopulatedOnce = new bool[_visiblePaneCount];
             for (int i = 0; i < _visiblePaneCount; i++)
                 _cardElements[i] = new List<UpgradeCardElement>();
 
@@ -66,9 +68,16 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             _subscriptions.Add(clock.CurrentPhase.Subscribe(phase =>
             {
                 if (phase == GamePhase.UpgradePhase)
+                {
+                    // リロール検出フラグをリセット
+                    for (int j = 0; j < _hasPopulatedOnce.Length; j++)
+                        _hasPopulatedOnce[j] = false;
                     _view.Show();
+                }
                 else
+                {
                     _view.Hide();
+                }
             }));
 
             // Per-player subscriptions (pane → player mapping via humanIndices)
@@ -82,7 +91,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
 
                 // Card choices
                 _subscriptions.Add(draft.CurrentChoices.Subscribe(
-                    choices => PopulateCards(_view.GetCards(paneIndex), choices, _cardElements[paneIndex], stats, playerId)));
+                    choices => PopulateCards(_view.GetCards(paneIndex), choices, _cardElements[paneIndex], stats, playerId, paneIndex)));
 
                 // Draft state
                 _subscriptions.Add(draft.State.Subscribe(state =>
@@ -150,8 +159,16 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
             IReadOnlyList<UpgradeDefinition> choices,
             List<UpgradeCardElement> cardElements,
             PlayerStats stats,
-            PlayerId player)
+            PlayerId player,
+            int paneIndex)
         {
+            // リロール検出: 初回以降の PopulateCards はリロール
+            if (_hasPopulatedOnce[paneIndex])
+            {
+                _audio?.PlaySfx(SfxIds.UiNavigate);
+            }
+            _hasPopulatedOnce[paneIndex] = true;
+
             container.Clear();
             cardElements.Clear();
 
@@ -179,7 +196,7 @@ namespace FloorBreaker.UI.UpgradeOverlay.Presentation
         private static void UpdateSelection(List<UpgradeCardElement> cards, int selectedIndex, bool isCardRow)
         {
             for (int i = 0; i < cards.Count; i++)
-                cards[i].SetSelected(isCardRow && i == selectedIndex);
+                cards[i].SetSelected(isCardRow && selectedIndex >= 0 && i == selectedIndex);
         }
 
         private void RefreshHighlight(PlayerId player, int paneIndex, List<UpgradeCardElement> cards)

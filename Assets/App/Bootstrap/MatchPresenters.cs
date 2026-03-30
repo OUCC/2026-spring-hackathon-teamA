@@ -39,7 +39,7 @@ namespace FloorBreaker.Bootstrap
             foreach (var hud in Huds)
                 hud?.UpdatePerFrame();
             UpgradeOverlay?.UpdateCountdown();
-            Countdown?.UpdateCountdown();
+            Countdown?.UpdateCountdown(deltaTime);
             Stage?.TickFireDecay();
             Stage?.TickRecoveryPreview();
             ShrinkWarning?.Tick();
