@@ -144,6 +144,25 @@ namespace FloorBreaker.UI.Title.Presentation
             SelectStageInternal(assetName, notify: false);
         }
 
+        /// <summary>インデックスでステージを選択する。</summary>
+        public void SelectByIndex(int index)
+        {
+            if (index < 0 || index >= _stageCards.Count) return;
+            SelectStageInternal(_stageCards[index].assetName, notify: true);
+        }
+
+        /// <summary>カード要素の一覧を返す。</summary>
+        public VisualElement[] GetCardElements()
+        {
+            var result = new VisualElement[_stageCards.Count];
+            for (int i = 0; i < _stageCards.Count; i++)
+                result[i] = _stageCards[i].card;
+            return result;
+        }
+
+        /// <summary>カード数を返す。</summary>
+        public int CardCount => _stageCards.Count;
+
         public void Dispose()
         {
             _tickSchedule?.Pause();

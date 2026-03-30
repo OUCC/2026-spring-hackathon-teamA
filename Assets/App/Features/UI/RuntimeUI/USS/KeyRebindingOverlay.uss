@@ -89,6 +89,11 @@
     background-color: rgba(80, 70, 110, 0.9);
 }
 
+.keyconfig-row__key.title-btn--focused {
+    border-color: #F0C040;
+    background-color: rgba(80, 70, 110, 0.9);
+}
+
 /* リスニング中 */
 .keyconfig-row__key--listening {
     color: #F0C040;
