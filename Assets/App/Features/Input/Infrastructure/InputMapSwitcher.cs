@@ -54,7 +54,7 @@ namespace FloorBreaker.Input.Infrastructure
                     system?.Enable();
                     break;
                 case GamePhase.Result:
-                    SetGameplayMaps(enabled: false);
+                    SetGameplayMaps(enabled: true);
                     SetUpgradeMaps(enabled: false);
                     system?.Enable();
                     break;

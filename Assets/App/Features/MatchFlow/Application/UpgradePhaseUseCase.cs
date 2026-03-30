@@ -47,6 +47,11 @@ namespace FloorBreaker.MatchFlow.Application
             {
                 var draft = GetDraft(player.Id);
                 draft.Reset();
+                if (player.Stats.IsDead)
+                {
+                    draft.Skip();
+                    continue;
+                }
                 draft.GenerateChoices(player, random);
             }
         }

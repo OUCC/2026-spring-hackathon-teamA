@@ -21,7 +21,6 @@ namespace FloorBreaker.CpuPlayer.Application
     {
         private readonly IBalanceParameters _balance;
         private readonly PlayerModel _cpu;
-        private readonly PlayerModel _opponent;
         private readonly StageModel _stage;
         private readonly PlayerMoveService _moveService;
         private readonly BombFlightTracker _bombFlightTracker;
@@ -42,7 +41,6 @@ namespace FloorBreaker.CpuPlayer.Application
         public CpuPlayerBrain(
             IBalanceParameters balance,
             PlayerModel cpu,
-            PlayerModel opponent,
             StageModel stage,
             PlayerMoveService moveService,
             BombFlightTracker bombFlightTracker,
@@ -54,7 +52,6 @@ namespace FloorBreaker.CpuPlayer.Application
         {
             _balance = balance;
             _cpu = cpu;
-            _opponent = opponent;
             _stage = stage;
             _moveService = moveService;
             _bombFlightTracker = bombFlightTracker;
@@ -132,10 +129,11 @@ namespace FloorBreaker.CpuPlayer.Application
                 }
             }
 
-            // 3. 相手プレイヤーに近づく (ボム射程の少し外を維持)
-            if (!_opponent.Stats.IsDead)
+            // 3. 最も近い敵プレイヤーに近づく (ボム射程の少し外を維持)
+            var nearestEnemy = FindNearestEnemy(myPos);
+            if (nearestEnemy != null)
             {
-                var oppPos = _opponent.CurrentPosition;
+                var oppPos = nearestEnemy.CurrentPosition;
                 int dist = myPos.ChebyshevDistance(oppPos);
                 int idealDist = Math.Max(2, _cpu.Build.BreakFlightRange - 1);
 
@@ -197,27 +195,23 @@ namespace FloorBreaker.CpuPlayer.Application
             var myPos = _cpu.CurrentPosition;
 
             // スライムを狙う
-            var slimeTarget = FindBombTarget(myPos, isSlimeTarget: true);
+            var slimeTarget = FindBombTargetSlime(myPos);
             if (slimeTarget.HasValue)
             {
                 TryLaunchBomb(slimeTarget.Value.Dir, slimeTarget.Value.Type);
                 return;
             }
 
-            // 相手プレイヤーを狙う
-            if (!_opponent.Stats.IsDead)
+            // 他プレイヤーを狙う
+            var playerTarget = FindBombTargetPlayer(myPos);
+            if (playerTarget.HasValue)
             {
-                var playerTarget = FindBombTarget(myPos, isSlimeTarget: false);
-                if (playerTarget.HasValue)
-                {
-                    TryLaunchBomb(playerTarget.Value.Dir, playerTarget.Value.Type);
-                }
+                TryLaunchBomb(playerTarget.Value.Dir, playerTarget.Value.Type);
             }
         }
 
-        private (Direction8 Dir, BombType Type)? FindBombTarget(GridPos from, bool isSlimeTarget)
+        private (Direction8 Dir, BombType Type)? FindBombTargetSlime(GridPos from)
         {
-            // 8方向それぞれにターゲットがいるか確認
             foreach (Direction8 dir in Enum.GetValues(typeof(Direction8)))
             {
                 var offset = dir.ToOffset();
@@ -235,34 +229,66 @@ namespace FloorBreaker.CpuPlayer.Application
                         || tileData.Condition == TileCondition.PermanentlyDestroyed)
                         break;
 
-                    if (isSlimeTarget)
+                    if (_slimeRegistry.IsOccupied(checkPos))
                     {
-                        if (_slimeRegistry.IsOccupied(checkPos))
-                        {
-                            // BreakBomb を優先 (範囲崩落でスライム巻き込み)
-                            if (d <= breakRange && _cooldown.CanFire(BombType.Break))
-                                return (dir, BombType.Break);
-                            if (d <= fireRange && _cooldown.CanFire(BombType.Fire))
-                                return (dir, BombType.Fire);
-                        }
-                    }
-                    else
-                    {
-                        if (_opponent.CurrentPosition == checkPos)
-                        {
-                            // 近距離は FireBomb (直接ダメージ), 遠距離は BreakBomb
-                            if (d <= 3 && d <= fireRange && _cooldown.CanFire(BombType.Fire))
-                                return (dir, BombType.Fire);
-                            if (d <= breakRange && _cooldown.CanFire(BombType.Break))
-                                return (dir, BombType.Break);
-                            if (d <= fireRange && _cooldown.CanFire(BombType.Fire))
-                                return (dir, BombType.Fire);
-                        }
+                        if (d <= breakRange && _cooldown.CanFire(BombType.Break))
+                            return (dir, BombType.Break);
+                        if (d <= fireRange && _cooldown.CanFire(BombType.Fire))
+                            return (dir, BombType.Fire);
                     }
                 }
             }
-
             return null;
+        }
+
+        private (Direction8 Dir, BombType Type)? FindBombTargetPlayer(GridPos from)
+        {
+            foreach (Direction8 dir in Enum.GetValues(typeof(Direction8)))
+            {
+                var offset = dir.ToOffset();
+                int breakRange = _cpu.Build.BreakFlightRange;
+                int fireRange = _cpu.Build.FireFlightRange;
+                int maxCheck = Math.Max(breakRange, fireRange);
+
+                for (int d = 1; d <= maxCheck; d++)
+                {
+                    var checkPos = from + offset * d;
+                    if (!_stage.IsInBounds(checkPos)) break;
+
+                    var tileData = _stage.GetTileData(checkPos);
+                    if (TileData.IsImpassableType(tileData.Type)
+                        || tileData.Condition == TileCondition.PermanentlyDestroyed)
+                        break;
+
+                    // 自分以外の生存プレイヤーがいるか
+                    foreach (var p in _allPlayers)
+                    {
+                        if (p.Id == _cpu.Id || p.Stats.IsDead) continue;
+                        if (p.CurrentPosition != checkPos) continue;
+
+                        if (d <= 3 && d <= fireRange && _cooldown.CanFire(BombType.Fire))
+                            return (dir, BombType.Fire);
+                        if (d <= breakRange && _cooldown.CanFire(BombType.Break))
+                            return (dir, BombType.Break);
+                        if (d <= fireRange && _cooldown.CanFire(BombType.Fire))
+                            return (dir, BombType.Fire);
+                    }
+                }
+            }
+            return null;
+        }
+
+        private PlayerModel FindNearestEnemy(GridPos from)
+        {
+            PlayerModel nearest = null;
+            int minDist = int.MaxValue;
+            foreach (var p in _allPlayers)
+            {
+                if (p.Id == _cpu.Id || p.Stats.IsDead) continue;
+                int d = from.ChebyshevDistance(p.CurrentPosition);
+                if (d < minDist) { minDist = d; nearest = p; }
+            }
+            return nearest;
         }
 
         private void TryLaunchBomb(Direction8 direction, BombType type)

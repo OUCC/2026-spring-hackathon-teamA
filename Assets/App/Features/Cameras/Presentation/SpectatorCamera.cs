@@ -133,8 +133,12 @@ namespace FloorBreaker.Cameras.Presentation
             float worldMinY = range.MinY;
             float worldMaxY = range.MaxY + 1f;
 
-            float cx = Mathf.Clamp(pos.x, worldMinX + halfW, worldMaxX - halfW);
-            float cy = Mathf.Clamp(pos.y, worldMinY + halfH, worldMaxY - halfH);
+            float minX = worldMinX + halfW;
+            float maxX = worldMaxX - halfW;
+            float minY = worldMinY + halfH;
+            float maxY = worldMaxY - halfH;
+            float cx = minX < maxX ? Mathf.Clamp(pos.x, minX, maxX) : (worldMinX + worldMaxX) * 0.5f;
+            float cy = minY < maxY ? Mathf.Clamp(pos.y, minY, maxY) : (worldMinY + worldMaxY) * 0.5f;
             return new Vector3(cx, cy, pos.z);
         }
     }
